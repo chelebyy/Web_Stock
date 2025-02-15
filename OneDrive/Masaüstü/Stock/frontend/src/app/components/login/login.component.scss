@@ -1,0 +1,102 @@
+.login-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  background-color: var(--surface-ground);
+}
+
+.login-card {
+  width: 100%;
+  max-width: 400px;
+  padding: 20px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1), 0 1px 3px rgba(0, 0, 0, 0.08);
+  border-radius: 8px;
+
+  mat-card-header {
+    margin-bottom: 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+
+    mat-card-title {
+      font-size: 24px;
+      margin-bottom: 8px;
+    }
+
+    mat-card-subtitle {
+      font-size: 16px;
+      opacity: 0.8;
+    }
+  }
+}
+
+.form-container {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.field {
+  margin-bottom: 1.5rem;
+}
+
+.field-checkbox {
+  margin-bottom: 1rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.full-width {
+  width: 100%;
+}
+
+.form-actions {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin: 8px 0;
+}
+
+.button-spinner {
+  display: inline-block;
+  margin-right: 8px;
+}
+
+:host ::ng-deep {
+  .p-card {
+    background-color: var(--surface-card);
+    border-radius: var(--border-radius);
+    padding: 1.5rem;
+    box-shadow: var(--card-shadow);
+  }
+
+  .p-inputtext,
+  .p-password,
+  .p-button {
+    width: 100%;
+  }
+
+  .p-button {
+    margin-top: 1rem;
+  }
+
+  .p-password-input {
+    width: 100%;
+  }
+
+  .error-snackbar {
+    background: #f44336;
+    color: white;
+  }
+
+  .mat-mdc-snack-bar-container {
+    &.error-snackbar {
+      --mdc-snackbar-container-color: #f44336;
+      --mat-mdc-snack-bar-button-color: #fff;
+      --mdc-snackbar-supporting-text-color: #fff;
+    }
+  }
+}
