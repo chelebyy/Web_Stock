@@ -1,0 +1,46 @@
+.user-management-container {
+  padding: 20px;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.toolbar-spacer {
+  flex: 1 1 auto;
+}
+
+.table-container {
+  margin-top: 20px;
+  width: 100%;
+  overflow-x: auto;
+}
+
+table {
+  width: 100%;
+  
+  th.mat-header-cell {
+    font-weight: bold;
+    color: rgba(0, 0, 0, 0.87);
+  }
+  
+  td.mat-cell, th.mat-header-cell {
+    padding: 12px;
+  }
+  
+  .mat-column-actions {
+    width: 120px;
+    text-align: center;
+  }
+  
+  .mat-column-isAdmin {
+    width: 100px;
+    text-align: center;
+  }
+}
+
+.mat-elevation-z8 {
+  box-shadow: 0 5px 5px -3px rgba(0,0,0,.2), 
+              0 8px 10px 1px rgba(0,0,0,.14), 
+              0 3px 14px 2px rgba(0,0,0,.12);
+}
