@@ -101,3 +101,30 @@
 6. [ ] API dokümantasyonunun hazırlanması
 7. [ ] Unit testlerin yazılması
 8. [ ] End-to-end testlerin yazılması
+
+## Login Sorunlarının Çözümü
+[X] CORS hatası çözüldü
+[X] Şifre hashleme yöntemi standardize edildi
+[X] Veritabanı sıfırlanıp yeniden oluşturuldu
+[X] Admin kullanıcısı başarıyla giriş yapabildi
+
+### Öğrenilen Dersler
+1. CORS Yapılandırması:
+   - Middleware sıralaması önemli
+   - CORS middleware'i en üstte olmalı
+   - Doğru origin, header ve method izinleri verilmeli
+
+2. Şifre Hashleme:
+   - Tüm uygulamada tek bir hash formatı kullanılmalı
+   - Hash formatı değiştiğinde veritabanı güncellenmeli
+   - Hexadecimal format tercih edildi (Base64 yerine)
+
+3. Veritabanı Yönetimi:
+   - Seed data önemli - ilk admin kullanıcısı otomatik oluşturulmalı
+   - Migration'lar düzenli yapılmalı
+   - Gerektiğinde veritabanı sıfırlanabilmeli
+
+## Login Sorunları Sonrası Notlar
+- Her önemli değişiklik knowledge base'e eklenmeli
+- Sorunlar ve çözümleri detaylı dokümante edilmeli
+- Test senaryoları oluşturulmalı ve düzenli çalıştırılmalı

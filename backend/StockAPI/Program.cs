@@ -5,15 +5,38 @@ using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using StockAPI.Models;
 using StockAPI.Services;
+using Serilog;
+using Serilog.Events;
+using StockAPI.Middleware;
 
 var builder = WebApplication.CreateBuilder(args);
+
+// Configure Serilog
+Log.Logger = new LoggerConfiguration()
+    .MinimumLevel.Debug()
+    .MinimumLevel.Override("Microsoft", LogEventLevel.Information)
+    .Enrich.FromLogContext()
+    .WriteTo.Console()
+    .WriteTo.File("Logs/log-.txt", rollingInterval: RollingInterval.Day)
+    .WriteTo.PostgreSQL(
+        connectionString: builder.Configuration.GetConnectionString("DefaultConnection"),
+        tableName: "Logs",
+        needAutoCreateTable: true)
+    .CreateLogger();
+
+builder.Host.UseSerilog();
 
 // Add services to the container.
 builder.Services.AddControllers();
 
 // Configure PostgreSQL
+var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
-    options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
+{
+    options.UseNpgsql(connectionString);
+    options.EnableSensitiveDataLogging();
+    options.EnableDetailedErrors();
+});
 
 // Configure JWT
 builder.Services.Configure<JwtSettings>(builder.Configuration.GetSection("JWT"));
@@ -44,9 +67,10 @@ builder.Services.AddCors(options =>
     options.AddPolicy("AllowAngularApp",
         builder =>
         {
-            builder.WithOrigins("http://localhost:55075")
+            builder.SetIsOriginAllowed(origin => new Uri(origin).Host == "localhost")
                    .AllowAnyHeader()
-                   .AllowAnyMethod();
+                   .AllowAnyMethod()
+                   .AllowCredentials();
         });
 });
 
@@ -63,21 +87,21 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
+// CORS middleware'ini en üste taşıyoruz
+app.UseCors("AllowAngularApp");
+
 app.UseHttpsRedirection();
 
-app.UseCors("AllowAngularApp");
+// Global Exception Handler Middleware
+app.UseMiddleware<GlobalExceptionHandler>();
 
 app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
 
-// Veritabanını sıfırla ve yeniden oluştur
-using (var scope = app.Services.CreateScope())
-{
-    var context = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
-    context.Database.EnsureDeleted();
-    context.Database.EnsureCreated();
-}
+Log.Information("Uygulama başlatılıyor...");
 
 app.Run();
+
+Log.CloseAndFlush();
