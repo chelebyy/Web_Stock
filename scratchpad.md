@@ -77,6 +77,8 @@
 - Auth guard ile sayfa erişimleri rol bazlı kontrol ediliyor
 - Her sayfa için knowledge base dosyası oluşturulmalı
 - Private property'lere doğrudan erişim yerine getter metodları kullanılmalı
+- Şifre hash'leme yönteminin tüm uygulamada tutarlı olması önemli (Base64 veya hex)
+- Veritabanı değişikliklerinde migration ve seed data'nın güncellenmesi gerekiyor
 
 ## Notlar
 - Backend ve frontend için ayrı klasör yapıları oluşturuldu
@@ -91,24 +93,29 @@
 - Auth interceptor 401 hatalarında kullanıcıyı login sayfasına yönlendiriyor
 - Auth guard admin sayfalarına erişimi kısıtlıyor
 - Knowledge base dosyaları docs klasöründe tutuluyor
+- Şifre hash'leme yöntemi Base64 formatına güncellendi
 
 ## Sonraki Adımlar
 1. [X] Login component'inin JWT entegrasyonuna göre güncellenmesi
 2. [X] Dashboard sayfasının oluşturulması ve test edilmesi
-3. [ ] Admin panelinde kullanıcı yönetimi sayfasının güncellenmesi
+3. [X] Admin panelinde kullanıcı yönetimi sayfasının güncellenmesi
 4. [ ] Hata yakalama ve loglama sisteminin geliştirilmesi
 5. [ ] User Management knowledge base dosyasının oluşturulması
 6. [ ] API dokümantasyonunun hazırlanması
-7. [ ] Unit testlerin yazılması
-8. [ ] End-to-end testlerin yazılması
 
-## Login Sorunlarının Çözümü
-[X] CORS hatası çözüldü
-[X] Şifre hashleme yöntemi standardize edildi
-[X] Veritabanı sıfırlanıp yeniden oluşturuldu
-[X] Admin kullanıcısı başarıyla giriş yapabildi
+## Çözülen Sorunlar
+1. Kullanıcı Yönetimi Hatası:
+   - AuthController'da ApplicationDbContext yerine StockContext kullanılıyordu
+   - Şifre hash'leme yöntemi SeedData ile AuthController arasında farklıydı
+   - Veritabanı sıfırlanıp yeniden oluşturuldu
+   - Admin kullanıcısı doğru hash ile yeniden oluşturuldu
 
-### Öğrenilen Dersler
+2. Şifre Hashleme:
+   - Tüm uygulamada tek bir hash formatı kullanılmalı (Base64)
+   - Hash formatı değiştiğinde veritabanı güncellenmeli
+   - Base64 format tercih edildi (hex yerine)
+
+## Öğrenilen Dersler
 1. CORS Yapılandırması:
    - Middleware sıralaması önemli
    - CORS middleware'i en üstte olmalı
@@ -165,8 +172,3 @@
 1. Migration kullanırken Database.EnsureCreated() kullanılmamalı
 2. Seed data'da dinamik tarih (DateTime.UtcNow) kullanmak migration sorunlarına yol açabilir
 3. Hata ayıklama için detaylı loglama önemli
-
-## Yapılacaklar
-- [ ] Giriş işleminin başarılı olduğundan emin olunması
-- [ ] Kullanıcı yönetimi sayfasının kontrol edilmesi
-- [ ] Hata mesajlarının kullanıcı dostu hale getirilmesi

@@ -31,7 +31,7 @@ builder.Services.AddControllers();
 
 // Configure PostgreSQL
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
-builder.Services.AddDbContext<ApplicationDbContext>(options =>
+builder.Services.AddDbContext<StockContext>(options =>
 {
     options.UseNpgsql(connectionString);
     options.EnableSensitiveDataLogging(); // Hata ayıklama için
@@ -100,6 +100,13 @@ app.UseAuthorization();
 app.MapControllers();
 
 Log.Information("Uygulama başlatılıyor...");
+
+// Seed data
+using (var scope = app.Services.CreateScope())
+{
+    var services = scope.ServiceProvider;
+    await SeedData.Initialize(services);
+}
 
 app.Run();
 

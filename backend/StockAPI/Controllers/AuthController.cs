@@ -14,11 +14,11 @@ namespace StockAPI.Controllers
     [Route("api/[controller]")]
     public class AuthController : ControllerBase
     {
-        private readonly ApplicationDbContext _context;
+        private readonly StockAPI.Data.StockContext _context;
         private readonly JwtService _jwtService;
         private readonly ILogger<AuthController> _logger;
 
-        public AuthController(ApplicationDbContext context, JwtService jwtService, ILogger<AuthController> logger)
+        public AuthController(StockAPI.Data.StockContext context, JwtService jwtService, ILogger<AuthController> logger)
         {
             _context = context;
             _jwtService = jwtService;
@@ -30,12 +30,7 @@ namespace StockAPI.Controllers
             using (SHA256 sha256Hash = SHA256.Create())
             {
                 byte[] bytes = sha256Hash.ComputeHash(Encoding.UTF8.GetBytes(rawData));
-                StringBuilder builder = new StringBuilder();
-                for (int i = 0; i < bytes.Length; i++)
-                {
-                    builder.Append(bytes[i].ToString("x2"));
-                }
-                return builder.ToString();
+                return Convert.ToBase64String(bytes);
             }
         }
 

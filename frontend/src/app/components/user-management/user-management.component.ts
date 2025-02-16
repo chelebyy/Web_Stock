@@ -73,7 +73,7 @@ export class UserManagementComponent implements OnInit {
         this.messageService.add({
           severity: 'error',
           summary: 'Hata',
-          detail: 'Kullanıcılar yüklenirken bir hata oluştu'
+          detail: `Kullanıcılar yüklenirken bir hata oluştu: ${error.status === 401 ? 'Yetkilendirme hatası. Lütfen giriş yapın.' : error.message}`
         });
         this.loading = false;
       }
