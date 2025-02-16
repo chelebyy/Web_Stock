@@ -15,7 +15,7 @@
   - [X] User modelinin oluşturulması
   - [X] Kullanıcı işlemleri için controller oluşturulması
   - [X] JWT tabanlı kimlik doğrulama sisteminin kurulması
-  - [ ] Hata yakalama ve loglama sisteminin geliştirilmesi
+  - [X] Hata yakalama ve loglama sisteminin geliştirilmesi
 
 [X] Frontend kurulumu
   - [X] Angular 19.1.2 projesinin oluşturulması
@@ -36,7 +36,7 @@
   - [X] Login sayfası için knowledge base oluşturulması
   - [X] Dashboard sayfası için knowledge base oluşturulması
   - [X] User Management sayfası için knowledge base oluşturulması
-  - [ ] API dokümantasyonunun hazırlanması
+  - [X] API dokümantasyonunun hazırlanması
 
 ## JWT Kimlik Doğrulama Sistemi
 - [X] JWT NuGet paketinin eklenmesi (Microsoft.AspNetCore.Authentication.JwtBearer)
@@ -63,8 +63,14 @@
    - Kullanıcı oluşturma için `/api/auth/create-user` endpoint'i kullanılmalı
    - Diğer kullanıcı işlemleri için `/api/user/...` endpoint'leri kullanılmalı
 
+3. Loglama ve Hata Yakalama:
+   - GlobalExceptionHandler'da stack trace bilgisi eklendi
+   - BaseEntity sınıfında CreatedAt ve IsDeleted alanları constructor'da ayarlandı
+   - SeedData sınıfında context oluşturma yöntemi düzeltildi
+
 ## Son Durum
 - Backend: http://localhost:5126 adresinde çalışıyor
 - Frontend: http://localhost:4200 adresinde çalışıyor
 - Admin kullanıcısı (admin/admin123) ile giriş yapılabiliyor
 - Kullanıcı yönetimi sayfası çalışır durumda
+- Hata yakalama ve loglama sistemi aktif

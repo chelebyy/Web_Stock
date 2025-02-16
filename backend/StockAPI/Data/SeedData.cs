@@ -1,6 +1,7 @@
 using System.Security.Cryptography;
 using System.Text;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace StockAPI.Data
 {
@@ -8,8 +9,8 @@ namespace StockAPI.Data
     {
         public static async Task Initialize(IServiceProvider serviceProvider)
         {
-            using var context = new StockContext(
-                serviceProvider.GetRequiredService<DbContextOptions<StockContext>>());
+            using var scope = serviceProvider.CreateScope();
+            var context = scope.ServiceProvider.GetRequiredService<StockContext>();
 
             // Veritabanında hiç kullanıcı yoksa admin kullanıcısı oluştur
             if (!await context.Users.AnyAsync())

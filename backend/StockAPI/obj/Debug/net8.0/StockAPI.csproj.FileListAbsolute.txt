@@ -157,3 +157,5 @@ C:\Users\muham\OneDrive\Masaüstü\Stock\backend\StockAPI\bin\Debug\net8.0\Seril
 C:\Users\muham\OneDrive\Masaüstü\Stock\backend\StockAPI\bin\Debug\net8.0\Serilog.Sinks.File.dll
 C:\Users\muham\OneDrive\Masaüstü\Stock\backend\StockAPI\bin\Debug\net8.0\Serilog.Sinks.PeriodicBatching.dll
 C:\Users\muham\OneDrive\Masaüstü\Stock\backend\StockAPI\bin\Debug\net8.0\Serilog.Sinks.PostgreSQL.dll
+C:\Users\muham\OneDrive\Masaüstü\Stock\backend\StockAPI\bin\Debug\net8.0\Serilog.Enrichers.Environment.dll
+C:\Users\muham\OneDrive\Masaüstü\Stock\backend\StockAPI\bin\Debug\net8.0\Serilog.Enrichers.Thread.dll

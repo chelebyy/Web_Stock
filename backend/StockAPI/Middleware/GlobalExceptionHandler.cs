@@ -1,91 +1,88 @@
+using Microsoft.AspNetCore.Http;
+using StockAPI.Exceptions;
+using StockAPI.Services;
 using System.Net;
 using System.Text.Json;
-using Microsoft.AspNetCore.Http;
-using Serilog;
 
-namespace StockAPI.Middleware
+namespace StockAPI.Middleware;
+
+public class GlobalExceptionHandler
 {
-    public class GlobalExceptionHandler
+    private readonly RequestDelegate _next;
+    private readonly ILogger<GlobalExceptionHandler> _logger;
+    private readonly IServiceScopeFactory _serviceScopeFactory;
+
+    public GlobalExceptionHandler(
+        RequestDelegate next,
+        ILogger<GlobalExceptionHandler> logger,
+        IServiceScopeFactory serviceScopeFactory)
     {
-        private readonly RequestDelegate _next;
-        private readonly Serilog.ILogger _logger;
+        _next = next;
+        _logger = logger;
+        _serviceScopeFactory = serviceScopeFactory;
+    }
 
-        public GlobalExceptionHandler(RequestDelegate next)
+    public async Task InvokeAsync(HttpContext context)
+    {
+        try
         {
-            _next = next;
-            _logger = Log.ForContext<GlobalExceptionHandler>();
+            await _next(context);
         }
-
-        public async Task InvokeAsync(HttpContext context)
+        catch (Exception ex)
         {
+            _logger.LogError(ex, "Beklenmeyen hata oluştu: {ErrorMessage}\nStack Trace: {StackTrace}", ex.Message, ex.StackTrace);
+            await HandleExceptionAsync(context, ex);
+        }
+    }
+
+    private async Task HandleExceptionAsync(HttpContext context, Exception exception)
+    {
+        var userId = context.User?.Identity?.Name ?? "anonymous";
+        var path = context.Request.Path;
+
+        var (statusCode, userMessage) = exception switch
+        {
+            ApiException apiException => ((int)apiException.StatusCode, apiException.UserMessage),
+            ArgumentException _ => (StatusCodes.Status400BadRequest, "Geçersiz argüman."),
+            UnauthorizedAccessException _ => (StatusCodes.Status401Unauthorized, "Yetkisiz erişim."),
+            _ => (StatusCodes.Status500InternalServerError, "Bir hata oluştu. Lütfen daha sonra tekrar deneyin.")
+        };
+
+        var response = new
+        {
+            StatusCode = statusCode,
+            Message = userMessage,
+            Path = path,
+            Timestamp = DateTime.UtcNow,
+            Details = exception.Message
+        };
+
+        context.Response.ContentType = "application/json";
+        context.Response.StatusCode = statusCode;
+
+        using (var scope = _serviceScopeFactory.CreateScope())
+        {
+            var auditLogger = scope.ServiceProvider.GetRequiredService<IAuditLogger>();
             try
             {
-                await _next(context);
+                await auditLogger.LogActionAsync(
+                    userId: userId,
+                    action: "ERROR",
+                    entityId: exception.GetHashCode().ToString(),
+                    entityType: "Exception",
+                    path: path,
+                    details: JsonSerializer.Serialize(new { 
+                        ExceptionType = exception.GetType().Name,
+                        ExceptionMessage = exception.Message,
+                        StackTrace = exception.StackTrace
+                    }));
             }
             catch (Exception ex)
             {
-                _logger.Error(ex, "Beklenmeyen bir hata oluştu: {ErrorMessage}", ex.Message);
-                await HandleExceptionAsync(context, ex);
+                _logger.LogError(ex, "Hata loglanırken bir sorun oluştu");
             }
         }
 
-        private static async Task HandleExceptionAsync(HttpContext context, Exception exception)
-        {
-            context.Response.ContentType = "application/json";
-            
-            var response = new
-            {
-                error = new
-                {
-                    message = "İşlem sırasında bir hata oluştu.",
-                    detail = exception.Message
-                }
-            };
-
-            switch (exception)
-            {
-                case UnauthorizedAccessException:
-                    context.Response.StatusCode = (int)HttpStatusCode.Unauthorized;
-                    response = new
-                    {
-                        error = new
-                        {
-                            message = "Bu işlem için yetkiniz bulunmamaktadır.",
-                            detail = exception.Message
-                        }
-                    };
-                    break;
-
-                case KeyNotFoundException:
-                    context.Response.StatusCode = (int)HttpStatusCode.NotFound;
-                    response = new
-                    {
-                        error = new
-                        {
-                            message = "İstenen kayıt bulunamadı.",
-                            detail = exception.Message
-                        }
-                    };
-                    break;
-
-                case ArgumentException:
-                    context.Response.StatusCode = (int)HttpStatusCode.BadRequest;
-                    response = new
-                    {
-                        error = new
-                        {
-                            message = "Geçersiz parametre.",
-                            detail = exception.Message
-                        }
-                    };
-                    break;
-
-                default:
-                    context.Response.StatusCode = (int)HttpStatusCode.InternalServerError;
-                    break;
-            }
-
-            await context.Response.WriteAsync(JsonSerializer.Serialize(response));
-        }
+        await context.Response.WriteAsync(JsonSerializer.Serialize(response));
     }
 }

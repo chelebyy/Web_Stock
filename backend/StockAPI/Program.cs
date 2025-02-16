@@ -13,15 +13,11 @@ var builder = WebApplication.CreateBuilder(args);
 
 // Configure Serilog
 Log.Logger = new LoggerConfiguration()
-    .MinimumLevel.Debug()
-    .MinimumLevel.Override("Microsoft", LogEventLevel.Information)
-    .Enrich.FromLogContext()
+    .MinimumLevel.Information()
+    .MinimumLevel.Override("Microsoft", LogEventLevel.Warning)
+    .MinimumLevel.Override("System", LogEventLevel.Warning)
     .WriteTo.Console()
     .WriteTo.File("Logs/log-.txt", rollingInterval: RollingInterval.Day)
-    .WriteTo.PostgreSQL(
-        connectionString: builder.Configuration.GetConnectionString("DefaultConnection"),
-        tableName: "Logs",
-        needAutoCreateTable: true)
     .CreateLogger();
 
 builder.Host.UseSerilog();
@@ -77,6 +73,15 @@ builder.Services.AddCors(options =>
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
+builder.Services.AddScoped<IAuditLogger, AuditLogger>();
+
+// Logging için ILogger<T> servisini ekle
+builder.Services.AddLogging(logging =>
+{
+    logging.ClearProviders();
+    logging.AddSerilog(dispose: true);
+});
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -89,8 +94,6 @@ if (app.Environment.IsDevelopment())
 // CORS middleware'ini en üste taşıyoruz
 app.UseCors("AllowAngularApp");
 
-app.UseHttpsRedirection();
-
 // Global Exception Handler Middleware
 app.UseMiddleware<GlobalExceptionHandler>();
 
@@ -99,15 +102,40 @@ app.UseAuthorization();
 
 app.MapControllers();
 
+app.Urls.Clear();
+app.Urls.Add("http://localhost:5126");
+
 Log.Information("Uygulama başlatılıyor...");
 
 // Seed data
 using (var scope = app.Services.CreateScope())
 {
     var services = scope.ServiceProvider;
-    await SeedData.Initialize(services);
+    try
+    {
+        await SeedData.Initialize(services);
+        Log.Information("Veritabanı başarıyla hazırlandı.");
+    }
+    catch (Exception ex)
+    {
+        Log.Error(ex, "Veritabanı hazırlanırken hata oluştu.");
+        throw;
+    }
 }
 
-app.Run();
-
-Log.CloseAndFlush();
+try
+{
+    Log.Information("Web host başlatılıyor...");
+    await app.RunAsync();
+    Log.Information("Web host başarıyla başlatıldı.");
+}
+catch (Exception ex)
+{
+    Log.Fatal(ex, "Web host başlatılırken hata oluştu");
+    throw;
+}
+finally
+{
+    Log.Information("Uygulama kapatılıyor...");
+    Log.CloseAndFlush();
+}
