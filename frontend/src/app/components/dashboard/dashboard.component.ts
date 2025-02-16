@@ -10,58 +10,92 @@ import { AuthService } from '../../services/auth.service';
   standalone: true,
   imports: [CommonModule, CardModule, ButtonModule],
   template: `
-    <div class="container mx-auto p-4">
-      <p-card header="Hoş Geldiniz" styleClass="dashboard-card">
-        <div class="flex flex-column gap-3">
-          <p class="welcome-text">Merhaba, {{ username }}!</p>
-          <div class="grid">
-            <div class="col-12 md:col-6 lg:col-4" *ngIf="isAdmin">
-              <p-button 
-                label="Kullanıcı Yönetimi" 
-                (onClick)="navigateToUserManagement()"
-                styleClass="p-button-secondary w-full">
-              </p-button>
-            </div>
-            <div class="col-12 md:col-6 lg:col-4">
-              <p-button 
-                label="BİLGİ İŞLEM"
-                (onClick)="navigateToITManagement()"
-                styleClass="p-button-info w-full">
-              </p-button>
-            </div>
-            <div class="col-12 md:col-6 lg:col-4">
-              <p-button 
-                label="Çıkış Yap" 
-                (onClick)="logout()"
-                styleClass="p-button-danger w-full">
-              </p-button>
-            </div>
-          </div>
+    <div class="container">
+      <p-card>
+        <div class="header">
+          <h1>Hoş Geldiniz</h1>
+          <p-button 
+            label="Çıkış" 
+            icon="pi pi-sign-out"
+            (onClick)="logout()"
+            styleClass="p-button-text p-button-danger logout-button">
+          </p-button>
+        </div>
+        <p>Merhaba, {{ username }}!</p>
+
+        <div class="button-group">
+          <p-button 
+            *ngIf="isAdmin"
+            label="Kullanıcı Yönetimi" 
+            icon="pi pi-users"
+            (onClick)="navigateToUserManagement()"
+            styleClass="p-button-secondary">
+          </p-button>
+          
+          <p-button 
+            label="BİLGİ İŞLEM"
+            icon="pi pi-desktop"
+            (onClick)="navigateToITManagement()"
+            styleClass="p-button-info">
+          </p-button>
         </div>
       </p-card>
     </div>
   `,
   styles: [`
-    :host {
-      display: block;
-      height: 100vh;
-      background-color: var(--surface-ground);
+    .container {
+      max-width: 600px;
+      margin: 50px auto;
+      padding: 0 20px;
     }
-    .dashboard-card {
-      max-width: 1200px;
-      margin: 2rem auto;
+
+    .header {
+      position: relative;
+      margin-bottom: 10px;
     }
-    .welcome-text {
-      font-size: 1.5rem;
-      color: var(--text-color);
-      margin-bottom: 1rem;
+
+    h1 {
+      text-align: center;
+      color: #2196F3;
+      margin: 0;
     }
-    .grid {
-      display: grid;
-      gap: 1rem;
+
+    p {
+      text-align: center;
+      color: #666;
+      margin: 0 0 30px 0;
     }
-    :host ::ng-deep .p-button {
-      min-height: 3rem;
+
+    .button-group {
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+    }
+
+    .logout-button {
+      position: absolute;
+      top: 0;
+      right: 0;
+    }
+
+    :host ::ng-deep {
+      .p-card {
+        background: #fff;
+        padding: 20px;
+      }
+
+      .p-button {
+        width: 100%;
+      }
+
+      .p-button.p-button-text.p-button-danger {
+        width: auto;
+        padding: 0.5rem;
+        
+        .p-button-icon {
+          font-size: 1rem;
+        }
+      }
     }
   `]
 })
