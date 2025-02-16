@@ -4,11 +4,11 @@ import {
   NgIf,
   NgStyle,
   NgTemplateOutlet
-} from "./chunk-S6TCDYAA.js";
+} from "./chunk-ZEWQBLTB.js";
 import {
   PrimeTemplate,
   SharedModule
-} from "./chunk-EVWOTFVI.js";
+} from "./chunk-X5MPMWBT.js";
 import {
   ChangeDetectionStrategy,
   Component,
@@ -36,7 +36,8 @@ import {
   ɵɵproperty,
   ɵɵqueryRefresh,
   ɵɵtemplate
-} from "./chunk-7J7SLNDZ.js";
+} from "./chunk-PWVJMM3U.js";
+import "./chunk-DENFAI5C.js";
 
 // node_modules/primeng/fesm2022/primeng-toolbar.mjs
 var _c0 = ["*"];

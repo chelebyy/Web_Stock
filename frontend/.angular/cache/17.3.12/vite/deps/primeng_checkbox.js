@@ -1,28 +1,28 @@
 import {
+  AutoFocus,
+  AutoFocusModule
+} from "./chunk-QN5GO673.js";
+import {
   CheckIcon
-} from "./chunk-INFG7EUG.js";
+} from "./chunk-N7IZDNS3.js";
+import "./chunk-4YGVAR2H.js";
 import {
   NG_VALUE_ACCESSOR,
   NgControl
-} from "./chunk-GVUOOALK.js";
-import {
-  AutoFocus,
-  AutoFocusModule
-} from "./chunk-YQSRPNEL.js";
-import "./chunk-MWRB4AQK.js";
+} from "./chunk-DKOTU4TB.js";
 import {
   CommonModule,
   NgClass,
   NgIf,
   NgStyle,
   NgTemplateOutlet
-} from "./chunk-S6TCDYAA.js";
+} from "./chunk-ZEWQBLTB.js";
 import {
   ObjectUtils,
   PrimeNGConfig,
   PrimeTemplate,
   SharedModule
-} from "./chunk-EVWOTFVI.js";
+} from "./chunk-X5MPMWBT.js";
 import {
   ChangeDetectionStrategy,
   ChangeDetectorRef,
@@ -70,7 +70,8 @@ import {
   ɵɵtext,
   ɵɵtextInterpolate1,
   ɵɵviewQuery
-} from "./chunk-7J7SLNDZ.js";
+} from "./chunk-PWVJMM3U.js";
+import "./chunk-DENFAI5C.js";
 
 // node_modules/primeng/fesm2022/primeng-checkbox.mjs
 var _c0 = ["input"];

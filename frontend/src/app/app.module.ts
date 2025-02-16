@@ -1,8 +1,9 @@
 import { NgModule } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
-import { HttpClientModule } from '@angular/common/http';
+import { HttpClientModule, HTTP_INTERCEPTORS } from '@angular/common/http';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { JwtModule } from '@auth0/angular-jwt';
 
 // PrimeNG Modülleri
 import { ButtonModule } from 'primeng/button';
@@ -22,6 +23,11 @@ import { ConfirmationService, MessageService } from 'primeng/api';
 import { AppComponent } from './app.component';
 import { routes } from './app.routes';
 import { RouterModule } from '@angular/router';
+import { AuthInterceptor } from './interceptors/auth.interceptor';
+
+export function tokenGetter() {
+  return localStorage.getItem('token');
+}
 
 @NgModule({
   declarations: [
@@ -34,6 +40,13 @@ import { RouterModule } from '@angular/router';
     FormsModule,
     ReactiveFormsModule,
     RouterModule.forRoot(routes),
+    JwtModule.forRoot({
+      config: {
+        tokenGetter: tokenGetter,
+        allowedDomains: ['localhost:5000'],
+        disallowedRoutes: ['localhost:5000/api/auth/login']
+      }
+    }),
     // PrimeNG Modülleri
     ButtonModule,
     CardModule,
@@ -48,7 +61,12 @@ import { RouterModule } from '@angular/router';
   ],
   providers: [
     MessageService,
-    ConfirmationService
+    ConfirmationService,
+    {
+      provide: HTTP_INTERCEPTORS,
+      useClass: AuthInterceptor,
+      multi: true
+    }
   ],
   bootstrap: [AppComponent]
 })

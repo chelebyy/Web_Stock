@@ -41,3 +41,27 @@ testem.log
 # System files
 .DS_Store
 Thumbs.db
+
+# .NET
+bin/
+obj/
+*.dll
+*.pdb
+*.exe
+
+# Angular
+.angular/
+node_modules/
+dist/
+*.js.map
+
+# IDE
+.vs/
+.vscode/
+*.suo
+*.user
+*.sln.docstates
+
+# Logs
+*.log
+logs/

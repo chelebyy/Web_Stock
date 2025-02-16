@@ -8,10 +8,10 @@ namespace StockAPI.Models
 
         [Required]
         [StringLength(50)]
-        public string Username { get; set; }
+        public string Username { get; set; } = string.Empty;
 
         [Required]
-        public string PasswordHash { get; set; }
+        public string PasswordHash { get; set; } = string.Empty;
 
         public bool IsAdmin { get; set; }
 

@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { MessageService } from 'primeng/api';
+import { AuthService } from '../../services/auth.service';
 
 // PrimeNG Modülleri
 import { ButtonModule } from 'primeng/button';
@@ -37,26 +38,33 @@ export class LoginComponent {
 
   constructor(
     private router: Router,
-    private messageService: MessageService
+    private messageService: MessageService,
+    private authService: AuthService
   ) {}
 
   onSubmit(): void {
-    // TODO: Gerçek kimlik doğrulama işlemi eklenecek
-    if (this.username === 'admin' && this.password === 'admin') {
-      this.messageService.add({
-        severity: 'success',
-        summary: 'Başarılı',
-        detail: 'Giriş başarılı!',
-        life: 3000
-      });
-      this.router.navigate(['/user-management']);
-    } else {
-      this.messageService.add({
-        severity: 'error',
-        summary: 'Hata',
-        detail: 'Kullanıcı adı veya şifre hatalı!',
-        life: 3000
-      });
-    }
+    this.authService.login({ username: this.username, password: this.password }).subscribe({
+      next: (response) => {
+        this.messageService.add({
+          severity: 'success',
+          summary: 'Başarılı',
+          detail: 'Giriş başarılı!',
+          life: 3000
+        });
+        
+        // Ana sayfaya yönlendir
+        setTimeout(() => {
+          this.router.navigate(['/dashboard']);
+        }, 1000);
+      },
+      error: (error) => {
+        this.messageService.add({
+          severity: 'error',
+          summary: 'Hata',
+          detail: 'Kullanıcı adı veya şifre hatalı!',
+          life: 3000
+        });
+      }
+    });
   }
 }
