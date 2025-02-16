@@ -10,8 +10,6 @@ namespace StockAPI.Data
         public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options)
             : base(options)
         {
-            // Veritabanını oluştur
-            Database.EnsureCreated();
         }
 
         public DbSet<User> Users { get; set; }
@@ -53,7 +51,7 @@ namespace StockAPI.Data
                 Username = "admin",
                 PasswordHash = passwordHash,
                 IsAdmin = true,
-                CreatedAt = DateTime.UtcNow
+                CreatedAt = new DateTime(2025, 1, 1, 0, 0, 0, DateTimeKind.Utc)
             });
         }
 
@@ -81,11 +79,11 @@ namespace StockAPI.Data
 
             foreach (var entityEntry in entries)
             {
-                ((BaseEntity)entityEntry.Entity).UpdatedAt = DateTime.UtcNow;
+                ((BaseEntity)entityEntry.Entity).UpdatedAt = new DateTime(2025, 1, 1, 0, 0, 0, DateTimeKind.Utc);
 
                 if (entityEntry.State == EntityState.Added)
                 {
-                    ((BaseEntity)entityEntry.Entity).CreatedAt = DateTime.UtcNow;
+                    ((BaseEntity)entityEntry.Entity).CreatedAt = new DateTime(2025, 1, 1, 0, 0, 0, DateTimeKind.Utc);
                 }
             }
 

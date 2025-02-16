@@ -34,8 +34,7 @@ var connectionString = builder.Configuration.GetConnectionString("DefaultConnect
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
 {
     options.UseNpgsql(connectionString);
-    options.EnableSensitiveDataLogging();
-    options.EnableDetailedErrors();
+    options.EnableSensitiveDataLogging(); // Hata ayıklama için
 });
 
 // Configure JWT
@@ -67,7 +66,7 @@ builder.Services.AddCors(options =>
     options.AddPolicy("AllowAngularApp",
         builder =>
         {
-            builder.SetIsOriginAllowed(origin => new Uri(origin).Host == "localhost")
+            builder.WithOrigins("http://localhost:4200")
                    .AllowAnyHeader()
                    .AllowAnyMethod()
                    .AllowCredentials();

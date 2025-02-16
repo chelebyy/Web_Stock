@@ -28,8 +28,7 @@ import { ToastModule } from 'primeng/toast';
     InputTextModule,
     PasswordModule,
     ToastModule
-  ],
-  providers: [MessageService]
+  ]
 })
 export class LoginComponent {
   username: string = '';

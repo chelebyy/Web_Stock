@@ -9,7 +9,7 @@
   </p-toolbar>
 
   <div class="table-container">
-    <p-table [value]="users" [paginator]="true" [rows]="10" [responsive]="true">
+    <p-table [value]="users" [paginator]="true" [rows]="10" [responsive]="true" [loading]="loading">
       <ng-template pTemplate="header">
         <tr>
           <th>ID</th>
@@ -36,6 +36,11 @@
           </td>
         </tr>
       </ng-template>
+      <ng-template pTemplate="emptymessage">
+        <tr>
+          <td colspan="6" class="text-center">Kullanıcı bulunamadı</td>
+        </tr>
+      </ng-template>
     </p-table>
   </div>
 </div>
@@ -51,7 +56,7 @@
     </div>
 
     <div class="field">
-      <label for="password">Şifre</label>
+      <label for="password">Şifre {{editMode ? '(Boş bırakılırsa değişmez)' : ''}}</label>
       <p-password id="password" [feedback]="false" [toggleMask]="true" formControlName="password"></p-password>
       <small class="p-error" *ngIf="userForm.get('password')?.errors?.['required'] && userForm.get('password')?.touched">
         Şifre gereklidir.
@@ -66,7 +71,7 @@
 
   <ng-template pTemplate="footer">
     <button pButton pRipple label="İptal" icon="pi pi-times" class="p-button-text" (click)="hideDialog()"></button>
-    <button pButton pRipple label="Kaydet" icon="pi pi-check" class="p-button-text" (click)="saveUser()"></button>
+    <button pButton pRipple label="Kaydet" icon="pi pi-check" class="p-button-text" (click)="saveUser()" [disabled]="userForm.invalid"></button>
   </ng-template>
 </p-dialog>
 

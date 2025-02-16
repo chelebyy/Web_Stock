@@ -4,9 +4,11 @@ using StockAPI.Data;
 using StockAPI.Models;
 using System.Security.Cryptography;
 using System.Text;
+using Microsoft.AspNetCore.Authorization;
 
 namespace StockAPI.Controllers
 {
+    [Authorize(Roles = "Admin")]
     [ApiController]
     [Route("api/[controller]")]
     public class UserController : ControllerBase
@@ -22,14 +24,34 @@ namespace StockAPI.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<User>>> GetUsers()
         {
-            return await _context.Users.ToListAsync();
+            var users = await _context.Users
+                .Select(u => new User 
+                { 
+                    Id = u.Id,
+                    Username = u.Username,
+                    IsAdmin = u.IsAdmin,
+                    CreatedAt = u.CreatedAt,
+                    LastLoginAt = u.LastLoginAt
+                })
+                .ToListAsync();
+
+            return users;
         }
 
         // GET: api/User/5
         [HttpGet("{id}")]
         public async Task<ActionResult<User>> GetUser(int id)
         {
-            var user = await _context.Users.FindAsync(id);
+            var user = await _context.Users
+                .Select(u => new User 
+                { 
+                    Id = u.Id,
+                    Username = u.Username,
+                    IsAdmin = u.IsAdmin,
+                    CreatedAt = u.CreatedAt,
+                    LastLoginAt = u.LastLoginAt
+                })
+                .FirstOrDefaultAsync(u => u.Id == id);
 
             if (user == null)
             {
@@ -43,14 +65,27 @@ namespace StockAPI.Controllers
         [HttpPost]
         public async Task<ActionResult<User>> CreateUser(User user)
         {
-            // Hash password
+            if (await _context.Users.AnyAsync(u => u.Username == user.Username))
+            {
+                return BadRequest("Bu kullanıcı adı zaten kullanılıyor");
+            }
+
             user.PasswordHash = HashPassword(user.PasswordHash);
             user.CreatedAt = DateTime.UtcNow;
 
             _context.Users.Add(user);
             await _context.SaveChangesAsync();
 
-            return CreatedAtAction(nameof(GetUser), new { id = user.Id }, user);
+            var createdUser = new User
+            {
+                Id = user.Id,
+                Username = user.Username,
+                IsAdmin = user.IsAdmin,
+                CreatedAt = user.CreatedAt,
+                LastLoginAt = user.LastLoginAt
+            };
+
+            return CreatedAtAction(nameof(GetUser), new { id = user.Id }, createdUser);
         }
 
         // PUT: api/User/5
@@ -62,7 +97,19 @@ namespace StockAPI.Controllers
                 return BadRequest();
             }
 
-            _context.Entry(user).State = EntityState.Modified;
+            var existingUser = await _context.Users.FindAsync(id);
+            if (existingUser == null)
+            {
+                return NotFound();
+            }
+
+            if (!string.IsNullOrEmpty(user.PasswordHash))
+            {
+                existingUser.PasswordHash = HashPassword(user.PasswordHash);
+            }
+
+            existingUser.Username = user.Username;
+            existingUser.IsAdmin = user.IsAdmin;
 
             try
             {
@@ -91,6 +138,11 @@ namespace StockAPI.Controllers
             if (user == null)
             {
                 return NotFound();
+            }
+
+            if (user.Username.ToLower() == "admin")
+            {
+                return BadRequest("Admin kullanıcısı silinemez");
             }
 
             _context.Users.Remove(user);

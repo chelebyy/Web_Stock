@@ -84,7 +84,7 @@ namespace StockAPI.Migrations
             migrationBuilder.InsertData(
                 table: "Users",
                 columns: new[] { "Id", "CreatedAt", "IsAdmin", "LastLoginAt", "PasswordHash", "Username" },
-                values: new object[] { 1, new DateTime(2025, 2, 16, 13, 58, 25, 762, DateTimeKind.Utc).AddTicks(1929), true, null, "3eb3fe66b31e3b4d10fa70b5cad49c7112294af6ae4e476a1c405155d45aa121", "admin" });
+                values: new object[] { 1, new DateTime(2025, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc), true, null, "3eb3fe66b31e3b4d10fa70b5cad49c7112294af6ae4e476a1c405155d45aa121", "admin" });
 
             migrationBuilder.CreateIndex(
                 name: "IX_Categories_ParentCategoryId",

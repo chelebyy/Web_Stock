@@ -12,7 +12,7 @@ using StockAPI.Data;
 namespace StockAPI.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20250216135826_InitialCreate")]
+    [Migration("20250216153715_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -140,7 +140,7 @@ namespace StockAPI.Migrations
                         new
                         {
                             Id = 1,
-                            CreatedAt = new DateTime(2025, 2, 16, 13, 58, 25, 762, DateTimeKind.Utc).AddTicks(1929),
+                            CreatedAt = new DateTime(2025, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
                             IsAdmin = true,
                             PasswordHash = "3eb3fe66b31e3b4d10fa70b5cad49c7112294af6ae4e476a1c405155d45aa121",
                             Username = "admin"

@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ConfirmationService, MessageService } from 'primeng/api';
 import { ButtonModule } from 'primeng/button';
 import { CheckboxModule } from 'primeng/checkbox';
@@ -11,15 +11,8 @@ import { PasswordModule } from 'primeng/password';
 import { TableModule } from 'primeng/table';
 import { ToastModule } from 'primeng/toast';
 import { ToolbarModule } from 'primeng/toolbar';
-
-interface User {
-  id: number;
-  username: string;
-  password?: string;
-  isAdmin: boolean;
-  createdAt: Date;
-  lastLoginAt: Date;
-}
+import { UserService } from '../../services/user.service';
+import { User } from '../../models/user.model';
 
 @Component({
   selector: 'app-user-management',
@@ -45,103 +38,155 @@ interface User {
 export class UserManagementComponent implements OnInit {
   users: User[] = [];
   userDialog: boolean = false;
-  userForm: any;
+  userForm: FormGroup;
   editMode: boolean = false;
+  loading: boolean = false;
 
   constructor(
+    private userService: UserService,
     private messageService: MessageService,
-    private confirmationService: ConfirmationService
-  ) {}
+    private confirmationService: ConfirmationService,
+    private fb: FormBuilder
+  ) {
+    this.userForm = this.fb.group({
+      id: [null],
+      username: ['', [Validators.required]],
+      password: ['', [Validators.required]],
+      isAdmin: [false]
+    });
+  }
 
   ngOnInit(): void {
-    // Mock data for testing
-    this.users = [
-      {
-        id: 1,
-        username: 'admin',
-        isAdmin: true,
-        createdAt: new Date(),
-        lastLoginAt: new Date()
+    this.loadUsers();
+  }
+
+  loadUsers() {
+    this.loading = true;
+    this.userService.getUsers().subscribe({
+      next: (data) => {
+        console.log('Loaded users:', data);
+        this.users = data;
+        this.loading = false;
       },
-      {
-        id: 2,
-        username: 'user',
-        isAdmin: false,
-        createdAt: new Date(),
-        lastLoginAt: new Date()
+      error: (error) => {
+        console.error('Error loading users:', error);
+        this.messageService.add({
+          severity: 'error',
+          summary: 'Hata',
+          detail: 'Kullanıcılar yüklenirken bir hata oluştu'
+        });
+        this.loading = false;
       }
-    ];
+    });
   }
 
   openDialog(user?: User) {
+    this.editMode = !!user;
     if (user) {
-      this.editMode = true;
-      this.userForm = {
+      this.userForm.patchValue({
         id: user.id,
         username: user.username,
-        password: '',
         isAdmin: user.isAdmin
-      };
+      });
+      // Düzenleme modunda şifre zorunlu değil
+      this.userForm.get('password')?.setValidators(null);
     } else {
-      this.editMode = false;
-      this.userForm = {
+      this.userForm.reset({
         id: null,
         username: '',
         password: '',
         isAdmin: false
-      };
+      });
+      // Yeni kullanıcı için şifre zorunlu
+      this.userForm.get('password')?.setValidators([Validators.required]);
     }
+    this.userForm.get('password')?.updateValueAndValidity();
     this.userDialog = true;
   }
 
   hideDialog() {
     this.userDialog = false;
+    this.userForm.reset();
   }
 
   saveUser() {
-    const userData = this.userForm;
-    if (this.editMode) {
-      const index = this.users.findIndex(user => user.id === userData.id);
-      if (index !== -1) {
-        this.users[index] = {
-          ...this.users[index],
-          ...userData
-        };
-        this.messageService.add({
-          severity: 'success',
-          summary: 'Başarılı',
-          detail: 'Kullanıcı güncellendi'
-        });
-      }
-    } else {
-      const newUser: User = {
-        ...userData,
-        id: this.users.length + 1,
-        createdAt: new Date(),
-        lastLoginAt: new Date()
-      };
-      this.users.push(newUser);
-      this.messageService.add({
-        severity: 'success',
-        summary: 'Başarılı',
-        detail: 'Kullanıcı oluşturuldu'
+    if (this.userForm.invalid) {
+      Object.keys(this.userForm.controls).forEach(key => {
+        const control = this.userForm.get(key);
+        if (control?.invalid) {
+          control.markAsTouched();
+        }
       });
+      return;
     }
 
-    this.hideDialog();
+    const userData = this.userForm.value;
+    if (this.editMode) {
+      this.userService.updateUser(userData.id, userData).subscribe({
+        next: () => {
+          this.messageService.add({
+            severity: 'success',
+            summary: 'Başarılı',
+            detail: 'Kullanıcı güncellendi'
+          });
+          this.loadUsers();
+          this.hideDialog();
+        },
+        error: (error) => {
+          console.error('Error updating user:', error);
+          this.messageService.add({
+            severity: 'error',
+            summary: 'Hata',
+            detail: 'Kullanıcı güncellenirken bir hata oluştu'
+          });
+        }
+      });
+    } else {
+      this.userService.createUser(userData).subscribe({
+        next: () => {
+          this.messageService.add({
+            severity: 'success',
+            summary: 'Başarılı',
+            detail: 'Kullanıcı oluşturuldu'
+          });
+          this.loadUsers();
+          this.hideDialog();
+        },
+        error: (error) => {
+          console.error('Error creating user:', error);
+          this.messageService.add({
+            severity: 'error',
+            summary: 'Hata',
+            detail: 'Kullanıcı oluşturulurken bir hata oluştu'
+          });
+        }
+      });
+    }
   }
 
   deleteUser(user: User) {
     this.confirmationService.confirm({
-      message: `${user.username} kullanıcısını silmek istediğinizden emin misiniz?`,
-      header: 'Silme Onayı',
+      message: 'Bu kullanıcıyı silmek istediğinizden emin misiniz?',
+      header: 'Onay',
       icon: 'pi pi-exclamation-triangle',
       accept: () => {
-        this.users = this.users.filter(u => u.id !== user.id);
-        this.messageService.add({
-          severity: 'success',
-          summary: 'Başarılı',
-          detail: 'Kullanıcı silindi'
+        this.userService.deleteUser(user.id).subscribe({
+          next: () => {
+            this.messageService.add({
+              severity: 'success',
+              summary: 'Başarılı',
+              detail: 'Kullanıcı silindi'
+            });
+            this.loadUsers();
+          },
+          error: (error) => {
+            console.error('Error deleting user:', error);
+            this.messageService.add({
+              severity: 'error',
+              summary: 'Hata',
+              detail: 'Kullanıcı silinirken bir hata oluştu'
+            });
+          }
         });
       }
     });

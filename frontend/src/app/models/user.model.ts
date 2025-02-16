@@ -1,9 +1,10 @@
 export interface User {
-    id?: number;
+    id: number;
     username: string;
     passwordHash?: string;
+    password?: string;
     isAdmin: boolean;
-    createdAt?: Date;
+    createdAt: Date;
     lastLoginAt?: Date;
 }
 
