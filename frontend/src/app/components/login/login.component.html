@@ -1,39 +1,33 @@
 <div class="login-container">
-  <p-card header="Giriş Yap" [style]="{ width: '25rem' }">
+  <div class="login-card">
+    <h2>Giriş Yap</h2>
+    
     <form (ngSubmit)="onSubmit()">
-      <div class="field">
+      <div class="form-group">
         <label for="username">Kullanıcı Adı</label>
-        <span class="p-input-icon-left" style="width: 100%">
-          <i class="pi pi-user"></i>
-          <input
-            id="username"
-            type="text"
-            pInputText
-            [(ngModel)]="username"
-            name="username"
-            placeholder="Kullanıcı adınızı girin"
-            style="width: 100%"
-          />
-        </span>
+        <input 
+          type="text" 
+          id="username"
+          [(ngModel)]="username"
+          name="username"
+          placeholder="Kullanıcı adınızı girin"
+          required>
       </div>
 
-      <div class="field">
+      <div class="form-group">
         <label for="password">Şifre</label>
-        <span class="p-input-icon-left" style="width: 100%">
-          <i class="pi pi-lock"></i>
-          <p-password
-            id="password"
-            [(ngModel)]="password"
-            name="password"
-            [feedback]="false"
-            [toggleMask]="true"
-            placeholder="Şifrenizi girin"
-            styleClass="w-full"
-          ></p-password>
-        </span>
+        <p-password
+          id="password"
+          [(ngModel)]="password"
+          name="password"
+          [feedback]="false"
+          [toggleMask]="true"
+          placeholder="Şifrenizi girin"
+          styleClass="w-full"
+        ></p-password>
       </div>
 
-      <div class="field-checkbox">
+      <div class="remember-me">
         <p-checkbox
           [(ngModel)]="rememberMe"
           name="rememberMe"
@@ -43,16 +37,14 @@
         <label for="rememberMe">Beni Hatırla</label>
       </div>
 
-      <div class="flex justify-content-center">
-        <p-button
-          type="submit"
-          label="Giriş Yap"
-          icon="pi pi-sign-in"
-          styleClass="w-full"
-        ></p-button>
-      </div>
+      <p-button 
+        type="submit" 
+        label="Giriş Yap"
+        icon="pi pi-sign-in"
+        styleClass="w-full"
+      ></p-button>
     </form>
-  </p-card>
+  </div>
 </div>
 
 <p-toast></p-toast>
