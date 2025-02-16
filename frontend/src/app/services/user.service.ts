@@ -7,27 +7,27 @@ import { User } from '../models/user.model';
   providedIn: 'root'
 })
 export class UserService {
-  private apiUrl = 'http://localhost:5126/api/user';
+  private apiUrl = 'http://localhost:5126/api';
 
   constructor(private http: HttpClient) { }
 
   getUsers(): Observable<User[]> {
-    return this.http.get<User[]>(this.apiUrl);
+    return this.http.get<User[]>(`${this.apiUrl}/user`);
   }
 
   getUser(id: number): Observable<User> {
-    return this.http.get<User>(`${this.apiUrl}/${id}`);
+    return this.http.get<User>(`${this.apiUrl}/user/${id}`);
   }
 
   createUser(user: User): Observable<User> {
-    return this.http.post<User>(this.apiUrl, user);
+    return this.http.post<User>(`${this.apiUrl}/auth/create-user`, user);
   }
 
   updateUser(id: number, user: User): Observable<void> {
-    return this.http.put<void>(`${this.apiUrl}/${id}`, user);
+    return this.http.put<void>(`${this.apiUrl}/user/${id}`, user);
   }
 
   deleteUser(id: number): Observable<void> {
-    return this.http.delete<void>(`${this.apiUrl}/${id}`);
+    return this.http.delete<void>(`${this.apiUrl}/user/${id}`);
   }
 }

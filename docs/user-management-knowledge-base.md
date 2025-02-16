@@ -1,7 +1,69 @@
-# Kullanıcı Yönetimi Sayfası Knowledge Base
+# Kullanıcı Yönetimi Knowledge Base
 
 ## Genel Bakış
-Kullanıcı yönetimi sayfası, admin kullanıcıların sisteme kayıtlı kullanıcıları görüntülemesini, yeni kullanıcılar eklemesini ve mevcut kullanıcıları düzenlemesini veya silmesini sağlar.
+Kullanıcı yönetimi modülü, sistemdeki kullanıcıların oluşturulması, düzenlenmesi ve silinmesi işlemlerini yönetir. Sadece admin yetkisine sahip kullanıcılar bu sayfaya erişebilir.
+
+## API Endpoint'leri
+
+### Auth Controller (/api/auth)
+- POST `/api/auth/login`: Kullanıcı girişi
+- POST `/api/auth/create-user`: Yeni kullanıcı oluşturma (Sadece admin)
+- GET `/api/auth/me`: Mevcut kullanıcı bilgilerini getirme
+
+### User Controller (/api/user)
+- GET `/api/user`: Tüm kullanıcıları listeler
+- GET `/api/user/{id}`: Belirli bir kullanıcının detaylarını getirir
+- PUT `/api/user/{id}`: Kullanıcı bilgilerini günceller
+- DELETE `/api/user/{id}`: Kullanıcıyı siler
+
+## Frontend Bileşenleri
+
+### UserManagementComponent
+- Kullanıcı listesi tablosu
+- Yeni kullanıcı ekleme formu
+- Kullanıcı düzenleme formu
+- Kullanıcı silme onay dialogu
+
+### UserService
+- API ile iletişimi sağlayan servis
+- Token yönetimi için AuthInterceptor kullanır
+
+## Önemli Notlar ve Çözülen Sorunlar
+
+### API Endpoint Düzeltmesi
+- Sorun: Frontend'de yanlış API endpoint'i kullanılıyordu
+- Çözüm: 
+  - Kullanıcı oluşturma için `/api/auth/create-user` endpoint'i kullanılmalı
+  - Diğer kullanıcı işlemleri için `/api/user/...` endpoint'leri kullanılmalı
+
+### Yetkilendirme
+- Sadece admin yetkisine sahip kullanıcılar kullanıcı yönetimi sayfasına erişebilir
+- AuthGuard ile sayfa erişimi kontrol edilir
+- AuthInterceptor ile her isteğe JWT token eklenir
+
+### Güvenlik
+- Şifreler SHA256 ile hashlenerek saklanır
+- JWT token'lar kullanıcı rollerine göre üretilir
+- CORS politikası sadece frontend uygulamasına izin verir
+
+## Test Senaryoları
+
+1. Admin Girişi
+   - Kullanıcı adı: admin
+   - Şifre: admin123
+
+2. Yeni Kullanıcı Oluşturma
+   - Tüm alanlar doldurulmalı
+   - Kullanıcı adı benzersiz olmalı
+   - Admin yetkisi opsiyonel
+
+3. Kullanıcı Güncelleme
+   - Şifre alanı boş bırakılabilir
+   - Kullanıcı adı değiştirildiğinde benzersiz olmalı
+
+4. Kullanıcı Silme
+   - Silme işlemi onay gerektirir
+   - Admin kullanıcısı silinemez
 
 ## Teknik Detaylar
 
