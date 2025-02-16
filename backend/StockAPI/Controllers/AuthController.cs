@@ -7,6 +7,7 @@ using StockAPI.Services;
 using System.Text;
 using System.Security.Cryptography;
 using Microsoft.Extensions.Logging;
+using System.Security.Claims;
 
 namespace StockAPI.Controllers
 {
@@ -196,6 +197,48 @@ namespace StockAPI.Controllers
                 return StatusCode(500, new { message = "Sunucu hatası oluştu." });
             }
         }
+
+        [Authorize]
+        [HttpPost("change-password")]
+        public async Task<IActionResult> ChangePassword([FromBody] ChangePasswordRequest request)
+        {
+            try
+            {
+                var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+                if (string.IsNullOrEmpty(userId))
+                {
+                    _logger.LogWarning("Token'da kullanıcı ID'si bulunamadı");
+                    return Unauthorized();
+                }
+
+                _logger.LogInformation($"Şifre değiştirme isteği - Kullanıcı ID: {userId}");
+
+                var user = await _context.Users.FindAsync(int.Parse(userId));
+                if (user == null)
+                {
+                    _logger.LogWarning($"Kullanıcı bulunamadı - ID: {userId}");
+                    return NotFound();
+                }
+
+                var currentPasswordHash = ComputeSha256Hash(request.CurrentPassword);
+                if (user.PasswordHash != currentPasswordHash)
+                {
+                    _logger.LogWarning($"Mevcut şifre hatalı - Kullanıcı ID: {userId}");
+                    return BadRequest(new { message = "Mevcut şifre hatalı" });
+                }
+
+                user.PasswordHash = ComputeSha256Hash(request.NewPassword);
+                await _context.SaveChangesAsync();
+
+                _logger.LogInformation($"Şifre başarıyla değiştirildi - Kullanıcı ID: {userId}");
+                return Ok(new { message = "Şifre başarıyla değiştirildi" });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError($"Şifre değiştirme hatası: {ex.Message}");
+                return StatusCode(500, new { message = "Sunucu hatası oluştu." });
+            }
+        }
     }
 
     public class LoginRequest
@@ -224,5 +267,11 @@ namespace StockAPI.Controllers
         public bool IsAdmin { get; set; }
         public string CreatedAt { get; set; }
         public string LastLoginAt { get; set; }
+    }
+
+    public class ChangePasswordRequest
+    {
+        public string CurrentPassword { get; set; }
+        public string NewPassword { get; set; }
     }
 }

@@ -83,3 +83,55 @@
 1. Login işlem süreleri takip ediliyor
 2. Veritabanı sorgu süreleri izleniyor
 3. Token doğrulama süreleri ölçülüyor
+
+# Kimlik Doğrulama Bilgi Tabanı
+
+## Şifre Değiştirme İşlemi
+
+### Endpoint
+- `POST /api/auth/change-password`
+- Yetkilendirme gerektirir (Bearer Token)
+
+### İstek Formatı
+```json
+{
+    "currentPassword": "string",
+    "newPassword": "string"
+}
+```
+
+### Başarılı Yanıt
+```json
+{
+    "message": "Şifre başarıyla değiştirildi"
+}
+```
+
+### Hata Yanıtları
+- 401 Unauthorized: Token geçersiz veya eksik
+- 400 Bad Request: Mevcut şifre hatalı
+- 500 Internal Server Error: Sunucu hatası
+
+### Önemli Noktalar
+1. Token'dan kullanıcı ID'si alınırken `ClaimTypes.NameIdentifier` kullanılmalı
+2. Şifre değiştirme işlemi öncesi mevcut şifre doğrulanmalı
+3. Yeni şifre hash'lenerek veritabanına kaydedilmeli
+4. İşlem detaylı şekilde loglanmalı
+
+### Frontend Validasyonları
+1. Mevcut şifre boş olmamalı
+2. Yeni şifre en az 6 karakter olmalı
+3. Yeni şifre tekrarı ile eşleşmeli
+
+### Güvenlik Önlemleri
+1. Şifre hash'leme için SHA256 kullanılıyor
+2. Token kontrolü yapılıyor
+3. Rate limiting düşünülebilir
+4. Şifre politikası eklenebilir
+
+### Loglama
+```csharp
+_logger.LogInformation($"Şifre değiştirme isteği - Kullanıcı ID: {userId}");
+_logger.LogWarning($"Mevcut şifre hatalı - Kullanıcı ID: {userId}");
+_logger.LogInformation($"Şifre başarıyla değiştirildi - Kullanıcı ID: {userId}");
+```
