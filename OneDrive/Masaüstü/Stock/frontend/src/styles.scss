@@ -1,0 +1,149 @@
+@import "primeng/resources/themes/lara-light-blue/theme.css";
+@import "primeng/resources/primeng.min.css";
+@import "primeicons/primeicons.css";
+
+/* Global Styles */
+:root {
+  --surface-ground: #f8f9fa;
+  --surface-card: #ffffff;
+  --primary-color: #3B82F6;
+  --text-color: #495057;
+  --text-color-secondary: #6c757d;
+}
+
+body {
+  font-family: var(--font-family);
+  margin: 0;
+  padding: 0;
+  background-color: var(--surface-ground);
+  color: var(--text-color);
+}
+
+html, body {
+  height: 100%;
+}
+
+/* Genel stil ayarları */
+* {
+  box-sizing: border-box;
+}
+
+/* PrimeNG Component Styles */
+.p-component {
+  font-family: var(--font-family);
+}
+
+.p-card {
+  background: var(--surface-card);
+  border-radius: 6px;
+  padding: 1.5rem;
+  margin-bottom: 1rem;
+  box-shadow: 0 2px 1px -1px rgba(0,0,0,.2), 0 1px 1px 0 rgba(0,0,0,.14), 0 1px 3px 0 rgba(0,0,0,.12);
+}
+
+/* Form stilleri */
+.form-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 2rem;
+  max-width: 400px;
+  margin: 0 auto;
+}
+
+.form-field {
+  width: 100%;
+  margin-bottom: 1rem;
+}
+
+.form-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+/* Dialog stilleri */
+.dialog-content {
+  padding: 1rem 0;
+}
+
+.dialog-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.5rem;
+  padding: 1rem 0;
+}
+
+/* Toolbar stilleri */
+.toolbar-spacer {
+  flex: 1 1 auto;
+}
+
+/* Tablo stilleri */
+.table-container {
+  margin: 1rem 0;
+  overflow-x: auto;
+}
+
+.mat-mdc-table {
+  width: 100%;
+  background: white;
+}
+
+.mat-mdc-header-cell {
+  font-weight: bold;
+  color: rgba(0, 0, 0, 0.87);
+}
+
+.mat-mdc-cell, .mat-mdc-header-cell {
+  padding: 0 1rem;
+}
+
+/* Spinner stilleri */
+.loading-spinner {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 200px;
+}
+
+/* PrimeNG */
+html, body {
+  height: 100%;
+  margin: 0;
+  font-family: var(--font-family);
+}
+
+.user-management-container {
+  padding: 1rem;
+
+  .table-container {
+    margin-top: 1rem;
+  }
+
+  .p-toolbar {
+    margin-bottom: 1rem;
+  }
+}
+
+.field {
+  margin-bottom: 1rem;
+
+  label {
+    display: block;
+    margin-bottom: 0.5rem;
+  }
+
+  &.field-checkbox {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+}
+
+.p-dialog .p-dialog-footer {
+  text-align: right;
+  padding-top: 1rem;
+  border-top: 1px solid var(--surface-border);
+}

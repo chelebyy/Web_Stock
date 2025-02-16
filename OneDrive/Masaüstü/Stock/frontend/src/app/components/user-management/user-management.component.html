@@ -1,0 +1,74 @@
+<div class="user-management-container">
+  <p-toolbar>
+    <div class="p-toolbar-group-left">
+      <h2>Kullanıcı Yönetimi</h2>
+    </div>
+    <div class="p-toolbar-group-right">
+      <button pButton pRipple icon="pi pi-plus" label="Yeni Kullanıcı" (click)="openDialog()"></button>
+    </div>
+  </p-toolbar>
+
+  <div class="table-container">
+    <p-table [value]="users" [paginator]="true" [rows]="10" [responsive]="true">
+      <ng-template pTemplate="header">
+        <tr>
+          <th>ID</th>
+          <th>Kullanıcı Adı</th>
+          <th>Admin</th>
+          <th>Oluşturulma Tarihi</th>
+          <th>Son Giriş</th>
+          <th>İşlemler</th>
+        </tr>
+      </ng-template>
+      <ng-template pTemplate="body" let-user>
+        <tr>
+          <td>{{user.id}}</td>
+          <td>{{user.username}}</td>
+          <td>
+            <i class="pi" [class.pi-check-circle]="user.isAdmin" [class.pi-times-circle]="!user.isAdmin"
+              [ngStyle]="{'color': user.isAdmin ? 'var(--primary-color)' : 'var(--text-color-secondary)'}"></i>
+          </td>
+          <td>{{user.createdAt | date:'medium'}}</td>
+          <td>{{user.lastLoginAt | date:'medium'}}</td>
+          <td>
+            <button pButton pRipple icon="pi pi-pencil" class="p-button-rounded p-button-text" (click)="openDialog(user)"></button>
+            <button pButton pRipple icon="pi pi-trash" class="p-button-rounded p-button-text p-button-danger" (click)="deleteUser(user)"></button>
+          </td>
+        </tr>
+      </ng-template>
+    </p-table>
+  </div>
+</div>
+
+<p-dialog [(visible)]="userDialog" [style]="{width: '450px'}" header="Kullanıcı Detayları" [modal]="true" class="p-fluid">
+  <form [formGroup]="userForm">
+    <div class="field">
+      <label for="username">Kullanıcı Adı</label>
+      <input pInputText id="username" formControlName="username" required autofocus />
+      <small class="p-error" *ngIf="userForm.get('username')?.errors?.['required'] && userForm.get('username')?.touched">
+        Kullanıcı adı gereklidir.
+      </small>
+    </div>
+
+    <div class="field">
+      <label for="password">Şifre</label>
+      <p-password id="password" [feedback]="false" [toggleMask]="true" formControlName="password"></p-password>
+      <small class="p-error" *ngIf="userForm.get('password')?.errors?.['required'] && userForm.get('password')?.touched">
+        Şifre gereklidir.
+      </small>
+    </div>
+
+    <div class="field-checkbox">
+      <p-checkbox formControlName="isAdmin" [binary]="true" id="isAdmin"></p-checkbox>
+      <label for="isAdmin">Admin</label>
+    </div>
+  </form>
+
+  <ng-template pTemplate="footer">
+    <button pButton pRipple label="İptal" icon="pi pi-times" class="p-button-text" (click)="hideDialog()"></button>
+    <button pButton pRipple label="Kaydet" icon="pi pi-check" class="p-button-text" (click)="saveUser()"></button>
+  </ng-template>
+</p-dialog>
+
+<p-confirmDialog [style]="{width: '450px'}"></p-confirmDialog>
+<p-toast></p-toast>
