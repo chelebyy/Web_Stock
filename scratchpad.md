@@ -38,6 +38,22 @@
   - [X] User Management sayfası için knowledge base oluşturulması
   - [X] API dokümantasyonunun hazırlanması
 
+[X] Layout ve Menü Sistemi
+  - [X] Layout komponentinin oluşturulması
+  - [X] Sol menü tasarımının yapılması
+  - [X] Responsive tasarım eklenmesi
+  - [X] Sayfa yönlendirmelerinin düzenlenmesi
+
+[ ] Bilgi İşlem Modülü
+  - [X] Temel sayfa yapısının oluşturulması
+  - [X] Route yapılandırmasının güncellenmesi
+  - [ ] Bilgisayar envanter yönetimi
+  - [ ] Yazıcı envanter yönetimi
+  - [ ] Ağ cihazları yönetimi
+  - [ ] Sarf malzeme takibi
+  - [ ] İş takip sistemi
+  - [ ] Ayarlar sayfası
+
 ## JWT Kimlik Doğrulama Sistemi
 - [X] JWT NuGet paketinin eklenmesi (Microsoft.AspNetCore.Authentication.JwtBearer)
 - [X] JWT ayarlarının appsettings.json'a eklenmesi
@@ -68,9 +84,17 @@
    - BaseEntity sınıfında CreatedAt ve IsDeleted alanları constructor'da ayarlandı
    - SeedData sınıfında context oluşturma yöntemi düzeltildi
 
+4. Layout ve Menü Tasarımı:
+   - PrimeNG sidebar yerine özel menü tasarımı yapıldı
+   - Responsive tasarım için medya sorguları eklendi
+   - Menü başlıkları büyük harflerle yazıldı
+   - Toolbar düzeni iyileştirildi
+
 ## Son Durum
 - Backend: http://localhost:5126 adresinde çalışıyor
 - Frontend: http://localhost:4200 adresinde çalışıyor
 - Admin kullanıcısı (admin/admin123) ile giriş yapılabiliyor
 - Kullanıcı yönetimi sayfası çalışır durumda
 - Hata yakalama ve loglama sistemi aktif
+- Layout ve menü sistemi tamamlandı
+- Bilgi işlem modülü temel yapısı hazır

@@ -14,6 +14,7 @@ namespace StockAPI.Data
         public DbSet<Category> Categories { get; set; }
         public DbSet<Product> Products { get; set; }
         public DbSet<AuditLog> AuditLogs { get; set; }
+        public DbSet<ITEquipment> ITEquipments { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -31,6 +32,10 @@ namespace StockAPI.Data
 
             modelBuilder.Entity<AuditLog>()
                 .HasIndex(a => a.Timestamp);
+
+            modelBuilder.Entity<ITEquipment>()
+                .HasIndex(e => e.SerialNumber)
+                .IsUnique();
         }
     }
 }
