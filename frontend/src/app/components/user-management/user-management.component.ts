@@ -121,7 +121,14 @@ export class UserManagementComponent implements OnInit {
     }
 
     const userData = this.userForm.value;
+    
     if (this.editMode) {
+      // Şifre alanını PasswordHash olarak gönder
+      if (userData.password) {
+        userData.passwordHash = userData.password;
+        delete userData.password;
+      }
+
       this.userService.updateUser(userData.id, userData).subscribe({
         next: () => {
           this.messageService.add({
@@ -142,7 +149,15 @@ export class UserManagementComponent implements OnInit {
         }
       });
     } else {
-      this.userService.createUser(userData).subscribe({
+      // Yeni kullanıcı oluşturma
+      const newUser: User = {
+        username: userData.username,
+        passwordHash: userData.password, // password alanını passwordHash olarak kullan
+        isAdmin: userData.isAdmin,
+        createdAt: new Date()
+      };
+
+      this.userService.createUser(newUser).subscribe({
         next: () => {
           this.messageService.add({
             severity: 'success',
@@ -165,12 +180,21 @@ export class UserManagementComponent implements OnInit {
   }
 
   deleteUser(user: User) {
+    if (!user.id) {
+      this.messageService.add({
+        severity: 'error',
+        summary: 'Hata',
+        detail: 'Kullanıcı ID bulunamadı'
+      });
+      return;
+    }
+
     this.confirmationService.confirm({
       message: 'Bu kullanıcıyı silmek istediğinizden emin misiniz?',
       header: 'Onay',
       icon: 'pi pi-exclamation-triangle',
       accept: () => {
-        this.userService.deleteUser(user.id).subscribe({
+        this.userService.deleteUser(user.id!).subscribe({
           next: () => {
             this.messageService.add({
               severity: 'success',

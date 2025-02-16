@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { User } from '../models/user.model';
+import { CreateUserRequest } from '../models/auth.model';
 
 @Injectable({
   providedIn: 'root'
@@ -19,8 +20,13 @@ export class UserService {
     return this.http.get<User>(`${this.apiUrl}/user/${id}`);
   }
 
-  createUser(user: User): Observable<User> {
-    return this.http.post<User>(`${this.apiUrl}/auth/create-user`, user);
+  createUser(user: User): Observable<any> {
+    const createUserRequest: CreateUserRequest = {
+      username: user.username,
+      password: user.passwordHash || '', // passwordHash alanını password olarak kullan
+      isAdmin: user.isAdmin
+    };
+    return this.http.post<any>(`${this.apiUrl}/auth/create-user`, createUserRequest);
   }
 
   updateUser(id: number, user: User): Observable<void> {
