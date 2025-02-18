@@ -15,7 +15,7 @@ import { DropdownModule } from 'primeng/dropdown';
 import { UserService } from '../../services/user.service';
 import { RoleService } from '../../services/role.service';
 import { User } from '../../models/user.model';
-import { Role } from '../../models/role.model';
+import { Role, RoleWithUsers } from '../../models/role.model';
 
 @Component({
   selector: 'app-user-management',
@@ -41,7 +41,7 @@ import { Role } from '../../models/role.model';
 })
 export class UserManagementComponent implements OnInit {
   users: User[] = [];
-  roles: Role[] = [];
+  roles: RoleWithUsers[] = [];
   userDialog: boolean = false;
   userForm: FormGroup;
   editMode: boolean = false;

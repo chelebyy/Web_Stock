@@ -123,14 +123,67 @@
 - Dashboard tasarımı iyileştirildi
 - Bilgi işlem modülü temel yapısı hazır
 
-# Görev: Rol Tablosu Düzenleme
+# Görev: Rol Yönetimi Sayfası Geliştirmeleri
 
 ## Yapılacaklar
-[ ] Mevcut rol tablosunu analiz et
-[ ] "Rol Adı" sütununu "Kullanıcı Adı" olarak değiştir
-[ ] "Açıklama" sütununa rol adlarını yaz
-[ ] Değişiklikleri uygula
+[X] Backend Geliştirmeleri
+  - [X] RoleController'da kullanıcı bilgilerini getirme endpoint'i ekleme
+  - [X] Role modelinde gerekli alanları güncelleme
+  - [X] User-Role ilişkisini düzenleme
+
+[X] Frontend Geliştirmeleri
+  - [X] RoleService'de kullanıcı bilgilerini getirme metodu ekleme
+  - [X] Role-management component'inde tablo yapısını güncelleme
+  - [X] Kullanıcı adı ve rol adı kolonlarını ekleme
+  - [X] Tablo verilerini güncelleme
+  - [X] Arayüz tasarımını iyileştirme
+
+## Son Yapılan Değişiklikler
+- Rol tablosundan açıklama sütunu kaldırıldı
+- Role modelinden description alanı kaldırıldı
+- Form sadeleştirildi ve sadece rol adı alanı bırakıldı
+- Tablo görünümü optimize edildi
 
 ## Notlar
-- Tablo görünümünde değişiklik yapılacak
-- Mevcut veriler korunarak sadece görünüm değiştirilecek
+- Tüm değişiklikler için detaylı loglama yapıldı
+- Her adımda test edildi
+- Güvenlik kontrolleri yapıldı
+- Performans optimize edildi
+
+# Görev: Bilgi İşlem Modülü Geliştirmeleri
+
+## Yapılacaklar
+[ ] Bilgisayar Envanter Yönetimi
+  - [ ] Model oluşturma
+  - [ ] Controller geliştirme
+  - [ ] Frontend sayfası hazırlama
+  - [ ] CRUD işlemlerini tamamlama
+
+[ ] Yazıcı Envanter Yönetimi
+  - [ ] Model oluşturma
+  - [ ] Controller geliştirme
+  - [ ] Frontend sayfası hazırlama
+  - [ ] CRUD işlemlerini tamamlama
+
+[ ] Ağ Cihazları Yönetimi
+  - [ ] Model oluşturma
+  - [ ] Controller geliştirme
+  - [ ] Frontend sayfası hazırlama
+  - [ ] CRUD işlemlerini tamamlama
+
+[ ] Sarf Malzeme Takibi
+  - [ ] Model oluşturma
+  - [ ] Controller geliştirme
+  - [ ] Frontend sayfası hazırlama
+  - [ ] CRUD işlemlerini tamamlama
+
+[ ] İş Takip Sistemi
+  - [ ] Model oluşturma
+  - [ ] Controller geliştirme
+  - [ ] Frontend sayfası hazırlama
+  - [ ] CRUD işlemlerini tamamlama
+
+[ ] Ayarlar Sayfası
+  - [ ] Genel ayarlar
+  - [ ] Kullanıcı ayarları
+  - [ ] Sistem ayarları

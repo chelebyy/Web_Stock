@@ -13,8 +13,8 @@
       <ng-template pTemplate="header">
         <tr>
           <th>ID</th>
-          <th>Kullanıcı Adı</th>
           <th>Rol Adı</th>
+          <th>Kullanıcılar</th>
           <th>Oluşturulma Tarihi</th>
           <th>İşlemler</th>
         </tr>
@@ -23,7 +23,11 @@
         <tr>
           <td>{{role.id}}</td>
           <td>{{role.name}}</td>
-          <td>{{role.description}}</td>
+          <td>
+            <div *ngFor="let user of role.users">
+              {{user.username}}
+            </div>
+          </td>
           <td>{{role.createdAt | date:'medium'}}</td>
           <td>
             <button pButton pRipple icon="pi pi-pencil" class="p-button-rounded p-button-text" (click)="openDialog(role)"></button>
@@ -43,17 +47,9 @@
 <p-dialog [(visible)]="roleDialog" [style]="{width: '450px'}" header="Rol Detayları" [modal]="true" class="p-fluid">
   <form [formGroup]="roleForm">
     <div class="field">
-      <label for="name">Kullanıcı Adı</label>
+      <label for="name">Rol Adı</label>
       <input pInputText id="name" formControlName="name" required autofocus />
       <small class="p-error" *ngIf="roleForm.get('name')?.errors?.['required'] && roleForm.get('name')?.touched">
-        Kullanıcı adı gereklidir.
-      </small>
-    </div>
-
-    <div class="field">
-      <label for="description">Rol Adı</label>
-      <input pInputText id="description" formControlName="description" required />
-      <small class="p-error" *ngIf="roleForm.get('description')?.errors?.['required'] && roleForm.get('description')?.touched">
         Rol adı gereklidir.
       </small>
     </div>
@@ -66,4 +62,4 @@
 </p-dialog>
 
 <p-confirmDialog [style]="{width: '450px'}"></p-confirmDialog>
-<p-toast></p-toast> 
+<p-toast></p-toast>

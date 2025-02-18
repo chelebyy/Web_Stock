@@ -10,7 +10,7 @@ import { TableModule } from 'primeng/table';
 import { ToastModule } from 'primeng/toast';
 import { ToolbarModule } from 'primeng/toolbar';
 import { RoleService } from '../../services/role.service';
-import { Role } from '../../models/role.model';
+import { Role, RoleWithUsers } from '../../models/role.model';
 
 @Component({
   selector: 'app-role-management',
@@ -32,7 +32,7 @@ import { Role } from '../../models/role.model';
   providers: [ConfirmationService, MessageService]
 })
 export class RoleManagementComponent implements OnInit {
-  roles: Role[] = [];
+  roles: RoleWithUsers[] = [];
   roleDialog: boolean = false;
   roleForm: FormGroup;
   editMode: boolean = false;
@@ -46,8 +46,7 @@ export class RoleManagementComponent implements OnInit {
   ) {
     this.roleForm = this.fb.group({
       id: [null],
-      name: ['', [Validators.required]],
-      description: ['']
+      name: ['', [Validators.required]]
     });
   }
 
@@ -75,19 +74,17 @@ export class RoleManagementComponent implements OnInit {
     });
   }
 
-  openDialog(role?: Role) {
+  openDialog(role?: RoleWithUsers) {
     this.editMode = !!role;
     if (role) {
       this.roleForm.patchValue({
         id: role.id,
-        name: role.name,
-        description: role.description
+        name: role.name
       });
     } else {
       this.roleForm.reset({
         id: null,
-        name: '',
-        description: ''
+        name: ''
       });
     }
     this.roleDialog = true;
@@ -154,7 +151,7 @@ export class RoleManagementComponent implements OnInit {
     }
   }
 
-  deleteRole(role: Role) {
+  deleteRole(role: RoleWithUsers) {
     this.confirmationService.confirm({
       message: 'Bu rolü silmek istediğinizden emin misiniz?',
       header: 'Onay',

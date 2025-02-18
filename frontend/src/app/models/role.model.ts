@@ -1,7 +1,15 @@
 export interface Role {
     id: number;
     name: string;
-    description?: string;
-    createdAt: Date;
-    updatedAt?: Date;
+    createdAt: string | Date;
+    updatedAt?: string | Date;
+}
+
+export interface RoleWithUsers extends Role {
+    users: {
+        id: number;
+        username: string;
+        isAdmin: boolean;
+        createdAt: string;
+    }[];
 } 
