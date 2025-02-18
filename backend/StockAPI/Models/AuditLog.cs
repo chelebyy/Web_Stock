@@ -11,19 +11,19 @@ namespace StockAPI.Models
         public int Id { get; set; }
 
         [Required]
-        public string UserId { get; set; }
+        public string UserId { get; set; } = string.Empty;
 
         [Required]
-        public string Action { get; set; }
+        public string Action { get; set; } = string.Empty;
 
         [Required]
-        public string EntityId { get; set; }
+        public string EntityId { get; set; } = string.Empty;
 
         [Required]
-        public string EntityType { get; set; }
+        public string EntityType { get; set; } = string.Empty;
 
         [Required]
-        public string Path { get; set; }
+        public string Path { get; set; } = string.Empty;
 
         public string? Details { get; set; }
 

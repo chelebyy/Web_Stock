@@ -63,7 +63,7 @@ import { MessageService } from 'primeng/api';
             (onClick)="navigateToRoleManagement()"
             styleClass="p-button-help">
           </p-button>
-          
+
           <p-button 
             label="BİLGİ İŞLEM"
             icon="pi pi-desktop"
@@ -292,15 +292,15 @@ export class DashboardComponent {
   }
 
   navigateToUserManagement(): void {
-    this.router.navigate(['/user-management']);
+    this.router.navigate(['/admin/user-management']);
   }
 
   navigateToRoleManagement(): void {
-    this.router.navigate(['/role-management']);
+    this.router.navigate(['/admin/role-management']);
   }
 
   navigateToITManagement(): void {
-    this.router.navigate(['/it']);
+    this.router.navigate(['/bilgi-islem']);
   }
 
   logout(): void {
@@ -311,45 +311,28 @@ export class DashboardComponent {
   isPasswordFormValid(): boolean {
     return this.currentPassword.length > 0 && 
            this.newPassword.length > 0 && 
-           this.confirmPassword.length > 0 && 
-           this.newPassword === this.confirmPassword &&
-           this.newPassword.length >= 6;
+           this.newPassword === this.confirmPassword;
   }
 
   changePassword(): void {
-    if (!this.isPasswordFormValid()) {
-      return;
-    }
-
-    this.authService.changePassword(this.currentPassword, this.newPassword)
-      .subscribe({
-        next: (response) => {
+    if (this.isPasswordFormValid()) {
+      this.authService.changePassword(this.currentPassword, this.newPassword).subscribe({
+        next: () => {
           this.messageService.add({
             severity: 'success',
             summary: 'Başarılı',
             detail: 'Şifreniz başarıyla değiştirildi'
           });
-          this.currentPassword = '';
-          this.newPassword = '';
-          this.confirmPassword = '';
-          this.showPasswordChange = false;
+          this.togglePasswordChange();
         },
         error: (error) => {
-          if (error.status === 401) {
-            this.messageService.add({
-              severity: 'error',
-              summary: 'Hata',
-              detail: 'Oturumunuz sonlanmış, lütfen tekrar giriş yapın'
-            });
-            this.router.navigate(['/login']);
-          } else {
-            this.messageService.add({
-              severity: 'error',
-              summary: 'Hata',
-              detail: error.error?.message || 'Şifre değiştirme işlemi başarısız oldu'
-            });
-          }
+          this.messageService.add({
+            severity: 'error',
+            summary: 'Hata',
+            detail: error.error.message || 'Şifre değiştirme işlemi başarısız oldu'
+          });
         }
       });
+    }
   }
 }

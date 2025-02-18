@@ -8,6 +8,7 @@ using System.Text;
 using System.Security.Cryptography;
 using Microsoft.Extensions.Logging;
 using System.Security.Claims;
+using System.ComponentModel.DataAnnotations;
 
 namespace StockAPI.Controllers
 {
@@ -67,7 +68,7 @@ namespace StockAPI.Controllers
                     return Unauthorized(new { message = "Kullanıcı adı veya şifre hatalı" });
                 }
 
-                var token = _jwtService.GenerateToken(user.Id.ToString(), user.Username, new List<string> { user.IsAdmin ? "Admin" : "User" });
+                var token = _jwtService.GenerateToken(user);
                 _logger.LogInformation($"Token oluşturuldu: {token}");
 
                 user.LastLoginAt = DateTime.UtcNow;
@@ -247,35 +248,45 @@ namespace StockAPI.Controllers
 
     public class LoginRequest
     {
-        public string Username { get; set; }
-        public string Password { get; set; }
+        [Required]
+        public string Username { get; set; } = string.Empty;
+        [Required]
+        public string Password { get; set; } = string.Empty;
     }
 
     public class CreateUserRequest
     {
-        public string Username { get; set; }
-        public string Password { get; set; }
+        [Required]
+        public string Username { get; set; } = string.Empty;
+        [Required]
+        public string Password { get; set; } = string.Empty;
         public bool IsAdmin { get; set; }
     }
 
     public class LoginResponse
     {
-        public string Token { get; set; }
-        public UserResponse User { get; set; }
+        [Required]
+        public string Token { get; set; } = string.Empty;
+        [Required]
+        public UserResponse User { get; set; } = new();
     }
 
     public class UserResponse
     {
         public int Id { get; set; }
-        public string Username { get; set; }
+        [Required]
+        public string Username { get; set; } = string.Empty;
         public bool IsAdmin { get; set; }
-        public string CreatedAt { get; set; }
-        public string LastLoginAt { get; set; }
+        [Required]
+        public string CreatedAt { get; set; } = string.Empty;
+        public string? LastLoginAt { get; set; }
     }
 
     public class ChangePasswordRequest
     {
-        public string CurrentPassword { get; set; }
-        public string NewPassword { get; set; }
+        [Required]
+        public string CurrentPassword { get; set; } = string.Empty;
+        [Required]
+        public string NewPassword { get; set; } = string.Empty;
     }
 }

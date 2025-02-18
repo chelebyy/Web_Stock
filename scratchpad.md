@@ -194,3 +194,37 @@
   - [ ] Genel ayarlar
   - [ ] Kullanıcı ayarları
   - [ ] Sistem ayarları
+
+# Scratchpad
+
+## Yapıldı
+- [X] URL yapısı Türkçeleştirildi ve daha anlamlı hale getirildi
+  - `/bilgi-islem` ana sayfası oluşturuldu
+  - Alt sayfalar: `envanter`, `stok`, `isler`, `ayarlar` düzenlendi
+  - Tüm rotalar AuthGuard ile korunuyor
+
+- [X] Bilgi İşlem için özel dashboard oluşturuldu
+  - Üç ana kategori kartı eklendi:
+    - Envanter Yönetimi
+    - Stok Yönetimi
+    - İş Takibi
+  - Her kart için ilgili butonlar ve ikonlar eklendi
+  - Responsive tasarım uygulandı
+
+- [X] Layout yapısı düzenlendi
+  - Sol menü sadece bilgi işlem sayfalarında görünüyor
+  - Ana dashboard sade ve temiz bir tasarıma sahip
+  - Kullanıcı yönetimi ve rol yönetimi `/admin` altına taşındı
+
+- [X] HTTPS yapılandırması tamamlandı
+  - Backend: https://localhost:5126
+  - Frontend: https://localhost:4200
+  - SSL sertifikaları yapılandırıldı
+  - Environment dosyaları güncellendi
+  - JWT token'lar güvenli kanal üzerinden iletiliyor
+
+## Yapılacak
+- [ ] Her bölüm için özel bileşenler oluşturulacak (şu an hepsi ComputersComponent kullanıyor)
+- [ ] Backend servisleri ve veritabanı tabloları eklenecek
+- [ ] Detaylı raporlama özellikleri eklenecek
+- [ ] Production ortamı için geçerli SSL sertifikası alınacak

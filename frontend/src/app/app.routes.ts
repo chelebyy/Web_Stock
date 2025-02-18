@@ -5,43 +5,69 @@ import { RoleManagementComponent } from './components/role-management/role-manag
 import { DashboardComponent } from './components/dashboard/dashboard.component';
 import { LayoutComponent } from './components/layout/layout.component';
 import { ComputersComponent } from './components/inventory/computers/computers.component';
+import { ITDashboardComponent } from './components/it-dashboard/it-dashboard.component';
 import { AuthGuard } from './guards/auth.guard';
 
 export const routes: Routes = [
-  { path: '', redirectTo: '/dashboard', pathMatch: 'full' },
   { path: 'login', component: LoginComponent },
   { 
-    path: 'dashboard', 
+    path: '', 
     component: DashboardComponent,
     canActivate: [AuthGuard]
   },
-  { 
-    path: 'user-management', 
-    component: UserManagementComponent,
-    canActivate: [AuthGuard],
-    data: { requiresAdmin: true }
-  },
-  { 
-    path: 'role-management', 
-    component: RoleManagementComponent,
-    canActivate: [AuthGuard],
-    data: { requiresAdmin: true }
-  },
   {
-    path: 'it',
+    path: 'admin',
     component: LayoutComponent,
     canActivate: [AuthGuard],
     children: [
-      { path: '', redirectTo: 'inventory/computers', pathMatch: 'full' },
-      { path: 'inventory/computers', component: ComputersComponent },
-      { path: 'inventory/printers', component: ComputersComponent },
-      { path: 'inventory/network', component: ComputersComponent },
-      { path: 'stock/consumables', component: ComputersComponent },
-      { path: 'stock/spare-parts', component: ComputersComponent },
-      { path: 'tasks/active', component: ComputersComponent },
-      { path: 'tasks/completed', component: ComputersComponent },
-      { path: 'settings/general', component: ComputersComponent },
-      { path: 'settings/categories', component: ComputersComponent }
+      { 
+        path: 'user-management', 
+        component: UserManagementComponent,
+        data: { requiresAdmin: true }
+      },
+      { 
+        path: 'role-management', 
+        component: RoleManagementComponent,
+        data: { requiresAdmin: true }
+      }
     ]
-  }
+  },
+  {
+    path: 'bilgi-islem',
+    component: LayoutComponent,
+    canActivate: [AuthGuard],
+    children: [
+      { path: '', component: ITDashboardComponent },
+      { 
+        path: 'envanter',
+        children: [
+          { path: 'bilgisayarlar', component: ComputersComponent },
+          { path: 'yazicilar', component: ComputersComponent },
+          { path: 'ag-cihazlari', component: ComputersComponent }
+        ]
+      },
+      {
+        path: 'stok',
+        children: [
+          { path: 'sarf-malzemeler', component: ComputersComponent },
+          { path: 'yedek-parcalar', component: ComputersComponent }
+        ]
+      },
+      {
+        path: 'isler',
+        children: [
+          { path: 'aktif', component: ComputersComponent },
+          { path: 'tamamlanan', component: ComputersComponent }
+        ]
+      },
+      {
+        path: 'ayarlar',
+        children: [
+          { path: 'genel', component: ComputersComponent },
+          { path: 'kategoriler', component: ComputersComponent }
+        ]
+      }
+    ]
+  },
+  { path: '**', redirectTo: '' }
 ];

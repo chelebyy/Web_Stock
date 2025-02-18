@@ -13,9 +13,9 @@ var builder = WebApplication.CreateBuilder(args);
 
 // Configure Serilog
 Log.Logger = new LoggerConfiguration()
-    .MinimumLevel.Information()
-    .MinimumLevel.Override("Microsoft", LogEventLevel.Warning)
-    .MinimumLevel.Override("System", LogEventLevel.Warning)
+    .MinimumLevel.Debug()
+    .MinimumLevel.Override("Microsoft", LogEventLevel.Information)
+    .MinimumLevel.Override("System", LogEventLevel.Information)
     .WriteTo.Console()
     .WriteTo.File("Logs/log-.txt", rollingInterval: RollingInterval.Day)
     .CreateLogger();
@@ -46,7 +46,7 @@ builder.Services.AddAuthentication(options =>
 }).AddJwtBearer(options =>
 {
     options.SaveToken = true;
-    options.RequireHttpsMetadata = false;
+    options.RequireHttpsMetadata = true; // HTTPS gerekli
     options.TokenValidationParameters = new TokenValidationParameters()
     {
         ValidateIssuer = true,
@@ -63,7 +63,7 @@ builder.Services.AddCors(options =>
     options.AddPolicy("AllowAngularApp",
         builder =>
         {
-            builder.WithOrigins("http://localhost:4200")
+            builder.WithOrigins("https://localhost:4200", "http://localhost:4200")
                    .AllowAnyHeader()
                    .AllowAnyMethod()
                    .AllowCredentials();
@@ -92,7 +92,10 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
-// CORS middleware'ini en üste taşıyoruz
+// HTTPS yönlendirmesi ve yapılandırması
+app.UseHttpsRedirection();
+
+// CORS middleware'ini HTTPS'den sonra kullanıyoruz
 app.UseCors("AllowAngularApp");
 
 // Global Exception Handler Middleware
@@ -103,8 +106,10 @@ app.UseAuthorization();
 
 app.MapControllers();
 
+// URL'leri ayarla
 app.Urls.Clear();
-app.Urls.Add("http://localhost:5126");
+app.Urls.Add("https://localhost:5126");
+app.Urls.Add("http://localhost:5125"); // HTTP'den HTTPS'e yönlendirme için
 
 Log.Information("Uygulama başlatılıyor...");
 

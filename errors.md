@@ -289,3 +289,149 @@ const roleData = {
 - `[style]="{'width':'100%'}"` genişlik sorunlarını çözer
 - Template'de seçilen değerin gösterimi için `selectedItem` template'i kullanılmalı
 - Form değerleri kaydedilirken seçilen nesnenin doğru özelliği (name) alınmalı
+
+## SSL Sertifika Oluşturma Hatası (22.02.2024)
+
+### Sorun:
+```
+New-SelfSignedCertificate : CertEnroll::CX509Enrollment::_CreateRequest: Erişim engellendi. 0x80090010 (-2146893808 NTE_PERM)
+```
+
+### Nedeni:
+1. PowerShell'in yönetici yetkileri olmadan sertifika oluşturmaya çalışması
+2. Windows sertifika deposuna yazma yetkisinin olmaması
+
+### Çözüm:
+1. PowerShell'i yönetici olarak çalıştır:
+```powershell
+Start-Process powershell -Verb RunAs
+```
+2. Yönetici PowerShell'de sertifika oluştur:
+```powershell
+New-SelfSignedCertificate -DnsName "localhost" -CertStoreLocation "cert:\LocalMachine\My" -NotAfter (Get-Date).AddYears(1) -KeyUsage DigitalSignature,KeyEncipherment -Type SSLServerAuthentication
+```
+
+### Önemli Notlar:
+- Sertifika işlemleri her zaman yönetici yetkisi gerektirir
+- Local Machine sertifika deposuna yazma işlemi yönetici hakları gerektirir
+- Sertifika oluşturulduktan sonra Thumbprint değeri not edilmelidir
+
+# Bilgi İşlem Modülü Route ve Layout Düzenlemesi (23.02.2024)
+
+### Sorun:
+1. Bilgi işlem sayfaları için URL yapısı İngilizce ve karışıktı
+2. Tüm sayfalar aynı bileşeni (ComputersComponent) kullanıyordu
+3. Sol menü dashboard'da da görünüyordu
+
+### Nedeni:
+1. Route yapısı başlangıçta hızlı geliştirme için basit tutulmuştu
+2. Layout bileşeni tüm sayfalarda aktifti
+3. Sayfa bileşenleri henüz oluşturulmamıştı
+
+### Çözüm:
+1. URL yapısı Türkçeleştirildi ve organize edildi:
+```typescript
+{
+  path: 'bilgi-islem',
+  component: LayoutComponent,
+  children: [
+    { path: '', component: ITDashboardComponent },
+    { 
+      path: 'envanter',
+      children: [
+        { path: 'bilgisayarlar', component: ComputersComponent },
+        { path: 'yazicilar', component: ComputersComponent },
+        { path: 'ag-cihazlari', component: ComputersComponent }
+      ]
+    }
+    // ... diğer rotalar
+  ]
+}
+```
+
+2. Bilgi İşlem için özel dashboard oluşturuldu:
+```typescript
+@Component({
+  selector: 'app-it-dashboard',
+  template: `
+    <div class="grid">
+      <div class="col-12 md:col-6 lg:col-4">
+        <p-card header="Envanter Yönetimi">
+          <!-- Envanter butonları -->
+        </p-card>
+      </div>
+      <!-- Diğer kartlar -->
+    </div>
+  `
+})
+export class ITDashboardComponent { }
+```
+
+3. Layout yapısı düzenlendi:
+- Sol menü sadece bilgi işlem sayfalarında gösteriliyor
+- Admin sayfaları `/admin` altına taşındı
+- Dashboard sade bir yapıya kavuştu
+
+### Önemli Notlar:
+- Her bölüm için özel bileşenler oluşturulmalı
+- Backend servisleri ve veritabanı tabloları eklenecek
+- Detaylı raporlama özellikleri planlanacak
+
+### Öğrenilen Dersler:
+1. URL yapısı baştan düzgün planlanmalı
+2. Her bölüm için özel bileşenler oluşturulmalı
+3. Layout yapısı sayfa bazında kontrol edilmeli
+
+# HTTPS Geçişi ve SSL Yapılandırması (23.02.2024)
+
+### Sorun:
+1. Frontend ve backend servisleri HTTP üzerinden çalışıyordu
+2. Güvenli olmayan bağlantı uyarıları alınıyordu
+3. JWT token'lar güvenli olmayan kanaldan iletiliyordu
+
+### Nedeni:
+1. SSL sertifikası yapılandırılmamıştı
+2. Angular ve .NET Core HTTPS yapılandırması eksikti
+3. Development ortamında varsayılan olarak HTTP kullanılıyordu
+
+### Çözüm:
+1. Backend için HTTPS yapılandırması:
+```json
+// appsettings.json
+{
+  "Urls": "https://localhost:5126"
+}
+```
+
+2. Frontend için HTTPS yapılandırması:
+```json
+// angular.json
+{
+  "serve": {
+    "options": {
+      "ssl": true
+    }
+  }
+}
+```
+
+3. Environment ayarları güncellendi:
+```typescript
+// environment.ts
+export const environment = {
+    production: false,
+    apiUrl: 'https://localhost:5126'
+};
+```
+
+### Önemli Notlar:
+- Backend servisi artık https://localhost:5126 üzerinden çalışıyor
+- Frontend servisi https://localhost:4200 üzerinden çalışıyor
+- JWT token'lar güvenli kanal üzerinden iletiliyor
+- Development ortamında self-signed sertifika kullanılıyor
+- Production ortamında geçerli SSL sertifikası kullanılmalı
+
+### Öğrenilen Dersler:
+1. Güvenlik için baştan HTTPS yapılandırması yapılmalı
+2. Environment dosyaları doğru yapılandırılmalı
+3. SSL sertifikaları düzgün yönetilmeli

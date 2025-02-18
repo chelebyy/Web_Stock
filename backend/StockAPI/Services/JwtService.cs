@@ -4,53 +4,78 @@ using System.Text;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using StockAPI.Models;
+using Microsoft.Extensions.Logging;
 
 namespace StockAPI.Services
 {
     public interface IJwtService
     {
-        string GenerateToken(string userId, string username, List<string> roles);
+        string GenerateToken(User user);
         ClaimsPrincipal? ValidateToken(string token);
     }
 
     public class JwtService : IJwtService
     {
         private readonly JwtSettings _jwtSettings;
+        private readonly ILogger<JwtService> _logger;
 
-        public JwtService(IOptions<JwtSettings> jwtSettings)
+        public JwtService(IOptions<JwtSettings> jwtSettings, ILogger<JwtService> logger)
         {
             _jwtSettings = jwtSettings.Value;
+            _logger = logger;
         }
 
-        public string GenerateToken(string userId, string username, List<string> roles)
+        public string GenerateToken(User user)
         {
-            var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_jwtSettings.Secret));
-            var credentials = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256);
+            var key = Encoding.UTF8.GetBytes(_jwtSettings.Secret ?? "");
+            var tokenHandler = new JwtSecurityTokenHandler();
+
+            _logger.LogInformation("Token oluşturma başladı - Kullanıcı: {Username}", user.Username);
 
             var claims = new List<Claim>
             {
-                new Claim(ClaimTypes.NameIdentifier, userId),
-                new Claim(ClaimTypes.Name, username)
+                new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
+                new Claim(ClaimTypes.Name, user.Username),
+                new Claim(ClaimTypes.Role, user.IsAdmin ? "Admin" : "User")
             };
 
-            // Rolleri ekle
-            claims.AddRange(roles.Select(role => new Claim(ClaimTypes.Role, role)));
+            var tokenDescriptor = new SecurityTokenDescriptor
+            {
+                Subject = new ClaimsIdentity(claims),
+                Expires = DateTime.UtcNow.AddHours(1), // Token 1 saat geçerli
+                SigningCredentials = new SigningCredentials(
+                    new SymmetricSecurityKey(key),
+                    SecurityAlgorithms.HmacSha256Signature
+                ),
+                Issuer = _jwtSettings.ValidIssuer,
+                Audience = _jwtSettings.ValidAudience
+            };
 
-            var token = new JwtSecurityToken(
-                issuer: _jwtSettings.ValidIssuer,
-                audience: _jwtSettings.ValidAudience,
-                claims: claims,
-                expires: DateTime.Now.AddMinutes(_jwtSettings.TokenValidityInMinutes),
-                signingCredentials: credentials
-            );
+            _logger.LogInformation("Token ayarları: Issuer: {Issuer}, Audience: {Audience}, Expires: {Expires}",
+                tokenDescriptor.Issuer,
+                tokenDescriptor.Audience,
+                tokenDescriptor.Expires);
 
-            return new JwtSecurityTokenHandler().WriteToken(token);
+            var token = tokenHandler.CreateToken(tokenDescriptor);
+            var tokenString = tokenHandler.WriteToken(token);
+
+            _logger.LogInformation("Token oluşturuldu: {Token}", tokenString);
+
+            return tokenString;
         }
 
         public ClaimsPrincipal? ValidateToken(string token)
         {
+            _logger.LogInformation("Token doğrulama başladı");
+
+            if (string.IsNullOrEmpty(token))
+            {
+                _logger.LogWarning("Token boş veya null");
+                return null;
+            }
+
+            var key = Encoding.UTF8.GetBytes(_jwtSettings.Secret ?? "");
             var tokenHandler = new JwtSecurityTokenHandler();
-            var key = Encoding.UTF8.GetBytes(_jwtSettings.Secret);
 
             try
             {
@@ -65,10 +90,12 @@ namespace StockAPI.Services
                     ClockSkew = TimeSpan.Zero
                 }, out SecurityToken validatedToken);
 
+                _logger.LogInformation("Token doğrulama başarılı");
                 return principal;
             }
-            catch
+            catch (Exception ex)
             {
+                _logger.LogError(ex, "Token doğrulama hatası");
                 return null;
             }
         }

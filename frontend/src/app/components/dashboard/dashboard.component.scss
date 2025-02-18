@@ -1,0 +1,13 @@
+.grid {
+  margin-top: 2rem;
+}
+
+.col-12 {
+  margin-bottom: 1rem;
+}
+
+:host ::ng-deep {
+  .p-button {
+    min-height: 4rem;
+  }
+} 
