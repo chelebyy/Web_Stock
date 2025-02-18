@@ -1,3 +1,7 @@
+---
+description: 
+globs: 
+---
 Project Start and Setup Roadmap
 
 Preliminary Setup and Installation of Necessary Tools

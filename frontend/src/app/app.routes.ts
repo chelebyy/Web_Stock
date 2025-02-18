@@ -1,6 +1,7 @@
 import { Routes } from '@angular/router';
 import { LoginComponent } from './components/login/login.component';
 import { UserManagementComponent } from './components/user-management/user-management.component';
+import { RoleManagementComponent } from './components/role-management/role-management.component';
 import { DashboardComponent } from './components/dashboard/dashboard.component';
 import { LayoutComponent } from './components/layout/layout.component';
 import { ComputersComponent } from './components/inventory/computers/computers.component';
@@ -17,6 +18,12 @@ export const routes: Routes = [
   { 
     path: 'user-management', 
     component: UserManagementComponent,
+    canActivate: [AuthGuard],
+    data: { requiresAdmin: true }
+  },
+  { 
+    path: 'role-management', 
+    component: RoleManagementComponent,
     canActivate: [AuthGuard],
     data: { requiresAdmin: true }
   },

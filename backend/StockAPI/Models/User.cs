@@ -2,10 +2,8 @@ using System.ComponentModel.DataAnnotations;
 
 namespace StockAPI.Models
 {
-    public class User
+    public class User : BaseEntity
     {
-        public int Id { get; set; }
-
         [Required]
         [StringLength(50)]
         public string Username { get; set; } = string.Empty;
@@ -15,8 +13,10 @@ namespace StockAPI.Models
 
         public bool IsAdmin { get; set; }
 
-        public DateTime CreatedAt { get; set; }
-
         public DateTime? LastLoginAt { get; set; }
+
+        // Role ilişkisi
+        public int? RoleId { get; set; }
+        public virtual Role? Role { get; set; }
     }
 }

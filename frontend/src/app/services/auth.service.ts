@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { BehaviorSubject, Observable, tap } from 'rxjs';
+import { BehaviorSubject, Observable, tap, catchError, throwError } from 'rxjs';
 import { LoginRequest, LoginResponse, User, CreateUserRequest } from '../models/auth.model';
 import { JwtHelperService } from '@auth0/angular-jwt';
 
@@ -70,5 +70,32 @@ export class AuthService {
 
   getCurrentUser(): User | null {
     return this.currentUserSubject.value;
+  }
+
+  changePassword(currentPassword: string, newPassword: string): Observable<any> {
+    console.log('Şifre değiştirme isteği başlatılıyor...');
+    const token = this.getToken();
+    if (!token) {
+      console.error('Token bulunamadı!');
+      return throwError(() => new Error('Oturum bulunamadı'));
+    }
+    console.log('Token mevcut, istek gönderiliyor...');
+
+    return this.http.post(`${this.apiUrl}/auth/change-password`, {
+      currentPassword,
+      newPassword
+    }).pipe(
+      tap(response => {
+        console.log('Şifre değiştirme başarılı:', response);
+      }),
+      catchError(error => {
+        console.error('Şifre değiştirme hatası:', error);
+        if (error.status === 401) {
+          console.log('Oturum sonlandı, çıkış yapılıyor...');
+          this.logout();
+        }
+        return throwError(() => error);
+      })
+    );
   }
 }

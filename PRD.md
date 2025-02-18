@@ -1,3 +1,7 @@
+---
+description: 
+globs: 
+---
 # Inventory and Stock Tracking Web Application - Product Requirements Document (PRD)
 
 ---
@@ -95,6 +99,7 @@ The Inventory and Stock Tracking Web Application is designed to manage and monit
 - **Database:** PostgreSQL
 - **Frontend Framework:** Angular 19.1.2
 - **UI Components:** PrimeNG Library
+- **CSS Framework:** Tailwind CSS 3.4.1
 - **Hosting Environment:** Local server within the organization's network
 
 ---
@@ -164,6 +169,63 @@ The Inventory and Stock Tracking Web Application is designed to manage and monit
 |------------|---------|-------------------------------|-------------|
 | 2025-02-15 | 1.0     | Initial PRD Draft             | [Your Name] |
 
+## 11. Semantic coding rules
+
+  Overall Guidelines:
+
+Use meaningful names for variables, functions, classes, and database objects
+Follow consistent casing conventions across technologies
+Implement clear patterns for common operations
+Document complex logic and architecture decisions
+
+.NET Core Backend:
+
+Use Pascal Case for class names, properties, and public methods (e.g., UserService, GetUserById)
+Use camel case for private fields and local variables (e.g., private string userName;)
+Follow repository pattern for database access
+Use dependency injection consistently
+Implement service interfaces (e.g., IUserService) for testability
+Group related functionality into appropriate namespaces
+Use async/await for database operations
+
+Angular/TypeScript Frontend:
+
+Follow Angular style guide conventions
+Use descriptive component names with Component suffix (e.g., UserProfileComponent)
+Create reusable services with Service suffix (e.g., AuthenticationService)
+Implement typed models that match backend DTOs
+Use interfaces for complex object definitions
+Create standalone modules for major feature areas
+Use reactive forms pattern for complex forms
+
+PrimeNG Components:
+
+Create wrapper components for frequently used PrimeNG components
+Maintain consistent styling patterns
+Document component usage in comments
+Structure template layouts consistently
+
+Tailwind CSS Styling:
+
+- Follow utility-first approach consistently
+- Create custom utility classes only when necessary
+- Use @apply directive for complex, repeating utility combinations
+- Maintain a consistent color palette and spacing scale
+- Document custom Tailwind configurations
+- Use responsive design utilities systematically
+- Create reusable component classes for common patterns
+
+PostgreSQL Database:
+
+Use snake_case for table and column names (e.g., user_profile, first_name)
+Create proper indexes for frequently queried columns
+Use appropriate data types for performance optimization
+Implement consistent naming for constraints and sequences
+Document complex queries with comments
+
 ---
 
 *This PRD is intended to serve as a comprehensive guide for the development and deployment of the Inventory and Stock Tracking Web Application. Feedback and revisions will be incorporated as the project progresses.*
+
+
+

@@ -1,14 +1,13 @@
-import { HttpInterceptorFn, HttpErrorResponse } from '@angular/common/http';
+import { HttpInterceptorFn, HttpRequest, HttpHandlerFn, HttpEvent, HttpErrorResponse } from '@angular/common/http';
 import { inject } from '@angular/core';
-import { catchError, throwError } from 'rxjs';
+import { Observable, throwError } from 'rxjs';
+import { catchError } from 'rxjs/operators';
 import { AuthService } from '../services/auth.service';
 import { Router } from '@angular/router';
-import { ErrorService } from '../services/error.service';
 
-export const AuthInterceptor: HttpInterceptorFn = (req, next) => {
+export const AuthInterceptor: HttpInterceptorFn = (req: HttpRequest<unknown>, next: HttpHandlerFn) => {
   const authService = inject(AuthService);
   const router = inject(Router);
-  const errorService = inject(ErrorService);
 
   const token = authService.getToken();
   
@@ -23,14 +22,9 @@ export const AuthInterceptor: HttpInterceptorFn = (req, next) => {
   return next(req).pipe(
     catchError((error: HttpErrorResponse) => {
       if (error.status === 401) {
-        // Token geçersiz veya süresi dolmuş
         authService.logout();
         router.navigate(['/login']);
       }
-      
-      // Global hata yönetimi
-      errorService.handleError(error);
-      
       return throwError(() => error);
     })
   );

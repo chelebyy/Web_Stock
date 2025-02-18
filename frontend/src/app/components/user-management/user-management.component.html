@@ -15,6 +15,7 @@
           <th>ID</th>
           <th>Kullanıcı Adı</th>
           <th>Admin</th>
+          <th>Rol</th>
           <th>Oluşturulma Tarihi</th>
           <th>Son Giriş</th>
           <th>İşlemler</th>
@@ -28,6 +29,7 @@
             <i class="pi" [class.pi-check-circle]="user.isAdmin" [class.pi-times-circle]="!user.isAdmin"
               [ngStyle]="{'color': user.isAdmin ? 'var(--primary-color)' : 'var(--text-color-secondary)'}"></i>
           </td>
+          <td>{{getRoleName(user.roleId)}}</td>
           <td>{{user.createdAt | date:'medium'}}</td>
           <td>{{user.lastLoginAt | date:'medium'}}</td>
           <td>
@@ -38,7 +40,7 @@
       </ng-template>
       <ng-template pTemplate="emptymessage">
         <tr>
-          <td colspan="6" class="text-center">Kullanıcı bulunamadı</td>
+          <td colspan="7" class="text-center">Kullanıcı bulunamadı</td>
         </tr>
       </ng-template>
     </p-table>
@@ -61,6 +63,12 @@
       <small class="p-error" *ngIf="userForm.get('password')?.errors?.['required'] && userForm.get('password')?.touched">
         Şifre gereklidir.
       </small>
+    </div>
+
+    <div class="field">
+      <label for="role">Rol</label>
+      <p-dropdown id="role" [options]="roles" formControlName="roleId" optionLabel="name" optionValue="id" 
+        [showClear]="true" placeholder="Rol seçin"></p-dropdown>
     </div>
 
     <div class="field-checkbox">

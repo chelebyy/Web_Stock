@@ -215,6 +215,65 @@ namespace StockAPI.Migrations
                     b.ToTable("Products");
                 });
 
+            modelBuilder.Entity("StockAPI.Models.Role", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Description")
+                        .HasColumnType("text");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("boolean");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Name")
+                        .IsUnique();
+
+                    b.ToTable("Roles");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            CreatedAt = new DateTime(2025, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Description = "Sistem Yöneticisi",
+                            IsDeleted = false,
+                            Name = "administrator"
+                        },
+                        new
+                        {
+                            Id = 2,
+                            CreatedAt = new DateTime(2025, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Description = "Bilgi İşlem",
+                            IsDeleted = false,
+                            Name = "it_support"
+                        },
+                        new
+                        {
+                            Id = 3,
+                            CreatedAt = new DateTime(2025, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Description = "Standart Kullanıcı",
+                            IsDeleted = false,
+                            Name = "standard_user"
+                        });
+                });
+
             modelBuilder.Entity("StockAPI.Models.User", b =>
                 {
                     b.Property<int>("Id")
@@ -229,12 +288,21 @@ namespace StockAPI.Migrations
                     b.Property<bool>("IsAdmin")
                         .HasColumnType("boolean");
 
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("boolean");
+
                     b.Property<DateTime?>("LastLoginAt")
                         .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("PasswordHash")
                         .IsRequired()
                         .HasColumnType("text");
+
+                    b.Property<int?>("RoleId")
+                        .HasColumnType("integer");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("Username")
                         .IsRequired()
@@ -243,10 +311,24 @@ namespace StockAPI.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("RoleId");
+
                     b.HasIndex("Username")
                         .IsUnique();
 
                     b.ToTable("Users");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            CreatedAt = new DateTime(2025, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            IsAdmin = true,
+                            IsDeleted = false,
+                            PasswordHash = "JAvlGPq9JyTdtvBO6x2llnRI1+gxwIyPqCKAn3THIKk=",
+                            RoleId = 1,
+                            Username = "admin"
+                        });
                 });
 
             modelBuilder.Entity("StockAPI.Models.Category", b =>
@@ -269,11 +351,26 @@ namespace StockAPI.Migrations
                     b.Navigation("Category");
                 });
 
+            modelBuilder.Entity("StockAPI.Models.User", b =>
+                {
+                    b.HasOne("StockAPI.Models.Role", "Role")
+                        .WithMany("Users")
+                        .HasForeignKey("RoleId")
+                        .OnDelete(DeleteBehavior.SetNull);
+
+                    b.Navigation("Role");
+                });
+
             modelBuilder.Entity("StockAPI.Models.Category", b =>
                 {
                     b.Navigation("Products");
 
                     b.Navigation("SubCategories");
+                });
+
+            modelBuilder.Entity("StockAPI.Models.Role", b =>
+                {
+                    b.Navigation("Users");
                 });
 #pragma warning restore 612, 618
         }

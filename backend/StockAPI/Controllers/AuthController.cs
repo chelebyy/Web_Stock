@@ -18,21 +18,18 @@ namespace StockAPI.Controllers
         private readonly StockAPI.Data.StockContext _context;
         private readonly JwtService _jwtService;
         private readonly ILogger<AuthController> _logger;
+        private readonly HashService _hashService;
 
-        public AuthController(StockAPI.Data.StockContext context, JwtService jwtService, ILogger<AuthController> logger)
+        public AuthController(
+            StockAPI.Data.StockContext context, 
+            JwtService jwtService, 
+            ILogger<AuthController> logger,
+            HashService hashService)
         {
             _context = context;
             _jwtService = jwtService;
             _logger = logger;
-        }
-
-        private string ComputeSha256Hash(string rawData)
-        {
-            using (SHA256 sha256Hash = SHA256.Create())
-            {
-                byte[] bytes = sha256Hash.ComputeHash(Encoding.UTF8.GetBytes(rawData));
-                return Convert.ToBase64String(bytes);
-            }
+            _hashService = hashService;
         }
 
         [HttpPost("login")]
@@ -40,9 +37,10 @@ namespace StockAPI.Controllers
         {
             try
             {
-                _logger.LogInformation($"Giriş denemesi - Kullanıcı adı: {request.Username}");
+                _logger.LogInformation("Giriş denemesi - Kullanıcı adı: {Username}", request.Username);
 
-                var user = await _context.Users.FirstOrDefaultAsync(u => u.Username == request.Username);
+                var user = await _context.Users
+                    .FirstOrDefaultAsync(u => u.Username == request.Username && !u.IsDeleted);
 
                 if (user == null)
                 {
@@ -50,14 +48,20 @@ namespace StockAPI.Controllers
                     return Unauthorized(new { message = "Kullanıcı adı veya şifre hatalı" });
                 }
 
-                _logger.LogInformation($"Kullanıcı bulundu - ID: {user.Id}, Username: {user.Username}, IsAdmin: {user.IsAdmin}");
+                _logger.LogInformation("Kullanıcı bulundu - ID: {Id}, Username: {Username}, IsAdmin: {IsAdmin}", 
+                    user.Id, user.Username, user.IsAdmin);
 
-                var hashedPassword = ComputeSha256Hash(request.Password);
-                _logger.LogInformation($"Şifre karşılaştırması:");
-                _logger.LogInformation($"Gelen şifre hash'i: {hashedPassword}");
-                _logger.LogInformation($"DB'deki hash: {user.PasswordHash}");
+                _logger.LogInformation("Hash Algoritması Detayları:");
+                _logger.LogInformation("Gelen şifre: {Password}", request.Password);
+                _logger.LogInformation("Hash algoritması: SHA256");
+                _logger.LogInformation("Encoding: UTF8");
+                
+                var hashedPassword = _hashService.ComputeSha256Hash(request.Password);
+                _logger.LogInformation("Şifre karşılaştırması:");
+                _logger.LogInformation("Gelen şifre hash'i: {Hash}", hashedPassword);
+                _logger.LogInformation("DB'deki hash: {Hash}", user.PasswordHash);
 
-                if (user.PasswordHash != hashedPassword)
+                if (hashedPassword != user.PasswordHash)
                 {
                     _logger.LogWarning($"Şifre eşleşmedi - Kullanıcı: {request.Username}");
                     return Unauthorized(new { message = "Kullanıcı adı veya şifre hatalı" });
@@ -112,7 +116,7 @@ namespace StockAPI.Controllers
                     return BadRequest(new { message = "Zaten bir admin kullanıcısı mevcut!" });
                 }
 
-                var hashedPassword = ComputeSha256Hash(request.Password);
+                var hashedPassword = _hashService.ComputeSha256Hash(request.Password);
                 _logger.LogInformation($"Oluşturulan şifre hash'i: {hashedPassword}");
 
                 var admin = new User
@@ -155,7 +159,7 @@ namespace StockAPI.Controllers
             var user = new User
             {
                 Username = request.Username,
-                PasswordHash = ComputeSha256Hash(request.Password),
+                PasswordHash = _hashService.ComputeSha256Hash(request.Password),
                 IsAdmin = request.IsAdmin,
                 CreatedAt = DateTime.UtcNow
             };
@@ -220,14 +224,14 @@ namespace StockAPI.Controllers
                     return NotFound();
                 }
 
-                var currentPasswordHash = ComputeSha256Hash(request.CurrentPassword);
+                var currentPasswordHash = _hashService.ComputeSha256Hash(request.CurrentPassword);
                 if (user.PasswordHash != currentPasswordHash)
                 {
                     _logger.LogWarning($"Mevcut şifre hatalı - Kullanıcı ID: {userId}");
                     return BadRequest(new { message = "Mevcut şifre hatalı" });
                 }
 
-                user.PasswordHash = ComputeSha256Hash(request.NewPassword);
+                user.PasswordHash = _hashService.ComputeSha256Hash(request.NewPassword);
                 await _context.SaveChangesAsync();
 
                 _logger.LogInformation($"Şifre başarıyla değiştirildi - Kullanıcı ID: {userId}");

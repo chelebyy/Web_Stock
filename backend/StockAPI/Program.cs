@@ -36,6 +36,7 @@ builder.Services.AddDbContext<StockContext>(options =>
 // Configure JWT
 builder.Services.Configure<JwtSettings>(builder.Configuration.GetSection("JWT"));
 builder.Services.AddScoped<JwtService>();
+builder.Services.AddScoped<HashService>();
 
 builder.Services.AddAuthentication(options =>
 {

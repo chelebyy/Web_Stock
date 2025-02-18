@@ -1,0 +1,53 @@
+---
+description: General Rules
+globs: 
+---
+always respond Turkish
+If you need clarification or have any questions, feel free to ask.
+Write all errors, solutions, and solution methods in the `errors.md`file.
+Reflect on 5-7 different possible sources of the problem, distill those down to 1-2 most likely sources, and then add logs to validate your assumptions before we move onto implementing the actual code fix
+Remember I am using powershell,don't forget
+
+## Documents to be Continuously Checked
+- PRD.md
+- Roadmap.md
+- scratchpad.md
+
+# Instructions
+
+During you interaction with the user, if you find anything reusable in this project (e.g. version of a library, model name), especially about a fix to a mistake you made or a correction you received, you should take note in the `Lessons` section in the `scratchpad.md` file so you will not make the same mistake again. 
+
+You should also use the `scratchpad.md` file as a scratchpad to organize your thoughts. Especially when you receive a new task, you should first review the content of the scratchpad, clear old different task if necessary, first explain the task, and plan the steps you need to take to complete the task. You can use todo markers to indicate the progress, e.g.
+[X] Task 1
+[ ] Task 2
+Also update the progress of the task in the Scratchpad when you finish a subtask.
+Especially when you finished a milestone, it will help to improve your depth of task accomplishment to use the scratchpad to reflect and plan.
+The goal is to help you maintain a big picture as well as the progress of the task. Always refer to the Scratchpad when you plan the next step.
+
+# Tools
+
+The project will use .NET core, PostgreSQL, Angular, and the PrimeNG library.
+For bulk operations, you can use existing .NET and SQL tools, or you can write your own C# or SQL scripts.
+Add meaningful and detailed logs for debugging.
+
+## Lessons
+-Add useful debugging information in the program output.
+-Read the file before trying to edit it.
+-For flexible text-understanding tasks, use LLM (Large Language Models). Test in a few files first, and once successful, parallelize the process.
+
+## User Specified Lessons
+
+- You have a python venv in ./venv.
+- Include info useful for debugging in the program output.
+- Read the file before you try to edit it.
+- Use LLM to perform flexible text understanding tasks. First test on a few files. After success, make it parallel.
+
+## Modes
+There are two modes Plan Mode: This mode is just reading mode, you have to focus on gathering information, asking questions and designing a solution, you have to create a plan. In this mode you are allowed to read all project files. Act Mode: This mode is read/write mode. You can modify the code and perform actions If the user seems to be asking you to do something that requires Act Mode, you should ask the user to switch to Act mode by typing “Act” - they will have to do it manually themselves. You cannot switch to Action Mode yourself and you have to wait for the user to do it themselves when they are satisfied with the plan. You will start in Plan mode After each act mode you will return to plan mode. ac Read the files, check the assumptions and add a confidence percentage, if the score is less than 95% suggest questions or actions to increase the score. After each act mode, update the project on github with an act related name
+
+
+## Knowledge Base Management
+
+
+
+Check after every operation you do, whether it works or not. Always stop all services before checks and restart

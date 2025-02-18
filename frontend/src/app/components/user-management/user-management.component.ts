@@ -11,8 +11,11 @@ import { PasswordModule } from 'primeng/password';
 import { TableModule } from 'primeng/table';
 import { ToastModule } from 'primeng/toast';
 import { ToolbarModule } from 'primeng/toolbar';
+import { DropdownModule } from 'primeng/dropdown';
 import { UserService } from '../../services/user.service';
+import { RoleService } from '../../services/role.service';
 import { User } from '../../models/user.model';
+import { Role } from '../../models/role.model';
 
 @Component({
   selector: 'app-user-management',
@@ -31,12 +34,14 @@ import { User } from '../../models/user.model';
     PasswordModule,
     TableModule,
     ToastModule,
-    ToolbarModule
+    ToolbarModule,
+    DropdownModule
   ],
   providers: [ConfirmationService, MessageService]
 })
 export class UserManagementComponent implements OnInit {
   users: User[] = [];
+  roles: Role[] = [];
   userDialog: boolean = false;
   userForm: FormGroup;
   editMode: boolean = false;
@@ -44,6 +49,7 @@ export class UserManagementComponent implements OnInit {
 
   constructor(
     private userService: UserService,
+    private roleService: RoleService,
     private messageService: MessageService,
     private confirmationService: ConfirmationService,
     private fb: FormBuilder
@@ -52,12 +58,14 @@ export class UserManagementComponent implements OnInit {
       id: [null],
       username: ['', [Validators.required]],
       password: ['', [Validators.required]],
-      isAdmin: [false]
+      isAdmin: [false],
+      roleId: [null]
     });
   }
 
   ngOnInit(): void {
     this.loadUsers();
+    this.loadRoles();
   }
 
   loadUsers() {
@@ -80,13 +88,31 @@ export class UserManagementComponent implements OnInit {
     });
   }
 
+  loadRoles() {
+    this.roleService.getRoles().subscribe({
+      next: (data) => {
+        console.log('Loaded roles:', data);
+        this.roles = data;
+      },
+      error: (error) => {
+        console.error('Error loading roles:', error);
+        this.messageService.add({
+          severity: 'error',
+          summary: 'Hata',
+          detail: 'Roller yüklenirken bir hata oluştu'
+        });
+      }
+    });
+  }
+
   openDialog(user?: User) {
     this.editMode = !!user;
     if (user) {
       this.userForm.patchValue({
         id: user.id,
         username: user.username,
-        isAdmin: user.isAdmin
+        isAdmin: user.isAdmin,
+        roleId: user.roleId
       });
       // Düzenleme modunda şifre zorunlu değil
       this.userForm.get('password')?.setValidators(null);
@@ -95,7 +121,8 @@ export class UserManagementComponent implements OnInit {
         id: null,
         username: '',
         password: '',
-        isAdmin: false
+        isAdmin: false,
+        roleId: null
       });
       // Yeni kullanıcı için şifre zorunlu
       this.userForm.get('password')?.setValidators([Validators.required]);
@@ -150,10 +177,11 @@ export class UserManagementComponent implements OnInit {
       });
     } else {
       // Yeni kullanıcı oluşturma
-      const newUser: User = {
+      const newUser = {
         username: userData.username,
-        passwordHash: userData.password, // password alanını passwordHash olarak kullan
+        passwordHash: userData.password,
         isAdmin: userData.isAdmin,
+        roleId: userData.roleId,
         createdAt: new Date()
       };
 
@@ -214,5 +242,11 @@ export class UserManagementComponent implements OnInit {
         });
       }
     });
+  }
+
+  getRoleName(roleId: number | undefined): string {
+    if (!roleId) return 'Rol atanmamış';
+    const role = this.roles.find(r => r.id === roleId);
+    return role ? role.name : 'Rol bulunamadı';
   }
 }
