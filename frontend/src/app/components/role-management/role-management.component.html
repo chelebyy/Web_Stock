@@ -48,7 +48,13 @@
   <form [formGroup]="roleForm">
     <div class="field">
       <label for="name">Rol Adı</label>
-      <input pInputText id="name" formControlName="name" required autofocus />
+      <p-dropdown id="name" [options]="roles" formControlName="name" optionLabel="name" [showClear]="true" 
+        placeholder="Rol seçin" [filter]="true" [virtualScroll]="true" [virtualScrollItemSize]="38"
+        [style]="{'width':'100%'}" appendTo="body">
+        <ng-template pTemplate="selectedItem" let-role>
+          <span>{{role?.name}}</span>
+        </ng-template>
+      </p-dropdown>
       <small class="p-error" *ngIf="roleForm.get('name')?.errors?.['required'] && roleForm.get('name')?.touched">
         Rol adı gereklidir.
       </small>

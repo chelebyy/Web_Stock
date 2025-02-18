@@ -9,6 +9,7 @@ import { InputTextModule } from 'primeng/inputtext';
 import { TableModule } from 'primeng/table';
 import { ToastModule } from 'primeng/toast';
 import { ToolbarModule } from 'primeng/toolbar';
+import { DropdownModule } from 'primeng/dropdown';
 import { RoleService } from '../../services/role.service';
 import { Role, RoleWithUsers } from '../../models/role.model';
 
@@ -27,7 +28,8 @@ import { Role, RoleWithUsers } from '../../models/role.model';
     InputTextModule,
     TableModule,
     ToastModule,
-    ToolbarModule
+    ToolbarModule,
+    DropdownModule
   ],
   providers: [ConfirmationService, MessageService]
 })
@@ -79,12 +81,12 @@ export class RoleManagementComponent implements OnInit {
     if (role) {
       this.roleForm.patchValue({
         id: role.id,
-        name: role.name
+        name: role
       });
     } else {
       this.roleForm.reset({
         id: null,
-        name: ''
+        name: null
       });
     }
     this.roleDialog = true;
@@ -106,7 +108,11 @@ export class RoleManagementComponent implements OnInit {
       return;
     }
 
-    const roleData = this.roleForm.value;
+    const selectedRole = this.roleForm.get('name')?.value;
+    const roleData = {
+      id: this.editMode ? selectedRole.id : null,
+      name: selectedRole.name
+    };
     
     if (this.editMode) {
       this.roleService.updateRole(roleData.id, roleData).subscribe({

@@ -67,6 +67,13 @@
   - [X] Rol CRUD işlemlerinin tamamlanması
   - [X] Admin yetkisi kontrollerinin eklenmesi
 
+[X] PrimeNG Dropdown Geliştirmesi (21.02.2024)
+- Rol yönetimi için dropdown komponenti eklendi
+- Dropdown görünüm sorunları çözüldü
+- Seçilen rolün doğru gösterimi sağlandı
+- Arama özelliği eklendi
+- Virtual scroll ile performans iyileştirmesi yapıldı
+
 ## JWT Kimlik Doğrulama Sistemi
 - [X] JWT NuGet paketinin eklenmesi (Microsoft.AspNetCore.Authentication.JwtBearer)
 - [X] JWT ayarlarının appsettings.json'a eklenmesi

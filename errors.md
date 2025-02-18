@@ -201,3 +201,91 @@ import { Role, RoleWithUsers } from '../models/role.model';
 - Interface'ler tek bir yerde tanımlanmalı ve oradan import edilmeli
 - Backend'den gelen tarih verileri string olarak geldiği için tip tanımlarında bunu hesaba katmalıyız
 - Tip uyumsuzluklarını çözerken veri akışını dikkatlice takip etmeliyiz
+
+## Proje Çökme ve Git ile Kurtarma (21.02.2024)
+
+### Sorun:
+- Proje dosyaları silinmiş veya bozulmuş
+- Backend servisleri çalışmıyor
+- Git index dosyası kilitli kalmış
+
+### Nedeni:
+1. Git işlemleri sırasında beklenmedik kesinti
+2. Dosya sistemi kilitleri düzgün temizlenmemiş
+3. Çalışan servisler düzgün kapatılmamış
+
+### Çözüm:
+1. Tüm IDE'leri ve servisleri kapat
+2. PowerShell'i yönetici olarak çalıştır
+3. Sırasıyla şu komutları çalıştır:
+```powershell
+Stop-Process -Name "StockAPI" -Force -ErrorAction SilentlyContinue
+Stop-Process -Name "dotnet" -Force -ErrorAction SilentlyContinue
+Remove-Item -Force .git/index.lock -ErrorAction SilentlyContinue
+git reset --hard HEAD
+git clean -fd
+```
+4. Backend'i başlat:
+```powershell
+cd backend/StockAPI; dotnet run
+```
+5. Frontend'i başlat (yeni terminal):
+```powershell
+cd frontend; npm start
+```
+
+### Önemli Notlar:
+- Düzenli commit yapılmalı
+- Önemli değişikliklerden önce branch oluşturulmalı
+- Değişiklikler test edilmeden ana branch'e merge edilmemeli
+- PowerShell'de && yerine ; kullanılmalı
+- Servisleri kapatırken tüm bağlantılı işlemlerin sonlandırıldığından emin olunmalı
+
+## PrimeNG Dropdown Görünüm ve Seçim Sorunları (21.02.2024)
+
+### Sorun:
+1. Dropdown menüde roller tam görünmüyor, liste kısıtlı kalıyor
+2. Seçilen rol "[object Object]" olarak görünüyor
+3. Dropdown içeriği sayfa içinde sınırlı kalıyor
+
+### Nedeni:
+1. Dropdown varsayılan ayarları uzun listeler için optimize edilmemiş
+2. Template tanımlaması eksik
+3. Dropdown container'ı sayfa içinde kısıtlı
+
+### Çözüm:
+1. HTML template'de dropdown özelliklerini güncelledik:
+```html
+<p-dropdown 
+  [options]="roles" 
+  formControlName="name" 
+  optionLabel="name" 
+  [showClear]="true" 
+  placeholder="Rol seçin" 
+  [filter]="true" 
+  [virtualScroll]="true" 
+  [virtualScrollItemSize]="38"
+  [style]="{'width':'100%'}" 
+  appendTo="body">
+  <ng-template pTemplate="selectedItem" let-role>
+    <span>{{role?.name}}</span>
+  </ng-template>
+</p-dropdown>
+```
+
+2. Component'te form değerlerini düzenledik:
+```typescript
+const selectedRole = this.roleForm.get('name')?.value;
+const roleData = {
+  id: this.editMode ? selectedRole.id : null,
+  name: selectedRole.name
+};
+```
+
+### Önemli Notlar:
+- `[virtualScroll]="true"` uzun listelerin performanslı gösterimi için önemli
+- `[filter]="true"` arama özelliği ekler
+- `appendTo="body"` dropdown menünün sayfa içinde kısıtlanmamasını sağlar
+- `[style]="{'width':'100%'}"` genişlik sorunlarını çözer
+- Template'de seçilen değerin gösterimi için `selectedItem` template'i kullanılmalı
+- Form değerleri kaydedilirken seçilen nesnenin doğru özelliği (name) alınmalı
