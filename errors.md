@@ -153,3 +153,51 @@ modelBuilder.Entity<User>().HasData(
 - Seed data'daki hash'ler doğru hesaplanmalı
 - Detaylı loglama hash sorunlarını tespit etmeye yardımcı olur
 - Migration'ları temiz tutmak önemli
+
+## Rol Yönetimi Tip Uyumsuzluğu Hatası (21.02.2024)
+
+### Sorun:
+```
+TS2322: Type 'RoleWithUsers[]' is not assignable to type 'Role[]'.
+  Type 'RoleWithUsers' is not assignable to type 'Role'.
+    Types of property 'createdAt' are incompatible.
+      Type 'string' is not assignable to type 'Date'.
+```
+
+### Nedeni:
+1. `RoleWithUsers` interface'i iki farklı yerde tanımlanmış
+2. `Role` modelinde `createdAt` alanı sadece `Date` tipinde tanımlanmış
+3. Backend'den gelen veriler string formatında
+
+### Çözüm:
+1. `role.model.ts`'de `createdAt` ve `updatedAt` tiplerini güncelledik:
+```typescript
+export interface Role {
+    id: number;
+    name: string;
+    createdAt: string | Date;
+    updatedAt?: string | Date;
+}
+```
+
+2. `RoleWithUsers` interface'ini tek bir yerde (models) tanımladık:
+```typescript
+export interface RoleWithUsers extends Role {
+    users: {
+        id: number;
+        username: string;
+        isAdmin: boolean;
+        createdAt: string;
+    }[];
+}
+```
+
+3. `role.service.ts`'den duplicate interface'i kaldırdık ve models'dan import ettik:
+```typescript
+import { Role, RoleWithUsers } from '../models/role.model';
+```
+
+### Önemli Notlar:
+- Interface'ler tek bir yerde tanımlanmalı ve oradan import edilmeli
+- Backend'den gelen tarih verileri string olarak geldiği için tip tanımlarında bunu hesaba katmalıyız
+- Tip uyumsuzluklarını çözerken veri akışını dikkatlice takip etmeliyiz
