@@ -1,7 +1,3 @@
----
-description: project
-globs: 
----
 # Project Rules
 
 ## Basic Operating Principles
@@ -309,7 +305,8 @@ public interface ILocalLogger
 - Implement validation through Angular's form validation system or custom validators.
 
 ### Testing and Code Quality
-- Follow the Arrange-Act-Assertiut coverage with well-defined unit tests for services, components, and utilities.
+- Follow the Arrange-Act-Assert model for unit tests.
+- Ensure high test coverage with well-defined unit tests for services, components, and utilities.
 
 ### Performance Optimization
 - Use trackBy functions with `ngFor` to optimize list rendering.

@@ -2,9 +2,10 @@
 
 ## Gerekli Teknolojiler ve Sürümler
 - Backend: .NET Core 8
-- Veritabanı: PostgreSQL 17.3
+- Veritabanı: PostgreSQL 17.3 (Local)
 - Frontend: Angular 19.1.2
 - UI Kütüphanesi: PrimeNG 19.0.6
+- CSS Framework: Tailwind CSS 3.4.1
 - Geliştirme Araçları: npm, ESLint
 
 ## Yapılacaklar
@@ -21,42 +22,43 @@
   - [X] Angular 19.1.2 projesinin oluşturulması
   - [X] PrimeNG 19.0.6 entegrasyonu
   - [X] Login sayfasının oluşturulması
-  - [X] Dashboard sayfasının oluşturulması ve tasarımının iyileştirilmesi
-    - [X] Sade ve kullanıcı dostu arayüz
-    - [X] Çıkış butonunun sağ üste konumlandırılması
-    - [X] Ana menü butonlarının dikey yerleşimi
-    - [X] Responsive tasarım
+  - [X] Dashboard sayfasının oluşturulması
   - [X] Kullanıcı yönetim sayfasının oluşturulması
   - [X] Routing yapılandırması
-  - [X] Auth interceptor ve guard'ların eklenmesi
-  - [X] Kullanıcı arayüzünün test edilmesi
+  - [X] Auth guard'ların eklenmesi
 
-[X] Veritabanı
-  - [X] PostgreSQL kurulumu ve yapılandırması
-  - [X] Migration'ların oluşturulması
-  - [X] Veritabanının güncellenmesi
+[ ] Veritabanı İyileştirmeleri
+  - [ ] Repository pattern implementasyonu
+  - [ ] Unit of Work pattern implementasyonu
+  - [ ] Local caching mekanizması
+  - [ ] Veritabanı indeksleme optimizasyonu
+  - [ ] Backup ve restore mekanizması
 
-[X] Dokümantasyon
-  - [X] Login sayfası için knowledge base oluşturulması
-  - [X] Dashboard sayfası için knowledge base oluşturulması ve tasarım güncellemesi
-  - [X] User Management sayfası için knowledge base oluşturulması
-  - [X] API dokümantasyonunun hazırlanması
+[ ] Mimari İyileştirmeler
+  - [ ] N-Tier mimarinin tamamlanması
+  - [ ] Service katmanının güçlendirilmesi
+  - [ ] Exception handling mekanizmasının geliştirilmesi
+  - [ ] Audit logging sisteminin iyileştirilmesi
+  - [ ] Local sistem log yönetimi
 
-[X] Layout ve Menü Sistemi
-  - [X] Layout komponentinin oluşturulması
-  - [X] Sol menü tasarımının yapılması
-  - [X] Responsive tasarım eklenmesi
-  - [X] Sayfa yönlendirmelerinin düzenlenmesi
+[ ] Güvenlik İyileştirmeleri
+  - [ ] Password hashing optimizasyonu
+  - [ ] Role-based authorization geliştirmesi
+  - [ ] Local network CORS politikalarının güncellenmesi
+  - [ ] Input validation kontrollerinin güçlendirilmesi
 
-[ ] Bilgi İşlem Modülü
-  - [X] Temel sayfa yapısının oluşturulması
-  - [X] Route yapılandırmasının güncellenmesi
-  - [ ] Bilgisayar envanter yönetimi
-  - [ ] Yazıcı envanter yönetimi
-  - [ ] Ağ cihazları yönetimi
-  - [ ] Sarf malzeme takibi
-  - [ ] İş takip sistemi
-  - [ ] Ayarlar sayfası
+[ ] Test ve Dokümantasyon
+  - [ ] Unit testlerin yazılması
+  - [ ] Integration testlerin yazılması
+  - [ ] Kullanıcı kılavuzunun hazırlanması
+  - [ ] Kurulum kılavuzunun hazırlanması
+  - [ ] Bakım kılavuzunun hazırlanması
+
+## Notlar
+- Tüm geliştirmeler local sistem üzerinde test edilecek
+- Her değişiklik için detaylı log tutulacak
+- Performans optimizasyonları local sistem odaklı yapılacak
+- Güvenlik önlemleri local network gereksinimleri göz önünde bulundurularak uygulanacak
 
 ## Yapıldı
 [X] Rol Yönetimi
@@ -194,3 +196,46 @@
   - [ ] Genel ayarlar
   - [ ] Kullanıcı ayarları
   - [ ] Sistem ayarları
+
+# Mimari İyileştirme Planı
+
+## Yapılacak İyileştirmeler
+[ ] Repository Pattern Implementasyonu
+  - [ ] IRepository interface'inin oluşturulması
+  - [ ] Generic Repository base sınıfının oluşturulması
+  - [ ] Entity'e özel repository'lerin oluşturulması
+  - [ ] Repository testlerinin yazılması
+
+[ ] Unit of Work Pattern Implementasyonu
+  - [ ] IUnitOfWork interface'inin oluşturulması
+  - [ ] UnitOfWork sınıfının implementasyonu
+  - [ ] Transaction yönetiminin eklenmesi
+  - [ ] Unit testlerin yazılması
+
+[ ] Service Katmanı İyileştirmeleri
+  - [ ] Her entity için service interface'lerinin oluşturulması
+  - [ ] Service implementasyonlarının tamamlanması
+  - [ ] Business logic'in service katmanına taşınması
+  - [ ] Service unit testlerinin yazılması
+
+[ ] CQRS Pattern Implementasyonu
+  - [ ] Command ve Query interface'lerinin oluşturulması
+  - [ ] Handler'ların implementasyonu
+  - [ ] Mediator pattern'in eklenmesi
+  - [ ] CQRS test coverage'ının sağlanması
+
+## Mevcut Mimari Durum Analizi
+- Veri Erişim Katmanı Skoru: 70%
+- İş Katmanı Skoru: 75%
+- Sunum Katmanı Skoru: 90%
+- Cross-Cutting Concerns Skoru: 95%
+- Domain Layer Skoru: 85%
+- Genel Değerlendirme Skoru: 83%
+
+## İyileştirme Sonrası Hedeflenen Skorlar
+- Veri Erişim Katmanı Hedef: 95%
+- İş Katmanı Hedef: 95%
+- Sunum Katmanı Hedef: 95%
+- Cross-Cutting Concerns Hedef: 98%
+- Domain Layer Hedef: 95%
+- Genel Değerlendirme Hedef: 95%

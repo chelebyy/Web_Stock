@@ -95,12 +95,54 @@ The Inventory and Stock Tracking Web Application is designed to manage and monit
 
 ## 5. Technical Specifications
 
-- **Backend Framework:** .NET Core
-- **Database:** PostgreSQL
-- **Frontend Framework:** Angular 19.1.2
-- **UI Components:** PrimeNG Library
-- **CSS Framework:** Tailwind CSS 3.4.1
-- **Hosting Environment:** Local server within the organization's network
+### 5.1 Core Technologies
+- Backend Framework: .NET Core 8
+- Database: PostgreSQL 17.3 (Local Instance)
+- Frontend Framework: Angular 19.1.2
+- UI Components: PrimeNG 19.0.6
+- CSS Framework: Tailwind CSS 3.4.1
+
+### 5.2 Architecture
+- N-Tier Architecture
+  - Presentation Layer (Angular)
+  - Business Layer (.NET Core)
+  - Data Access Layer (Entity Framework Core)
+  - Database Layer (PostgreSQL)
+
+### 5.3 Local System Requirements
+- Windows 10 or later
+- PostgreSQL 17.3
+- .NET Core 8 SDK
+- Node.js 18.x or later
+- Minimum 8GB RAM
+- 100GB available disk space
+
+### 5.4 Security Requirements
+- Local network authentication
+- Role-based access control
+- Password hashing
+- Basic JWT implementation
+- Local network CORS policies
+
+### 5.5 Performance Requirements
+- Application startup < 5 seconds
+- Page load time < 2 seconds
+- Database query response < 500ms
+- Local caching implementation
+- Efficient memory usage
+
+### 5.6 Backup and Recovery
+- Local database backup mechanism
+- Automated backup scheduling
+- Point-in-time recovery support
+- Backup verification process
+
+### 5.7 Logging and Monitoring
+- Local system logging
+- User action auditing
+- Error tracking and reporting
+- Performance monitoring
+- Local log rotation
 
 ---
 
@@ -226,6 +268,58 @@ Document complex queries with comments
 ---
 
 *This PRD is intended to serve as a comprehensive guide for the development and deployment of the Inventory and Stock Tracking Web Application. Feedback and revisions will be incorporated as the project progresses.*
+
+## 12. Mimari Gereksinimler ve Teknik Detaylar
+
+### 12.1 Katmanlı Mimari
+- **Presentation Layer (Sunum Katmanı)**
+  - Angular tabanlı frontend uygulaması
+  - PrimeNG UI bileşenleri
+  - Responsive tasarım
+  - TypeScript ile tip güvenliği
+
+- **Business Layer (İş Katmanı)**
+  - Service pattern implementasyonu
+  - CQRS pattern kullanımı
+  - Business logic izolasyonu
+  - Interface-driven development
+
+- **Data Access Layer (Veri Erişim Katmanı)**
+  - Repository pattern implementasyonu
+  - Unit of Work pattern kullanımı
+  - Entity Framework Core ile ORM
+  - PostgreSQL veritabanı entegrasyonu
+
+- **Cross-Cutting Concerns**
+  - Global exception handling
+  - Logging ve audit trail
+  - Authentication ve authorization
+  - Caching mekanizmaları
+
+### 12.2 Tasarım Prensipleri
+- SOLID prensiplerinin uygulanması
+- DRY (Don't Repeat Yourself) prensibi
+- KISS (Keep It Simple, Stupid) prensibi
+- Clean Code pratikleri
+
+### 12.3 Performans Gereksinimleri
+- Sayfa yüklenme süresi < 2 saniye
+- API yanıt süresi < 500ms
+- Veritabanı sorgu optimizasyonu
+- Önbellek kullanımı
+
+### 12.4 Güvenlik Gereksinimleri
+- JWT tabanlı kimlik doğrulama
+- Role-based access control
+- SQL injection önleme
+- XSS koruması
+- CSRF koruması
+
+### 12.5 Test Gereksinimleri
+- Unit test coverage > 80%
+- Integration testleri
+- E2E testleri
+- Performance testleri
 
 
 
