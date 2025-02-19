@@ -1,168 +1,248 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using StockAPI.Data;
 using StockAPI.Models;
+using StockAPI.Services;
+using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Text;
-using Microsoft.AspNetCore.Authorization;
+using StockAPI.Models.DTOs;
 
-namespace StockAPI.Controllers
+namespace StockAPI.Controllers;
+
+[ApiController]
+[Route("api/[controller]")]
+[Authorize]
+public class UserController : ControllerBase
 {
-    [Authorize(Roles = "Admin")]
-    [ApiController]
-    [Route("api/[controller]")]
-    public class UserController : ControllerBase
+    private readonly ApplicationDbContext _context;
+    private readonly IAuditLogService _auditLogService;
+    private readonly ILogger<UserController> _logger;
+    private readonly IHashService _hashService;
+
+    public UserController(
+        ApplicationDbContext context,
+        IAuditLogService auditLogService,
+        ILogger<UserController> logger,
+        IHashService hashService)
     {
-        private readonly StockContext _context;
+        _context = context ?? throw new ArgumentNullException(nameof(context));
+        _auditLogService = auditLogService ?? throw new ArgumentNullException(nameof(auditLogService));
+        _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+        _hashService = hashService ?? throw new ArgumentNullException(nameof(hashService));
+    }
 
-        public UserController(StockContext context)
-        {
-            _context = context;
-        }
-
-        // GET: api/User
-        [HttpGet]
-        public async Task<ActionResult<IEnumerable<User>>> GetUsers()
+    [HttpGet]
+    [Authorize(Roles = "Admin")]
+    public async Task<ActionResult<IEnumerable<UserDto>>> GetUsers()
+    {
+        try
         {
             var users = await _context.Users
-                .Select(u => new User 
-                { 
+                .Include(u => u.Role)
+                .Select(u => new UserDto
+                {
                     Id = u.Id,
                     Username = u.Username,
+                    Role = u.Role.Name,
                     IsAdmin = u.IsAdmin,
                     CreatedAt = u.CreatedAt,
                     LastLoginAt = u.LastLoginAt
                 })
                 .ToListAsync();
 
-            return users;
+            return Ok(users);
         }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Kullanıcılar listelenirken hata oluştu");
+            return StatusCode(500, new { message = "Kullanıcılar listelenirken bir hata oluştu" });
+        }
+    }
 
-        // GET: api/User/5
-        [HttpGet("{id}")]
-        public async Task<ActionResult<User>> GetUser(int id)
+    [HttpGet("{id}")]
+    [Authorize(Roles = "Admin")]
+    public async Task<ActionResult<UserDto>> GetUser(int id)
+    {
+        try 
         {
             var user = await _context.Users
-                .Select(u => new User 
-                { 
-                    Id = u.Id,
-                    Username = u.Username,
-                    IsAdmin = u.IsAdmin,
-                    CreatedAt = u.CreatedAt,
-                    LastLoginAt = u.LastLoginAt
-                })
+                .Include(u => u.Role)
                 .FirstOrDefaultAsync(u => u.Id == id);
-
+            
             if (user == null)
             {
+                _logger.LogWarning("ID'si {Id} olan kullanıcı bulunamadı", id);
                 return NotFound();
             }
 
-            return user;
-        }
-
-        // POST: api/User
-        [HttpPost]
-        public async Task<ActionResult<User>> CreateUser(User user)
-        {
-            if (await _context.Users.AnyAsync(u => u.Username == user.Username))
-            {
-                return BadRequest("Bu kullanıcı adı zaten kullanılıyor");
-            }
-
-            user.PasswordHash = HashPassword(user.PasswordHash);
-            user.CreatedAt = DateTime.UtcNow;
-
-            _context.Users.Add(user);
-            await _context.SaveChangesAsync();
-
-            var createdUser = new User
+            return Ok(new UserDto
             {
                 Id = user.Id,
                 Username = user.Username,
+                Role = user.Role.Name,
                 IsAdmin = user.IsAdmin,
                 CreatedAt = user.CreatedAt,
                 LastLoginAt = user.LastLoginAt
-            };
+            });
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Kullanıcı getirilirken hata oluştu. ID: {Id}", id);
+            throw;
+        }
+    }
 
-            return CreatedAtAction(nameof(GetUser), new { id = user.Id }, createdUser);
+    [HttpPost]
+    [Authorize(Roles = "Admin")]
+    public async Task<ActionResult<UserDto>> CreateUser(CreateUserDto createUserDto)
+    {
+        ArgumentNullException.ThrowIfNull(createUserDto);
+
+        if (await _context.Users.AnyAsync(u => u.Username == createUserDto.Username))
+        {
+            return BadRequest("Bu kullanıcı adı zaten kullanılıyor");
         }
 
-        // PUT: api/User/5
-        [HttpPut("{id}")]
-        public async Task<IActionResult> UpdateUser(int id, User user)
+        var user = new User
         {
-            if (id != user.Id)
-            {
-                return BadRequest();
-            }
+            Username = createUserDto.Username,
+            PasswordHash = _hashService.HashPassword(createUserDto.Password),
+            IsAdmin = createUserDto.IsAdmin,
+            RoleId = createUserDto.RoleId,
+            CreatedAt = DateTime.UtcNow
+        };
 
-            var existingUser = await _context.Users.FindAsync(id);
+        _context.Users.Add(user);
+        await _context.SaveChangesAsync();
+
+        var userDto = new UserDto
+        {
+            Id = user.Id,
+            Username = user.Username,
+            Role = (await _context.Roles.FindAsync(user.RoleId))?.Name ?? "User",
+            IsAdmin = user.IsAdmin,
+            CreatedAt = user.CreatedAt,
+            LastLoginAt = user.LastLoginAt
+        };
+
+        return CreatedAtAction(nameof(GetUser), new { id = user.Id }, userDto);
+    }
+
+    [HttpPut("{id}")]
+    [Authorize(Roles = "Admin")]
+    public async Task<IActionResult> UpdateUser(int id, UpdateUserDto updateUserDto)
+    {
+        ArgumentNullException.ThrowIfNull(updateUserDto);
+
+        if (id != updateUserDto.Id)
+        {
+            return BadRequest("ID'ler eşleşmiyor");
+        }
+
+        try
+        {
+            var existingUser = await _context.Users.FindAsync(id).ConfigureAwait(false);
             if (existingUser == null)
             {
-                return NotFound();
+                return NotFound($"ID'si {id} olan kullanıcı bulunamadı");
             }
 
-            if (!string.IsNullOrEmpty(user.PasswordHash))
+            var oldUser = new { existingUser.Username, existingUser.IsAdmin, existingUser.RoleId };
+
+            existingUser.Username = updateUserDto.Username;
+            existingUser.IsAdmin = updateUserDto.IsAdmin;
+            existingUser.RoleId = updateUserDto.RoleId;
+
+            await _context.SaveChangesAsync();
+
+            var currentUserId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (!string.IsNullOrEmpty(currentUserId))
             {
-                existingUser.PasswordHash = HashPassword(user.PasswordHash);
+                await _auditLogService.LogAsync<object>(
+                    int.Parse(currentUserId),
+                    "UpdateUser",
+                    id.ToString(),
+                    oldUser,
+                    new { updateUserDto.Username, updateUserDto.IsAdmin, updateUserDto.RoleId });
             }
 
-            existingUser.Username = user.Username;
-            existingUser.IsAdmin = user.IsAdmin;
-
-            try
-            {
-                await _context.SaveChangesAsync();
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                if (!UserExists(id))
-                {
-                    return NotFound();
-                }
-                else
-                {
-                    throw;
-                }
-            }
-
-            return NoContent();
+            return Ok(new { message = "Kullanıcı başarıyla güncellendi" });
         }
+        catch (DbUpdateConcurrencyException ex)
+        {
+            _logger.LogError(ex, "Kullanıcı güncellenirken eşzamanlılık hatası oluştu - ID: {UserId}", id);
+            return StatusCode(409, new { message = "Kullanıcı başka bir kullanıcı tarafından güncellenmiş olabilir" });
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Kullanıcı güncellenirken hata oluştu. ID: {Id}", id);
+            throw;
+        }
+    }
 
-        // DELETE: api/User/5
-        [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteUser(int id)
+    [HttpDelete("{id}")]
+    [Authorize(Roles = "Admin")]
+    public async Task<IActionResult> DeleteUser(int id)
+    {
+        try
         {
             var user = await _context.Users.FindAsync(id);
             if (user == null)
             {
-                return NotFound();
+                return NotFound(new { message = "Kullanıcı bulunamadı" });
             }
 
-            if (user.Username.ToLower() == "admin")
+            if (user.IsAdmin)
             {
-                return BadRequest("Admin kullanıcısı silinemez");
+                return BadRequest(new { message = "Admin kullanıcısı silinemez" });
             }
 
             _context.Users.Remove(user);
             await _context.SaveChangesAsync();
 
-            return NoContent();
-        }
-
-        private bool UserExists(int id)
-        {
-            return _context.Users.Any(e => e.Id == id);
-        }
-
-        private string HashPassword(string password)
-        {
-            using (var sha256 = SHA256.Create())
+            var currentUserId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (!string.IsNullOrEmpty(currentUserId))
             {
-                var hashedBytes = sha256.ComputeHash(Encoding.UTF8.GetBytes(password));
-                return Convert.ToBase64String(hashedBytes);
+                await _auditLogService.LogAsync<User>(
+                    int.Parse(currentUserId),
+                    "DeleteUser",
+                    id.ToString(),
+                    user,
+                    null);
             }
+
+            return Ok(new { message = "Kullanıcı başarıyla silindi" });
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Kullanıcı silinirken hata oluştu - ID: {UserId}", id);
+            return StatusCode(500, new { message = "Kullanıcı silinirken bir hata oluştu" });
         }
     }
+
+    private bool UserExists(int id)
+    {
+        return _context.Users.Any(e => e.Id == id);
+    }
+}
+
+public class UserDto
+{
+    public int Id { get; set; }
+    public string Username { get; set; } = null!;
+    public bool IsAdmin { get; set; }
+    public int RoleId { get; set; }
+    public string Role { get; set; } = null!;
+    public DateTime CreatedAt { get; set; }
+    public DateTime? LastLoginAt { get; set; }
+}
+
+public class UpdateUserDto
+{
+    public int Id { get; set; }
+    public string Username { get; set; } = null!;
+    public bool IsAdmin { get; set; }
+    public int RoleId { get; set; }
 }

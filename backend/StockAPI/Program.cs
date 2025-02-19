@@ -1,142 +1,138 @@
-using StockAPI.Data;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using Microsoft.OpenApi.Models;
+using Serilog;
+using StockAPI.Data;
+using StockAPI.Middleware;
+using StockAPI.Services;
 using System.Text;
 using StockAPI.Models;
-using StockAPI.Services;
-using Serilog;
-using Serilog.Events;
-using StockAPI.Middleware;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Configure Serilog
+// Serilog yapılandırması
 Log.Logger = new LoggerConfiguration()
     .MinimumLevel.Information()
-    .MinimumLevel.Override("Microsoft", LogEventLevel.Warning)
-    .MinimumLevel.Override("System", LogEventLevel.Warning)
     .WriteTo.Console()
-    .WriteTo.File("Logs/log-.txt", rollingInterval: RollingInterval.Day)
+    .WriteTo.File("logs/stock-api-.log", rollingInterval: RollingInterval.Day)
+    .WriteTo.PostgreSQL(
+        connectionString: builder.Configuration.GetConnectionString("DefaultConnection"),
+        tableName: "Logs",
+        needAutoCreateTable: true)
+    .Enrich.FromLogContext()
+    .Enrich.WithThreadId()
+    .Enrich.WithEnvironmentName()
     .CreateLogger();
 
 builder.Host.UseSerilog();
 
-// Add services to the container.
-builder.Services.AddControllers();
-
-// Configure PostgreSQL
-var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
-builder.Services.AddDbContext<StockContext>(options =>
-{
-    options.UseNpgsql(connectionString);
-    options.EnableSensitiveDataLogging(); // Hata ayıklama için
-});
-
-// Configure JWT
-builder.Services.Configure<JwtSettings>(builder.Configuration.GetSection("JWT"));
-builder.Services.AddScoped<JwtService>();
-builder.Services.AddScoped<HashService>();
-
-builder.Services.AddAuthentication(options =>
-{
-    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
-    options.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
-}).AddJwtBearer(options =>
-{
-    options.SaveToken = true;
-    options.RequireHttpsMetadata = false;
-    options.TokenValidationParameters = new TokenValidationParameters()
-    {
-        ValidateIssuer = true,
-        ValidateAudience = true,
-        ValidAudience = builder.Configuration["JWT:ValidAudience"],
-        ValidIssuer = builder.Configuration["JWT:ValidIssuer"],
-        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["JWT:Secret"] ?? ""))
-    };
-});
-
-// Configure CORS
+// CORS politikası
 builder.Services.AddCors(options =>
 {
-    options.AddPolicy("AllowAngularApp",
-        builder =>
-        {
-            builder.WithOrigins("http://localhost:4200")
-                   .AllowAnyHeader()
-                   .AllowAnyMethod()
-                   .AllowCredentials();
-        });
+    options.AddPolicy("AllowLocalhost", policy =>
+    {
+        policy.WithOrigins("http://localhost:4200")
+            .AllowAnyMethod()
+            .AllowAnyHeader()
+            .AllowCredentials();
+    });
 });
 
-// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
-builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
-
-builder.Services.AddScoped<IAuditLogger, AuditLogger>();
-
-// Logging için ILogger<T> servisini ekle
-builder.Services.AddLogging(logging =>
+// Veritabanı bağlantısı
+builder.Services.AddDbContext<ApplicationDbContext>(options =>
 {
-    logging.ClearProviders();
-    logging.AddSerilog(dispose: true);
+    options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection") ??
+        throw new InvalidOperationException("Connection string 'DefaultConnection' not found."));
+});
+
+// JWT yapılandırması
+var jwtSettings = builder.Configuration.GetSection("Jwt").Get<JwtSettings>() ?? throw new InvalidOperationException("JWT settings are not configured");
+builder.Services.Configure<JwtSettings>(builder.Configuration.GetSection("Jwt"));
+builder.Services.AddSingleton(jwtSettings);
+
+builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+    .AddJwtBearer(options =>
+    {
+        var key = Encoding.UTF8.GetBytes(jwtSettings.SecretKey.PadRight(32));
+        options.TokenValidationParameters = new TokenValidationParameters
+        {
+            ValidateIssuer = true,
+            ValidateAudience = true,
+            ValidateLifetime = true,
+            ValidateIssuerSigningKey = true,
+            ValidIssuer = jwtSettings.Issuer,
+            ValidAudience = jwtSettings.Audience,
+            IssuerSigningKey = new SymmetricSecurityKey(key)
+        };
+    });
+
+// Servisler
+builder.Services.AddScoped<JwtService>();
+builder.Services.AddScoped<IHashService, HashService>();
+builder.Services.AddScoped<IAuditLogService, AuditLogService>();
+builder.Services.AddScoped<IJwtService, JwtService>();
+builder.Services.AddHttpContextAccessor();
+builder.Services.AddControllers();
+builder.Services.AddEndpointsApiExplorer();
+
+// Swagger yapılandırması
+builder.Services.AddSwaggerGen(c =>
+{
+    c.SwaggerDoc("v1", new OpenApiInfo { Title = "Stock API", Version = "v1" });
+    c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
+    {
+        Description = "JWT Authorization header using the Bearer scheme",
+        Name = "Authorization",
+        In = ParameterLocation.Header,
+        Type = SecuritySchemeType.ApiKey,
+        Scheme = "Bearer"
+    });
+    c.AddSecurityRequirement(new OpenApiSecurityRequirement
+    {
+        {
+            new OpenApiSecurityScheme
+            {
+                Reference = new OpenApiReference
+                {
+                    Type = ReferenceType.SecurityScheme,
+                    Id = "Bearer"
+                }
+            },
+            Array.Empty<string>()
+        }
+    });
 });
 
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
+// Middleware pipeline
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
     app.UseSwaggerUI();
 }
 
-// CORS middleware'ini en üste taşıyoruz
-app.UseCors("AllowAngularApp");
-
-// Global Exception Handler Middleware
 app.UseMiddleware<GlobalExceptionHandler>();
+app.UseSerilogRequestLogging();
 
+app.UseHttpsRedirection();
+app.UseCors("AllowLocalhost");
 app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
 
-app.Urls.Clear();
-app.Urls.Add("http://localhost:5126");
-
-Log.Information("Uygulama başlatılıyor...");
-
-// Seed data
-using (var scope = app.Services.CreateScope())
-{
-    var services = scope.ServiceProvider;
-    try
-    {
-        await SeedData.Initialize(services);
-        Log.Information("Veritabanı başarıyla hazırlandı.");
-    }
-    catch (Exception ex)
-    {
-        Log.Error(ex, "Veritabanı hazırlanırken hata oluştu.");
-        throw;
-    }
-}
-
+// Veritabanı migration
 try
 {
-    Log.Information("Web host başlatılıyor...");
-    await app.RunAsync();
-    Log.Information("Web host başarıyla başlatıldı.");
+    using var scope = app.Services.CreateScope();
+    var context = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+    await context.Database.MigrateAsync().ConfigureAwait(false);
 }
 catch (Exception ex)
 {
-    Log.Fatal(ex, "Web host başlatılırken hata oluştu");
-    throw;
+    Log.Error(ex, "Veritabanı migration sırasında hata oluştu");
 }
-finally
-{
-    Log.Information("Uygulama kapatılıyor...");
-    Log.CloseAndFlush();
-}
+
+app.Run();

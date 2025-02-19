@@ -5,72 +5,53 @@ using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using StockAPI.Models;
 
-namespace StockAPI.Services
+namespace StockAPI.Services;
+
+public class JwtService : IJwtService
 {
-    public interface IJwtService
+    private readonly ILogger<JwtService> _logger;
+    private readonly JwtSettings _jwtSettings;
+
+    public JwtService(
+        ILogger<JwtService> logger,
+        IOptions<JwtSettings> jwtSettings)
     {
-        string GenerateToken(string userId, string username, List<string> roles);
-        ClaimsPrincipal? ValidateToken(string token);
+        _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+        _jwtSettings = jwtSettings.Value ?? throw new ArgumentNullException(nameof(jwtSettings));
     }
 
-    public class JwtService : IJwtService
+    public string GenerateToken(User user)
     {
-        private readonly JwtSettings _jwtSettings;
-
-        public JwtService(IOptions<JwtSettings> jwtSettings)
+        try
         {
-            _jwtSettings = jwtSettings.Value;
-        }
-
-        public string GenerateToken(string userId, string username, List<string> roles)
-        {
-            var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_jwtSettings.Secret));
-            var credentials = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256);
+            var tokenHandler = new JwtSecurityTokenHandler();
+            var key = Encoding.UTF8.GetBytes(_jwtSettings.SecretKey.PadRight(32));
 
             var claims = new List<Claim>
             {
-                new Claim(ClaimTypes.NameIdentifier, userId),
-                new Claim(ClaimTypes.Name, username)
+                new Claim(ClaimTypes.Name, user.Username),
+                new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
+                new Claim(ClaimTypes.Role, user.Role?.Name ?? "User")
             };
 
-            // Rolleri ekle
-            claims.AddRange(roles.Select(role => new Claim(ClaimTypes.Role, role)));
+            var tokenDescriptor = new SecurityTokenDescriptor
+            {
+                Subject = new ClaimsIdentity(claims),
+                Expires = DateTime.UtcNow.AddHours(_jwtSettings.ExpirationHours),
+                Issuer = _jwtSettings.Issuer,
+                Audience = _jwtSettings.Audience,
+                SigningCredentials = new SigningCredentials(
+                    new SymmetricSecurityKey(key),
+                    SecurityAlgorithms.HmacSha256Signature)
+            };
 
-            var token = new JwtSecurityToken(
-                issuer: _jwtSettings.ValidIssuer,
-                audience: _jwtSettings.ValidAudience,
-                claims: claims,
-                expires: DateTime.Now.AddMinutes(_jwtSettings.TokenValidityInMinutes),
-                signingCredentials: credentials
-            );
-
-            return new JwtSecurityTokenHandler().WriteToken(token);
+            var token = tokenHandler.CreateToken(tokenDescriptor);
+            return tokenHandler.WriteToken(token);
         }
-
-        public ClaimsPrincipal? ValidateToken(string token)
+        catch (Exception ex)
         {
-            var tokenHandler = new JwtSecurityTokenHandler();
-            var key = Encoding.UTF8.GetBytes(_jwtSettings.Secret);
-
-            try
-            {
-                var principal = tokenHandler.ValidateToken(token, new TokenValidationParameters
-                {
-                    ValidateIssuerSigningKey = true,
-                    IssuerSigningKey = new SymmetricSecurityKey(key),
-                    ValidateIssuer = true,
-                    ValidIssuer = _jwtSettings.ValidIssuer,
-                    ValidateAudience = true,
-                    ValidAudience = _jwtSettings.ValidAudience,
-                    ClockSkew = TimeSpan.Zero
-                }, out SecurityToken validatedToken);
-
-                return principal;
-            }
-            catch
-            {
-                return null;
-            }
+            _logger.LogError(ex, "Token oluşturulurken hata oluştu. Kullanıcı: {Username}", user.Username);
+            throw;
         }
     }
 }

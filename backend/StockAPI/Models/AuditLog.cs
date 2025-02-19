@@ -1,33 +1,23 @@
-using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
+using System.Text.Json;
 
 namespace StockAPI.Models
 {
-    [Table("AuditLogs")]
-    public class AuditLog
+    public class AuditLog : BaseEntity
     {
-        [Key]
-        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public int Id { get; set; }
-
-        [Required]
-        public string UserId { get; set; }
-
-        [Required]
-        public string Action { get; set; }
-
-        [Required]
-        public string EntityId { get; set; }
-
-        [Required]
-        public string EntityType { get; set; }
-
-        [Required]
-        public string Path { get; set; }
-
+        public int UserId { get; set; }
+        public string Action { get; set; } = string.Empty;
+        public string EntityType { get; set; } = string.Empty;
+        public string EntityId { get; set; } = string.Empty;
+        public string Path { get; set; } = string.Empty;
+        public DateTime Timestamp { get; set; }
+        public string? OldData { get; set; }
+        public string? NewData { get; set; }
         public string? Details { get; set; }
 
-        [Required]
-        public DateTime Timestamp { get; set; }
+        public virtual User? User { get; set; }
+
+        public T? GetOldData<T>() => OldData != null ? JsonSerializer.Deserialize<T>(OldData) : default;
+        public T? GetNewData<T>() => NewData != null ? JsonSerializer.Deserialize<T>(NewData) : default;
     }
 }

@@ -2,28 +2,79 @@ using System.Security.Cryptography;
 using System.Text;
 using Microsoft.Extensions.Logging;
 
-namespace StockAPI.Services
+namespace StockAPI.Services;
+
+public class HashService : IHashService
 {
-    public class HashService
+    private const int SaltSize = 16;
+    private const int KeySize = 32;
+    private const int Iterations = 10000;
+    private static readonly HashAlgorithmName _hashAlgorithmName = HashAlgorithmName.SHA256;
+    private static readonly char Delimiter = ';';
+    private const string Salt = "StockAPI_Salt_2024";
+
+    public string HashPassword(string password)
     {
-        private readonly ILogger<HashService> _logger;
+        if (string.IsNullOrEmpty(password))
+            throw new ArgumentNullException(nameof(password));
 
-        public HashService(ILogger<HashService> logger)
+        using var sha256 = SHA256.Create();
+        var passwordBytes = System.Text.Encoding.UTF8.GetBytes(password);
+        var hashedBytes = sha256.ComputeHash(passwordBytes);
+        return Convert.ToBase64String(hashedBytes);
+    }
+
+    public bool VerifyPassword(string password, string hashedPassword)
+    {
+        if (string.IsNullOrEmpty(password))
+            throw new ArgumentNullException(nameof(password));
+
+        if (string.IsNullOrEmpty(hashedPassword))
+            throw new ArgumentNullException(nameof(hashedPassword));
+
+        var newHashedPassword = HashPassword(password);
+        return hashedPassword == newHashedPassword;
+    }
+
+    public static string ComputeHash(string input)
+    {
+        ArgumentNullException.ThrowIfNull(input);
+
+        byte[] salt = RandomNumberGenerator.GetBytes(SaltSize);
+        byte[] hash = Rfc2898DeriveBytes.Pbkdf2(
+            input,
+            salt,
+            Iterations,
+            _hashAlgorithmName,
+            KeySize);
+
+        return string.Join(
+            Delimiter,
+            Convert.ToBase64String(salt),
+            Convert.ToBase64String(hash));
+    }
+
+    public static bool VerifyHash(string input, string hashString)
+    {
+        ArgumentNullException.ThrowIfNull(input);
+        ArgumentNullException.ThrowIfNull(hashString);
+
+        string[] segments = hashString.Split(Delimiter);
+        if (segments.Length != 2)
         {
-            _logger = logger;
+            return false;
         }
 
-        public string ComputeSha256Hash(string input)
-        {
-            _logger.LogInformation("Hash hesaplanıyor - Input: {Input}", input);
-            
-            using (SHA256 sha256Hash = SHA256.Create())
-            {
-                byte[] bytes = sha256Hash.ComputeHash(Encoding.UTF8.GetBytes(input));
-                var result = Convert.ToBase64String(bytes);
-                _logger.LogInformation("Hash sonucu - Result: {Result}", result);
-                return result;
-            }
-        }
+        byte[] salt = Convert.FromBase64String(segments[0]);
+        byte[] hash = Convert.FromBase64String(segments[1]);
+
+        byte[] inputHash = Rfc2898DeriveBytes.Pbkdf2(
+            input,
+            salt,
+            Iterations,
+            _hashAlgorithmName,
+            KeySize);
+
+        return CryptographicOperations.FixedTimeEquals(inputHash, hash);
     }
 } 

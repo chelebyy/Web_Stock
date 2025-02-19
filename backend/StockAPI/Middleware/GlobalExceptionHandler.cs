@@ -10,79 +10,53 @@ public class GlobalExceptionHandler
 {
     private readonly RequestDelegate _next;
     private readonly ILogger<GlobalExceptionHandler> _logger;
-    private readonly IServiceScopeFactory _serviceScopeFactory;
 
-    public GlobalExceptionHandler(
-        RequestDelegate next,
-        ILogger<GlobalExceptionHandler> logger,
-        IServiceScopeFactory serviceScopeFactory)
+    public GlobalExceptionHandler(RequestDelegate next, ILogger<GlobalExceptionHandler> logger)
     {
-        _next = next;
-        _logger = logger;
-        _serviceScopeFactory = serviceScopeFactory;
+        _next = next ?? throw new ArgumentNullException(nameof(next));
+        _logger = logger ?? throw new ArgumentNullException(nameof(logger));
     }
 
     public async Task InvokeAsync(HttpContext context)
     {
+        ArgumentNullException.ThrowIfNull(context);
+
         try
         {
-            await _next(context);
+            await _next(context).ConfigureAwait(false);
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Beklenmeyen hata oluştu: {ErrorMessage}\nStack Trace: {StackTrace}", ex.Message, ex.StackTrace);
-            await HandleExceptionAsync(context, ex);
+            await HandleExceptionAsync(context, ex).ConfigureAwait(false);
         }
     }
 
     private async Task HandleExceptionAsync(HttpContext context, Exception exception)
     {
-        var userId = context.User?.Identity?.Name ?? "anonymous";
-        var path = context.Request.Path;
-
-        var (statusCode, userMessage) = exception switch
+        context.Response.ContentType = "application/json";
+        context.Response.StatusCode = exception switch
         {
-            ApiException apiException => ((int)apiException.StatusCode, apiException.UserMessage),
-            ArgumentException _ => (StatusCodes.Status400BadRequest, "Geçersiz argüman."),
-            UnauthorizedAccessException _ => (StatusCodes.Status401Unauthorized, "Yetkisiz erişim."),
-            _ => (StatusCodes.Status500InternalServerError, "Bir hata oluştu. Lütfen daha sonra tekrar deneyin.")
+            UnauthorizedAccessException => (int)HttpStatusCode.Unauthorized,
+            ArgumentException => (int)HttpStatusCode.BadRequest,
+            KeyNotFoundException => (int)HttpStatusCode.NotFound,
+            InvalidOperationException => (int)HttpStatusCode.BadRequest,
+            _ => (int)HttpStatusCode.InternalServerError
         };
 
         var response = new
         {
-            StatusCode = statusCode,
-            Message = userMessage,
-            Path = path,
-            Timestamp = DateTime.UtcNow,
-            Details = exception.Message
+            StatusCode = context.Response.StatusCode,
+            Message = exception.Message,
+            DetailedMessage = exception.InnerException?.Message,
         };
 
-        context.Response.ContentType = "application/json";
-        context.Response.StatusCode = statusCode;
+        _logger.LogError(exception, "Hata oluştu: {Message}", exception.Message);
 
-        using (var scope = _serviceScopeFactory.CreateScope())
+        var jsonResponse = JsonSerializer.Serialize(response, new JsonSerializerOptions
         {
-            var auditLogger = scope.ServiceProvider.GetRequiredService<IAuditLogger>();
-            try
-            {
-                await auditLogger.LogActionAsync(
-                    userId: userId,
-                    action: "ERROR",
-                    entityId: exception.GetHashCode().ToString(),
-                    entityType: "Exception",
-                    path: path,
-                    details: JsonSerializer.Serialize(new { 
-                        ExceptionType = exception.GetType().Name,
-                        ExceptionMessage = exception.Message,
-                        StackTrace = exception.StackTrace
-                    }));
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Hata loglanırken bir sorun oluştu");
-            }
-        }
+            PropertyNamingPolicy = JsonNamingPolicy.CamelCase
+        });
 
-        await context.Response.WriteAsync(JsonSerializer.Serialize(response));
+        await context.Response.WriteAsync(jsonResponse).ConfigureAwait(false);
     }
 }
