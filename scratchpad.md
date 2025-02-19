@@ -1,7 +1,7 @@
 # Görev: Proje Gereksinimlerinin Uygulanması
 
 ## Gerekli Teknolojiler ve Sürümler
-- Backend: .NET Core 8
+- Backend: .NET Core 9
 - Veritabanı: PostgreSQL 17.3 (Local)
 - Frontend: Angular 19.1.2
 - UI Kütüphanesi: PrimeNG 19.0.6
@@ -10,7 +10,7 @@
 
 ## Yapılacaklar
 [X] Backend kurulumu
-  - [X] .NET Core 8 projesinin oluşturulması
+  - [X] .NET Core 9 projesinin oluşturulması
   - [X] PostgreSQL bağlantısının kurulması
   - [X] Temel proje yapısının oluşturulması
   - [X] User modelinin oluşturulması
@@ -286,3 +286,19 @@
     - API yanıt süreleri 10-15ms aralığında
     - Token doğrulama sorunsuz
     - CORS politikaları düzgün çalışıyor
+
+## Yapıldı
+[X] JWT Token Doğrulama Sorunu Çözümü (23.02.2024)
+  - [X] Program.cs'de JWT yapılandırması düzenlendi
+  - [X] Token doğrulama parametreleri güncellendi
+  - [X] Key oluşturma mantığı standardize edildi
+  - [X] Token doğrulama başarıyla çalışıyor
+  - [X] Rol ve kullanıcı bilgileri doğru şekilde yükleniyor
+
+## Son Durum
+- Backend: http://localhost:5126 adresinde çalışıyor
+- Frontend: http://localhost:4200 adresinde çalışıyor
+- JWT token doğrulama sistemi sorunsuz çalışıyor
+- Rol ve kullanıcı yönetimi sayfaları aktif
+- HTTP 200 OK yanıtları alınıyor
+- Tüm servisler stabil çalışıyor

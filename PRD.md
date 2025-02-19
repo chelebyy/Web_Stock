@@ -95,7 +95,7 @@ The Inventory and Stock Tracking Web Application is designed to manage and monit
 
 ## 5. Technical Specifications
 
-- **Backend Framework:** .NET Core
+- **Backend Framework:** .NET Core 9
 - **Database:** PostgreSQL
 - **Frontend Framework:** Angular 19.1.2
 - **UI Components:** PrimeNG Library
