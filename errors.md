@@ -622,7 +622,7 @@ Number of keys in TokenValidationParameters: '1'.
 3. Key boyutu yetersiz veya uyumsuz
 
 ### Çözüm:
-1. Program.cs'de JWT yapılandırmasını düzenle:
+1. Program.cs'de JWT yapılandırmasını düzenledik:
 ```csharp
 var key = Encoding.UTF8.GetBytes(jwtSettings.SecretKey.PadRight(32));
 options.TokenValidationParameters = new TokenValidationParameters
@@ -637,16 +637,12 @@ options.TokenValidationParameters = new TokenValidationParameters
 };
 ```
 
-2. JwtService.cs'de aynı key oluşturma mantığını kullan:
-```csharp
-var key = Encoding.UTF8.GetBytes(_jwtSettings.SecretKey.PadRight(32));
-```
-
 ### Önemli Notlar:
 - Key oluşturma mantığı her yerde aynı olmalı
 - Key boyutu en az 256 bit (32 karakter) olmalı
 - UTF8 encoding kullanılmalı
 - PadRight ile key boyutu sabitlenmeli
+- Token doğrulama parametreleri doğru yapılandırılmalı
 
 ## RolesController Bağımlılık Sorunu (23.02.2024)
 
