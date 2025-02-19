@@ -42,8 +42,21 @@ export class LoginComponent {
   ) {}
 
   onSubmit(): void {
+    if (!this.username || !this.password) {
+      this.messageService.add({
+        severity: 'error',
+        summary: 'Hata',
+        detail: 'Kullanıcı adı ve şifre gereklidir!',
+        life: 3000
+      });
+      return;
+    }
+
+    console.log('Login isteği gönderiliyor:', { username: this.username, password: this.password });
+
     this.authService.login({ username: this.username, password: this.password }).subscribe({
       next: (response) => {
+        console.log('Login başarılı:', response);
         this.messageService.add({
           severity: 'success',
           summary: 'Başarılı',
@@ -51,16 +64,24 @@ export class LoginComponent {
           life: 3000
         });
         
-        // Ana sayfaya yönlendir
         setTimeout(() => {
           this.router.navigate(['/dashboard']);
         }, 1000);
       },
       error: (error) => {
+        console.error('Login hatası:', error);
+        let errorMessage = 'Bir hata oluştu!';
+        
+        if (error.status === 400) {
+          errorMessage = error.error?.message || 'Geçersiz kullanıcı adı veya şifre!';
+        } else if (error.status === 401) {
+          errorMessage = 'Kullanıcı adı veya şifre hatalı!';
+        }
+
         this.messageService.add({
           severity: 'error',
           summary: 'Hata',
-          detail: 'Kullanıcı adı veya şifre hatalı!',
+          detail: errorMessage,
           life: 3000
         });
       }

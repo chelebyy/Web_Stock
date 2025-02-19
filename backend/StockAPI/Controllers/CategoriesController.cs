@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using StockAPI.Data;
 using StockAPI.Models;
 using Microsoft.AspNetCore.Authorization;
+using StockAPI.Services;
 
 namespace StockAPI.Controllers;
 
@@ -11,13 +12,30 @@ namespace StockAPI.Controllers;
 [Authorize]
 public class CategoriesController : ControllerBase
 {
-    private readonly StockContext _context;
+    private readonly ApplicationDbContext _context;
+    private readonly IAuditLogService _auditLogService;
     private readonly ILogger<CategoriesController> _logger;
 
-    public CategoriesController(StockContext context, ILogger<CategoriesController> logger)
+    private static readonly Action<ILogger, string, Exception?> _logCategoryUpdateError =
+        LoggerMessage.Define<string>(
+            LogLevel.Error,
+            new EventId(1, nameof(PutCategory)),
+            "Kategori güncellenirken hata oluştu - Name: {CategoryName}");
+
+    private static readonly Action<ILogger, string, Exception?> _logCategoryCreateError =
+        LoggerMessage.Define<string>(
+            LogLevel.Error,
+            new EventId(2, nameof(PostCategory)),
+            "Kategori oluşturulurken hata oluştu - Name: {CategoryName}");
+
+    public CategoriesController(
+        ApplicationDbContext context,
+        IAuditLogService auditLogService,
+        ILogger<CategoriesController> logger)
     {
-        _context = context;
-        _logger = logger;
+        _context = context ?? throw new ArgumentNullException(nameof(context));
+        _auditLogService = auditLogService ?? throw new ArgumentNullException(nameof(auditLogService));
+        _logger = logger ?? throw new ArgumentNullException(nameof(logger));
     }
 
     // GET: api/Categories
@@ -54,66 +72,60 @@ public class CategoriesController : ControllerBase
     [HttpPost]
     public async Task<ActionResult<Category>> PostCategory(Category category)
     {
-        _logger.LogInformation("Yeni kategori oluşturuluyor");
-        
-        if (category.ParentCategoryId.HasValue)
+        ArgumentNullException.ThrowIfNull(category);
+
+        try
         {
-            var parentExists = await _context.Categories.AnyAsync(c => c.Id == category.ParentCategoryId && !c.IsDeleted);
-            if (!parentExists)
-            {
-                _logger.LogWarning("Üst kategori bulunamadı, ID: {ParentId}", category.ParentCategoryId);
-                return BadRequest("Belirtilen üst kategori bulunamadı.");
-            }
+            await _context.Categories.AddAsync(category).ConfigureAwait(false);
+            await _context.SaveChangesAsync().ConfigureAwait(false);
+
+            return CreatedAtAction(nameof(GetCategory), new { id = category.Id }, category);
         }
-
-        _context.Categories.Add(category);
-        await _context.SaveChangesAsync();
-
-        _logger.LogInformation("Yeni kategori oluşturuldu, ID: {Id}", category.Id);
-        return CreatedAtAction(nameof(GetCategory), new { id = category.Id }, category);
+        catch (DbUpdateException ex)
+        {
+            _logCategoryCreateError(_logger, category.Name, ex);
+            return StatusCode(500, new { message = "Kategori oluşturulurken bir hata oluştu" });
+        }
     }
 
     // PUT: api/Categories/5
     [HttpPut("{id}")]
     public async Task<IActionResult> PutCategory(int id, Category category)
     {
+        ArgumentNullException.ThrowIfNull(category);
+
         if (id != category.Id)
         {
-            _logger.LogWarning("Geçersiz kategori ID'si");
             return BadRequest();
         }
 
-        if (category.ParentCategoryId.HasValue)
-        {
-            var parentExists = await _context.Categories.AnyAsync(c => c.Id == category.ParentCategoryId && !c.IsDeleted);
-            if (!parentExists)
-            {
-                _logger.LogWarning("Üst kategori bulunamadı, ID: {ParentId}", category.ParentCategoryId);
-                return BadRequest("Belirtilen üst kategori bulunamadı.");
-            }
-        }
-
-        _context.Entry(category).State = EntityState.Modified;
-
         try
         {
-            await _context.SaveChangesAsync();
-            _logger.LogInformation("Kategori güncellendi, ID: {Id}", id);
-        }
-        catch (DbUpdateConcurrencyException)
-        {
-            if (!CategoryExists(id))
+            var existingCategory = await _context.Categories
+                .AsNoTracking()
+                .FirstOrDefaultAsync(c => c.Id == id)
+                .ConfigureAwait(false);
+
+            if (existingCategory == null)
             {
-                _logger.LogWarning("Kategori bulunamadı, ID: {Id}", id);
                 return NotFound();
             }
-            else
-            {
-                throw;
-            }
-        }
 
-        return NoContent();
+            _context.Entry(category).State = EntityState.Modified;
+            await _context.SaveChangesAsync().ConfigureAwait(false);
+
+            return NoContent();
+        }
+        catch (DbUpdateConcurrencyException ex)
+        {
+            if (!await CategoryExists(id).ConfigureAwait(false))
+            {
+                return NotFound();
+            }
+
+            _logCategoryUpdateError(_logger, category.Name, ex);
+            throw;
+        }
     }
 
     // DELETE: api/Categories/5
@@ -144,8 +156,8 @@ public class CategoriesController : ControllerBase
         return NoContent();
     }
 
-    private bool CategoryExists(int id)
+    private async Task<bool> CategoryExists(int id)
     {
-        return _context.Categories.Any(e => e.Id == id && !e.IsDeleted);
+        return await _context.Categories.AnyAsync(e => e.Id == id).ConfigureAwait(false);
     }
 }

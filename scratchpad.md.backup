@@ -1,7 +1,7 @@
 # Görev: Proje Gereksinimlerinin Uygulanması
 
 ## Gerekli Teknolojiler ve Sürümler
-- Backend: .NET Core 9
+- Backend: .NET Core 8
 - Veritabanı: PostgreSQL 17.3 (Local)
 - Frontend: Angular 19.1.2
 - UI Kütüphanesi: PrimeNG 19.0.6
@@ -10,7 +10,7 @@
 
 ## Yapılacaklar
 [X] Backend kurulumu
-  - [X] .NET Core 9 projesinin oluşturulması
+  - [X] .NET Core 8 projesinin oluşturulması
   - [X] PostgreSQL bağlantısının kurulması
   - [X] Temel proje yapısının oluşturulması
   - [X] User modelinin oluşturulması
@@ -239,66 +239,3 @@
 - Cross-Cutting Concerns Hedef: 98%
 - Domain Layer Hedef: 95%
 - Genel Değerlendirme Hedef: 95%
-
-# Görev: .NET Core 9 Geçişi
-
-## Yapılacaklar
-[ ] Geçiş Öncesi Hazırlık
-  - [ ] Mevcut sistem analizi
-  - [ ] Gereksinim dokümanlarının güncellenmesi
-  - [ ] Test coverage raporunun çıkarılması
-  - [ ] Yedekleme planının hazırlanması
-
-[ ] Altyapı Hazırlığı
-  - [ ] Development branch oluşturma
-  - [ ] CI/CD pipeline güncellemesi
-  - [ ] Test ortamı hazırlığı
-  - [ ] Monitoring araçları güncellemesi
-
-[ ] Kod Güncellemeleri
-  - [ ] Project file güncellemeleri
-  - [ ] Target framework güncelleme
-  - [ ] NuGet paketleri güncelleme
-  - [ ] API uyumluluk kontrolleri
-
-[ ] Test ve Optimizasyon
-  - [ ] Unit testlerin güncellenmesi
-  - [ ] Integration testlerin güncellenmesi
-  - [ ] Performance testleri
-  - [ ] Güvenlik testleri
-
-[ ] Deployment
-  - [ ] Staging deployment
-  - [ ] Production deployment planı
-  - [ ] Rollback planı
-  - [ ] Monitoring planı
-
-[X] JWT Token ve RolesController Sorunlarının Çözümü (23.02.2024)
-  - [X] JWT token doğrulama hatası çözüldü
-    - Key boyutu 256 bit'e çıkarıldı
-    - Encoding UTF8 olarak standardize edildi
-    - Token oluşturma ve doğrulama tutarlı hale getirildi
-  - [X] RolesController bağımlılık sorunu çözüldü
-    - StockContext yerine ApplicationDbContext kullanıldı
-    - Dependency Injection düzeltildi
-    - Rol listeleme başarıyla çalışıyor
-  - [X] Sistem stabil ve performanslı çalışıyor
-    - API yanıt süreleri 10-15ms aralığında
-    - Token doğrulama sorunsuz
-    - CORS politikaları düzgün çalışıyor
-
-## Yapıldı
-[X] JWT Token Doğrulama Sorunu Çözümü (23.02.2024)
-  - [X] Program.cs'de JWT yapılandırması düzenlendi
-  - [X] Token doğrulama parametreleri güncellendi
-  - [X] Key oluşturma mantığı standardize edildi
-  - [X] Token doğrulama başarıyla çalışıyor
-  - [X] Rol ve kullanıcı bilgileri doğru şekilde yükleniyor
-
-## Son Durum
-- Backend: http://localhost:5126 adresinde çalışıyor
-- Frontend: http://localhost:4200 adresinde çalışıyor
-- JWT token doğrulama sistemi sorunsuz çalışıyor
-- Rol ve kullanıcı yönetimi sayfaları aktif
-- HTTP 200 OK yanıtları alınıyor
-- Tüm servisler stabil çalışıyor
