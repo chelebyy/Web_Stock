@@ -110,7 +110,7 @@ export class LoginComponent implements OnInit, AfterViewInit {
 
         if (distance < this.mouseRadius) {
           // Mouse yakınındaki karakterlerin alpha değerini güncelle
-          const targetAlpha = this.map(distance, 0, this.mouseRadius, 1.5, 0.05); // Minimum değeri azalttık
+          const targetAlpha = this.map(distance, 0, this.mouseRadius, 2, 0.05); // 1.5'ten 2'ye çıkardık
           particle.alpha = this.lerp(particle.alpha, targetAlpha, 0.15);
 
           // Karakteri rastgele değiştir
