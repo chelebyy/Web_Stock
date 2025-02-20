@@ -4,7 +4,7 @@
 
 /* Global Styles */
 :root {
-  --surface-ground: #f8f9fa;
+  --surface-ground: #f5f7fa;
   --surface-card: #ffffff;
   --primary-color: #3B82F6;
   --text-color: #495057;
@@ -16,7 +16,7 @@ body {
   margin: 0;
   padding: 0;
   font-family: var(--font-family);
-  background: linear-gradient(45deg, #1a1f3c, #2a2f4c);
+  background: linear-gradient(135deg, #f5f7fa 0%, #e4e9f2 100%);
   min-height: 100vh;
   overflow-x: hidden;
 }
@@ -36,11 +36,20 @@ html, body {
 }
 
 .p-card {
-  background: var(--surface-card);
-  border-radius: 6px;
+  background: #ffffff;
+  border-radius: 12px;
   padding: 1.5rem;
   margin-bottom: 1rem;
-  box-shadow: 0 2px 1px -1px rgba(0,0,0,.2), 0 1px 1px 0 rgba(0,0,0,.14), 0 1px 3px 0 rgba(0,0,0,.12);
+  box-shadow: rgba(17, 17, 26, 0.1) 0px 4px 16px, 
+              rgba(17, 17, 26, 0.05) 0px 8px 32px;
+  border: 1px solid rgba(0,0,0,0.1);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: rgba(17, 17, 26, 0.15) 0px 8px 24px, 
+                rgba(17, 17, 26, 0.1) 0px 16px 48px;
+  }
 }
 
 /* Form stilleri */
