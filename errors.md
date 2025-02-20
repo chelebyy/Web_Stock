@@ -1,4 +1,123 @@
-# Proje Başlatma Sorunları ve Çözümleri
+# Proje Hataları ve Çözümleri
+
+## Clean Architecture Geçiş Sorunları (26.02.2024)
+
+### Sorun 1: Solution Yapısı
+```
+Hata: Proje referansları ve bağımlılıklar düzgün ayarlanmamış
+```
+
+### Nedeni:
+1. Katmanlar arası referanslar eksik
+2. NuGet paketleri yanlış projelerde
+3. Circular dependency riski
+
+### Çözüm:
+1. Proje referanslarını düzenle:
+```xml
+<!-- Stock.Application -->
+<ProjectReference Include="..\Stock.Domain\Stock.Domain.csproj" />
+
+<!-- Stock.Infrastructure -->
+<ProjectReference Include="..\Stock.Domain\Stock.Domain.csproj" />
+<ProjectReference Include="..\Stock.Application\Stock.Application.csproj" />
+
+<!-- Stock.API -->
+<ProjectReference Include="..\Stock.Infrastructure\Stock.Infrastructure.csproj" />
+```
+
+2. NuGet paketlerini doğru projelere taşı:
+- Domain: Sadece temel .NET paketleri
+- Application: AutoMapper, FluentValidation
+- Infrastructure: Entity Framework Core, Npgsql
+- API: ASP.NET Core paketleri, Swagger
+
+### Önemli Notlar:
+- Domain katmanı hiçbir katmana bağımlı olmamalı
+- Application katmanı sadece Domain'e bağımlı olmalı
+- Infrastructure hem Domain hem Application'a bağımlı olabilir
+- API katmanı Infrastructure'a bağımlı olabilir
+
+## CQRS Pattern Implementasyon Sorunları (26.02.2024)
+
+### Sorun 1: Interface Tanımlamaları
+```
+Hata: Generic tip parametreleri ve constraint'ler eksik
+```
+
+### Nedeni:
+1. ICommand ve IQuery interface'leri eksik tanımlanmış
+2. Handler'lar için constraint'ler eksik
+3. Return tipleri belirsiz
+
+### Çözüm:
+1. Interface'leri düzelt:
+```csharp
+public interface ICommand<TResult> { }
+public interface ICommand { }
+public interface IQuery<TResult> { }
+
+public interface ICommandHandler<in TCommand, TResult> 
+    where TCommand : ICommand<TResult>
+{
+    Task<TResult> Handle(TCommand command, CancellationToken cancellationToken);
+}
+
+public interface IQueryHandler<in TQuery, TResult> 
+    where TQuery : IQuery<TResult>
+{
+    Task<TResult> Handle(TQuery query, CancellationToken cancellationToken);
+}
+```
+
+### Önemli Notlar:
+- Generic tip parametreleri doğru kullanılmalı
+- Constraint'ler eksiksiz tanımlanmalı
+- Async/await pattern'i kullanılmalı
+- CancellationToken desteği eklenmelı
+
+## Entity İlişkileri Sorunları (26.02.2024)
+
+### Sorun 1: Navigation Property'ler
+```
+Hata: Entity ilişkileri düzgün tanımlanmamış
+```
+
+### Nedeni:
+1. Virtual keyword'ü eksik
+2. Collection tipleri yanlış
+3. Foreign key tanımlamaları eksik
+
+### Çözüm:
+1. Entity'leri düzelt:
+```csharp
+public class User : BaseEntity
+{
+    public string Username { get; set; }
+    public string PasswordHash { get; set; }
+    public bool IsAdmin { get; set; }
+    public int? RoleId { get; set; }
+    public virtual Role Role { get; set; }
+}
+
+public class Role : BaseEntity
+{
+    public string Name { get; set; }
+    public string Description { get; set; }
+    public virtual ICollection<User> Users { get; set; }
+
+    public Role()
+    {
+        Users = new HashSet<User>();
+    }
+}
+```
+
+### Önemli Notlar:
+- Virtual keyword'ü lazy loading için gerekli
+- Collection'lar için HashSet<T> tercih edilmeli
+- Foreign key'ler nullable olabilir
+- Constructor'da collection'lar initialize edilmeli
 
 ## Backend Başlatma Sorunu (18.02.2024)
 
@@ -782,3 +901,44 @@ public RolesController(ApplicationDbContext context, ILogger<RolesController> lo
 - Mobil görünüm kontrol edildi
 - Performance profiling yapıldı
 - Memory leak tespit edilmedi
+
+## Rol Oluşturma Sorunları (26.02.2024)
+
+### Sorun 1: CreatedBy ve UpdatedBy Alanları
+```
+Hata: 400 Bad Request - CreatedBy ve UpdatedBy alanları gerekli
+```
+
+### Nedeni:
+1. BaseEntity sınıfında CreatedBy ve UpdatedBy alanları required olarak tanımlanmış
+2. Role oluşturma isteğinde bu alanlar gönderilmemiş
+3. Validation hatası alınıyor
+
+### Çözüm:
+1. BaseEntity sınıfında CreatedBy ve UpdatedBy alanlarını nullable yap:
+```csharp
+public string? CreatedBy { get; set; }
+public string? UpdatedBy { get; set; }
+```
+
+2. Role entity'sinde Name ve Description için default değerler tanımla:
+```csharp
+public string Name { get; set; } = string.Empty;
+public string Description { get; set; } = string.Empty;
+```
+
+3. Role oluşturma isteğinde system kullanıcısını ekle:
+```json
+{
+  "name": "Administrator",
+  "description": "Sistem Yöneticisi",
+  "createdBy": "system",
+  "updatedBy": "system"
+}
+```
+
+### Önemli Notlar:
+- BaseEntity'de nullable string kullanımı
+- Default değerler ile null reference hatalarını önleme
+- System kullanıcısı ile audit alanlarını doldurma
+- Entity konfigürasyonlarında MaxLength tanımlama
