@@ -12,10 +12,10 @@ namespace StockAPI.Controllers
     [Route("api/[controller]")]
     public class RolesController : ControllerBase
     {
-        private readonly StockContext _context;
+        private readonly ApplicationDbContext _context;
         private readonly ILogger<RolesController> _logger;
 
-        public RolesController(StockContext context, ILogger<RolesController> logger)
+        public RolesController(ApplicationDbContext context, ILogger<RolesController> logger)
         {
             _context = context;
             _logger = logger;

@@ -24,9 +24,18 @@ import { MessageService } from 'primeng/api';
   ],
   providers: [MessageService],
   template: `
+    <div class="animated-background">
+      <div class="cube"></div>
+      <div class="cube"></div>
+      <div class="cube"></div>
+      <div class="cube"></div>
+      <div class="cube"></div>
+      <div class="lines"></div>
+    </div>
+
     <p-toast></p-toast>
-    <div class="container">
-      <p-card>
+    <div class="dashboard-container">
+      <div class="glass-card">
         <div class="header">
           <div class="header-title">
             <h1>Merhaba, {{ username }}</h1>
@@ -114,51 +123,138 @@ import { MessageService } from 'primeng/api';
             </p-button>
           </div>
         </div>
-      </p-card>
+      </div>
     </div>
   `,
   styles: [`
-    .container {
+    :host {
+      display: block;
+      min-height: 100vh;
+    }
+
+    .animated-background {
+      position: fixed;
+      width: 100vw;
+      height: 100vh;
+      top: 0;
+      left: 0;
+      background: linear-gradient(45deg, #1a1f3c, #2a2f4c);
+      overflow: hidden;
+      z-index: 0;
+    }
+
+    .cube {
+      position: absolute;
+      top: 80vh;
+      left: 45vw;
+      width: 10px;
+      height: 10px;
+      border: solid 1px rgba(255, 255, 255, 0.2);
+      transform-origin: top left;
+      transform: scale(0) rotate(0deg) translate(-50%, -50%);
+      animation: cube 12s ease-in forwards infinite;
+      
+      &:nth-child(2) {
+        animation-delay: 2s;
+        left: 25vw;
+        top: 40vh;
+      }
+      
+      &:nth-child(3) {
+        animation-delay: 4s;
+        left: 75vw;
+        top: 50vh;
+      }
+      
+      &:nth-child(4) {
+        animation-delay: 6s;
+        left: 90vw;
+        top: 10vh;
+      }
+      
+      &:nth-child(5) {
+        animation-delay: 8s;
+        left: 10vw;
+        top: 85vh;
+      }
+    }
+
+    .lines {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: repeating-linear-gradient(
+        0deg,
+        transparent 0%,
+        rgba(255, 255, 255, 0.05) 0.5%,
+        transparent 1%
+      );
+      animation: lines 20s linear infinite;
+      background-size: 100% 50px;
+    }
+
+    @keyframes lines {
+      0% {
+        background-position: 0 0;
+      }
+      100% {
+        background-position: 0 1000px;
+      }
+    }
+
+    @keyframes cube {
+      from {
+        transform: scale(0) rotate(0deg) translate(-50%, -50%);
+        opacity: 1;
+      }
+      to {
+        transform: scale(20) rotate(960deg) translate(-50%, -50%);
+        opacity: 0;
+      }
+    }
+
+    .dashboard-container {
+      position: relative;
+      z-index: 1;
       max-width: 600px;
       margin: 50px auto;
       padding: 0 20px;
+      animation: fadeIn 0.5s ease-out;
+    }
+
+    .glass-card {
+      background: rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      border-radius: 16px;
+      padding: 2rem;
+      box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.15);
+      border: 1px solid rgba(255, 255, 255, 0.18);
     }
 
     .header {
       margin-bottom: 20px;
       padding-bottom: 20px;
-      border-bottom: 1px solid #eee;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.3);
     }
 
     .header-title {
       text-align: center;
       margin-bottom: 15px;
+
+      h1 {
+        color: #fff;
+        margin: 0;
+        font-size: 28px;
+      }
     }
 
     .header-buttons {
       display: flex;
       justify-content: center;
       gap: 10px;
-    }
-
-    h1 {
-      color: #2196F3;
-      margin: 0;
-      font-size: 28px;
-    }
-
-    h2 {
-      color: #2196F3;
-      margin: 0 0 25px 0;
-      font-size: 22px;
-      text-align: center;
-    }
-
-    p {
-      text-align: center;
-      color: #666;
-      margin: 0 0 30px 0;
-      font-size: 16px;
     }
 
     .button-group {
@@ -169,35 +265,30 @@ import { MessageService } from 'primeng/api';
     }
 
     .password-change-section {
-      margin: 0 auto;
+      background: rgba(255, 255, 255, 0.1);
       padding: 25px;
-      border-radius: 8px;
-      background-color: #f8f9fa;
-      box-shadow: inset 0 2px 4px rgba(0,0,0,0.05);
-      max-width: 400px;
-      border: 1px solid #e9ecef;
+      border-radius: 12px;
+      margin-top: 20px;
+
+      h2 {
+        color: #fff;
+        text-align: center;
+        margin-bottom: 20px;
+      }
     }
 
-    .p-field {
-      margin-bottom: 20px;
-    }
-
-    label {
-      display: block;
-      margin-bottom: 8px;
-      color: #666;
-      font-size: 14px;
-      font-weight: 500;
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
     }
 
     :host ::ng-deep {
-      .p-card {
-        background: #fff;
-        padding: 30px;
-        border-radius: 8px;
-        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-      }
-
       .p-button {
         width: 100%;
       }
@@ -207,57 +298,21 @@ import { MessageService } from 'primeng/api';
           width: auto;
           min-width: 120px;
           padding: 0.5rem 1rem;
-          
-          .p-button-icon {
-            font-size: 1rem;
-          }
-
-          &.p-button-text {
-            &:hover {
-              background: rgba(0,0,0,0.05);
-            }
-          }
-
-          &.p-button-text.p-button-warning {
-            color: #f59e0b;
-            &:hover {
-              background: rgba(245,158,11,0.1);
-            }
-          }
-
-          &.p-button-text.p-button-help {
-            color: #7c3aed;
-            &:hover {
-              background: rgba(124,58,237,0.1);
-            }
-          }
         }
       }
 
-      .p-password {
-        width: 100%;
+      .p-password input {
+        background: rgba(255, 255, 255, 0.1);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        color: #fff;
 
-        input {
-          width: 100%;
-          padding: 12px;
-          border-radius: 4px;
-        }
-
-        .p-password-panel {
-          margin-top: 5px;
+        &::placeholder {
+          color: rgba(255, 255, 255, 0.5);
         }
       }
 
-      .p-button.p-button-success {
-        margin-top: 10px;
-        padding: 12px;
-        font-weight: 600;
-      }
-
-      .p-toast {
-        .p-toast-message {
-          border-radius: 4px;
-        }
+      label {
+        color: #fff;
       }
     }
   `]
@@ -353,3 +408,4 @@ export class DashboardComponent {
       });
   }
 }
+

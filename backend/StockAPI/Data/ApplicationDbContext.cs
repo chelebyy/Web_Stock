@@ -1,72 +1,125 @@
 using Microsoft.EntityFrameworkCore;
 using StockAPI.Models;
-using System.Security.Cryptography;
-using System.Text;
+using StockAPI.Services;
 
 namespace StockAPI.Data
 {
     public class ApplicationDbContext : DbContext
     {
-        public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options)
+        private readonly IHashService _hashService;
+
+        public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options, IHashService hashService)
             : base(options)
         {
+            _hashService = hashService;
         }
 
-        public DbSet<User> Users { get; set; }
-        public DbSet<Category> Categories { get; set; }
-        public DbSet<Product> Products { get; set; }
+        public DbSet<User> Users => Set<User>();
+        public DbSet<Role> Roles => Set<Role>();
+        public DbSet<Product> Products => Set<Product>();
+        public DbSet<Category> Categories => Set<Category>();
+        public DbSet<AuditLog> AuditLogs => Set<AuditLog>();
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
+            ArgumentNullException.ThrowIfNull(modelBuilder);
+
             base.OnModelCreating(modelBuilder);
 
-            // Category yapılandırması
-            modelBuilder.Entity<Category>(entity =>
+            // User yapılandırması
+            modelBuilder.Entity<User>(entity =>
             {
-                entity.HasOne(c => c.ParentCategory)
-                    .WithMany(c => c.SubCategories)
-                    .HasForeignKey(c => c.ParentCategoryId)
+                entity.HasKey(e => e.Id);
+                entity.Property(e => e.Username).IsRequired().HasMaxLength(50);
+                entity.Property(e => e.PasswordHash).IsRequired();
+                entity.Property(e => e.CreatedAt).IsRequired();
+                entity.HasOne(e => e.Role)
+                    .WithMany(r => r.Users)
+                    .HasForeignKey(e => e.RoleId)
                     .OnDelete(DeleteBehavior.Restrict);
+            });
+
+            // Role yapılandırması
+            modelBuilder.Entity<Role>(entity =>
+            {
+                entity.HasKey(e => e.Id);
+                entity.Property(e => e.Name).IsRequired().HasMaxLength(50);
+                entity.Property(e => e.CreatedAt).IsRequired();
             });
 
             // Product yapılandırması
             modelBuilder.Entity<Product>(entity =>
             {
-                entity.HasOne(p => p.Category)
+                entity.HasKey(e => e.Id);
+                entity.Property(e => e.Name).IsRequired().HasMaxLength(100);
+                entity.Property(e => e.CreatedAt).IsRequired();
+                entity.HasOne(e => e.Category)
                     .WithMany(c => c.Products)
-                    .HasForeignKey(p => p.CategoryId)
+                    .HasForeignKey(e => e.CategoryId)
                     .OnDelete(DeleteBehavior.Restrict);
-
-                entity.Property(p => p.Price)
-                    .HasPrecision(18, 2);
             });
 
-            // Admin kullanıcısı oluştur
-            var password = "Admin123!";
-            var passwordHash = ComputeSha256Hash(password);
+            // Category yapılandırması
+            modelBuilder.Entity<Category>(entity =>
+            {
+                entity.HasKey(e => e.Id);
+                entity.Property(e => e.Name).IsRequired().HasMaxLength(50);
+                entity.Property(e => e.CreatedAt).IsRequired();
+            });
 
-            modelBuilder.Entity<User>().HasData(new User
+            // AuditLog yapılandırması
+            modelBuilder.Entity<AuditLog>(entity =>
+            {
+                entity.HasKey(e => e.Id);
+                entity.Property(e => e.UserId).IsRequired();
+                entity.Property(e => e.Action).IsRequired().HasMaxLength(50);
+                entity.Property(e => e.EntityType).IsRequired().HasMaxLength(50);
+                entity.Property(e => e.EntityId).IsRequired();
+                entity.Property(e => e.Path).HasMaxLength(255);
+                entity.Property(e => e.Timestamp).IsRequired();
+                entity.Property(e => e.CreatedAt).IsRequired();
+                
+                entity.HasOne(e => e.User)
+                    .WithMany()
+                    .HasForeignKey(e => e.UserId)
+                    .OnDelete(DeleteBehavior.Restrict);
+            });
+
+            // Seed data
+            SeedData(modelBuilder);
+        }
+
+        private static void SeedData(ModelBuilder modelBuilder)
+        {
+            var seedTime = new DateTime(2024, 2, 23, 0, 0, 0, DateTimeKind.Utc);
+
+            var adminRole = new Role
+            {
+                Id = 1,
+                Name = "Admin",
+                CreatedAt = seedTime
+            };
+
+            var userRole = new Role
+            {
+                Id = 2,
+                Name = "User",
+                CreatedAt = seedTime
+            };
+
+            modelBuilder.Entity<Role>().HasData(adminRole, userRole);
+
+            var adminUser = new User
             {
                 Id = 1,
                 Username = "admin",
-                PasswordHash = passwordHash,
+                PasswordHash = "JAvlGPq9JyTdtvBO6x2llnRI1+gxwIyPqCKAn3THIKk=", // admin123
                 IsAdmin = true,
-                CreatedAt = new DateTime(2025, 1, 1, 0, 0, 0, DateTimeKind.Utc)
-            });
-        }
+                RoleId = adminRole.Id,
+                CreatedAt = seedTime
+            };
 
-        private string ComputeSha256Hash(string rawData)
-        {
-            using (SHA256 sha256Hash = SHA256.Create())
-            {
-                byte[] bytes = sha256Hash.ComputeHash(Encoding.UTF8.GetBytes(rawData));
-                StringBuilder builder = new StringBuilder();
-                for (int i = 0; i < bytes.Length; i++)
-                {
-                    builder.Append(bytes[i].ToString("x2"));
-                }
-                return builder.ToString();
-            }
+            modelBuilder.Entity<User>().HasData(adminUser);
         }
 
         public override Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
@@ -77,13 +130,15 @@ namespace StockAPI.Data
                     e.State == EntityState.Added
                     || e.State == EntityState.Modified));
 
+            var currentTime = DateTime.UtcNow;
+
             foreach (var entityEntry in entries)
             {
-                ((BaseEntity)entityEntry.Entity).UpdatedAt = new DateTime(2025, 1, 1, 0, 0, 0, DateTimeKind.Utc);
+                ((BaseEntity)entityEntry.Entity).UpdatedAt = currentTime;
 
                 if (entityEntry.State == EntityState.Added)
                 {
-                    ((BaseEntity)entityEntry.Entity).CreatedAt = new DateTime(2025, 1, 1, 0, 0, 0, DateTimeKind.Utc);
+                    ((BaseEntity)entityEntry.Entity).CreatedAt = currentTime;
                 }
             }
 

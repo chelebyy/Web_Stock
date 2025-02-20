@@ -36,33 +36,62 @@ globs:
 - **Core Technologies**: .NET Core 8, PostgreSQL 17.3, Angular 19.1.2, PrimeNG 19.0.6,Tailwind CSS 3.4.1.
 - **Development Tools**: npm, ESLint.
 
-## Project Structure (Local System)
+## Project Structure (Clean Architecture)
 
 ```
-project-root/
-├── backend/
-│   ├── Models/
-│   │   ├── Entities/
-│   │   └── DTOs/
-│   ├── Services/
-│   │   └── Interfaces/
-│   ├── Repositories/
-│   ├── Controllers/
-│   └── Data/
-│       └── Configurations/
-├── frontend/
+Solution
+├── src/
+│   ├── Stock.Domain/              # Domain Layer
+│   │   ├── Entities/             # Domain entities
+│   │   ├── Interfaces/           # Repository interfaces
+│   │   ├── Events/              # Domain events
+│   │   ├── Exceptions/          # Domain exceptions
+│   │   └── Specifications/      # Query specifications
+│   │
+│   ├── Stock.Application/         # Application Layer
+│   │   ├── Common/              # Shared components
+│   │   ├── Features/            # Use cases
+│   │   │   ├── Auth/           # Authentication
+│   │   │   ├── Users/          # User management
+│   │   │   └── Roles/          # Role management
+│   │   ├── Interfaces/         # Service interfaces
+│   │   ├── Models/             # DTOs
+│   │   └── Services/           # Application services
+│   │
+│   ├── Stock.Infrastructure/      # Infrastructure Layer
+│   │   ├── Data/               # Data access
+│   │   │   ├── Config/        # EF configurations
+│   │   │   ├── Migrations/    # EF migrations
+│   │   │   └── Repositories/  # Repository implementations
+│   │   ├── Identity/          # Authentication
+│   │   ├── Logging/           # Logging implementations
+│   │   └── Services/          # External services
+│   │
+│   └── Stock.API/                # API Layer
+│       ├── Controllers/         # API endpoints
+│       ├── Filters/            # Action filters
+│       ├── Middleware/         # Custom middleware
+│       └── Extensions/         # Service extensions
+│
+├── tests/                        # Test Projects
+│   ├── Stock.UnitTests/         # Unit tests
+│   ├── Stock.IntegrationTests/  # Integration tests
+│   └── Stock.FunctionalTests/   # E2E tests
+│
+├── frontend/                     # Angular Frontend
 │   ├── src/
 │   │   ├── app/
-│   │   │   ├── components/
-│   │   │   ├── services/
-│   │   │   ├── models/
-│   │   │   └── guards/
-│   │   ├── assets/
-│   │   └── environments/
-│   └── tests/
-└── docs/
-    ├── guides/
-    └── architecture/
+│   │   │   ├── components/    # UI components
+│   │   │   ├── services/      # API services
+│   │   │   ├── models/        # TypeScript interfaces
+│   │   │   └── guards/        # Route guards
+│   │   ├── assets/           # Static files
+│   │   └── environments/     # Environment configs
+│   └── tests/                # Frontend tests
+│
+└── docs/                        # Documentation
+    ├── guides/               # User guides
+    └── architecture/        # Architecture docs
 ```
 
 ## Local System Requirements
@@ -475,3 +504,216 @@ public interface ICommandHandler<TCommand>
    - User behavior analytics
 
 @.cursorrules @scratchpad.md @Roadmap.md 
+
+## Frontend Architecture Guidelines
+
+### Component Architecture
+```typescript
+@Component({
+    selector: 'app-user-list',
+    standalone: true,
+    imports: [CommonModule, PrimeNgModule],
+    template: `...`
+})
+export class UserListComponent {
+    private readonly userService = inject(UserService);
+    users = signal<User[]>([]);
+    
+    ngOnInit() {
+        this.loadUsers();
+    }
+    
+    async loadUsers() {
+        this.users.set(await this.userService.getUsers());
+    }
+}
+```
+
+### State Management
+```typescript
+export interface AppState {
+    users: User[];
+    roles: Role[];
+    currentUser: User | null;
+}
+
+export const initialState: AppState = {
+    users: [],
+    roles: [],
+    currentUser: null
+};
+
+export const appFeature = createFeature({
+    name: 'app',
+    reducer: createReducer(
+        initialState,
+        on(loadUsers, (state) => ({ ...state })),
+        on(loadUsersSuccess, (state, { users }) => ({ ...state, users }))
+    )
+});
+```
+
+### Performance Optimization
+```typescript
+@Component({
+    selector: 'app-user-table',
+    template: `
+        <p-table 
+            [value]="users()" 
+            [virtualScroll]="true"
+            [rows]="10"
+            [lazy]="true"
+            (onLazyLoad)="loadUsers($event)">
+            <!-- table content -->
+        </p-table>
+    `
+})
+export class UserTableComponent {
+    users = signal<User[]>([]);
+    
+    @Input() set data(value: User[]) {
+        this.users.set(value);
+    }
+    
+    trackByFn(index: number, item: User): number {
+        return item.id;
+    }
+}
+```
+
+## DevOps ve CI/CD Guidelines
+
+### GitHub Actions Workflow
+```yaml
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v2
+    
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v1
+      with:
+        dotnet-version: '9.0.x'
+    
+    - name: Restore dependencies
+      run: dotnet restore
+    
+    - name: Build
+      run: dotnet build --no-restore
+    
+    - name: Test
+      run: dotnet test --no-build --verbosity normal
+```
+
+### Docker Deployment
+```dockerfile
+# API Dockerfile
+FROM mcr.microsoft.com/dotnet/aspnet:9.0 AS base
+WORKDIR /app
+EXPOSE 80
+EXPOSE 443
+
+FROM mcr.microsoft.com/dotnet/sdk:9.0 AS build
+WORKDIR /src
+COPY ["Stock.API/Stock.API.csproj", "Stock.API/"]
+RUN dotnet restore "Stock.API/Stock.API.csproj"
+COPY . .
+WORKDIR "/src/Stock.API"
+RUN dotnet build "Stock.API.csproj" -c Release -o /app/build
+
+FROM build AS publish
+RUN dotnet publish "Stock.API.csproj" -c Release -o /app/publish
+
+FROM base AS final
+WORKDIR /app
+COPY --from=publish /app/publish .
+ENTRYPOINT ["dotnet", "Stock.API.dll"]
+```
+
+## Database Management Guidelines
+
+### Migration Strategy
+```csharp
+public class ApplicationDbContextFactory : IDesignTimeDbContextFactory<ApplicationDbContext>
+{
+    public ApplicationDbContext CreateDbContext(string[] args)
+    {
+        var optionsBuilder = new DbContextOptionsBuilder<ApplicationDbContext>();
+        optionsBuilder.UseNpgsql(GetConnectionString());
+        
+        return new ApplicationDbContext(optionsBuilder.Options);
+    }
+    
+    private string GetConnectionString()
+    {
+        var configuration = new ConfigurationBuilder()
+            .SetBasePath(Directory.GetCurrentDirectory())
+            .AddJsonFile("appsettings.json")
+            .Build();
+            
+        return configuration.GetConnectionString("DefaultConnection");
+    }
+}
+```
+
+### Performance Optimization
+```csharp
+public class ApplicationDbContext : DbContext
+{
+    protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+    {
+        optionsBuilder
+            .UseNpgsql(connectionString, options => {
+                options.EnableRetryOnFailure(3);
+                options.CommandTimeout(30);
+                options.MaxBatchSize(100);
+            })
+            .UseQueryTrackingBehavior(QueryTrackingBehavior.NoTracking);
+    }
+    
+    protected override void OnModelCreating(ModelBuilder modelBuilder)
+    {
+        // Indexes
+        modelBuilder.Entity<User>()
+            .HasIndex(u => u.Username)
+            .IsUnique();
+            
+        modelBuilder.Entity<Role>()
+            .HasIndex(r => r.Name)
+            .IsUnique();
+            
+        // Relationships
+        modelBuilder.Entity<User>()
+            .HasOne(u => u.Role)
+            .WithMany(r => r.Users)
+            .HasForeignKey(u => u.RoleId)
+            .OnDelete(DeleteBehavior.Restrict);
+    }
+}
+```
+
+### Backup and Recovery
+```powershell
+# Backup script
+$timestamp = Get-Date -Format "yyyyMMdd_HHmmss"
+$backupPath = "C:\Backups\db_backup_$timestamp.sql"
+$connectionString = "Host=localhost;Database=stockdb;Username=postgres;Password=yourpassword"
+
+pg_dump -h localhost -U postgres -F c -b -v -f $backupPath stockdb
+
+# Restore script
+$backupFile = "db_backup_20250225_120000.sql"
+$connectionString = "Host=localhost;Database=stockdb;Username=postgres;Password=yourpassword"
+
+pg_restore -h localhost -U postgres -d stockdb -v $backupFile
+```
