@@ -1,5 +1,5 @@
-@import "primeng/resources/themes/lara-light-blue/theme.css";
-@import "primeng/resources/primeng.min.css";
+@import "primeng/resources/themes/lara-dark-blue/theme.css";
+@import "primeng/resources/primeng.css";
 @import "primeicons/primeicons.css";
 
 /* Global Styles */
@@ -13,11 +13,12 @@
 }
 
 body {
-  font-family: var(--font-family);
   margin: 0;
   padding: 0;
-  background-color: var(--surface-ground);
-  color: var(--text-color);
+  font-family: var(--font-family);
+  background: linear-gradient(45deg, #1a1f3c, #2a2f4c);
+  min-height: 100vh;
+  overflow-x: hidden;
 }
 
 html, body {
@@ -147,4 +148,83 @@ html, body {
   text-align: right;
   padding-top: 1rem;
   border-top: 1px solid var(--surface-border);
+}
+
+/* Scrollbar Styles */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.3);
+}
+
+/* Glass Effect */
+.glass-effect {
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 20px;
+}
+
+/* Neon Text Effect */
+.neon-text {
+  color: #fff;
+  text-shadow: 0 0 10px rgba(74, 158, 255, 0.8),
+               0 0 20px rgba(74, 158, 255, 0.8),
+               0 0 30px rgba(74, 158, 255, 0.8);
+}
+
+/* Gradient Button */
+.gradient-button {
+  background: linear-gradient(45deg, #4a9eff, #6d18ff);
+  border: none;
+  color: white;
+  transition: all 0.3s ease;
+
+  &:hover {
+    background: linear-gradient(45deg, #3a8eff, #5d08ff);
+    box-shadow: 0 0 20px rgba(74, 158, 255, 0.4);
+    transform: translateY(-2px);
+  }
+
+  &:active {
+    transform: translateY(0);
+  }
+}
+
+/* Animation Keyframes */
+@keyframes float {
+  0% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-20px);
+  }
+  100% {
+    transform: translateY(0px);
+  }
+}
+
+@keyframes glow {
+  0% {
+    box-shadow: 0 0 5px rgba(74, 158, 255, 0.2);
+  }
+  50% {
+    box-shadow: 0 0 20px rgba(74, 158, 255, 0.6);
+  }
+  100% {
+    box-shadow: 0 0 5px rgba(74, 158, 255, 0.2);
+  }
 }
