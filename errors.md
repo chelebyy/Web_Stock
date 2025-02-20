@@ -704,3 +704,41 @@ public RolesController(ApplicationDbContext context, ILogger<RolesController> lo
 - Mobil görünüm kontrol edildi
 - API yanıt süreleri 200ms altında
 - Memory leak tespit edilmedi
+
+## Matrix Efekti ve Görsel İyileştirmeler (24.02.2024)
+
+### Yapılan İyileştirmeler:
+1. Arka Plan:
+   - Koyu lacivert ton (rgba(10, 14, 25, 0.98))
+   - Matrix benzeri karakter yağmuru efekti
+   - Karakterlerin minimum görünürlüğü 0.05
+   - Mouse etkileşimi ile karakterlerin parlaklığı artıyor
+
+2. Renk Ayarları:
+   - HSL renk uzayı kullanıldı
+   - Saturation: 65-100 arası
+   - Lightness: 55-75 arası
+   - Daha yumuşak ve göz yormayan renkler
+
+3. Performans İyileştirmeleri:
+   - RequestAnimationFrame kullanıldı
+   - Canvas boyut optimizasyonları yapıldı
+   - Gereksiz render'lar engellendi
+
+### Önemli Notlar:
+- Canvas performansı için window resize event'i throttle edilmeli
+- Alpha değerleri 0-1 arasında sınırlandırılmalı
+- Mouse etkileşimi için mouseRadius değeri ekran boyutuna göre ayarlanmalı
+- Karakter değişim hızı (0.05) performans için optimize edildi
+
+### Çözülen Sorunlar:
+1. Arka plan çok açıktı -> rgba(10, 14, 25, 0.98) ile düzeltildi
+2. Karakterler çok parlaktı -> minimum alpha 0.05'e düşürüldü
+3. Renkler çok canlıydı -> HSL değerleri yumuşatıldı
+4. Mouse etkileşimi yavaştı -> lerp faktörü 0.15'e yükseltildi
+
+### Test Sonuçları:
+- Chrome, Firefox ve Edge'de test edildi
+- Mobil cihazlarda performans kontrol edildi
+- Memory leak tespit edilmedi
+- FPS değerleri stabil seyrediyor

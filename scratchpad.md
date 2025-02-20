@@ -318,3 +318,34 @@
     - Toast mesajları ile kullanıcı bildirimleri
     - Form validasyonları
     - API hata yakalama
+
+## Login Sayfası Matrix Efekti (24.02.2024)
+
+### Tamamlanan Görevler:
+[X] Matrix benzeri karakter yağmuru efekti eklendi
+[X] Mouse etkileşimi ile karakter parlaklığı ayarlandı
+[X] Renk paleti optimize edildi
+[X] Performans iyileştirmeleri yapıldı
+[X] Cross-browser uyumluluğu test edildi
+
+### Öğrenilen Dersler:
+1. Canvas performansı için:
+   - RequestAnimationFrame kullanımı
+   - Gereksiz render'ların engellenmesi
+   - Event listener'ların optimize edilmesi
+
+2. Görsel efektler için:
+   - HSL renk uzayının avantajları
+   - Alpha değerlerinin doğru kullanımı
+   - Lerp fonksiyonu ile smooth transitions
+
+3. Kullanıcı deneyimi için:
+   - Mouse etkileşiminin önemi
+   - Görsel feedback mekanizmaları
+   - Performans/görsellik dengesi
+
+### Gelecek İyileştirmeler:
+[ ] Window resize event throttling
+[ ] Mobil cihazlar için touch event desteği
+[ ] Farklı karakter setleri için destek
+[ ] Ekran boyutuna göre otomatik grid size ayarı
