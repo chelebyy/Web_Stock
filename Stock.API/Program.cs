@@ -102,6 +102,24 @@ using (var scope = app.Services.CreateScope())
     var services = scope.ServiceProvider;
     try
     {
+        // Admin şifresini sıfırlama argümanı kontrolü
+        if (args.Contains("--reset-admin"))
+        {
+            var context = services.GetRequiredService<ApplicationDbContext>();
+            var adminUser = context.Users.FirstOrDefault(u => u.Username == "Admin");
+            
+            if (adminUser != null)
+            {
+                adminUser.PasswordHash = BCrypt.Net.BCrypt.EnhancedHashPassword("Admin123", 13);
+                context.SaveChanges();
+                Log.Information("Admin kullanıcısının şifresi başarıyla sıfırlandı: Admin123");
+            }
+            else
+            {
+                Log.Warning("Admin kullanıcısı bulunamadı, şifre sıfırlanamadı.");
+            }
+        }
+        
         CreateAdminUser.Initialize(services);
     }
     catch (Exception ex)

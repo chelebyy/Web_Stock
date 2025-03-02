@@ -13,6 +13,7 @@ Bu dosya, proje geliştirme sürecinde karşılaşılan hataları ve çözümler
 - [API İstek Hataları](#api-i̇stek-hataları)
 - [Şifre Hashleme ve Doğrulama Sorunları](#şifre-hashleme-ve-doğrulama-sorunları)
 - [Bağımlılık Enjeksiyon Hataları](#bağımlılık-enjeksiyon-hataları)
+- [Login Hataları](#login-hataları)
 
 ## Clean Architecture Geçişi Hataları
 
@@ -1069,3 +1070,65 @@ export const routes: Routes = [
 - AuthService'den kullanıcı bilgisi alınarak doğru dashboard'a yönlendirme yapılıyor
 - Her iki dashboard rotası da AuthGuard ile korunuyor
 - Admin dashboard için ekstra requiresAdmin data parametresi eklendi
+
+# Login Hataları
+
+## BCrypt Work Factor Tutarsızlığı
+
+### Sorun
+- Farklı zamanlarda oluşturulan admin kullanıcıları için farklı BCrypt work factor'leri kullanılması
+- Veritabanında aynı kullanıcı için farklı büyük-küçük harf kombinasyonlarıyla kayıtlar oluşması
+
+### Çözüm
+1. BCrypt work factor'ü sabit bir değerde (11) tutuldu
+2. Kullanıcı adları için case-sensitive kontrol eklendi
+3. Migration ile admin kullanıcıları temizlenip yeniden oluşturuldu
+
+### Önlemler
+1. `PasswordHasher` sınıfında work factor sabitlenerek tutarsızlık önlendi
+2. Kullanıcı oluşturma ve doğrulama işlemlerinde detaylı loglama eklendi
+3. Migration ile veritabanı tutarlılığı sağlandı
+
+## Port Çakışması
+
+### Sorun
+- Frontend (4202) ve backend (5037) portlarında çakışma
+
+### Çözüm
+1. Servisleri başlatmadan önce ilgili portları kullanan işlemleri sonlandır:
+```powershell
+taskkill /F /IM Stock.API.exe
+taskkill /F /IM node.exe
+```
+
+### Önlemler
+1. Servisleri başlatmadan önce port kontrolü yap
+2. Alternatif portlar için yapılandırma ekle
+3. Servis başlatma/durdurma için script oluştur
+
+## Admin Dashboard Hataları ve Çözümleri
+
+### Hata: TypeError - userActivityLogs is not iterable
+**Sorun:** Admin dashboard'da userActivityLogs değişkeni undefined olarak geliyordu ve bu nedenle iterable hatası alınıyordu.
+
+**Çözüm:** 
+1. loadUserActivityLogs fonksiyonuna null kontrolü eklendi
+2. API yanıtı için kontrol mekanizması güçlendirildi
+3. Hata durumunda örnek veriler gösterilmesi sağlandı
+
+```typescript
+if (response && response.Logs) {
+  this.userActivityLogs = response.Logs;
+  this.totalRecords = response.TotalItems || 0;
+} else {
+  this.userActivityLogs = [];
+  this.totalRecords = 0;
+  console.warn('API yanıtında Logs verisi bulunamadı:', response);
+}
+```
+
+### Öğrenilen Dersler
+1. API yanıtlarında her zaman null kontrolü yapılmalı
+2. Hata durumları için fallback mekanizması oluşturulmalı
+3. Konsola detaylı hata mesajları yazılmalı
+4. Kullanıcıya anlamlı hata mesajları gösterilmeli

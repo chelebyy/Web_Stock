@@ -8,11 +8,14 @@
 </div>
 
 <p-toast></p-toast>
+
 <div class="dashboard-container">
   <div class="glass-card">
+    <!-- Üst Başlık ve Kullanıcı Bilgileri -->
     <div class="header">
       <div class="header-title">
-        <h1>Merhaba, {{ username }} (Admin)</h1>
+        <h1>Yönetim Paneli</h1>
+        <p class="welcome-text">Hoş geldiniz, <span class="username">{{ username }}</span></p>
       </div>
       <div class="header-buttons">
         <p-button 
@@ -30,6 +33,7 @@
       </div>
     </div>
 
+    <!-- Şifre Değiştirme Formu -->
     <div class="password-change-form" *ngIf="showPasswordChange">
       <div class="p-fluid">
         <div class="field">
@@ -51,141 +55,211 @@
       </div>
     </div>
 
-    <!-- Sistem Özeti Kartları -->
-    <div class="grid">
-      <div class="col-12 md:col-6 lg:col-3">
-        <div class="surface-card shadow-2 p-3 border-round">
-          <div class="flex justify-content-between mb-3">
-            <div>
-              <span class="block text-500 font-medium mb-3">Toplam Kullanıcı</span>
-              <div class="text-900 font-medium text-xl">{{ systemSummary.totalUsers }}</div>
+    <!-- Ana Yönetim Modülleri -->
+    <div class="admin-modules">
+      <div class="grid">
+        <!-- Kullanıcı Yönetimi Kartı -->
+        <div class="col-12 md:col-4">
+          <div class="admin-card user-management-card" (click)="navigateToUserManagement()">
+            <div class="admin-card-icon">
+              <i class="pi pi-users"></i>
             </div>
-            <div class="flex align-items-center justify-content-center bg-blue-100 border-round" style="width:2.5rem;height:2.5rem">
-              <i class="pi pi-users text-blue-500 text-xl"></i>
+            <div class="admin-card-content">
+              <h2>Kullanıcı Yönetimi</h2>
+              <p>Kullanıcıları görüntüle, ekle, düzenle ve yönet</p>
+              <div class="admin-card-stats">
+                <div class="stat">
+                  <span class="stat-value">{{ systemSummary.totalUsers }}</span>
+                  <span class="stat-label">Toplam Kullanıcı</span>
+                </div>
+                <div class="stat">
+                  <span class="stat-value">{{ systemSummary.activeUsers }}</span>
+                  <span class="stat-label">Aktif Kullanıcı</span>
+                </div>
+              </div>
+              <p-button 
+                label="Kullanıcıları Yönet" 
+                icon="pi pi-arrow-right" 
+                iconPos="right"
+                styleClass="p-button-rounded p-button-outlined">
+              </p-button>
             </div>
           </div>
-          <span class="text-green-500 font-medium">{{ systemSummary.activeUsers }} aktif </span>
-          <span class="text-500">kullanıcı</span>
         </div>
-      </div>
 
-      <div class="col-12 md:col-6 lg:col-3">
-        <div class="surface-card shadow-2 p-3 border-round">
-          <div class="flex justify-content-between mb-3">
-            <div>
-              <span class="block text-500 font-medium mb-3">Kullanıcı Rolleri</span>
-              <div class="text-900 font-medium text-xl">{{ systemSummary.totalRoles }}</div>
+        <!-- Rol Yönetimi Kartı -->
+        <div class="col-12 md:col-4">
+          <div class="admin-card role-management-card" (click)="navigateToRoleManagement()">
+            <div class="admin-card-icon">
+              <i class="pi pi-id-card"></i>
             </div>
-            <div class="flex align-items-center justify-content-center bg-purple-100 border-round" style="width:2.5rem;height:2.5rem">
-              <i class="pi pi-id-card text-purple-500 text-xl"></i>
+            <div class="admin-card-content">
+              <h2>Rol Yönetimi</h2>
+              <p>Kullanıcı rollerini ve izinlerini yapılandır</p>
+              <div class="admin-card-stats">
+                <div class="stat">
+                  <span class="stat-value">{{ systemSummary.totalRoles }}</span>
+                  <span class="stat-label">Toplam Rol</span>
+                </div>
+              </div>
+              <p-button 
+                label="Rolleri Yönet" 
+                icon="pi pi-arrow-right" 
+                iconPos="right"
+                styleClass="p-button-rounded p-button-outlined">
+              </p-button>
             </div>
           </div>
-          <p-button 
-            label="Rol Yönetimi" 
-            styleClass="p-button-text p-button-sm" 
-            icon="pi pi-arrow-right" 
-            iconPos="right"
-            (onClick)="navigateToRoleManagement()">
-          </p-button>
         </div>
-      </div>
 
-      <div class="col-12 md:col-6 lg:col-3">
-        <div class="surface-card shadow-2 p-3 border-round">
-          <div class="flex justify-content-between mb-3">
-            <div>
-              <span class="block text-500 font-medium mb-3">Toplam Ekipman</span>
-              <div class="text-900 font-medium text-xl">{{ systemSummary.totalEquipment }}</div>
+        <!-- Sistem Ayarları Kartı -->
+        <div class="col-12 md:col-4">
+          <div class="admin-card settings-card" (click)="navigateToSettings()">
+            <div class="admin-card-icon">
+              <i class="pi pi-cog"></i>
             </div>
-            <div class="flex align-items-center justify-content-center bg-orange-100 border-round" style="width:2.5rem;height:2.5rem">
-              <i class="pi pi-desktop text-orange-500 text-xl"></i>
+            <div class="admin-card-content">
+              <h2>Sistem Ayarları</h2>
+              <p>Sistem yapılandırmasını ve genel ayarları yönet</p>
+              <div class="admin-card-stats">
+                <div class="stat">
+                  <span class="stat-value">
+                    <i class="pi pi-check-circle" style="color: #22c55e;"></i>
+                  </span>
+                  <span class="stat-label">Sistem Durumu</span>
+                </div>
+              </div>
+              <p-button 
+                label="Ayarları Yönet" 
+                icon="pi pi-arrow-right" 
+                iconPos="right"
+                styleClass="p-button-rounded p-button-outlined">
+              </p-button>
             </div>
           </div>
-          <p-button 
-            label="BT Yönetimi" 
-            styleClass="p-button-text p-button-sm" 
-            icon="pi pi-arrow-right" 
-            iconPos="right"
-            (onClick)="navigateToItManagement()">
-          </p-button>
-        </div>
-      </div>
-
-      <div class="col-12 md:col-6 lg:col-3">
-        <div class="surface-card shadow-2 p-3 border-round">
-          <div class="flex justify-content-between mb-3">
-            <div>
-              <span class="block text-500 font-medium mb-3">Sistem Durumu</span>
-              <div class="text-900 font-medium text-xl">Aktif</div>
-            </div>
-            <div class="flex align-items-center justify-content-center bg-green-100 border-round" style="width:2.5rem;height:2.5rem">
-              <i class="pi pi-check-circle text-green-500 text-xl"></i>
-            </div>
-          </div>
-          <p-button 
-            label="Raporlar" 
-            styleClass="p-button-text p-button-sm" 
-            icon="pi pi-arrow-right" 
-            iconPos="right"
-            (onClick)="navigateToReports()">
-          </p-button>
         </div>
       </div>
     </div>
 
-    <!-- Grafikler -->
-    <div class="grid mt-3">
-      <div class="col-12 md:col-6">
-        <p-card header="Kullanıcı Aktivitesi" styleClass="h-full">
-          <p-chart type="line" [data]="userActivityData" [options]="{ responsive: true }"></p-chart>
-        </p-card>
-      </div>
-      <div class="col-12 md:col-6">
-        <p-card header="Ekipman Durumu" styleClass="h-full">
-          <p-chart type="doughnut" [data]="equipmentStatusData" [options]="{ responsive: true }"></p-chart>
-        </p-card>
-      </div>
-    </div>
-
-    <!-- Hızlı Erişim Menüsü -->
-    <div class="grid mt-3">
+    <!-- Kullanıcı Aktivite Grafiği -->
+    <div class="grid mt-4">
       <div class="col-12">
-        <p-card header="Hızlı Erişim" styleClass="quick-access-card">
-          <div class="grid">
-            <div class="col-6 md:col-3 lg:col-2">
-              <div class="quick-access-item" (click)="navigateToUserManagement()">
-                <i class="pi pi-users"></i>
-                <span>Kullanıcı Yönetimi</span>
+        <p-card header="Kullanıcı Aktivitesi" styleClass="activity-log-card">
+          <div class="p-fluid">
+            <div class="grid">
+              <!-- Filtreleme Seçenekleri -->
+              <div class="col-12 md:col-4">
+                <div class="log-filter-container">
+                  <h3>Aktivite Filtreleri</h3>
+                  <div class="field">
+                    <label for="filterActivityType">Aktivite Tipi</label>
+                    <p-dropdown id="filterActivityType" 
+                               [options]="activityTypeOptions" 
+                               [(ngModel)]="activityFilter.activityType" 
+                               placeholder="Tüm aktivite tipleri"
+                               optionLabel="label" 
+                               optionValue="value"
+                               [showClear]="true"
+                               [style]="{'width':'100%'}"
+                               (onChange)="filterLogs()">
+                    </p-dropdown>
+                  </div>
+                  <div class="field">
+                    <label for="filterStatus">Durum</label>
+                    <p-dropdown id="filterStatus" 
+                               [options]="statusOptions" 
+                               [(ngModel)]="activityFilter.status" 
+                               placeholder="Tüm durumlar"
+                               optionLabel="label" 
+                               optionValue="value"
+                               [showClear]="true"
+                               [style]="{'width':'100%'}"
+                               (onChange)="filterLogs()">
+                    </p-dropdown>
+                  </div>
+                  <div class="field">
+                    <label for="filterDateRange">Tarih Aralığı</label>
+                    <p-calendar id="filterDateRange"
+                              [(ngModel)]="activityFilter.dateRange"
+                              selectionMode="range"
+                              [readonlyInput]="true"
+                              [showButtonBar]="true"
+                              placeholder="Tarih aralığı seçin"
+                              [style]="{'width':'100%'}"
+                              (onSelect)="filterLogs()"
+                              (onClear)="clearDateFilter()">
+                    </p-calendar>
+                  </div>
+                  <div class="field">
+                    <label for="filterUsername">Kullanıcı Adı</label>
+                    <div class="p-inputgroup">
+                      <input id="filterUsername" type="text" pInputText [(ngModel)]="activityFilter.username" placeholder="Kullanıcı adı ara">
+                      <button type="button" pButton icon="pi pi-search" (click)="filterLogs()"></button>
+                    </div>
+                  </div>
+                  <div class="field">
+                    <p-button label="Filtreleri Temizle" icon="pi pi-filter-slash" styleClass="p-button-outlined w-full" (onClick)="clearFilters()"></p-button>
+                  </div>
+                </div>
               </div>
-            </div>
-            <div class="col-6 md:col-3 lg:col-2">
-              <div class="quick-access-item" (click)="navigateToRoleManagement()">
-                <i class="pi pi-id-card"></i>
-                <span>Rol Yönetimi</span>
-              </div>
-            </div>
-            <div class="col-6 md:col-3 lg:col-2">
-              <div class="quick-access-item" (click)="navigateToItManagement()">
-                <i class="pi pi-desktop"></i>
-                <span>BT Ekipmanları</span>
-              </div>
-            </div>
-            <div class="col-6 md:col-3 lg:col-2">
-              <div class="quick-access-item">
-                <i class="pi pi-print"></i>
-                <span>Yazıcılar</span>
-              </div>
-            </div>
-            <div class="col-6 md:col-3 lg:col-2">
-              <div class="quick-access-item">
-                <i class="pi pi-box"></i>
-                <span>Stok Yönetimi</span>
-              </div>
-            </div>
-            <div class="col-6 md:col-3 lg:col-2">
-              <div class="quick-access-item">
-                <i class="pi pi-cog"></i>
-                <span>Sistem Ayarları</span>
+              
+              <!-- Aktivite logları tablosu -->
+              <div class="col-12 md:col-8">
+                <div class="log-table-container">
+                  <div class="log-table-header">
+                    <h3>Sistem Aktivite Logları</h3>
+                    <p>Sistemde gerçekleşen tüm kullanıcı aktiviteleri otomatik olarak kaydedilir.</p>
+                  </div>
+                  
+                  <p-table [value]="filteredActivityLogs" [loading]="loading" styleClass="p-datatable-sm" [tableStyle]="{'min-width': '100%'}">
+                    <ng-template pTemplate="header">
+                      <tr>
+                        <th style="width: 20%">Kullanıcı</th>
+                        <th style="width: 15%">Tip</th>
+                        <th style="width: 35%">Açıklama</th>
+                        <th style="width: 20%">Zaman</th>
+                        <th style="width: 10%">Durum</th>
+                      </tr>
+                    </ng-template>
+                    <ng-template pTemplate="body" let-log>
+                      <tr (click)="showLogDetails(log)" class="log-row">
+                        <td>{{ log.username }}</td>
+                        <td>
+                          <div class="flex align-items-center gap-2">
+                            <i [class]="getActivityIcon(log.activityType)" class="activity-icon"></i>
+                            <span>{{ getActivityTypeLabel(log.activityType) }}</span>
+                          </div>
+                        </td>
+                        <td>{{ log.description }}</td>
+                        <td>{{ log.timestamp | date:'dd.MM.yyyy HH:mm:ss' }}</td>
+                        <td>
+                          <p-tag [value]="getStatusLabel(log.status)" [severity]="getActivitySeverity(log.status)"></p-tag>
+                        </td>
+                      </tr>
+                    </ng-template>
+                    <ng-template pTemplate="emptymessage">
+                      <tr>
+                        <td colspan="5" class="text-center p-4">
+                          <div class="empty-message">
+                            <i class="pi pi-info-circle" style="font-size: 2rem; color: var(--primary-color);"></i>
+                            <p>Aktivite kaydı bulunamadı.</p>
+                            <p *ngIf="hasActiveFilters()" class="text-sm">Filtreleri temizlemeyi deneyin.</p>
+                          </div>
+                        </td>
+                      </tr>
+                    </ng-template>
+                  </p-table>
+                  
+                  <!-- Sayfalama -->
+                  <div class="paginator-container">
+                    <p-paginator 
+                      [rows]="pageSize" 
+                      [totalRecords]="totalFilteredRecords" 
+                      [rowsPerPageOptions]="[5, 10, 20, 50]"
+                      (onPageChange)="onPageChange($event)">
+                    </p-paginator>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
@@ -193,11 +267,76 @@
       </div>
     </div>
 
-    <!-- Son Aktiviteler -->
-    <div class="grid mt-3">
+    <!-- Log Detay Dialog -->
+    <p-dialog header="Aktivite Detayları" [(visible)]="showLogDetailsDialog" [style]="{width: '50vw'}" [modal]="true">
+      <div *ngIf="selectedLog" class="log-details">
+        <div class="grid">
+          <div class="col-12 md:col-6">
+            <div class="detail-item">
+              <label>Kullanıcı:</label>
+              <span>{{ selectedLog.username }}</span>
+            </div>
+          </div>
+          <div class="col-12 md:col-6">
+            <div class="detail-item">
+              <label>Kullanıcı ID:</label>
+              <span>{{ selectedLog.userId || 'Belirtilmemiş' }}</span>
+            </div>
+          </div>
+          <div class="col-12 md:col-6">
+            <div class="detail-item">
+              <label>Aktivite Tipi:</label>
+              <span>{{ getActivityTypeLabel(selectedLog.activityType) }}</span>
+            </div>
+          </div>
+          <div class="col-12 md:col-6">
+            <div class="detail-item">
+              <label>Durum:</label>
+              <p-tag [value]="getStatusLabel(selectedLog.status)" [severity]="getActivitySeverity(selectedLog.status)"></p-tag>
+            </div>
+          </div>
+          <div class="col-12">
+            <div class="detail-item">
+              <label>Açıklama:</label>
+              <span>{{ selectedLog.description }}</span>
+            </div>
+          </div>
+          <div class="col-12 md:col-6">
+            <div class="detail-item">
+              <label>Tarih:</label>
+              <span>{{ selectedLog.timestamp | date:'dd.MM.yyyy' }}</span>
+            </div>
+          </div>
+          <div class="col-12 md:col-6">
+            <div class="detail-item">
+              <label>Saat:</label>
+              <span>{{ selectedLog.timestamp | date:'HH:mm:ss' }}</span>
+            </div>
+          </div>
+          <div class="col-12 md:col-6">
+            <div class="detail-item">
+              <label>IP Adresi:</label>
+              <span>{{ selectedLog.ipAddress || 'Belirtilmemiş' }}</span>
+            </div>
+          </div>
+          <div class="col-12" *ngIf="selectedLog.details">
+            <div class="detail-item">
+              <label>Detaylar:</label>
+              <pre class="log-details-json">{{ selectedLog.details | json }}</pre>
+            </div>
+          </div>
+        </div>
+      </div>
+      <ng-template pTemplate="footer">
+        <p-button icon="pi pi-times" label="Kapat" styleClass="p-button-text" (click)="showLogDetailsDialog = false"></p-button>
+      </ng-template>
+    </p-dialog>
+
+    <!-- Son Aktiviteler Tablosu -->
+    <div class="grid mt-4">
       <div class="col-12">
-        <p-card header="Son Aktiviteler">
-          <p-table [value]="recentActivities" [loading]="loading" styleClass="p-datatable-sm" [tableStyle]="{'min-width': '50rem'}">
+        <p-card header="Son Aktiviteler" styleClass="activity-card">
+          <p-table [value]="recentActivities" [loading]="loading" styleClass="p-datatable-sm" [tableStyle]="{'min-width': '50rem'}" [paginator]="true" [rows]="5">
             <ng-template pTemplate="header">
               <tr>
                 <th style="width: 5%">#</th>
@@ -212,7 +351,7 @@
                 <td>{{ i + 1 }}</td>
                 <td>
                   <div class="flex align-items-center gap-2">
-                    <i [class]="getActivityIcon(activity.type)"></i>
+                    <i [class]="getActivityIcon(activity.type)" class="activity-icon"></i>
                     <span>{{ activity.type }}</span>
                   </div>
                 </td>
@@ -229,6 +368,40 @@
               </tr>
             </ng-template>
           </p-table>
+        </p-card>
+      </div>
+    </div>
+
+    <!-- Hızlı Erişim Menüsü -->
+    <div class="grid mt-4">
+      <div class="col-12">
+        <p-card header="Hızlı Erişim" styleClass="quick-access-card">
+          <div class="grid">
+            <div class="col-6 md:col-3">
+              <div class="quick-access-item" (click)="navigateToUserManagement()">
+                <i class="pi pi-users"></i>
+                <span>Kullanıcı Yönetimi</span>
+              </div>
+            </div>
+            <div class="col-6 md:col-3">
+              <div class="quick-access-item" (click)="navigateToRoleManagement()">
+                <i class="pi pi-id-card"></i>
+                <span>Rol Yönetimi</span>
+              </div>
+            </div>
+            <div class="col-6 md:col-3">
+              <div class="quick-access-item" (click)="navigateToSettings()">
+                <i class="pi pi-cog"></i>
+                <span>Sistem Ayarları</span>
+              </div>
+            </div>
+            <div class="col-6 md:col-3">
+              <div class="quick-access-item" (click)="navigateToAuditLogs()">
+                <i class="pi pi-history"></i>
+                <span>Denetim Kayıtları</span>
+              </div>
+            </div>
+          </div>
         </p-card>
       </div>
     </div>

@@ -25,12 +25,27 @@
   align-items: center;
   margin-bottom: 2rem;
   flex-wrap: wrap;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.3);
+  padding-bottom: 1rem;
 }
 
 .header-title h1 {
   margin: 0;
-  font-size: 1.8rem;
+  font-size: 2rem;
   color: #333;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+}
+
+.welcome-text {
+  margin: 0;
+  color: #666;
+  font-size: 1rem;
+}
+
+.username {
+  font-weight: 600;
+  color: #3B82F6;
 }
 
 .header-buttons {
@@ -44,6 +59,7 @@
   border-radius: 8px;
   margin-bottom: 2rem;
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  animation: fadeIn 0.3s ease-in-out;
 }
 
 .button-container {
@@ -138,7 +154,116 @@
   background: linear-gradient(to bottom, rgba(255, 255, 255, 0) 0%, rgba(255, 255, 255, 0.5) 75%, rgba(255, 255, 255, 0.8) 100%);
 }
 
-/* Yeni eklenen stiller */
+/* Admin Modülleri Kartları */
+.admin-modules {
+  margin-bottom: 2rem;
+}
+
+.admin-card {
+  display: flex;
+  background: rgba(255, 255, 255, 0.7);
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+  transition: all 0.3s ease;
+  cursor: pointer;
+  height: 100%;
+  min-height: 220px;
+}
+
+.admin-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+}
+
+.admin-card-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 80px;
+  padding: 0 1rem;
+  font-size: 2.5rem;
+}
+
+.user-management-card .admin-card-icon {
+  background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+  color: white;
+}
+
+.role-management-card .admin-card-icon {
+  background: linear-gradient(135deg, #b721ff 0%, #21d4fd 100%);
+  color: white;
+}
+
+.settings-card .admin-card-icon {
+  background: linear-gradient(135deg, #f83600 0%, #f9d423 100%);
+  color: white;
+}
+
+.admin-card-content {
+  flex: 1;
+  padding: 1.5rem;
+}
+
+.admin-card-content h2 {
+  margin: 0 0 0.5rem 0;
+  font-size: 1.4rem;
+  color: #333;
+}
+
+.admin-card-content p {
+  margin: 0 0 1rem 0;
+  color: #666;
+  font-size: 0.9rem;
+}
+
+.admin-card-stats {
+  display: flex;
+  gap: 1.5rem;
+  margin-bottom: 1rem;
+}
+
+.stat {
+  display: flex;
+  flex-direction: column;
+}
+
+.stat-value {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: #333;
+}
+
+.stat-label {
+  font-size: 0.8rem;
+  color: #666;
+}
+
+/* Grafik Kartı */
+.chart-card {
+  margin-bottom: 1rem;
+  height: 350px;
+}
+
+:host ::ng-deep .chart-card .p-card-content {
+  height: 280px;
+}
+
+/* Aktivite Tablosu */
+.activity-card {
+  margin-bottom: 1rem;
+}
+
+.activity-icon {
+  font-size: 1.2rem;
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Hızlı Erişim Kartı */
 .quick-access-card {
   margin-top: 1rem;
 }
@@ -149,12 +274,12 @@
   align-items: center;
   justify-content: center;
   background-color: rgba(255, 255, 255, 0.7);
-  border-radius: 8px;
-  padding: 1rem;
+  border-radius: 12px;
+  padding: 1.5rem;
   text-align: center;
   transition: all 0.3s ease;
   cursor: pointer;
-  height: 100px;
+  height: 120px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
 }
 
@@ -165,13 +290,13 @@
 }
 
 .quick-access-item i {
-  font-size: 2rem;
-  margin-bottom: 0.5rem;
+  font-size: 2.2rem;
+  margin-bottom: 0.8rem;
   color: var(--primary-color, #3B82F6);
 }
 
 .quick-access-item span {
-  font-size: 0.9rem;
+  font-size: 1rem;
   color: #495057;
   font-weight: 500;
 }
@@ -197,41 +322,84 @@
     justify-content: flex-end;
   }
   
+  .admin-card {
+    flex-direction: column;
+    min-height: auto;
+  }
+  
+  .admin-card-icon {
+    width: 100%;
+    height: 80px;
+  }
+  
+  .admin-card-stats {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+  
   .quick-access-item {
-    height: 90px;
-    padding: 0.75rem;
+    height: 100px;
+    padding: 1rem;
   }
   
   .quick-access-item i {
-    font-size: 1.5rem;
+    font-size: 1.8rem;
   }
   
-  .quick-access-item span {
-    font-size: 0.8rem;
+  .chart-card {
+    height: 300px;
+  }
+  
+  :host ::ng-deep .chart-card .p-card-content {
+    height: 230px;
   }
 }
 
-/* Grafik kartları için stil */
+/* PrimeNG Bileşen Stilleri */
 :host ::ng-deep .p-card {
   background: rgba(255, 255, 255, 0.7);
-  border-radius: 8px;
+  border-radius: 12px;
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+  overflow: hidden;
 }
 
 :host ::ng-deep .p-card .p-card-title {
   font-size: 1.2rem;
-  color: #495057;
+  color: #333;
+  font-weight: 600;
+  padding: 1rem 1rem 0 1rem;
+  margin: 0;
 }
 
 :host ::ng-deep .p-card .p-card-content {
+  padding: 1rem;
+}
+
+:host ::ng-deep .p-card .p-card-body {
   padding: 0;
+}
+
+:host ::ng-deep .p-button.p-button-rounded {
+  border-radius: 50px;
+}
+
+:host ::ng-deep .p-button.p-button-outlined {
+  background: transparent;
+  border: 1px solid var(--primary-color);
+  color: var(--primary-color);
+}
+
+:host ::ng-deep .p-button.p-button-outlined:hover {
+  background: rgba(59, 130, 246, 0.04);
 }
 
 /* Tablo stilleri */
 :host ::ng-deep .p-datatable .p-datatable-thead > tr > th {
   background: rgba(255, 255, 255, 0.5);
-  color: #495057;
+  color: #333;
   font-weight: 600;
+  padding: 0.75rem 1rem;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.1);
 }
 
 :host ::ng-deep .p-datatable .p-datatable-tbody > tr {
@@ -243,27 +411,282 @@
   background: rgba(255, 255, 255, 0.5);
 }
 
+:host ::ng-deep .p-datatable .p-datatable-tbody > tr > td {
+  padding: 0.75rem 1rem;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+:host ::ng-deep .p-paginator {
+  background: transparent;
+  border: none;
+  padding: 0.5rem 0;
+}
+
+:host ::ng-deep .p-paginator .p-paginator-element {
+  background: rgba(255, 255, 255, 0.7);
+  border: none;
+  border-radius: 4px;
+}
+
+:host ::ng-deep .p-paginator .p-paginator-element.p-highlight {
+  background: var(--primary-color);
+  color: white;
+}
+
 /* Animasyon */
 @keyframes fadeIn {
   from { opacity: 0; transform: translateY(20px); }
   to { opacity: 1; transform: translateY(0); }
 }
 
-.grid {
+.admin-modules, .chart-card, .activity-card, .quick-access-card {
   animation: fadeIn 0.5s ease-out;
 }
 
-.mt-3 {
-  margin-top: 1.5rem;
+/* Kullanıcı Aktivite Logları */
+.activity-log-card {
+  height: auto !important;
+  margin-bottom: 1.5rem;
 }
 
-/* Yükleniyor durumu için stil */
-:host ::ng-deep .p-datatable-loading-overlay {
+:host ::ng-deep .activity-log-card .p-card-content {
+  height: auto !important;
+  padding: 1rem;
+}
+
+.log-filter-container {
+  background-color: rgba(255, 255, 255, 0.5);
+  border-radius: 8px;
+  padding: 1.5rem;
+  height: 100%;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+.log-filter-container h3 {
+  margin-top: 0;
+  margin-bottom: 1.5rem;
+  color: #333;
+  font-size: 1.2rem;
+  font-weight: 600;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+  padding-bottom: 0.75rem;
+}
+
+.log-table-container {
+  background-color: rgba(255, 255, 255, 0.5);
+  border-radius: 8px;
+  padding: 1rem;
+  height: 100%;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+.log-table-header {
+  margin-bottom: 1rem;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+  padding-bottom: 0.75rem;
+}
+
+.log-table-header h3 {
+  margin-top: 0;
+  margin-bottom: 0.5rem;
+  color: #333;
+  font-size: 1.2rem;
+  font-weight: 600;
+}
+
+.log-table-header p {
+  margin: 0;
+  color: #666;
+  font-size: 0.9rem;
+}
+
+.paginator-container {
+  margin-top: 1rem;
+  display: flex;
+  justify-content: center;
+}
+
+.field {
+  margin-bottom: 1.25rem;
+}
+
+.field:last-child {
+  margin-bottom: 0;
+}
+
+.field label {
+  display: block;
+  margin-bottom: 0.5rem;
+  font-weight: 500;
+  color: #495057;
+}
+
+.p-inputtext {
+  width: 100%;
+  padding: 0.75rem;
+  border-radius: 6px;
+  border: 1px solid #ced4da;
+  transition: all 0.2s;
+  background-color: #fff;
+}
+
+.p-inputtext:focus {
+  outline: none;
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 1px var(--primary-color);
+}
+
+select.p-component {
+  height: 44px;
+  background-color: #fff;
+  width: 100%;
+  padding: 0.75rem;
+  border-radius: 6px;
+  border: 1px solid #ced4da;
+  transition: all 0.2s;
+  appearance: auto;
+}
+
+select.p-component:focus {
+  outline: none;
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 1px var(--primary-color);
+}
+
+/* Aktivite Logları Tablosu */
+:host ::ng-deep .p-datatable {
+  border-radius: 6px;
+  overflow: hidden;
+}
+
+:host ::ng-deep .p-datatable .p-datatable-thead > tr > th {
   background: rgba(255, 255, 255, 0.7);
+  color: #333;
+  font-weight: 600;
+  padding: 0.75rem 1rem;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.1);
 }
 
-/* Kart içindeki butonlar için stil */
-:host ::ng-deep .p-button.p-button-sm {
-  padding: 0.25rem 0.5rem;
-  font-size: 0.875rem;
+:host ::ng-deep .p-datatable .p-datatable-tbody > tr {
+  background: rgba(255, 255, 255, 0.5);
+  transition: background-color 0.2s;
+  cursor: pointer;
+}
+
+:host ::ng-deep .p-datatable .p-datatable-tbody > tr:hover {
+  background: rgba(255, 255, 255, 0.8);
+}
+
+:host ::ng-deep .p-datatable .p-datatable-tbody > tr > td {
+  padding: 0.75rem 1rem;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+/* Log Detay Dialog */
+.log-details {
+  padding: 1rem;
+}
+
+.detail-item {
+  margin-bottom: 1rem;
+}
+
+.detail-item label {
+  display: block;
+  font-weight: 600;
+  color: #495057;
+  margin-bottom: 0.25rem;
+  font-size: 0.9rem;
+}
+
+.detail-item span {
+  color: #333;
+}
+
+.log-details-json {
+  background-color: #f8f9fa;
+  padding: 1rem;
+  border-radius: 6px;
+  border: 1px solid #e9ecef;
+  font-family: monospace;
+  font-size: 0.9rem;
+  white-space: pre-wrap;
+  max-height: 200px;
+  overflow-y: auto;
+}
+
+/* Boş Mesaj */
+.empty-message {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+}
+
+.empty-message p {
+  margin: 0.5rem 0 0 0;
+  color: #666;
+}
+
+.empty-message .text-sm {
+  font-size: 0.85rem;
+  color: #888;
+}
+
+/* Sayfalama */
+:host ::ng-deep .p-paginator {
+  background: transparent;
+  border: none;
+  padding: 0.5rem 0;
+  margin-top: 1rem;
+}
+
+:host ::ng-deep .p-paginator .p-paginator-element {
+  background: rgba(255, 255, 255, 0.7);
+  border: none;
+  border-radius: 4px;
+}
+
+:host ::ng-deep .p-paginator .p-paginator-element.p-highlight {
+  background: var(--primary-color);
+  color: white;
+}
+
+/* Calendar */
+:host ::ng-deep .p-calendar {
+  width: 100%;
+}
+
+:host ::ng-deep .p-calendar .p-inputtext {
+  width: 100%;
+}
+
+:host ::ng-deep .p-calendar .p-datepicker {
+  min-width: 280px;
+}
+
+/* Responsive düzenlemeler */
+@media screen and (max-width: 768px) {
+  .log-filter-container, .log-table-container {
+    margin-bottom: 1rem;
+  }
+  
+  .log-filter-container {
+    padding: 1rem;
+  }
+  
+  .log-table-container {
+    padding: 0.5rem;
+  }
+  
+  :host ::ng-deep .p-datatable .p-datatable-thead > tr > th,
+  :host ::ng-deep .p-datatable .p-datatable-tbody > tr > td {
+    padding: 0.5rem;
+  }
+  
+  :host ::ng-deep .p-dialog {
+    width: 95vw !important;
+    max-width: 95vw !important;
+  }
 }

@@ -1,10 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using Stock.Infrastructure.Data;
 using Stock.Domain.Interfaces;
-using System.Threading.Tasks;
-using Microsoft.Extensions.Logging;
-using System;
+using Stock.Infrastructure.Data;
+using Microsoft.EntityFrameworkCore;
 
 namespace Stock.API.Controllers
 {
@@ -31,28 +28,17 @@ namespace Stock.API.Controllers
         {
             try
             {
-                _logger.LogInformation("Admin şifresini düzeltme işlemi başlatıldı");
-                
                 var admin = await _context.Users
-                    .FirstOrDefaultAsync(u => u.Username == "admin" && !u.IsDeleted);
+                    .FirstOrDefaultAsync(u => u.Username == "admin");
 
                 if (admin == null)
                 {
                     _logger.LogWarning("Admin kullanıcısı bulunamadı");
-                    return NotFound("Admin kullanıcısı bulunamadı.");
+                    return NotFound("Admin kullanıcısı bulunamadı");
                 }
 
-                _logger.LogInformation($"Admin kullanıcısı bulundu. ID: {admin.Id}");
-                _logger.LogInformation($"Mevcut hash: {admin.PasswordHash}");
-
-                // IPasswordHasher kullanarak yeni şifreyi hash'liyoruz
-                var newPassword = "Admin123";
-                var newPasswordHash = _passwordHasher.HashPassword(newPassword);
-
-                _logger.LogInformation($"Yeni hash oluşturuldu: {newPasswordHash}");
-
-                // Yeni hash'i atıyoruz
-                admin.PasswordHash = newPasswordHash;
+                // Admin123 şifresini BCrypt ile hashleme
+                admin.PasswordHash = _passwordHasher.HashPassword("Admin123");
                 
                 await _context.SaveChangesAsync();
                 

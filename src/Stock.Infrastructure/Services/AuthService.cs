@@ -29,7 +29,7 @@ namespace Stock.Infrastructure.Services
 
         public async Task<AuthResponseDto> LoginAsync(LoginDto loginDto)
         {
-            _logger.LogInformation($"Giriş denemesi: {loginDto.Username}");
+            _logger.LogInformation($"Giriş denemesi: {loginDto.Username}, Şifre uzunluğu: {loginDto.Password?.Length ?? 0}");
             
             var user = await _unitOfWork.Users.GetByUsernameAsync(loginDto.Username);
             
@@ -45,16 +45,19 @@ namespace Stock.Infrastructure.Services
 
             _logger.LogInformation($"Kullanıcı bulundu: {loginDto.Username}, ID: {user.Id}, IsAdmin: {user.IsAdmin}");
             _logger.LogInformation($"Şifre doğrulanıyor. Hash: {user.PasswordHash}");
+            _logger.LogInformation($"Hash uzunluğu: {user.PasswordHash?.Length ?? 0}");
+            _logger.LogInformation($"Hash formatı: {(user.PasswordHash?.StartsWith("$2") == true ? "BCrypt" : "Bilinmeyen")}");
             
             bool isPasswordValid = false;
             try
             {
+                // IPasswordHasher arayüzünü kullanarak şifreyi doğrula
                 isPasswordValid = _passwordHasher.VerifyPassword(loginDto.Password, user.PasswordHash);
                 _logger.LogInformation($"Şifre doğrulama sonucu: {isPasswordValid}");
             }
             catch (Exception ex)
             {
-                _logger.LogError($"Şifre doğrulama hatası: {ex.Message}");
+                _logger.LogError($"Şifre doğrulama hatası: {ex.Message}, StackTrace: {ex.StackTrace}");
                 return new AuthResponseDto
                 {
                     Success = false,
