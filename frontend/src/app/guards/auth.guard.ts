@@ -16,7 +16,7 @@ export class AuthGuard implements CanActivate {
 
     // Admin yetkisi gerektiren rotalar için kontrol
     if (route.data['requiresAdmin'] && !this.authService.isAdmin()) {
-      this.router.navigate(['/']);
+      this.router.navigate(['/user-dashboard']);
       return false;
     }
 

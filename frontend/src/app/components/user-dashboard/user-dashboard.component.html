@@ -1,0 +1,112 @@
+<div class="animated-background">
+  <div class="cube"></div>
+  <div class="cube"></div>
+  <div class="cube"></div>
+  <div class="cube"></div>
+  <div class="cube"></div>
+  <div class="lines"></div>
+</div>
+
+<p-toast></p-toast>
+<div class="dashboard-container">
+  <div class="glass-card">
+    <div class="header">
+      <div class="header-title">
+        <h1>Merhaba, {{ username }}</h1>
+      </div>
+      <div class="header-buttons">
+        <p-button 
+          label="Şifre Değiştir"
+          icon="pi pi-key"
+          (onClick)="togglePasswordChange()"
+          [styleClass]="showPasswordChange ? 'p-button-text p-button-warning' : 'p-button-text p-button-help'">
+        </p-button>
+        <p-button 
+          label="Çıkış Yap"
+          icon="pi pi-sign-out"
+          styleClass="p-button-text p-button-danger"
+          (onClick)="logout()">
+        </p-button>
+      </div>
+    </div>
+
+    <div class="password-change-form" *ngIf="showPasswordChange">
+      <div class="p-fluid">
+        <div class="field">
+          <label for="currentPassword">Mevcut Şifre</label>
+          <p-password id="currentPassword" [(ngModel)]="currentPassword" [feedback]="false" [toggleMask]="true"></p-password>
+        </div>
+        <div class="field">
+          <label for="newPassword">Yeni Şifre</label>
+          <p-password id="newPassword" [(ngModel)]="newPassword" [toggleMask]="true"></p-password>
+        </div>
+        <div class="field">
+          <label for="confirmPassword">Yeni Şifre (Tekrar)</label>
+          <p-password id="confirmPassword" [(ngModel)]="confirmPassword" [feedback]="false" [toggleMask]="true"></p-password>
+        </div>
+        <div class="button-container">
+          <p-button label="Değiştir" icon="pi pi-check" (onClick)="changePassword()"></p-button>
+          <p-button label="İptal" icon="pi pi-times" styleClass="p-button-secondary" (onClick)="togglePasswordChange()"></p-button>
+        </div>
+      </div>
+    </div>
+
+    <div class="grid">
+      <div class="col-12 md:col-6 lg:col-3">
+        <div class="surface-card shadow-2 p-3 border-round cursor-pointer" (click)="navigateToInventory()">
+          <div class="flex justify-content-between mb-3">
+            <div>
+              <span class="block text-500 font-medium mb-3">Envanter</span>
+              <div class="text-900 font-medium text-xl">Bilgisayarlar</div>
+            </div>
+            <div class="flex align-items-center justify-content-center bg-blue-100 border-round" style="width:2.5rem;height:2.5rem">
+              <i class="pi pi-desktop text-blue-500 text-xl"></i>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-12 md:col-6 lg:col-3">
+        <div class="surface-card shadow-2 p-3 border-round cursor-pointer" (click)="navigateToConsumables()">
+          <div class="flex justify-content-between mb-3">
+            <div>
+              <span class="block text-500 font-medium mb-3">Stok</span>
+              <div class="text-900 font-medium text-xl">Sarf Malzemeleri</div>
+            </div>
+            <div class="flex align-items-center justify-content-center bg-green-100 border-round" style="width:2.5rem;height:2.5rem">
+              <i class="pi pi-box text-green-500 text-xl"></i>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-12 md:col-6 lg:col-3">
+        <div class="surface-card shadow-2 p-3 border-round cursor-pointer" (click)="navigateToTasks()">
+          <div class="flex justify-content-between mb-3">
+            <div>
+              <span class="block text-500 font-medium mb-3">Görevler</span>
+              <div class="text-900 font-medium text-xl">Aktif Görevler</div>
+            </div>
+            <div class="flex align-items-center justify-content-center bg-orange-100 border-round" style="width:2.5rem;height:2.5rem">
+              <i class="pi pi-check-square text-orange-500 text-xl"></i>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-12 md:col-6 lg:col-3">
+        <div class="surface-card shadow-2 p-3 border-round cursor-pointer">
+          <div class="flex justify-content-between mb-3">
+            <div>
+              <span class="block text-500 font-medium mb-3">Yardım</span>
+              <div class="text-900 font-medium text-xl">Destek</div>
+            </div>
+            <div class="flex align-items-center justify-content-center bg-purple-100 border-round" style="width:2.5rem;height:2.5rem">
+              <i class="pi pi-question-circle text-purple-500 text-xl"></i>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

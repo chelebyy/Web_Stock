@@ -4,8 +4,12 @@ export interface LoginRequest {
 }
 
 export interface LoginResponse {
+    success: boolean;
     token: string;
-    user: User;
+    username: string;
+    isAdmin: boolean;
+    roleName?: string;
+    errorMessage?: string;
 }
 
 export interface User {

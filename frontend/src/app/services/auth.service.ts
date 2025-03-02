@@ -3,18 +3,22 @@ import { HttpClient } from '@angular/common/http';
 import { BehaviorSubject, Observable, tap, catchError, throwError } from 'rxjs';
 import { LoginRequest, LoginResponse, User, CreateUserRequest } from '../models/auth.model';
 import { JwtHelperService } from '@auth0/angular-jwt';
+import { Router } from '@angular/router';
 
 @Injectable({
   providedIn: 'root'
 })
 export class AuthService {
-  private apiUrl = 'http://localhost:5126/api'; // API URL'sini güncelledim
+  private apiUrl = 'http://localhost:5037/api'; // API URL'sini 5037 portuna güncelledim
   private currentUserSubject = new BehaviorSubject<User | null>(null);
   private jwtHelper = new JwtHelperService();
 
   currentUser$ = this.currentUserSubject.asObservable();
 
-  constructor(private http: HttpClient) {
+  constructor(
+    private http: HttpClient,
+    private router: Router
+  ) {
     this.loadStoredUser();
   }
 
@@ -39,8 +43,31 @@ export class AuthService {
     return this.http.post<LoginResponse>(`${this.apiUrl}/auth/login`, loginRequest)
       .pipe(
         tap(response => {
-          localStorage.setItem('token', response.token);
-          this.currentUserSubject.next(response.user);
+          if (response.success) {
+            localStorage.setItem('token', response.token);
+            
+            // Token'dan kullanıcı bilgilerini al
+            const decodedToken = this.jwtHelper.decodeToken(response.token);
+            const user: User = {
+              id: parseInt(decodedToken.nameid),
+              username: decodedToken.unique_name,
+              isAdmin: decodedToken.role === 'Admin',
+              createdAt: new Date().toISOString(),
+              lastLoginAt: new Date().toISOString()
+            };
+            this.currentUserSubject.next(user);
+            
+            // Kullanıcı rolüne göre yönlendirme
+            const targetRoute = user.isAdmin ? '/admin-dashboard' : '/user-dashboard';
+            console.log('Yönlendiriliyor:', targetRoute);
+            this.router.navigate([targetRoute])
+              .then(() => console.log('Yönlendirme başarılı'))
+              .catch(err => console.error('Yönlendirme hatası:', err));
+          }
+        }),
+        catchError(error => {
+          console.error('Login error:', error);
+          return throwError(() => error);
         })
       );
   }

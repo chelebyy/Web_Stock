@@ -175,8 +175,15 @@ export class LoginComponent implements OnInit, AfterViewInit {
           life: 3000
         });
         
+        // Kullanıcı rolüne göre yönlendirme
+        const user = this.authService.getCurrentUser();
+        const targetRoute = user?.isAdmin ? '/admin-dashboard' : '/user-dashboard';
+        console.log('Yönlendiriliyor:', targetRoute);
+        
         setTimeout(() => {
-          this.router.navigate(['/dashboard']);
+          this.router.navigate([targetRoute])
+            .then(() => console.log('Yönlendirme başarılı'))
+            .catch(err => console.error('Yönlendirme hatası:', err));
         }, 1000);
       },
       error: (error) => {

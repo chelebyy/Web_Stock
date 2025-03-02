@@ -2,17 +2,24 @@ import { Routes } from '@angular/router';
 import { LoginComponent } from './components/login/login.component';
 import { UserManagementComponent } from './components/user-management/user-management.component';
 import { RoleManagementComponent } from './components/role-management/role-management.component';
-import { DashboardComponent } from './components/dashboard/dashboard.component';
 import { LayoutComponent } from './components/layout/layout.component';
 import { ComputersComponent } from './components/inventory/computers/computers.component';
 import { AuthGuard } from './guards/auth.guard';
+import { AdminDashboardComponent } from './components/admin-dashboard/admin-dashboard.component';
+import { UserDashboardComponent } from './components/user-dashboard/user-dashboard.component';
 
 export const routes: Routes = [
-  { path: '', redirectTo: '/dashboard', pathMatch: 'full' },
+  { path: '', redirectTo: '/login', pathMatch: 'full' },
   { path: 'login', component: LoginComponent },
   { 
-    path: 'dashboard', 
-    component: DashboardComponent,
+    path: 'admin-dashboard', 
+    component: AdminDashboardComponent,
+    canActivate: [AuthGuard],
+    data: { requiresAdmin: true }
+  },
+  { 
+    path: 'user-dashboard', 
+    component: UserDashboardComponent,
     canActivate: [AuthGuard]
   },
   { 
