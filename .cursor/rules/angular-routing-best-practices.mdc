@@ -1,0 +1,10 @@
+---
+description: Best practices for routing in Angular 19
+globs: **/*.ts
+---
+- Implement route-level render modes (client, server, or hybrid)
+- Use lazy loading for routes
+- Implement proper route guards with signals
+- Use the new Router API with signals
+- Implement route resolvers effectively
+- Use router events for analytics and performance tracking

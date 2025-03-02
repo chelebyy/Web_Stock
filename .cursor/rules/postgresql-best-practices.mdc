@@ -1,11 +1,7 @@
 ---
-description: PostgreSQL
+description: Best practices for working with PostgreSQL
 globs: 
 ---
-description: Best practices for working with PostgreSQL 17.3
-globs: backend/**/*.{cs,sql}
----
-
 - Use parameterized queries to prevent SQL injection attacks
 - Implement proper indexing to optimize query performance
 - Use transactions for maintaining data integrity in multi-step operations

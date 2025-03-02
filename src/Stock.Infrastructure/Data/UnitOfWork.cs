@@ -10,8 +10,8 @@ namespace Stock.Infrastructure.Data
     public class UnitOfWork : IUnitOfWork
     {
         private readonly ApplicationDbContext _context;
-        private IRepository<User> _users;
-        private IRepository<Role> _roles;
+        private IUserRepository _users;
+        private IRoleRepository _roles;
         private bool _disposed;
 
         public UnitOfWork(ApplicationDbContext context)
@@ -19,8 +19,8 @@ namespace Stock.Infrastructure.Data
             _context = context;
         }
 
-        public IRepository<User> Users => _users ??= new UserRepository(_context);
-        public IRepository<Role> Roles => _roles ??= new RoleRepository(_context);
+        public IUserRepository Users => _users ??= new UserRepository(_context);
+        public IRoleRepository Roles => _roles ??= new RoleRepository(_context);
 
         public async Task<int> SaveChangesAsync()
         {
@@ -32,7 +32,7 @@ namespace Stock.Infrastructure.Data
             await _context.Database.BeginTransactionAsync();
         }
 
-        public async Task CommitAsync()
+        public async Task CommitTransactionAsync()
         {
             try
             {
@@ -45,7 +45,7 @@ namespace Stock.Infrastructure.Data
             }
         }
 
-        public async Task RollbackAsync()
+        public async Task RollbackTransactionAsync()
         {
             await _context.Database.RollbackTransactionAsync();
         }

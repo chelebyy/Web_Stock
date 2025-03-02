@@ -1,0 +1,13 @@
+---
+description: Best practices for optimizing performance in Angular 19
+globs: **/*.ts
+---
+- Implement lazy loading for feature modules
+- Use `trackBy` with `ngFor` for optimized rendering
+- Implement Incremental Hydration for faster initial load
+- Use Route-Level Render Mode for granular control
+- Optimize images by compressing and using appropriate formats
+- Regularly scan components for unnecessary imports
+- Use `OnPush` change detection strategy for pure components
+- Utilize Zoneless Change Detection for more efficient change detection
+- Use esbuild for faster compilation

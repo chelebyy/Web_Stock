@@ -1,6 +1,8 @@
-# Proje Durumu ve Gereksinimler
+# Scratchpad
 
-## Teknoloji Stack
+## Proje Bilgileri
+
+### Teknoloji Stack
 - Backend: .NET Core 9
 - Veritabanı: PostgreSQL 17.3 (Local)
 - Frontend: Angular 19.1.2
@@ -8,81 +10,110 @@
 - CSS Framework: Tailwind CSS 3.4.1
 - Geliştirme Araçları: npm, ESLint
 
-## Sistem Durumu
-- Backend: http://localhost:5126 adresinde çalışıyor
-- Frontend: http://localhost:4200 adresinde çalışıyor
+### Sistem Durumu
+- Backend: http://localhost:5037 adresinde çalışıyor
+- Frontend: http://localhost:4202 adresinde çalışıyor (başarıyla başlatıldı)
 - Admin kullanıcısı (admin/admin123) ile giriş başarıyla yapılabiliyor
 - JWT token doğrulama sistemi sorunsuz çalışıyor
 - Rol ve kullanıcı yönetimi sayfaları aktif
 - HTTP 200 OK yanıtları alınıyor
 - Tüm servisler stabil çalışıyor
+- Veritabanı temizlendi ve yeniden oluşturuldu
+- Sistem başlatma rehberi oluşturuldu (knowledge-base/system_startup_guide.md)
+- Chart.js kütüphanesi başarıyla yüklendi ve PrimeNG Chart bileşeni çalışıyor
+- Frontend uygulaması 4202 portunda çalışıyor (port çakışması çözüldü)
 
-## Tamamlanan Görevler
-[X] Clean Architecture Temel Yapısı
-  - [X] Solution yapısının oluşturulması
-    - [X] Stock.Domain projesi
-    - [X] Stock.Application projesi
-    - [X] Stock.Infrastructure projesi
-    - [X] Stock.API projesi
-    - [X] Test projeleri
-  - [X] Domain Layer temel yapısı
-    - [X] BaseEntity sınıfı
-    - [X] User ve Role entity'leri
-    - [X] Repository interface'leri
-    - [X] UnitOfWork interface'i
-  - [X] Application Layer temel yapısı
-    - [X] DTO'ların oluşturulması
-    - [X] CQRS interface'lerinin oluşturulması
-    - [X] Command ve Query sınıflarının oluşturulması
-  - [X] Infrastructure Layer temel yapısı
-    - [X] Entity Framework Core kurulumu
-    - [X] DbContext yapılandırması
-    - [X] Entity konfigürasyonları
-    - [X] Repository implementasyonları
-    - [X] UnitOfWork implementasyonu
-  - [X] API Layer temel yapısı
-    - [X] Controller'ların oluşturulması
-    - [X] Middleware'lerin eklenmesi
-    - [X] Swagger/OpenAPI implementasyonu
-  - [X] Rol Yönetimi
-    - [X] Administrator rolü oluşturuldu
-    - [X] User rolü oluşturuldu
+## Clean Architecture Geçişi
 
-## Devam Eden Görevler
-[ ] Infrastructure Layer Tamamlanması
-  - [ ] Migration'ların oluşturulması
-  - [ ] Seed data hazırlanması
-  - [ ] PostgreSQL bağlantısı
+### Mevcut İlerleme
+- [x] **Domain Katmanı Geçişi**
+  - [x] BaseEntity sınıfı oluşturuldu
+  - [x] Entity sınıfları taşındı (User, Role, AuditLog)
+  - [x] Domain servis arayüzleri tanımlandı (IPasswordHasher)
+  - [x] Repository arayüzleri tanımlandı (IRepository, IUserRepository, IRoleRepository)
+  - [x] UnitOfWork arayüzü tanımlandı
 
-[ ] API Layer Geliştirmesi
-  - [ ] Controller'ların oluşturulması
-  - [ ] Middleware'lerin eklenmesi
-  - [ ] JWT authentication yapılandırması
-  - [ ] Swagger/OpenAPI implementasyonu
+- [x] **Application Katmanı Geçişi**
+  - [x] DTO sınıfları oluşturuldu (UserDto, RoleDto, LoginDto, RegisterDto, AuthResponseDto)
+  - [x] AutoMapper profilleri tanımlandı (MappingProfile)
+  - [x] CQRS yapısı kuruldu (Commands, Queries, Handlers)
+  - [x] Validation kuralları tanımlandı (FluentValidation)
+  - [x] Servis arayüzleri tanımlandı (IAuthService, IAuditService)
 
-[ ] Frontend Geliştirmesi
-  - [ ] Component'lerin oluşturulması
+- [x] **Infrastructure Katmanı Geçişi**
+  - [x] DbContext yapılandırması oluşturuldu
+  - [x] Entity konfigürasyonları oluşturuldu
+  - [x] Repository uygulamaları oluşturuldu
+  - [x] UnitOfWork uygulaması oluşturuldu
+  - [x] Harici servis entegrasyonları oluşturuldu (PasswordHasher, JwtTokenGenerator, AuthService, AuditService)
+  - [x] Migrations oluşturuldu
+  - [x] Infrastructure katmanındaki hatalar düzeltildi
+
+- [x] **API Katmanı Geçişi**
+  - [x] API projesi oluşturuldu
+  - [x] Controller'lar CQRS yapısına uyarlandı (UsersController, AuthController)
+  - [x] Middleware'ler oluşturuldu (ExceptionHandlingMiddleware, RequestLoggingMiddleware)
+  - [x] Program.cs ve yapılandırması oluşturuldu
+  - [x] Swagger/OpenAPI yapılandırması oluşturuldu
+  - [x] Authentication/Authorization yapılandırması oluşturuldu
+  - [x] API katmanı test edildi
+
+### Devam Eden Görevler
+- [x] **Infrastructure Katmanı Tamamlanması**
+  - [x] Infrastructure katmanındaki hataları düzeltmek:
+    - [x] AuthService sınıfına GenerateJwtToken metodu eklemek
+    - [x] GenericRepository sınıfındaki AddAsync metodunun dönüş tipini Task olarak değiştirmek
+    - [x] SaveChangesAsync metodunu eklemek
+    - [x] UnitOfWork sınıfına CommitTransactionAsync ve RollbackTransactionAsync metotlarını eklemek
+    - [x] UnitOfWork sınıfındaki Users ve Roles özelliklerinin tiplerini düzeltmek
+  - [x] Migration'ların oluşturulması
+  - [x] Seed data hazırlanması
+  - [x] PostgreSQL bağlantısı
+
+- [x] **API Katmanı Tamamlanması**
+  - [x] API katmanını test etmek
+  - [x] API versiyonlama
+  - [x] Rate limiting
+
+- [x] **Sistem Başlatma ve Dokümantasyon**
+  - [x] Veritabanı temizleme ve yeniden oluşturma
+  - [x] Backend başlatma
+  - [x] Frontend başlatma
+  - [x] Sistem başlatma rehberi oluşturma
+
+- [x] **Frontend Geliştirmesi**
+  - [x] Dashboard ayrıştırması (Admin ve Kullanıcı dashboardları)
+  - [x] Admin Dashboard bileşeni oluşturuldu
+  - [x] Chart.js kütüphanesi yüklendi
+  - [x] PrimeNG Chart bileşeni entegrasyonu
+  - [x] Routing yapılandırması
+  - [x] Frontend başlatma sorunları çözüldü
+
+### Planlanan Görevler
+- [ ] **Frontend Geliştirmesinin Devamı**
+  - [ ] Kullanıcı Dashboard bileşeninin geliştirilmesi
+  - [ ] Diğer bileşenlerin oluşturulması
   - [ ] Service'lerin implementasyonu
-  - [ ] PrimeNG entegrasyonu
-  - [ ] Routing yapılandırması
+  - [ ] Frontend adaptasyonunu tamamlamak
 
-## Planlanan Görevler
-[ ] Test Katmanı
+- [ ] **Test Katmanı**
   - [ ] Unit testlerin yazılması
   - [ ] Integration testlerin yazılması
   - [ ] E2E testlerin yazılması
 
-[ ] DevOps
+- [ ] **DevOps**
   - [ ] CI/CD pipeline kurulumu
   - [ ] Docker yapılandırması
   - [ ] Monitoring ve logging sistemi
 
-[ ] Dokümantasyon
+- [ ] **Dokümantasyon**
   - [ ] API dokümantasyonu
   - [ ] Deployment prosedürleri
   - [ ] Geliştirici kılavuzu
 
 ## Öğrenilen Dersler
+
+### Mimari ve Tasarım
 - Clean Architecture prensiplerini takip etmenin önemi
 - CQRS pattern'in faydaları
 - Entity ilişkilerinin doğru tasarlanması
@@ -90,214 +121,68 @@
 - Entity Framework Core konfigürasyonlarının modüler yapılması
 - Transaction yönetiminin önemi
 
-## Devam Eden ve Planlanan Görevler
+### Geliştirme Pratikleri
+- Arayüzleri ve uygulamaları senkronize tutmak için önce arayüzleri tam olarak tanımlamak, sonra uygulamaları geliştirmek önemli
+- Null referans tipleri için projenin başında bir strateji belirlemek ve tutarlı şekilde uygulamak gerekli
+- Paket sürümlerini projenin tamamında tutarlı tutmak önemli
+- Hata mesajlarını dikkatlice okumak ve adım adım çözmek gerekli
+- Veritabanı işlemlerinde hata alındığında, veritabanını temizleyip yeniden oluşturmak etkili bir çözüm olabilir
+- Her servis için ayrı terminal penceresi kullanmak gerekli
 
-### Clean Architecture Geçişi (3-4 Hafta)
-[ ] **Aşama 1 - Solution Reorganizasyonu** (3-4 gün)
-    - [ ] Yeni solution yapısının oluşturulması
-        - [ ] Stock.Domain projesi
-        - [ ] Stock.Application projesi
-        - [ ] Stock.Infrastructure projesi
-        - [ ] Stock.API projesi
-        - [ ] Test projeleri
-    - [ ] Mevcut kodların yeni projelere taşınması
-        - [ ] Entity'lerin Domain katmanına taşınması
-        - [ ] Interface'lerin ilgili katmanlara dağıtılması
-        - [ ] Repository'lerin Infrastructure katmanına taşınması
-        - [ ] Service'lerin Application katmanına taşınması
-    - [ ] Dependency'lerin düzenlenmesi
-        - [ ] Proje referanslarının ayarlanması
-        - [ ] NuGet paketlerinin düzenlenmesi
-    - [ ] CI/CD pipeline güncellenmesi
+### Paket ve Kütüphane Kullanımı
+- FluentValidation.DependencyInjection paketi yerine manuel kayıt kullanılabilir
+- System.IdentityModel.Tokens.Jwt paketi sürüm uyumsuzluğu sorunları çıkarabilir
+- PrimeNG Chart bileşeni için chart.js kütüphanesi gereklidir
+- Eksik bağımlılıklar, uygulamanın çalışmasını engelleyebilir
 
-[ ] **Aşama 2 - Domain Layer** (4-5 gün)
-    - [ ] Core entity'lerin oluşturulması
-        - [ ] BaseEntity
-        - [ ] User, Role ve diğer entity'ler
-        - [ ] Value objects
-    - [ ] Repository interface'lerinin tanımlanması
-        - [ ] IRepository<T>
-        - [ ] IUnitOfWork
-    - [ ] Domain service'lerin tanımlanması
-    - [ ] Domain event'lerinin tanımlanması
-    - [ ] Specification pattern implementasyonu
+### Frontend Geliştirme
+- Angular routing yapılandırmasında her rotanın açıkça tanımlanması gerekiyor
+- AuthService ile kullanıcı bilgilerinin doğru şekilde yönetilmesi önemli
+- Yönlendirme işlemlerinde detaylı loglama yapılması hata ayıklamayı kolaylaştırıyor
+- Guard'lar ile rota güvenliğinin sağlanması kritik
+- Kullanıcı rolüne göre farklı dashboard'ların yönetilmesi
+- PowerShell'de komutları birleştirmek için ; (noktalı virgül) kullanılmalı
+- Port çakışması durumunda farklı bir port kullanılabilir
 
-[ ] **Aşama 3 - Application Layer** (4-5 gün)
-    - [ ] CQRS implementasyonu
-        - [ ] Command'ların oluşturulması
-        - [ ] Query'lerin oluşturulması
-        - [ ] Handler'ların implementasyonu
-    - [ ] Service implementasyonları
-        - [ ] UserService
-        - [ ] RoleService
-        - [ ] AuthService
-    - [ ] DTO'ların oluşturulması
-        - [ ] Request/Response modelleri
-        - [ ] Validation DTO'ları
-    - [ ] AutoMapper profilleri
-    - [ ] Validation kuralları
-        - [ ] FluentValidation implementasyonu
-        - [ ] Custom validator'lar
+### Hata Yönetimi
+- Konsol loglarının detaylı tutulması hata tespitini kolaylaştırıyor
+- Yönlendirme hatalarında önce rota tanımlarını kontrol etmek gerekiyor
+- AuthService ve routing yapılandırmasının senkronize olması önemli
+- Hataların sistematik olarak belgelenmesi ve çözümlerin paylaşılması
+- Çalışan işlemleri durdurmak için Get-Process ve Stop-Process komutlarını kullanmak
 
-[ ] **Aşama 4 - Infrastructure Layer** (4-5 gün)
-    - [ ] Repository implementasyonları
-        - [ ] Generic Repository
-        - [ ] Özelleştirilmiş repository'ler
-    - [ ] Unit of Work implementasyonu
-    - [ ] DbContext yapılandırması
-        - [ ] Entity configurations
-        - [ ] Migration'ların taşınması
-    - [ ] Identity servisleri
-        - [ ] JWT implementasyonu
-        - [ ] Role-based authorization
-    - [ ] Logging implementasyonu
-        - [ ] Serilog yapılandırması
-        - [ ] Custom log enrichers
+## Zaman Çizelgesi
+- **Domain Katmanı**: Tamamlandı
+- **Application Katmanı**: Tamamlandı
+- **Infrastructure Katmanı**: Tamamlandı
+- **API Katmanı**: Tamamlandı
+- **Sistem Başlatma ve Dokümantasyon**: Tamamlandı
+- **Frontend Adaptasyonu**: 4-5 gün
+- **Test Yazımı**: 5-6 gün
+- **Dokümantasyon**: 2-3 gün
 
-[ ] **Aşama 5 - API Layer** (3-4 gün)
-    - [ ] Controller'ların CQRS'e uygun hale getirilmesi
-    - [ ] Middleware'lerin düzenlenmesi
-        - [ ] Exception handling
-        - [ ] Request/Response logging
-    - [ ] Swagger/OpenAPI implementasyonu
-    - [ ] API versiyonlama
-    - [ ] Rate limiting
+**Toplam Kalan Süre**: ~11-14 gün
 
-[ ] **Aşama 6 - Frontend Adaptasyonu** (4-5 gün)
-    - [ ] API client'ların güncellenmesi
-    - [ ] Service katmanının düzenlenmesi
-    - [ ] State management optimizasyonu
-    - [ ] Error handling geliştirmesi
-    - [ ] Loading state yönetimi
+## Güncel Durum (3 Mart 2025)
+- Veritabanı başarıyla temizlendi ve yeniden oluşturuldu
+- API başarıyla çalışıyor (http://localhost:5037)
+- Frontend başarıyla başlatıldı (http://localhost:4202)
+- Swagger UI erişilebilir durumda (http://localhost:5037/swagger/index.html)
+- Login işlemi başarıyla çalışıyor
+- Kullanıcı rolüne göre doğru dashboard'a yönlendirme yapılıyor
+- Sistem başlatma rehberi oluşturuldu (knowledge-base/system_startup_guide.md)
+- BCrypt.Net-Next paketi güncellendi ve şifre hashleme işlemleri iyileştirildi
+- Chart.js kütüphanesi yüklendi ve PrimeNG Chart bileşeni sorunsuz çalışıyor
+- Frontend başlatma sorunları çözüldü (PowerShell komut çalıştırma, port çakışması, chart.js bağımlılığı)
+- Bir sonraki adım: Frontend geliştirmesinin devamı ve API ile tam entegrasyonu
 
-[ ] **Aşama 7 - Test Yazımı** (5-6 gün)
-    - [ ] Domain testleri
-        - [ ] Entity testleri
-        - [ ] Value object testleri
-        - [ ] Domain service testleri
-    - [ ] Application testleri
-        - [ ] Command/Query handler testleri
-        - [ ] Service testleri
-        - [ ] Validation testleri
-    - [ ] Infrastructure testleri
-        - [ ] Repository testleri
-        - [ ] DbContext testleri
-    - [ ] API testleri
-        - [ ] Controller testleri
-        - [ ] Integration testleri
-    - [ ] Frontend testleri
-        - [ ] Component testleri
-        - [ ] Service testleri
-        - [ ] E2E testleri
-
-[ ] **Aşama 8 - Dokümantasyon** (2-3 gün)
-    - [ ] Architecture decision records (ADR)
-    - [ ] API dokümantasyonu
-    - [ ] Deployment prosedürleri
-    - [ ] Development guidelines
-    - [ ] Test stratejisi dokümantasyonu
-
-### Veritabanı İyileştirmeleri
-[ ] Local caching mekanizması
-[ ] Veritabanı indeksleme optimizasyonu
-[ ] Backup ve restore mekanizması
-
-### Güvenlik İyileştirmeleri
-[ ] Password hashing optimizasyonu
-[ ] Role-based authorization geliştirmesi
-[ ] Local network CORS politikalarının güncellenmesi
-[ ] Input validation kontrollerinin güçlendirilmesi
-
-### Matrix Efekti Planlanan İyileştirmeler
-[ ] Window resize event throttling
-[ ] Farklı karakter setleri için destek
-[ ] Ekran boyutuna göre otomatik grid size ayarı
-
-### Frontend ve Angular İyileştirmeleri (2-3 Hafta)
-[ ] **Aşama 1 - Component Mimarisi** (3-4 gün)
-    - [ ] Standalone component'lere geçiş
-    - [ ] Signals implementasyonu
-    - [ ] Performance optimizasyonları
-    - [ ] Lazy loading yapılandırması
-    - [ ] State management (NgRx) implementasyonu
-
-[ ] **Aşama 2 - UI/UX İyileştirmeleri** (2-3 gün)
-    - [ ] PrimeNG güncellemesi
-    - [ ] Responsive tasarım optimizasyonu
-    - [ ] Accessibility iyileştirmeleri
-    - [ ] Dark/Light tema desteği
-    - [ ] Loading state yönetimi
-
-[ ] **Aşama 3 - Test Altyapısı** (2-3 gün)
-    - [ ] Jest test framework kurulumu
-    - [ ] Component testleri
-    - [ ] Service testleri
-    - [ ] E2E testler (Cypress)
-    - [ ] Visual regression testleri
-
-### DevOps ve CI/CD İyileştirmeleri (1-2 Hafta)
-[ ] **Aşama 1 - Pipeline Kurulumu** (2-3 gün)
-    - [ ] GitHub Actions workflow'ları
-    - [ ] Build ve test otomasyonu
-    - [ ] Code quality checks
-    - [ ] Security scanning
-    - [ ] Automated deployment
-
-[ ] **Aşama 2 - Monitoring** (2-3 gün)
-    - [ ] Application Insights entegrasyonu
-    - [ ] Log aggregation sistemi
-    - [ ] Performance metrics
-    - [ ] Error tracking
-    - [ ] Health checks
-
-### Veritabanı ve Migration Stratejisi (1-2 Hafta)
-[ ] **Aşama 1 - Schema Management** (2-3 gün)
-    - [ ] Migration scriptlerinin düzenlenmesi
-    - [ ] Rollback scriptleri
-    - [ ] Data seeding stratejisi
-    - [ ] Schema versiyonlama
-
-[ ] **Aşama 2 - Performance** (2-3 gün)
-    - [ ] Index optimizasyonu
-    - [ ] Query optimizasyonu
-    - [ ] Connection pooling
-    - [ ] Caching stratejisi
-
-[ ] **Aşama 3 - Maintenance** (2-3 gün)
-    - [ ] Backup/restore prosedürleri
-    - [ ] Data archiving stratejisi
-    - [ ] Monitoring ve alerting
-    - [ ] Disaster recovery planı
-
-## Öğrenilen Dersler ve İyileştirmeler
-
-### Kullanıcı Yönetimi
-- AuthController'da ApplicationDbContext yerine StockContext kullanılıyordu
-- Şifre hash'leme yöntemi SeedData ile AuthController arasında farklıydı
-- Hash algoritması tüm sistemde tutarlı hale getirildi
-- Detaylı loglama sayesinde hash uyumsuzluğu tespit edildi
-
-### API ve Endpoint Düzeltmeleri
-- Frontend'de UserService'de yanlış API endpoint'i kullanılıyordu
-- Kullanıcı oluşturma için `/api/auth/create-user` endpoint'i kullanılmalı
-- Diğer kullanıcı işlemleri için `/api/user/...` endpoint'leri kullanılmalı
-
-### Loglama ve Hata Yakalama
-- GlobalExceptionHandler'da stack trace bilgisi eklendi
-- BaseEntity sınıfında CreatedAt ve IsDeleted alanları constructor'da ayarlandı
-- SeedData sınıfında context oluşturma yöntemi düzeltildi
-
-### UI/UX İyileştirmeleri
-- PrimeNG sidebar yerine özel menü tasarımı yapıldı
-- Responsive tasarım için medya sorguları eklendi
-- Menü başlıkları büyük harflerle yazıldı
-- Toolbar düzeni iyileştirildi
-- Dashboard tasarımı modernize edildi
-
-### Canvas ve Performans Optimizasyonları
-- RequestAnimationFrame kullanımı
-- Gereksiz render'ların engellenmesi
-- Event listener'ların optimize edilmesi
-- HSL renk uzayının avantajları
-- Alpha değerlerinin doğru kullanımı
-- Lerp fonksiyonu ile smooth transitions
+## Yapılan Güncellemeler (3 Mart 2025)
+- Chart.js kütüphanesi yüklendi
+- Frontend başlatma sorunları çözüldü:
+  - PowerShell komut çalıştırma sorunu (&&)
+  - Port çakışması sorunu (4200)
+  - Chart.js bağımlılığı sorunu
+- Frontend uygulaması 4202 portunda başarıyla çalışıyor
+- Admin Dashboard bileşeni geliştirildi
+- Frontend sorunları ve çözümleri belgelendi (knowledge-base/frontend_troubleshooting.md)
+- Errors.md dosyası güncellendi

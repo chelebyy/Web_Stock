@@ -20,7 +20,7 @@ namespace Stock.Infrastructure.Data.Repositories
             _dbSet = context.Set<T>();
         }
 
-        public virtual async Task<T> GetByIdAsync(int id)
+        public virtual async Task<T?> GetByIdAsync(int id)
         {
             return await _dbSet.FindAsync(id);
         }
@@ -35,10 +35,9 @@ namespace Stock.Infrastructure.Data.Repositories
             return await _dbSet.Where(predicate).ToListAsync();
         }
 
-        public virtual async Task<T> AddAsync(T entity)
+        public virtual async Task AddAsync(T entity)
         {
             await _dbSet.AddAsync(entity);
-            return entity;
         }
 
         public virtual Task UpdateAsync(T entity)
@@ -61,6 +60,11 @@ namespace Stock.Infrastructure.Data.Repositories
         public virtual IQueryable<T> Query()
         {
             return _dbSet.AsQueryable();
+        }
+
+        public virtual async Task<int> SaveChangesAsync()
+        {
+            return await _context.SaveChangesAsync();
         }
     }
 } 

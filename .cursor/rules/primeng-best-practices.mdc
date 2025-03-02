@@ -1,11 +1,7 @@
 ---
-description: primeng best practices
-globs: 
----
 description: Best practices for using PrimeNG components in Angular
-globs: frontend/src/**/*.{ts,tsx}
+globs: **/*.{ts,tsx,js,jsx}
 ---
-
 - Use PrimeNG's built-in theming capabilities for consistent UI styling
 - Leverage PrimeNG's responsive design features for mobile-friendly applications
 - Implement PrimeNG's accessibility features to ensure compliance with WCAG standards

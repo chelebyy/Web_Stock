@@ -1,0 +1,11 @@
+---
+description: Best practices for using RxJS in Angular 19
+globs: **/*.ts
+---
+- Use `AsyncPipe` in templates to auto-subscribe and avoid memory leaks
+- Manage subscriptions properly in components
+- Use `takeUntilDestroyed` operator for automatic unsubscription
+- Implement proper error handling with `catchError`
+- Use `shareReplay` for multicasting Observables
+- Implement retry logic with `retryWhen`
+- Use proper cache management with `share` and `publishReplay`

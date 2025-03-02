@@ -1,6 +1,6 @@
 ---
 description: dotnet core best practices
-globs: 
+globs: **/*.{cs}
 ---
 Use async/await for non-blocking operations throughout the application
 - Implement proper error handling and logging using .NET Core's built-in features
@@ -10,3 +10,5 @@ Use async/await for non-blocking operations throughout the application
 - Create API documentation using Swagger/OpenAPI for better API discoverability
 - Use Entity Framework Core for database operations and migrations
 - Implement proper input validation using FluentValidation or DataAnnotations
+
+

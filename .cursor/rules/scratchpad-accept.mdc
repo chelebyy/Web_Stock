@@ -2,8 +2,6 @@
 description: scratchpad-accept
 globs: 
 ---
-Rule: scratchpad-accept
-
 Kullanıcı "tamam süper" derse `scratchpad.md` ve `errors.md` dosyaları güncellenmeli,daha sonra Projeyi githuba yükle.
 
 Trigger:

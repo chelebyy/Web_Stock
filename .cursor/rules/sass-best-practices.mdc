@@ -1,11 +1,7 @@
 ---
-description: sass-best-practices
+description: Best practices for using SASS in Angular applications
 globs: 
 ---
-description: Best practices for using SASS in Angular applications
-globs: frontend/styles/**/*.{scss}
----
-
 - Use nested selectors to improve readability and maintainability
 - Implement variables for consistent theming across the application
 - Use mixins for reusable style patterns

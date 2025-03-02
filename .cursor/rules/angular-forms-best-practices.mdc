@@ -1,0 +1,11 @@
+---
+description: Best practices for using forms in Angular 19
+globs: **/*.ts
+---
+- Use Signal-based Forms for enhanced type safety and scalability
+- Choose Reactive Forms for complex data handling
+- Use template-driven forms for simpler cases
+- Implement form validation with signals
+- Use typed form controls for better type safety
+- Implement form array signals for dynamic forms
+- Use proper form state tracking with computed signals

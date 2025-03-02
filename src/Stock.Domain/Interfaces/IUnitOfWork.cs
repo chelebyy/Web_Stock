@@ -6,12 +6,12 @@ namespace Stock.Domain.Interfaces
 {
     public interface IUnitOfWork : IDisposable
     {
-        IRepository<User> Users { get; }
-        IRepository<Role> Roles { get; }
+        IUserRepository Users { get; }
+        IRoleRepository Roles { get; }
         
         Task<int> SaveChangesAsync();
         Task BeginTransactionAsync();
-        Task CommitAsync();
-        Task RollbackAsync();
+        Task CommitTransactionAsync();
+        Task RollbackTransactionAsync();
     }
 } 
