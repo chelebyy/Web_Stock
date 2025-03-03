@@ -18,6 +18,7 @@ import { PaginatorModule } from 'primeng/paginator';
 import { DropdownModule } from 'primeng/dropdown';
 import { CalendarModule } from 'primeng/calendar';
 import { DialogModule } from 'primeng/dialog';
+import { HostListener } from '@angular/core';
 
 // PrimeNG Tag bileşeni için geçerli severity tipleri
 type TagSeverity = 'success' | 'info' | 'warning' | 'danger' | 'secondary' | 'contrast' | undefined;
@@ -50,9 +51,12 @@ export class AdminDashboardComponent implements OnInit {
   username: string = '';
   isAdmin: boolean = true;
   showPasswordChange: boolean = false;
+  showAdminMenu: boolean = false;
   currentPassword: string = '';
   newPassword: string = '';
   confirmPassword: string = '';
+  
+  profileImageUrl: string = 'assets/images/default-avatar.png';
   
   // Şifre göster/gizle değişkenleri
   showCurrentPassword: boolean = false;
@@ -61,10 +65,9 @@ export class AdminDashboardComponent implements OnInit {
   
   // Sistem özeti verileri
   systemSummary = {
-    totalUsers: 0,
-    activeUsers: 0,
-    totalRoles: 0,
-    totalEquipment: 0
+    totalUsers: 1254,
+    totalRoles: 8,
+    activeUsers: 876
   };
   
   // Kullanıcı aktivite logları
@@ -95,8 +98,15 @@ export class AdminDashboardComponent implements OnInit {
   // Grafik seçenekleri (eski)
   chartOptions: any;
   
-  // Son aktiviteler
-  recentActivities: any[] = [];
+  // Aktivite verileri
+  recentActivities: { user: string; action: string; date: Date }[] = [
+    { user: 'admin', action: 'Kullanıcı eklendi', date: new Date() },
+    { user: 'moderator', action: 'Rol güncellendi', date: new Date(Date.now() - 3600000) },
+    { user: 'admin', action: 'Sistem ayarları değiştirildi', date: new Date(Date.now() - 7200000) },
+    { user: 'editor', action: 'Giriş yapıldı', date: new Date(Date.now() - 86400000) },
+    { user: 'admin', action: 'Yedekleme tamamlandı', date: new Date(Date.now() - 172800000) },
+    { user: 'support', action: 'Destek talebi kapatıldı', date: new Date(Date.now() - 259200000) }
+  ];
   
   // Yükleniyor durumu
   loading: boolean = true;
@@ -122,6 +132,9 @@ export class AdminDashboardComponent implements OnInit {
     { label: 'Hata', value: 'danger' }
   ];
 
+  // Aktif menü öğesi
+  activeMenuItem: string = '';
+
   constructor(
     private router: Router,
     private authService: AuthService,
@@ -133,6 +146,9 @@ export class AdminDashboardComponent implements OnInit {
   }
 
   ngOnInit(): void {
+    // Profil resmi URL'sini ayarla
+    this.loadProfileImage();
+    
     const user = this.authService.getCurrentUser();
     if (user) {
       this.username = user.username;
@@ -403,55 +419,44 @@ export class AdminDashboardComponent implements OnInit {
   }
   
   private loadSystemData(): void {
-    // Gerçek uygulamada bu veriler API'den gelecek
+    // Gerçek API bağlantısı olmadığında örnek veriler
     setTimeout(() => {
       this.systemSummary = {
-        totalUsers: 125,
-        activeUsers: 87,
+        totalUsers: 1254,
         totalRoles: 8,
-        totalEquipment: 0
+        activeUsers: 876
       };
-      
-      this.recentActivities = [
-        { type: 'login', user: 'ahmet.yilmaz', time: '10 dakika önce', status: 'success' },
-        { type: 'user_add', user: 'admin', time: '15 dakika önce', status: 'success' },
-        { type: 'role_update', user: 'admin', time: '25 dakika önce', status: 'info' },
-        { type: 'user_update', user: 'admin', time: '1 saat önce', status: 'warning' },
-        { type: 'system_backup', user: 'system', time: '3 saat önce', status: 'info' },
-        { type: 'login_failed', user: 'unknown', time: '5 saat önce', status: 'danger' },
-        { type: 'settings_update', user: 'admin', time: '1 gün önce', status: 'info' }
-      ];
       
       this.loading = false;
     }, 1000);
   }
 
   navigateToUserManagement(): void {
-    this.router.navigate(['/user-management']);
+    this.router.navigate(['/admin/users']);
   }
 
   navigateToRoleManagement(): void {
-    this.router.navigate(['/role-management']);
+    this.router.navigate(['/admin/roles']);
   }
   
-  navigateToSettings(): void {
-    // Ayarlar sayfası henüz oluşturulmadı
-    this.messageService.add({
-      severity: 'info',
-      summary: 'Bilgi',
-      detail: 'Sistem ayarları modülü geliştirme aşamasındadır.'
-    });
-    // Geliştirme tamamlandığında: this.router.navigate(['/settings']);
+  navigateToSystemSettings(): void {
+    this.router.navigate(['/admin/settings']);
   }
-  
-  navigateToAuditLogs(): void {
-    // Denetim kayıtları sayfası henüz oluşturulmadı
-    this.messageService.add({
-      severity: 'info',
-      summary: 'Bilgi',
-      detail: 'Denetim kayıtları modülü geliştirme aşamasındadır.'
-    });
-    // Geliştirme tamamlandığında: this.router.navigate(['/audit-logs']);
+
+  navigateToReports(): void {
+    this.router.navigate(['/admin/reports']);
+  }
+
+  navigateToLogs(): void {
+    this.router.navigate(['/admin/logs']);
+  }
+
+  navigateToBackup(): void {
+    this.router.navigate(['/admin/backup']);
+  }
+
+  navigateToHelp(): void {
+    this.router.navigate(['/admin/help']);
   }
 
   togglePasswordChange(): void {
@@ -580,5 +585,49 @@ export class AdminDashboardComponent implements OnInit {
         this.router.navigate(['/login']);
       }
     });
+  }
+
+  // Sidebar navigasyon fonksiyonları
+  navigateToProfile(): void {
+    this.activeMenuItem = 'profile';
+    this.router.navigate(['/admin/profile']);
+  }
+
+  navigateToSettings(): void {
+    this.activeMenuItem = 'settings';
+    this.router.navigate(['/admin/settings']);
+  }
+
+  navigateToCalendar(): void {
+    this.activeMenuItem = 'calendar';
+    this.router.navigate(['/admin/calendar']);
+  }
+
+  navigateToInbox(): void {
+    this.activeMenuItem = 'inbox';
+    this.router.navigate(['/admin/inbox']);
+  }
+
+  // Admin menüsünü aç/kapat
+  toggleAdminMenu(event: Event): void {
+    event.stopPropagation(); // Belge tıklamasının hemen tetiklenmesini önle
+    this.showAdminMenu = !this.showAdminMenu;
+  }
+
+  // Menü dışına tıklandığında menüyü kapat
+  @HostListener('document:click', ['$event'])
+  closeMenuOnOutsideClick(event: Event): void {
+    const target = event.target as HTMLElement;
+    const adminDropdown = document.querySelector('.admin-dropdown');
+    
+    if (adminDropdown && !adminDropdown.contains(target)) {
+      this.showAdminMenu = false;
+    }
+  }
+
+  private loadProfileImage(): void {
+    // Gerçek uygulamada bu fonksiyon kullanıcının profil resmini API'den alabilir
+    // Şimdilik varsayılan resmi kullanıyoruz
+    this.profileImageUrl = 'assets/images/default-avatar.png';
   }
 }

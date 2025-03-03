@@ -183,7 +183,7 @@
 - Frontend başlatma sorunları çözüldü (PowerShell komut çalıştırma, port çakışması, chart.js bağımlılığı)
 - Bir sonraki adım: Frontend geliştirmesinin devamı ve API ile tam entegrasyonu
 
-## Yapılan Güncellemeler (3 Mart 2025)
+## Yapılan Güncellemeler (4 Mart 2025)
 - Chart.js kütüphanesi yüklendi
 - Frontend başlatma sorunları çözüldü:
   - PowerShell komut çalıştırma sorunu (&&)
@@ -193,6 +193,11 @@
 - Admin Dashboard bileşeni geliştirildi
 - Frontend sorunları ve çözümleri belgelendi (knowledge-base/frontend_troubleshooting.md)
 - Errors.md dosyası güncellendi
+- Admin Dashboard'a profil resmi eklendi:
+  - Varsayılan profil resmi (default-avatar.png) assets/images klasörüne eklendi
+  - Profil resmi için CSS stilleri iyileştirildi (hover efektleri, gölgeler)
+  - Profil resmi yükleme işlemi için loadProfileImage() metodu eklendi
+  - PowerShell komut çalıştırma sorunları çözüldü (& yerine ; kullanımı)
 
 ## Şifre Değiştirme Formu Güncellemesi
 

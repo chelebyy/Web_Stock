@@ -1,431 +1,241 @@
-<div class="animated-background">
-  <div class="cube"></div>
-  <div class="cube"></div>
-  <div class="cube"></div>
-  <div class="cube"></div>
-  <div class="cube"></div>
-  <div class="lines"></div>
-</div>
-
 <p-toast></p-toast>
 
 <div class="dashboard-container">
   <div class="glass-card">
-    <!-- Üst Başlık ve Kullanıcı Bilgileri -->
     <div class="header">
       <div class="header-title">
-        <h1>Yönetim Paneli</h1>
+        <h1>Yönetici Paneli</h1>
         <p class="welcome-text">Hoş geldiniz, <span class="username">{{ username }}</span></p>
       </div>
-      <div class="header-buttons">
-        <p-button 
-          label="Şifre Değiştir"
-          icon="pi pi-key"
-          (onClick)="togglePasswordChange()"
-          [styleClass]="showPasswordChange ? 'p-button-text p-button-warning' : 'p-button-text p-button-help'">
-        </p-button>
-        <p-button 
-          label="Çıkış Yap"
-          icon="pi pi-sign-out"
-          styleClass="p-button-text p-button-danger"
-          (onClick)="logout()">
-        </p-button>
+      <div class="admin-dropdown">
+        <div class="admin-button" (click)="toggleAdminMenu($event)">
+          <img [src]="profileImageUrl" alt="Profil" class="admin-avatar" onerror="this.src='https://via.placeholder.com/40x40?text=A'">
+          <span class="admin-name">{{ username }}</span>
+          <i class="pi" [ngClass]="{'pi-chevron-down': !showAdminMenu, 'pi-chevron-up': showAdminMenu}"></i>
+        </div>
+        <div class="admin-menu" *ngIf="showAdminMenu">
+          <div class="menu-header">
+            <img [src]="profileImageUrl" alt="Profil" class="menu-avatar" onerror="this.src='https://via.placeholder.com/60x60?text=A'">
+            <div class="menu-user-info">
+              <span class="menu-username">{{ username }}</span>
+              <span class="menu-role">Yönetici</span>
+            </div>
+          </div>
+          <div class="menu-item" (click)="navigateToProfile()">
+            <i class="pi pi-user"></i>
+            <span>Profil</span>
+          </div>
+          <div class="menu-item" (click)="navigateToSettings()">
+            <i class="pi pi-cog"></i>
+            <span>Ayarlar</span>
+          </div>
+          <div class="menu-item" (click)="navigateToCalendar()">
+            <i class="pi pi-calendar"></i>
+            <span>Takvim</span>
+          </div>
+          <div class="menu-item" (click)="navigateToInbox()">
+            <i class="pi pi-inbox"></i>
+            <span>Gelen Kutusu</span>
+          </div>
+          <div class="menu-item" (click)="showPasswordChange = true; showAdminMenu = false;">
+            <i class="pi pi-key"></i>
+            <span>Şifre Değiştir</span>
+          </div>
+          <div class="menu-item logout" (click)="logout()">
+            <i class="pi pi-sign-out"></i>
+            <span>Çıkış</span>
+          </div>
+        </div>
       </div>
     </div>
 
-    <!-- Şifre Değiştirme Formu -->
     <div class="password-change-form" *ngIf="showPasswordChange">
       <div class="password-form-header">
         <h2>Şifre Değiştir</h2>
-        <button class="close-button" (click)="togglePasswordChange()">
+        <button class="close-button" (click)="showPasswordChange = false">
           <i class="pi pi-times"></i>
         </button>
       </div>
-      <div class="p-fluid">
-        <div class="field">
-          <div class="p-inputgroup">
-            <span class="p-inputgroup-addon">
-              <i class="pi pi-lock"></i>
-            </span>
-            <input [type]="showCurrentPassword ? 'text' : 'password'" pInputText id="currentPassword" [(ngModel)]="currentPassword" placeholder="Mevcut Şifre" class="modern-input" />
-            <button pButton type="button" class="p-button-text p-button-rounded p-button-plain" (click)="toggleCurrentPasswordVisibility()">
-              <i class="pi" [ngClass]="showCurrentPassword ? 'pi-eye' : 'pi-eye-slash'"></i>
-            </button>
-          </div>
-        </div>
-        <div class="field">
-          <div class="p-inputgroup">
-            <span class="p-inputgroup-addon">
-              <i class="pi pi-key"></i>
-            </span>
-            <input [type]="showNewPassword ? 'text' : 'password'" pInputText id="newPassword" [(ngModel)]="newPassword" placeholder="Yeni Şifre" class="modern-input" />
-            <button pButton type="button" class="p-button-text p-button-rounded p-button-plain" (click)="toggleNewPasswordVisibility()">
-              <i class="pi" [ngClass]="showNewPassword ? 'pi-eye' : 'pi-eye-slash'"></i>
-            </button>
-          </div>
-        </div>
-        <div class="field">
-          <div class="p-inputgroup">
-            <span class="p-inputgroup-addon">
-              <i class="pi pi-key"></i>
-            </span>
-            <input [type]="showConfirmPassword ? 'text' : 'password'" pInputText id="confirmPassword" [(ngModel)]="confirmPassword" placeholder="Yeni Şifre (Tekrar)" class="modern-input" />
-            <button pButton type="button" class="p-button-text p-button-rounded p-button-plain" (click)="toggleConfirmPasswordVisibility()">
-              <i class="pi" [ngClass]="showConfirmPassword ? 'pi-eye' : 'pi-eye-slash'"></i>
-            </button>
-          </div>
-        </div>
-        <div class="password-actions">
-          <button pButton class="p-button-sm p-button-primary change-button" label="Değiştir" icon="pi pi-check" (click)="changePassword()"></button>
-          <button pButton class="p-button-sm p-button-outlined p-button-secondary cancel-button" label="İptal" icon="pi pi-times" (click)="togglePasswordChange()"></button>
-        </div>
+      
+      <div class="field">
+        <span class="p-float-label p-input-icon-right">
+          <i class="pi pi-eye" (click)="showCurrentPassword = !showCurrentPassword" 
+             [ngClass]="{'pi-eye': !showCurrentPassword, 'pi-eye-slash': showCurrentPassword}" 
+             style="cursor: pointer;"></i>
+          <input id="currentPassword" [type]="showCurrentPassword ? 'text' : 'password'" 
+                 pInputText class="modern-input" [(ngModel)]="currentPassword">
+          <label for="currentPassword">Mevcut Şifre</label>
+        </span>
+      </div>
+      
+      <div class="field">
+        <span class="p-float-label p-input-icon-right">
+          <i class="pi pi-eye" (click)="showNewPassword = !showNewPassword" 
+             [ngClass]="{'pi-eye': !showNewPassword, 'pi-eye-slash': showNewPassword}" 
+             style="cursor: pointer;"></i>
+          <input id="newPassword" [type]="showNewPassword ? 'text' : 'password'" 
+                 pInputText class="modern-input" [(ngModel)]="newPassword">
+          <label for="newPassword">Yeni Şifre</label>
+        </span>
+      </div>
+      
+      <div class="field">
+        <span class="p-float-label p-input-icon-right">
+          <i class="pi pi-eye" (click)="showConfirmPassword = !showConfirmPassword" 
+             [ngClass]="{'pi-eye': !showConfirmPassword, 'pi-eye-slash': showConfirmPassword}" 
+             style="cursor: pointer;"></i>
+          <input id="confirmPassword" [type]="showConfirmPassword ? 'text' : 'password'" 
+                 pInputText class="modern-input" [(ngModel)]="confirmPassword">
+          <label for="confirmPassword">Şifre Tekrar</label>
+        </span>
+      </div>
+      
+      <div class="password-actions">
+        <button pButton pRipple type="button" label="Değiştir" 
+                class="p-button-rounded change-button" (click)="changePassword()"></button>
+        <button pButton pRipple type="button" label="İptal" 
+                class="p-button-rounded p-button-outlined cancel-button" (click)="showPasswordChange = false"></button>
       </div>
     </div>
 
-    <!-- Ana Yönetim Modülleri -->
-    <div class="admin-modules">
-      <div class="grid">
-        <!-- Kullanıcı Yönetimi Kartı -->
-        <div class="col-12 md:col-4">
+    <div class="dashboard-header">
+      <h1>Yönetici Paneli</h1>
+      <p>Sistem yönetimi ve izleme araçları</p>
+    </div>
+
+    <div class="main-content">
+      <!-- Sol Taraf - Ana Yönetim Modülleri -->
+      <div class="left-column">
+        <div class="admin-modules">
           <div class="admin-card user-management-card" (click)="navigateToUserManagement()">
-            <div class="admin-card-icon">
+            <div class="card-icon">
               <i class="pi pi-users"></i>
             </div>
-            <div class="admin-card-content">
-              <h2>Kullanıcı Yönetimi</h2>
-              <p>Kullanıcıları görüntüle, ekle, düzenle ve yönet</p>
-              <div class="admin-card-stats">
-                <div class="stat">
-                  <span class="stat-value">{{ systemSummary.totalUsers }}</span>
-                  <span class="stat-label">Toplam Kullanıcı</span>
-                </div>
-                <div class="stat">
-                  <span class="stat-value">{{ systemSummary.activeUsers }}</span>
-                  <span class="stat-label">Aktif Kullanıcı</span>
-                </div>
-              </div>
-              <p-button 
-                label="Kullanıcıları Yönet" 
-                icon="pi pi-arrow-right" 
-                iconPos="right"
-                styleClass="p-button-rounded p-button-outlined">
-              </p-button>
+            <div class="card-content">
+              <h3>Kullanıcı Yönetimi</h3>
+              <p>Kullanıcıları görüntüle, düzenle ve yönet</p>
             </div>
           </div>
-        </div>
 
-        <!-- Rol Yönetimi Kartı -->
-        <div class="col-12 md:col-4">
           <div class="admin-card role-management-card" (click)="navigateToRoleManagement()">
-            <div class="admin-card-icon">
+            <div class="card-icon">
               <i class="pi pi-id-card"></i>
             </div>
-            <div class="admin-card-content">
-              <h2>Rol Yönetimi</h2>
-              <p>Kullanıcı rollerini ve izinlerini yapılandır</p>
-              <div class="admin-card-stats">
-                <div class="stat">
-                  <span class="stat-value">{{ systemSummary.totalRoles }}</span>
-                  <span class="stat-label">Toplam Rol</span>
-                </div>
-              </div>
-              <p-button 
-                label="Rolleri Yönet" 
-                icon="pi pi-arrow-right" 
-                iconPos="right"
-                styleClass="p-button-rounded p-button-outlined">
-              </p-button>
+            <div class="card-content">
+              <h3>Rol Yönetimi</h3>
+              <p>Sistem rollerini ve izinleri yönet</p>
             </div>
           </div>
-        </div>
 
-        <!-- Sistem Ayarları Kartı -->
-        <div class="col-12 md:col-4">
-          <div class="admin-card settings-card" (click)="navigateToSettings()">
-            <div class="admin-card-icon">
+          <div class="admin-card settings-card" (click)="navigateToSystemSettings()">
+            <div class="card-icon">
               <i class="pi pi-cog"></i>
             </div>
-            <div class="admin-card-content">
-              <h2>Sistem Ayarları</h2>
-              <p>Sistem yapılandırmasını ve genel ayarları yönet</p>
-              <div class="admin-card-stats">
-                <div class="stat">
-                  <span class="stat-value">
-                    <i class="pi pi-check-circle" style="color: #22c55e;"></i>
-                  </span>
-                  <span class="stat-label">Sistem Durumu</span>
-                </div>
-              </div>
-              <p-button 
-                label="Ayarları Yönet" 
-                icon="pi pi-arrow-right" 
-                iconPos="right"
-                styleClass="p-button-rounded p-button-outlined">
-              </p-button>
+            <div class="card-content">
+              <h3>Sistem Ayarları</h3>
+              <p>Sistem yapılandırmasını ve parametrelerini yönet</p>
             </div>
           </div>
         </div>
       </div>
-    </div>
 
-    <!-- Kullanıcı Aktivite Grafiği -->
-    <div class="grid mt-4">
-      <div class="col-12">
-        <p-card header="Kullanıcı Aktivitesi" styleClass="activity-log-card">
-          <div class="p-fluid">
-            <div class="grid">
-              <!-- Filtreleme Seçenekleri -->
-              <div class="col-12 md:col-4">
-                <div class="log-filter-container">
-                  <h3>Aktivite Filtreleri</h3>
-                  <div class="field">
-                    <label for="filterActivityType">Aktivite Tipi</label>
-                    <p-dropdown id="filterActivityType" 
-                               [options]="activityTypeOptions" 
-                               [(ngModel)]="activityFilter.activityType" 
-                               placeholder="Tüm aktivite tipleri"
-                               optionLabel="label" 
-                               optionValue="value"
-                               [showClear]="true"
-                               [style]="{'width':'100%'}"
-                               (onChange)="filterLogs()">
-                    </p-dropdown>
-                  </div>
-                  <div class="field">
-                    <label for="filterStatus">Durum</label>
-                    <p-dropdown id="filterStatus" 
-                               [options]="statusOptions" 
-                               [(ngModel)]="activityFilter.status" 
-                               placeholder="Tüm durumlar"
-                               optionLabel="label" 
-                               optionValue="value"
-                               [showClear]="true"
-                               [style]="{'width':'100%'}"
-                               (onChange)="filterLogs()">
-                    </p-dropdown>
-                  </div>
-                  <div class="field">
-                    <label for="filterDateRange">Tarih Aralığı</label>
-                    <p-calendar id="filterDateRange"
-                              [(ngModel)]="activityFilter.dateRange"
-                              selectionMode="range"
-                              [readonlyInput]="true"
-                              [showButtonBar]="true"
-                              placeholder="Tarih aralığı seçin"
-                              [style]="{'width':'100%'}"
-                              (onSelect)="filterLogs()"
-                              (onClear)="clearDateFilter()">
-                    </p-calendar>
-                  </div>
-                  <div class="field">
-                    <label for="filterUsername">Kullanıcı Adı</label>
-                    <div class="p-inputgroup">
-                      <input id="filterUsername" type="text" pInputText [(ngModel)]="activityFilter.username" placeholder="Kullanıcı adı ara">
-                      <button type="button" pButton icon="pi pi-search" (click)="filterLogs()"></button>
-                    </div>
-                  </div>
-                  <div class="field">
-                    <p-button label="Filtreleri Temizle" icon="pi pi-filter-slash" styleClass="p-button-outlined w-full" (onClick)="clearFilters()"></p-button>
-                  </div>
+      <!-- Sağ Taraf - Özet ve Aktiviteler -->
+      <div class="right-column">
+        <!-- Sistem Özeti Kartı -->
+        <p-card styleClass="system-summary-card" header="Sistem Özeti">
+          <div class="p-grid">
+            <div class="p-col-12 p-md-6">
+              <div class="summary-item">
+                <div class="summary-icon users-icon">
+                  <i class="pi pi-users"></i>
+                </div>
+                <div class="summary-data">
+                  <span class="summary-value">1,254</span>
+                  <span class="summary-label">Toplam Kullanıcı</span>
                 </div>
               </div>
-              
-              <!-- Aktivite logları tablosu -->
-              <div class="col-12 md:col-8">
-                <div class="log-table-container">
-                  <div class="log-table-header">
-                    <h3>Sistem Aktivite Logları</h3>
-                    <p>Sistemde gerçekleşen tüm kullanıcı aktiviteleri otomatik olarak kaydedilir.</p>
-                  </div>
-                  
-                  <p-table [value]="filteredActivityLogs" [loading]="loading" styleClass="p-datatable-sm" [tableStyle]="{'min-width': '100%'}">
-                    <ng-template pTemplate="header">
-                      <tr>
-                        <th style="width: 20%">Kullanıcı</th>
-                        <th style="width: 15%">Tip</th>
-                        <th style="width: 35%">Açıklama</th>
-                        <th style="width: 20%">Zaman</th>
-                        <th style="width: 10%">Durum</th>
-                      </tr>
-                    </ng-template>
-                    <ng-template pTemplate="body" let-log>
-                      <tr (click)="showLogDetails(log)" class="log-row">
-                        <td>{{ log.username }}</td>
-                        <td>
-                          <div class="flex align-items-center gap-2">
-                            <i [class]="getActivityIcon(log.activityType)" class="activity-icon"></i>
-                            <span>{{ getActivityTypeLabel(log.activityType) }}</span>
-                          </div>
-                        </td>
-                        <td>{{ log.description }}</td>
-                        <td>{{ log.timestamp | date:'dd.MM.yyyy HH:mm:ss' }}</td>
-                        <td>
-                          <p-tag [value]="getStatusLabel(log.status)" [severity]="getActivitySeverity(log.status)"></p-tag>
-                        </td>
-                      </tr>
-                    </ng-template>
-                    <ng-template pTemplate="emptymessage">
-                      <tr>
-                        <td colspan="5" class="text-center p-4">
-                          <div class="empty-message">
-                            <i class="pi pi-info-circle" style="font-size: 2rem; color: var(--primary-color);"></i>
-                            <p>Aktivite kaydı bulunamadı.</p>
-                            <p *ngIf="hasActiveFilters()" class="text-sm">Filtreleri temizlemeyi deneyin.</p>
-                          </div>
-                        </td>
-                      </tr>
-                    </ng-template>
-                  </p-table>
-                  
-                  <!-- Sayfalama -->
-                  <div class="paginator-container">
-                    <p-paginator 
-                      [rows]="pageSize" 
-                      [totalRecords]="totalFilteredRecords" 
-                      [rowsPerPageOptions]="[5, 10, 20, 50]"
-                      (onPageChange)="onPageChange($event)">
-                    </p-paginator>
-                  </div>
+            </div>
+            <div class="p-col-12 p-md-6">
+              <div class="summary-item">
+                <div class="summary-icon roles-icon">
+                  <i class="pi pi-id-card"></i>
+                </div>
+                <div class="summary-data">
+                  <span class="summary-value">8</span>
+                  <span class="summary-label">Sistem Rolleri</span>
+                </div>
+              </div>
+            </div>
+            <div class="p-col-12 p-md-6">
+              <div class="summary-item">
+                <div class="summary-icon active-icon">
+                  <i class="pi pi-check-circle"></i>
+                </div>
+                <div class="summary-data">
+                  <span class="summary-value">876</span>
+                  <span class="summary-label">Aktif Kullanıcı</span>
+                </div>
+              </div>
+            </div>
+            <div class="p-col-12 p-md-6">
+              <div class="summary-item">
+                <div class="summary-icon status-icon">
+                  <i class="pi pi-server"></i>
+                </div>
+                <div class="summary-data">
+                  <span class="summary-value">Aktif</span>
+                  <span class="summary-label">Sistem Durumu</span>
                 </div>
               </div>
             </div>
           </div>
         </p-card>
-      </div>
-    </div>
 
-    <!-- Log Detay Dialog -->
-    <p-dialog header="Aktivite Detayları" [(visible)]="showLogDetailsDialog" [style]="{width: '50vw'}" [modal]="true">
-      <div *ngIf="selectedLog" class="log-details">
-        <div class="grid">
-          <div class="col-12 md:col-6">
-            <div class="detail-item">
-              <label>Kullanıcı:</label>
-              <span>{{ selectedLog.username }}</span>
-            </div>
-          </div>
-          <div class="col-12 md:col-6">
-            <div class="detail-item">
-              <label>Kullanıcı ID:</label>
-              <span>{{ selectedLog.userId || 'Belirtilmemiş' }}</span>
-            </div>
-          </div>
-          <div class="col-12 md:col-6">
-            <div class="detail-item">
-              <label>Aktivite Tipi:</label>
-              <span>{{ getActivityTypeLabel(selectedLog.activityType) }}</span>
-            </div>
-          </div>
-          <div class="col-12 md:col-6">
-            <div class="detail-item">
-              <label>Durum:</label>
-              <p-tag [value]="getStatusLabel(selectedLog.status)" [severity]="getActivitySeverity(selectedLog.status)"></p-tag>
-            </div>
-          </div>
-          <div class="col-12">
-            <div class="detail-item">
-              <label>Açıklama:</label>
-              <span>{{ selectedLog.description }}</span>
-            </div>
-          </div>
-          <div class="col-12 md:col-6">
-            <div class="detail-item">
-              <label>Tarih:</label>
-              <span>{{ selectedLog.timestamp | date:'dd.MM.yyyy' }}</span>
-            </div>
-          </div>
-          <div class="col-12 md:col-6">
-            <div class="detail-item">
-              <label>Saat:</label>
-              <span>{{ selectedLog.timestamp | date:'HH:mm:ss' }}</span>
-            </div>
-          </div>
-          <div class="col-12 md:col-6">
-            <div class="detail-item">
-              <label>IP Adresi:</label>
-              <span>{{ selectedLog.ipAddress || 'Belirtilmemiş' }}</span>
-            </div>
-          </div>
-          <div class="col-12" *ngIf="selectedLog.details">
-            <div class="detail-item">
-              <label>Detaylar:</label>
-              <pre class="log-details-json">{{ selectedLog.details | json }}</pre>
-            </div>
-          </div>
-        </div>
-      </div>
-      <ng-template pTemplate="footer">
-        <p-button icon="pi pi-times" label="Kapat" styleClass="p-button-text" (click)="showLogDetailsDialog = false"></p-button>
-      </ng-template>
-    </p-dialog>
-
-    <!-- Son Aktiviteler Tablosu -->
-    <div class="grid mt-4">
-      <div class="col-12">
-        <p-card header="Son Aktiviteler" styleClass="activity-card">
-          <p-table [value]="recentActivities" [loading]="loading" styleClass="p-datatable-sm" [tableStyle]="{'min-width': '50rem'}" [paginator]="true" [rows]="5">
+        <!-- Son Aktiviteler Tablosu -->
+        <p-card styleClass="activity-card" header="Son Aktiviteler">
+          <p-table [value]="recentActivities" [paginator]="true" [rows]="5" styleClass="p-datatable-sm">
             <ng-template pTemplate="header">
               <tr>
-                <th style="width: 5%">#</th>
-                <th style="width: 15%">Tip</th>
-                <th style="width: 20%">Kullanıcı</th>
-                <th style="width: 40%">Zaman</th>
-                <th style="width: 20%">Durum</th>
+                <th>Kullanıcı</th>
+                <th>İşlem</th>
+                <th>Tarih</th>
               </tr>
             </ng-template>
-            <ng-template pTemplate="body" let-activity let-i="rowIndex">
+            <ng-template pTemplate="body" let-activity>
               <tr>
-                <td>{{ i + 1 }}</td>
-                <td>
-                  <div class="flex align-items-center gap-2">
-                    <i [class]="getActivityIcon(activity.type)" class="activity-icon"></i>
-                    <span>{{ activity.type }}</span>
-                  </div>
-                </td>
                 <td>{{ activity.user }}</td>
-                <td>{{ activity.time }}</td>
-                <td>
-                  <p-tag [value]="activity.status" [severity]="getActivitySeverity(activity.status)"></p-tag>
-                </td>
-              </tr>
-            </ng-template>
-            <ng-template pTemplate="emptymessage">
-              <tr>
-                <td colspan="5">Aktivite bulunamadı.</td>
+                <td>{{ activity.action }}</td>
+                <td>{{ activity.date | date:'short' }}</td>
               </tr>
             </ng-template>
           </p-table>
         </p-card>
-      </div>
-    </div>
 
-    <!-- Hızlı Erişim Menüsü -->
-    <div class="grid mt-4">
-      <div class="col-12">
-        <p-card header="Hızlı Erişim" styleClass="quick-access-card">
-          <div class="grid">
-            <div class="col-6 md:col-3">
-              <div class="quick-access-item" (click)="navigateToUserManagement()">
-                <i class="pi pi-users"></i>
-                <span>Kullanıcı Yönetimi</span>
+        <!-- Hızlı Erişim Menüsü -->
+        <p-card styleClass="quick-access-card" header="Hızlı Erişim">
+          <div class="p-grid">
+            <div class="p-col-6 p-md-3">
+              <div class="quick-access-item" (click)="navigateToReports()">
+                <i class="pi pi-chart-bar"></i>
+                <span>Raporlar</span>
               </div>
             </div>
-            <div class="col-6 md:col-3">
-              <div class="quick-access-item" (click)="navigateToRoleManagement()">
-                <i class="pi pi-id-card"></i>
-                <span>Rol Yönetimi</span>
+            <div class="p-col-6 p-md-3">
+              <div class="quick-access-item" (click)="navigateToLogs()">
+                <i class="pi pi-list"></i>
+                <span>Sistem Logları</span>
               </div>
             </div>
-            <div class="col-6 md:col-3">
-              <div class="quick-access-item" (click)="navigateToSettings()">
-                <i class="pi pi-cog"></i>
-                <span>Sistem Ayarları</span>
+            <div class="p-col-6 p-md-3">
+              <div class="quick-access-item" (click)="navigateToBackup()">
+                <i class="pi pi-database"></i>
+                <span>Yedekleme</span>
               </div>
             </div>
-            <div class="col-6 md:col-3">
-              <div class="quick-access-item" (click)="navigateToAuditLogs()">
-                <i class="pi pi-history"></i>
-                <span>Denetim Kayıtları</span>
+            <div class="p-col-6 p-md-3">
+              <div class="quick-access-item" (click)="navigateToHelp()">
+                <i class="pi pi-question-circle"></i>
+                <span>Yardım</span>
               </div>
             </div>
           </div>

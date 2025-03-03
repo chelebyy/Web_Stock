@@ -14,6 +14,8 @@ Bu dosya, proje geliştirme sürecinde karşılaşılan hataları ve çözümler
 - [Şifre Hashleme ve Doğrulama Sorunları](#şifre-hashleme-ve-doğrulama-sorunları)
 - [Bağımlılık Enjeksiyon Hataları](#bağımlılık-enjeksiyon-hataları)
 - [Login Hataları](#login-hataları)
+- [PowerShell Komut Çalıştırma Sorunları](#powershell-komut-çalıştırma-sorunları)
+- [Profil Resmi Ekleme Sorunları](#profil-resmi-ekleme-sorunları)
 
 ## Clean Architecture Geçişi Hataları
 
@@ -896,10 +898,11 @@ POST http://localhost:5037/api/auth/register
 ```
 
 **Önemli Notlar:**
-- Şifre hashleme algoritması değiştirildiğinde, mevcut kullanıcıların şifreleri geçersiz hale gelir
-- Seed data'daki hash formatı ile PasswordHasher sınıfındaki format aynı olmalıdır
-- BCrypt, modern web uygulamaları için PBKDF2'den daha güvenli bir seçenektir
-- Şifre doğrulama hatalarında 401 Unauthorized hatası döner, bu normal bir davranıştır
+- Şifre değiştirme işlemi için kullanıcının kimliği doğrulanmalı (Authorize attribute)
+- Mevcut şifre doğrulanmalı
+- Yeni şifre güvenli bir şekilde hash'lenmeli
+- İşlem sonucu detaylı bir şekilde loglanmalı
+- Başarılı işlemler için Message özelliği, başarısız işlemler için ErrorMessage özelliği kullanılmalı
 
 ## BCrypt Verify Metodu Sorunu
 
@@ -1278,3 +1281,143 @@ public async Task<IActionResult> ChangePassword([FromBody] ChangePasswordDto cha
 - Admin kullanıcısı şifresini başarıyla değiştirebildi
 - Frontend uygulaması şifre değiştirme işlemini sorunsuz gerçekleştirebildi
 - Tüm güvenlik kontrolleri başarıyla çalıştı
+
+## Şifre Değiştirme Formu Güncellemesi
+
+### Şifre Değiştirme Formu Tasarım Güncellemesi
+
+**Yapılan Değişiklikler:**
+1. Şifre değiştirme formunun arka plan rengi ve stilini güncelledik
+2. Input alanlarını daha modern bir görünüme kavuşturduk
+3. Şifre göster/gizle işlevselliği ekledik
+4. Butonların tasarımını iyileştirdik
+
+**Olası Hatalar ve Çözümleri:**
+
+1. **Şifre göster/gizle işlevselliği çalışmıyor**
+   - **Neden:** Angular'da event binding sorunları olabilir
+   - **Çözüm:** HTML'de (click) event binding'in doğru şekilde uygulandığından emin olun
+
+2. **Şifre değiştirme API çağrısı başarısız oluyor**
+   - **Neden:** Backend API endpoint'i değişmiş olabilir veya token doğrulama sorunu olabilir
+   - **Çözüm:** Network isteklerini kontrol edin, API endpoint'in doğru olduğundan emin olun ve token'ın geçerli olduğunu doğrulayın
+
+3. **Form stillerinde bozulmalar**
+   - **Neden:** CSS override sorunları veya PrimeNG bileşenleriyle çakışmalar
+   - **Çözüm:** CSS seçicilerinin özgüllüğünü artırın veya !important kullanın
+
+4. **Şifre değiştirme işlemi sonrası form kapanmıyor**
+   - **Neden:** togglePasswordChange() metodu çağrılmamış olabilir
+   - **Çözüm:** API çağrısı başarılı olduğunda togglePasswordChange() metodunun çağrıldığından emin olun
+
+**Genel Notlar:**
+- Şifre değiştirme işlemi için her zaman mevcut şifre doğrulaması yapılmalıdır
+- Yeni şifre ve şifre tekrarı alanları eşleşmelidir
+- Şifre değiştirme işlemi başarılı olduğunda kullanıcıya bildirim gösterilmelidir
+- Hata durumlarında kullanıcıya anlamlı hata mesajları gösterilmelidir
+
+## PowerShell Komut Çalıştırma Sorunları
+
+### && Operatörü Kullanımı Hatası
+
+**Hata:** PowerShell'de && operatörü kullanıldığında komutlar düzgün çalışmıyor.
+
+**Nedeni:**
+1. PowerShell, && operatörünü mantıksal AND operatörü olarak kullanır, komut zincirleme için değil.
+2. Windows Command Prompt (cmd.exe) ve Bash gibi kabukların aksine, PowerShell'de komutları zincirleme için farklı bir sözdizimi kullanılır.
+
+**Çözüm:**
+PowerShell'de komutları zincirleme için aşağıdaki yöntemlerden birini kullanın:
+
+1. Noktalı virgül (;) kullanarak:
+```powershell
+cd .. ; cd frontend ; npm run start
+```
+
+2. Pipeline operatörü (|) ve ForEach-Object cmdlet'i kullanarak:
+```powershell
+"cd ..", "cd frontend", "npm run start" | ForEach-Object { Invoke-Expression $_ }
+```
+
+3. Komutları ayrı satırlara yazarak:
+```powershell
+cd ..
+cd frontend
+npm run start
+```
+
+**Önemli Notlar:**
+- PowerShell'de && operatörü, iki boolean ifadenin AND işlemi için kullanılır, komut zincirleme için değil.
+- Noktalı virgül (;) kullanımı, önceki komutun başarılı olup olmadığına bakılmaksızın sonraki komutu çalıştırır.
+- Eğer önceki komutun başarılı olması durumunda sonraki komutu çalıştırmak istiyorsanız, şu şekilde kullanabilirsiniz:
+```powershell
+cmd1.exe; if ($?) { cmd2.exe }
+```
+
+## Profil Resmi Ekleme Sorunları
+
+### Varsayılan Profil Resmi Ekleme
+
+**Sorun:** Admin dashboard'da profil resmi görüntülenmiyordu.
+
+**Nedeni:**
+1. Varsayılan profil resmi dosyası eksikti
+2. HTML'de profil resmi için doğru yol tanımlanmamıştı
+3. Profil resmi için gerekli CSS stilleri yetersizdi
+
+**Çözüm:**
+1. `frontend/src/assets/images/` klasörüne varsayılan profil resmi (`default-avatar.png`) eklendi
+2. Component'e `profileImageUrl` değişkeni eklendi:
+```typescript
+profileImageUrl: string = 'assets/images/default-avatar.png';
+```
+3. HTML şablonunda profil resmi referansları güncellendi:
+```html
+<img [src]="profileImageUrl" alt="Profil" class="admin-avatar" onerror="this.src='https://via.placeholder.com/40x40?text=A'">
+```
+4. CSS stilleri iyileştirildi:
+```css
+.admin-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid #f0f0f0;
+  margin-right: 0.75rem;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
+}
+
+.admin-button:hover .admin-avatar {
+  border-color: #3B82F6;
+  transform: scale(1.05);
+}
+```
+
+**Önemli Notlar:**
+- PowerShell'de `&&` operatörü yerine `;` kullanılmalıdır
+- Profil resmi için `onerror` özelliği, resim yüklenemediğinde yedek bir görüntü gösterir
+- Profil resmi için hover efektleri kullanıcı deneyimini iyileştirir
+- Gerçek uygulamada, profil resmi API'den alınabilir ve `loadProfileImage()` metodu buna göre güncellenebilir
+
+### Profil Resmi Yükleme Sorunları
+
+**Sorun:** Profil resmi dosyası yüklenirken PowerShell komut hatası alındı.
+
+**Nedeni:**
+PowerShell'de komutları birleştirmek için `&&` operatörü yerine `;` kullanılmalıdır.
+
+**Çözüm:**
+```powershell
+# Hatalı komut
+echo "Creating default avatar image..." && Invoke-WebRequest -Uri "https://cdn-icons-png.flaticon.com/512/149/149071.png" -OutFile "frontend/src/assets/images/default-avatar.png"
+
+# Doğru komut
+echo "Creating default avatar image..."; Invoke-WebRequest -Uri "https://cdn-icons-png.flaticon.com/512/149/149071.png" -OutFile "frontend/src/assets/images/default-avatar.png"
+```
+
+**Öğrenilen Dersler:**
+- Windows PowerShell'de komutları birleştirmek için `;` kullanılmalıdır
+- Dosya indirme işlemleri için `Invoke-WebRequest` komutu kullanılabilir
+- Profil resmi gibi statik dosyalar için `assets/images/` klasörü kullanılmalıdır
+- Resim dosyaları için yedek görüntü (fallback) tanımlamak önemlidir
