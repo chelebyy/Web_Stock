@@ -54,12 +54,64 @@
 }
 
 .password-change-form {
-  background: rgba(255, 255, 255, 0.5);
-  padding: 1.5rem;
-  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.8);
+  padding: 2rem;
+  border-radius: 16px;
   margin-bottom: 2rem;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
   animation: fadeIn 0.3s ease-in-out;
+  max-width: 500px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.password-form-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+  padding-bottom: 1rem;
+}
+
+.password-form-header h2 {
+  margin: 0;
+  font-size: 1.5rem;
+  color: #333;
+  font-weight: 500;
+}
+
+.close-button {
+  background: none;
+  border: none;
+  cursor: pointer;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background-color 0.2s;
+}
+
+.close-button:hover {
+  background-color: rgba(0, 0, 0, 0.05);
+}
+
+.close-button i {
+  font-size: 1rem;
+  color: #666;
+}
+
+.field {
+  margin-bottom: 1.5rem;
+}
+
+.password-actions {
+  display: flex;
+  gap: 1rem;
+  margin-top: 2rem;
+  justify-content: center;
 }
 
 .button-container {
@@ -435,8 +487,14 @@
 
 /* Animasyon */
 @keyframes fadeIn {
-  from { opacity: 0; transform: translateY(20px); }
-  to { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .admin-modules, .chart-card, .activity-card, .quick-access-card {
@@ -688,5 +746,45 @@ select.p-component:focus {
   :host ::ng-deep .p-dialog {
     width: 95vw !important;
     max-width: 95vw !important;
+  }
+}
+
+:host ::ng-deep {
+  .p-float-label {
+    display: block;
+    margin-bottom: 1rem;
+  }
+  
+  .p-float-label label {
+    background: transparent;
+  }
+  
+  .p-password input {
+    width: 100%;
+    padding: 1rem;
+    border-radius: 8px;
+    border: 1px solid #ced4da;
+    transition: border-color 0.2s, box-shadow 0.2s;
+  }
+  
+  .p-password input:focus {
+    border-color: #3B82F6;
+    box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.25);
+  }
+  
+  .p-button.p-button-rounded {
+    border-radius: 50px;
+    padding: 0.75rem 1.5rem;
+  }
+  
+  .p-button-outlined.p-button-secondary {
+    color: #64748B;
+    border-color: #64748B;
+  }
+  
+  .p-button-outlined.p-button-secondary:hover {
+    background: rgba(100, 116, 139, 0.04);
+    color: #64748B;
+    border-color: #64748B;
   }
 }

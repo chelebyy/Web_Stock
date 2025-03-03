@@ -31,22 +31,34 @@
     </div>
 
     <div class="password-change-form" *ngIf="showPasswordChange">
+      <div class="password-form-header">
+        <h2>Şifre Değiştir</h2>
+        <button class="close-button" (click)="togglePasswordChange()">
+          <i class="pi pi-times"></i>
+        </button>
+      </div>
       <div class="p-fluid">
         <div class="field">
-          <label for="currentPassword">Mevcut Şifre</label>
-          <p-password id="currentPassword" [(ngModel)]="currentPassword" [feedback]="false" [toggleMask]="true"></p-password>
+          <span class="p-float-label">
+            <p-password id="currentPassword" [(ngModel)]="currentPassword" [feedback]="false" [toggleMask]="true" styleClass="w-full"></p-password>
+            <label for="currentPassword">Mevcut Şifre</label>
+          </span>
         </div>
         <div class="field">
-          <label for="newPassword">Yeni Şifre</label>
-          <p-password id="newPassword" [(ngModel)]="newPassword" [toggleMask]="true"></p-password>
+          <span class="p-float-label">
+            <p-password id="newPassword" [(ngModel)]="newPassword" [toggleMask]="true" styleClass="w-full"></p-password>
+            <label for="newPassword">Yeni Şifre</label>
+          </span>
         </div>
         <div class="field">
-          <label for="confirmPassword">Yeni Şifre (Tekrar)</label>
-          <p-password id="confirmPassword" [(ngModel)]="confirmPassword" [feedback]="false" [toggleMask]="true"></p-password>
+          <span class="p-float-label">
+            <p-password id="confirmPassword" [(ngModel)]="confirmPassword" [feedback]="false" [toggleMask]="true" styleClass="w-full"></p-password>
+            <label for="confirmPassword">Yeni Şifre (Tekrar)</label>
+          </span>
         </div>
-        <div class="button-container">
-          <p-button label="Değiştir" icon="pi pi-check" (onClick)="changePassword()"></p-button>
-          <p-button label="İptal" icon="pi pi-times" styleClass="p-button-secondary" (onClick)="togglePasswordChange()"></p-button>
+        <div class="password-actions">
+          <p-button label="Değiştir" icon="pi pi-check" styleClass="p-button-rounded" (onClick)="changePassword()"></p-button>
+          <p-button label="İptal" icon="pi pi-times" styleClass="p-button-rounded p-button-outlined p-button-secondary" (onClick)="togglePasswordChange()"></p-button>
         </div>
       </div>
     </div>
