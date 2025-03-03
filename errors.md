@@ -52,6 +52,29 @@ Bu dosya, proje geliştirme sürecinde karşılaşılan hataları ve çözümler
 - Infrastructure hem Domain hem Application'a bağımlı olabilir
 - API katmanı Infrastructure'a bağımlı olabilir
 
+### Eski Yapı Temizliği
+
+**Sorun:** Clean Architecture geçişi sonrası eski yapı hala projede bulunuyordu
+
+**Nedeni:**
+1. Geçiş sırasında eski klasörler silinmemiş
+2. Kök dizinde ve src klasöründe aynı isimli projeler vardı
+3. Karışıklığa neden olabilecek eski dosyalar mevcuttu
+
+**Çözüm:**
+1. Eski yapıyı yedekle (backup_old_structure klasörüne)
+2. Aşağıdaki eski klasörleri ve dosyaları sil:
+   - backend/StockAPI
+   - Stock.API (kök dizindeki)
+   - Stock.Infrastructure (kök dizindeki)
+   - src/Stock.sln (boş solution dosyası)
+   - CreateAdminUser.cs (kök dizindeki boş dosya)
+
+**Önemli Notlar:**
+- Temizlik öncesi mutlaka yedek alınmalı
+- Silme işlemi öncesi dosyaların içeriği kontrol edilmeli
+- Yeni yapının çalıştığından emin olunmalı
+
 ### CQRS Pattern Implementasyon Sorunları
 
 **Hata:** Generic tip parametreleri ve constraint'ler eksik
@@ -308,113 +331,113 @@ cd Stock.API
 dotnet run
 ```
 
-### Frontend Başlatma Sorunu
+### Frontend Başlatma Sorunları (03.03.2025)
 
-**Hata:**
+### Hata: Angular CLI Tanınmama Sorunu
+**Tarih:** 2025-03-03
+**Hata Mesajı:** 
 ```
-PS C:\Users\muham\OneDrive\Masaüstü\Stock> ng serve
-Error: This command is not available when running the Angular CLI outside a workspace.
-```
-
-**Nedeni:**
-1. Angular CLI komutu (ng serve) Angular workspace dışında çalıştırılıyor
-2. Komut frontend dizininde değil, ana dizinde çalıştırılıyor
-
-**Çözüm:**
-```powershell
-cd frontend
-npm install    # Eğer node_modules yoksa
-ng serve
-```
-
-### PowerShell Komut Çalıştırma Sorunu
-
-**Hata:**
-```
-PS C:\Users\muham\OneDrive\Masaüstü\Stock> cd frontend && ng serve
-At line:1 char:13
-+ cd frontend && ng serve
-+             ~~
-The token '&&' is not a valid statement separator in this version.
+ng : The term 'ng' is not recognized as the name of a cmdlet, function, script file, or operable program.
 ```
 
 **Nedeni:**
-1. PowerShell, Bash veya CMD'den farklı olarak && operatörünü desteklemiyor
-2. PowerShell'de komutları birleştirmek için farklı bir sözdizimi kullanılıyor
+1. Angular CLI global olarak yüklü değil
+2. PATH değişkeninde Angular CLI yolu tanımlı değil
+3. PowerShell'de komut çalıştırma yetkileri kısıtlı olabilir
 
 **Çözüm:**
+1. Angular CLI'ı global olarak yüklemek:
 ```powershell
-cd frontend; ng serve
+npm install -g @angular/cli
 ```
 
-veya
-
-```powershell
-cd frontend
-ng serve
-```
-
-### Chart.js Bağımlılık Sorunu
-
-**Hata:**
-```
-X [ERROR] Could not resolve "chart.js/auto"
-    node_modules/primeng/fesm2022/primeng-chart.mjs:5:18:
-      5 │ import Chart from 'chart.js/auto';
-        ╵                   ~~~~~~~~~~~~~~~
-```
-
-**Nedeni:**
-1. PrimeNG Chart bileşeni, chart.js kütüphanesine bağımlıdır
-2. chart.js kütüphanesi projeye eklenmemiş
-3. PrimeNG 19.0.6 sürümü, chart.js kütüphanesini otomatik olarak yüklemiyor
-
-**Çözüm:**
+2. Yerel Angular CLI'ı kullanmak:
 ```powershell
 cd frontend
-npm install chart.js --save
+npx ng serve --port=4202
 ```
 
-### Port Çakışması Sorunu
-
-**Hata:**
+3. npm run start komutunu kullanmak:
+```powershell
+cd frontend
+npm run start -- --port=4202
 ```
-PS C:\Users\muham\OneDrive\Masaüstü\Stock\frontend> ng serve
-? Port 4200 is already in use.
+
+**Önemli Notlar:**
+- PowerShell'de && operatörü yerine ; kullanılmalıdır
+- Port çakışması durumunda farklı bir port belirtilmelidir
+- Çalışan node işlemleri durdurulmalıdır
+- Komutlar doğru dizinde çalıştırılmalıdır (frontend klasöründe)
+
+### Hata: Port Çakışması Sorunu
+**Tarih:** 2025-03-03
+**Hata Mesajı:** 
+```
+Port 4200 is already in use.
 Would you like to use a different port? No
 An unhandled exception occurred: Port 4200 is already in use. Use '--port' to specify a different port.
 ```
 
 **Nedeni:**
 1. 4200 portu başka bir uygulama tarafından kullanılıyor
-2. Önceki Angular uygulaması düzgün kapatılmamış olabilir
-3. Başka bir servis 4200 portunu kullanıyor olabilir
+2. Önceki Angular uygulaması düzgün kapatılmamış
+3. Port serbest bırakılmamış
 
 **Çözüm:**
-1. Çalışan tüm node işlemlerini durdurun:
+1. Çalışan tüm node işlemlerini durdurmak:
 ```powershell
 Get-Process -Name "node" -ErrorAction SilentlyContinue | Stop-Process -Force
 ```
 
-2. Belirli bir portu kullanan işlemleri bulun ve durdurun:
+2. 4200 portunu kullanan işlemleri bulmak ve durdurmak:
 ```powershell
 netstat -ano | findstr :4200
 Get-Process -Id <PID> -ErrorAction SilentlyContinue | Stop-Process -Force
 ```
 
-3. Farklı bir port kullanarak uygulamayı başlatın:
+3. Farklı bir port belirterek uygulamayı başlatmak:
 ```powershell
-ng serve --port 4202
+cd frontend
+npm run start -- --port=4202
 ```
 
 **Önemli Notlar:**
-- Her servis için ayrı terminal penceresi kullanılmalı
-- Backend servisi 5126 portunda çalışmalı
-- Frontend servisi 4200 portunda çalışmalı
-- Servisleri başlatmadan önce tüm portların müsait olduğundan emin olunmalı
-- PowerShell'de komutları birleştirmek için ; (noktalı virgül) kullanılmalı
-- Port çakışması durumunda farklı bir port kullanılabilir
-- PrimeNG Chart bileşeni için chart.js kütüphanesi gereklidir
+- Port parametresi doğru şekilde geçirilmelidir: `--port=4202`
+- Komut doğru dizinde çalıştırılmalıdır (frontend klasöründe)
+- Çalışan işlemler düzgün şekilde durdurulmalıdır
+- Uygulama başlatıldıktan sonra http://localhost:4202 adresinden erişilebilir
+
+### Hata: npm Komut Çalıştırma Sorunu
+**Tarih:** 2025-03-03
+**Hata Mesajı:** 
+```
+npm error code ENOENT
+npm error syscall open
+npm error path C:\Users\IT\Documents\Cz_Web\Web_Stock\package.json
+npm error errno -4058
+npm error enoent Could not read package.json: Error: ENOENT: no such file or directory
+```
+
+**Nedeni:**
+1. Komut yanlış dizinde çalıştırılıyor
+2. package.json dosyası bulunamıyor
+3. npm komutları frontend klasöründe çalıştırılmalı
+
+**Çözüm:**
+1. Doğru dizine geçmek:
+```powershell
+cd frontend
+```
+
+2. npm komutlarını frontend klasöründe çalıştırmak:
+```powershell
+npm run start -- --port=4202
+```
+
+**Önemli Notlar:**
+- npm komutları package.json dosyasının bulunduğu dizinde çalıştırılmalıdır
+- Frontend uygulaması için komutlar frontend klasöründe çalıştırılmalıdır
+- Komut çalıştırılmadan önce dizin kontrol edilmelidir
 
 ## Genel Öneriler
 
@@ -738,6 +761,7 @@ dotnet ef database update
 // Seed data oluşturma
 var adminUser = new User
 {
+    Id = 1,
     Username = "Admin",
     PasswordHash = BCrypt.Net.BCrypt.HashPassword("Admin123"), // BCrypt formatında hash
     IsAdmin = true,
@@ -924,6 +948,16 @@ dotnet ef database update
 - Şifre doğrulama hatalarında 401 Unauthorized hatası döner, bu normal bir davranıştır.
 - Kullanıcı adı: `admin`, şifre: `Admin123`
 
+**Log Kayıtları:**
+```
+info: Stock.Infrastructure.Services.AuthService[0]
+      Kullanıcı bulundu: admin, ID: 1, IsAdmin: True
+info: Stock.Infrastructure.Services.PasswordHasher[0]
+      Şifre doğrulama sonucu: True
+info: Stock.Infrastructure.Services.AuthService[0]
+      Başarılı giriş: admin, Token üretildi
+```
+
 ## Bağımlılık Enjeksiyon Hataları
 
 ### Hata: IAuthService Bağımlılık Çözümleme Hatası
@@ -1073,62 +1107,40 @@ export const routes: Routes = [
 
 # Login Hataları
 
-## BCrypt Work Factor Tutarsızlığı
+## BCrypt Şifre Doğrulama Hatası (03.03.2025)
 
-### Sorun
-- Farklı zamanlarda oluşturulan admin kullanıcıları için farklı BCrypt work factor'leri kullanılması
-- Veritabanında aynı kullanıcı için farklı büyük-küçük harf kombinasyonlarıyla kayıtlar oluşması
-
-### Çözüm
-1. BCrypt work factor'ü sabit bir değerde (11) tutuldu
-2. Kullanıcı adları için case-sensitive kontrol eklendi
-3. Migration ile admin kullanıcıları temizlenip yeniden oluşturuldu
-
-### Önlemler
-1. `PasswordHasher` sınıfında work factor sabitlenerek tutarsızlık önlendi
-2. Kullanıcı oluşturma ve doğrulama işlemlerinde detaylı loglama eklendi
-3. Migration ile veritabanı tutarlılığı sağlandı
-
-## Port Çakışması
-
-### Sorun
-- Frontend (4202) ve backend (5037) portlarında çakışma
-
-### Çözüm
-1. Servisleri başlatmadan önce ilgili portları kullanan işlemleri sonlandır:
-```powershell
-taskkill /F /IM Stock.API.exe
-taskkill /F /IM node.exe
+**Hata:** 
+```
+401 Unauthorized - Login işleminde şifre doğrulama hatası
 ```
 
-### Önlemler
-1. Servisleri başlatmadan önce port kontrolü yap
-2. Alternatif portlar için yapılandırma ekle
-3. Servis başlatma/durdurma için script oluştur
+**Nedeni:**
+1. BCrypt hash'i ile şifre doğrulama işlemi başarısız
+2. Veritabanındaki hash değeri ile girilen şifrenin hash'i uyuşmuyor
 
-## Admin Dashboard Hataları ve Çözümleri
-
-### Hata: TypeError - userActivityLogs is not iterable
-**Sorun:** Admin dashboard'da userActivityLogs değişkeni undefined olarak geliyordu ve bu nedenle iterable hatası alınıyordu.
-
-**Çözüm:** 
-1. loadUserActivityLogs fonksiyonuna null kontrolü eklendi
-2. API yanıtı için kontrol mekanizması güçlendirildi
-3. Hata durumunda örnek veriler gösterilmesi sağlandı
-
-```typescript
-if (response && response.Logs) {
-  this.userActivityLogs = response.Logs;
-  this.totalRecords = response.TotalItems || 0;
-} else {
-  this.userActivityLogs = [];
-  this.totalRecords = 0;
-  console.warn('API yanıtında Logs verisi bulunamadı:', response);
-}
+**Çözüm:**
+1. `FixPasswordController` endpoint'i kullanılarak admin şifresi yeniden ayarlandı:
+```
+GET /api/FixPassword/fix-admin
 ```
 
-### Öğrenilen Dersler
-1. API yanıtlarında her zaman null kontrolü yapılmalı
-2. Hata durumları için fallback mekanizması oluşturulmalı
-3. Konsola detaylı hata mesajları yazılmalı
-4. Kullanıcıya anlamlı hata mesajları gösterilmeli
+2. Yeni hash değeri:
+```
+$2a$11$jLGT8mYtwgJ/U6VpQPhxFuLfnVAMm7qLsnfim33OehCyeieqVms8q
+```
+
+**Önemli Notlar:**
+- BCrypt work factor: 11
+- Hash uzunluğu: 60 karakter
+- Hash formatı: BCrypt ($2a$ prefix)
+- Şifre: Admin123
+
+**Log Kayıtları:**
+```
+info: Stock.Infrastructure.Services.AuthService[0]
+      Kullanıcı bulundu: admin, ID: 1, IsAdmin: True
+info: Stock.Infrastructure.Services.PasswordHasher[0]
+      Şifre doğrulama sonucu: True
+info: Stock.Infrastructure.Services.AuthService[0]
+      Başarılı giriş: admin, Token üretildi
+```

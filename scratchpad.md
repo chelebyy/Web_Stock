@@ -49,6 +49,13 @@
   - [x] Migrations oluşturuldu
   - [x] Infrastructure katmanındaki hatalar düzeltildi
 
+- [x] **Eski Yapının Temizlenmesi**
+  - [x] Eski backend klasörü silindi (backend/StockAPI)
+  - [x] Eski Stock.API klasörü silindi (kök dizindeki)
+  - [x] Eski Stock.Infrastructure klasörü silindi (kök dizindeki)
+  - [x] Eski boş solution dosyası silindi (src/Stock.sln)
+  - [x] Eski yapı yedeklendi (backup_old_structure klasörüne)
+
 - [x] **API Katmanı Geçişi**
   - [x] API projesi oluşturuldu
   - [x] Controller'lar CQRS yapısına uyarlandı (UsersController, AuthController)
@@ -195,6 +202,32 @@
 - Frontend uygulaması stabil çalışıyor
 - Tüm servisler sorunsuz çalışıyor
 - Errors.md ve scratchpad.md dosyaları güncellendi
+
+## Frontend Başlatma Sorunları (3 Mart 2025)
+- Angular CLI tanınmama sorunu:
+  - Angular CLI global olarak yüklü değil
+  - Çözüm: `npx ng serve` veya `npm run start` komutları kullanıldı
+- Port çakışması sorunu:
+  - 4200 portu başka bir uygulama tarafından kullanılıyor
+  - Çözüm: `Get-Process -Name "node" | Stop-Process -Force` ile çalışan işlemler durduruldu
+  - Çözüm: `--port=4202` parametresi ile farklı port kullanıldı
+- npm komut çalıştırma sorunu:
+  - Komutlar yanlış dizinde çalıştırılıyor
+  - Çözüm: `cd frontend` ile doğru dizine geçildi
+  - Çözüm: PowerShell'de `&&` yerine `;` kullanıldı
+- Başarılı başlatma komutu:
+  ```powershell
+  cd frontend
+  npm run start -- --port=4202
+  ```
+- Frontend uygulaması http://localhost:4202 adresinde çalışıyor
+
+## GitHub İşlemleri (3 Mart 2025)
+- Clean Architecture geçişi sonrası yapılan değişiklikler GitHub'a push edildi
+- Eski yapının temizlenmesi ile ilgili bilgiler belgelendi
+- Frontend başlatma sorunları ve çözümleri errors.md dosyasına eklendi
+- Scratchpad.md dosyası güncellendi
+- Knowledge-base klasöründe clean-architecture-cleanup.md dosyası oluşturuldu
 
 ### Sonraki Adımlar
 1. GitHub'a son değişiklikleri yükle
