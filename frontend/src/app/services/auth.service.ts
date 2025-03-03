@@ -100,23 +100,39 @@ export class AuthService {
   }
 
   changePassword(currentPassword: string, newPassword: string): Observable<any> {
+    const requestUrl = `${this.apiUrl}/auth/change-password`;
+    const requestBody = { currentPassword, newPassword };
+    
     console.log('Şifre değiştirme isteği başlatılıyor...');
+    console.log('İstek URL:', requestUrl);
+    console.log('İstek metodu: POST');
+    console.log('İstek gövdesi:', requestBody);
+    
     const token = this.getToken();
     if (!token) {
       console.error('Token bulunamadı!');
       return throwError(() => new Error('Oturum bulunamadı'));
     }
-    console.log('Token mevcut, istek gönderiliyor...');
+    
+    const headers = {
+      'Authorization': `Bearer ${token}`,
+      'Content-Type': 'application/json'
+    };
+    console.log('İstek başlıkları:', headers);
 
-    return this.http.post(`${this.apiUrl}/auth/change-password`, {
-      currentPassword,
-      newPassword
-    }).pipe(
+    return this.http.post(requestUrl, requestBody, { headers }).pipe(
       tap(response => {
-        console.log('Şifre değiştirme başarılı:', response);
+        console.log('Sunucu yanıtı:', response);
       }),
       catchError(error => {
         console.error('Şifre değiştirme hatası:', error);
+        console.error('Hata detayları:', {
+          status: error.status,
+          statusText: error.statusText,
+          error: error.error,
+          url: error.url,
+          headers: error.headers?.keys().map((key: string) => `${key}: ${error.headers?.get(key)}`)
+        });
         if (error.status === 401) {
           console.log('Oturum sonlandı, çıkış yapılıyor...');
           this.logout();

@@ -194,25 +194,43 @@
 - Frontend sorunları ve çözümleri belgelendi (knowledge-base/frontend_troubleshooting.md)
 - Errors.md dosyası güncellendi
 
-## Son Güncellemeler (4 Mart 2025)
-- Şifre değiştirme işlevi başarıyla uygulandı:
-  - IAuthService arayüzüne ChangePasswordAsync metodu eklendi
-  - ChangePasswordDto sınıfı oluşturuldu
-  - AuthResponseDto sınıfına Message özelliği eklendi
-  - AuthService sınıfına ChangePasswordAsync metodu uygulandı
-  - AuthController'a şifre değiştirme endpoint'i eklendi
-- Şifre değiştirme işlevi için güvenlik kontrolleri uygulandı:
-  - Kullanıcı kimlik doğrulaması (Authorize attribute)
-  - Mevcut şifre doğrulaması
-  - Yeni şifre için minimum uzunluk kontrolü
-  - Güvenli şifre hashleme
-  - Detaylı loglama
-- Şifre değiştirme işlevi başarıyla test edildi:
-  - Admin kullanıcısı şifresini başarıyla değiştirebildi
-  - Frontend uygulaması şifre değiştirme işlemini sorunsuz gerçekleştirebildi
-  - Tüm güvenlik kontrolleri başarıyla çalıştı
-- Errors.md dosyası güncellendi
-- Knowledge-base klasöründe password_change_endpoint.md dosyası oluşturuldu
+## Şifre Değiştirme Formu Güncellemesi
+
+### Görev Tanımı
+Kullanıcı dashboard sayfasındaki şifre değiştirme formunun tasarımını ve işlevselliğini iyileştirmek.
+
+### Yapılan İşlemler
+- [x] Şifre değiştirme formunun arka plan rengi ve stilini güncelledik
+- [x] Input alanlarını daha modern bir görünüme kavuşturduk
+- [x] Şifre göster/gizle işlevselliği ekledik
+- [x] Butonların tasarımını iyileştirdik
+- [x] AuthService ile entegrasyonu sağladık
+- [x] Hata yönetimini iyileştirdik
+- [x] Bilgi tabanı dosyası oluşturduk (knowledge-base/password_change_form_knowledge_base.md)
+- [x] Errors.md dosyasını güncelledik
+
+### Teknik Detaylar
+1. **Tasarım Değişiklikleri:**
+   - Form arka planı koyu renkli, yarı saydam bir tasarıma dönüştürüldü
+   - Input alanları modern bir görünüme kavuşturuldu
+   - Butonlar gradient arka plan ve hover efektleriyle zenginleştirildi
+
+2. **İşlevsel Değişiklikler:**
+   - Şifre göster/gizle işlevselliği eklendi
+   - AuthService ile entegrasyon sağlandı
+   - Hata yönetimi iyileştirildi
+
+3. **Dosya Değişiklikleri:**
+   - frontend/src/app/components/user-dashboard/user-dashboard.component.html
+   - frontend/src/app/components/user-dashboard/user-dashboard.component.scss
+   - frontend/src/app/components/user-dashboard/user-dashboard.component.ts
+   - errors.md
+   - knowledge-base/password_change_form_knowledge_base.md
+
+### Gelecek Geliştirmeler
+- [ ] Şifre güçlülük göstergesi eklenebilir
+- [ ] Şifre politikası kontrolleri eklenebilir (minimum uzunluk, karakter çeşitliliği vb.)
+- [ ] İki faktörlü doğrulama desteği eklenebilir
 
 ### Sistem Durumu (4 Mart 2025)
 - Backend API (http://localhost:5037): ✅ Çalışıyor

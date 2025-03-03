@@ -54,6 +54,11 @@ export class AdminDashboardComponent implements OnInit {
   newPassword: string = '';
   confirmPassword: string = '';
   
+  // Şifre göster/gizle değişkenleri
+  showCurrentPassword: boolean = false;
+  showNewPassword: boolean = false;
+  showConfirmPassword: boolean = false;
+  
   // Sistem özeti verileri
   systemSummary = {
     totalUsers: 0,
@@ -455,7 +460,23 @@ export class AdminDashboardComponent implements OnInit {
       this.currentPassword = '';
       this.newPassword = '';
       this.confirmPassword = '';
+      this.showCurrentPassword = false;
+      this.showNewPassword = false;
+      this.showConfirmPassword = false;
     }
+  }
+
+  // Şifre göster/gizle metodları
+  toggleCurrentPasswordVisibility(): void {
+    this.showCurrentPassword = !this.showCurrentPassword;
+  }
+  
+  toggleNewPasswordVisibility(): void {
+    this.showNewPassword = !this.showNewPassword;
+  }
+  
+  toggleConfirmPasswordVisibility(): void {
+    this.showConfirmPassword = !this.showConfirmPassword;
   }
 
   changePassword(): void {

@@ -33,6 +33,11 @@ export class UserDashboardComponent implements OnInit {
   currentPassword: string = '';
   newPassword: string = '';
   confirmPassword: string = '';
+  
+  // Şifre göster/gizle değişkenleri
+  showCurrentPassword: boolean = false;
+  showNewPassword: boolean = false;
+  showConfirmPassword: boolean = false;
 
   constructor(
     private router: Router,
@@ -54,7 +59,23 @@ export class UserDashboardComponent implements OnInit {
       this.currentPassword = '';
       this.newPassword = '';
       this.confirmPassword = '';
+      this.showCurrentPassword = false;
+      this.showNewPassword = false;
+      this.showConfirmPassword = false;
     }
+  }
+  
+  // Şifre göster/gizle metodları
+  toggleCurrentPasswordVisibility(): void {
+    this.showCurrentPassword = !this.showCurrentPassword;
+  }
+  
+  toggleNewPasswordVisibility(): void {
+    this.showNewPassword = !this.showNewPassword;
+  }
+  
+  toggleConfirmPasswordVisibility(): void {
+    this.showConfirmPassword = !this.showConfirmPassword;
   }
 
   changePassword(): void {
@@ -67,13 +88,33 @@ export class UserDashboardComponent implements OnInit {
       return;
     }
 
-    // Burada şifre değiştirme API çağrısı yapılacak
-    this.messageService.add({
-      severity: 'success',
-      summary: 'Başarılı',
-      detail: 'Şifreniz başarıyla değiştirildi!'
-    });
-    this.togglePasswordChange();
+    // Şifre değiştirme API çağrısı
+    this.authService.changePassword(this.currentPassword, this.newPassword)
+      .subscribe({
+        next: (response) => {
+          this.messageService.add({
+            severity: 'success',
+            summary: 'Başarılı',
+            detail: 'Şifreniz başarıyla değiştirildi!'
+          });
+          this.togglePasswordChange();
+        },
+        error: (error) => {
+          let errorMessage = 'Şifre değiştirme işlemi başarısız oldu.';
+          
+          if (error.status === 401) {
+            errorMessage = 'Mevcut şifreniz yanlış.';
+          } else if (error.error && error.error.message) {
+            errorMessage = error.error.message;
+          }
+          
+          this.messageService.add({
+            severity: 'error',
+            summary: 'Hata',
+            detail: errorMessage
+          });
+        }
+      });
   }
 
   navigateToInventory(): void {

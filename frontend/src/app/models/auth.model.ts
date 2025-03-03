@@ -25,3 +25,8 @@ export interface CreateUserRequest {
     password: string;
     isAdmin: boolean;
 }
+
+export interface ChangePasswordRequest {
+    currentPassword: string;
+    newPassword: string;
+}

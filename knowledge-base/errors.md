@@ -66,4 +66,43 @@
 ### Gelecek İyileştirmeler
 1. Log filtreleme özelliği eklenebilir
 2. Log dışa aktarma (CSV, Excel) özelliği eklenebilir
-3. Gerçek zamanlı log görüntüleme için WebSocket entegrasyonu yapılabilir 
+3. Gerçek zamanlı log görüntüleme için WebSocket entegrasyonu yapılabilir
+
+## PowerShell Komut Çalıştırma Sorunları
+
+### && Operatörü Sorunu
+
+**Sorun:** Windows PowerShell'de && operatörü komutları birleştirmek için çalışmıyor.
+
+```
+PS C:\Users\IT\Documents\Cz_Web\Web_Stock> cd frontend && npm run build
+At line:1 char:13
++ cd frontend && npm run build
++             ~~
+The token '&&' is not a valid statement separator in this version.
+```
+
+**Çözüm:** PowerShell'de komutları birleştirmek için aşağıdaki yöntemler kullanılabilir:
+
+1. Komutları ayrı ayrı çalıştırma:
+```powershell
+cd frontend
+npm run build
+```
+
+2. Semicolon (;) kullanma:
+```powershell
+cd frontend; npm run build
+```
+
+3. PowerShell pipeline kullanma:
+```powershell
+cd frontend | Out-Null; npm run build
+```
+
+4. Komut bloğu kullanma:
+```powershell
+cd frontend; if ($?) { npm run build }
+```
+
+**Not:** PowerShell'de komut çalıştırırken Unix/Linux sistemlerindeki gibi && operatörü yerine yukarıdaki alternatif yöntemler kullanılmalıdır. 

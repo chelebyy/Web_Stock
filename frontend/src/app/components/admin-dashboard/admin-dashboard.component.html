@@ -43,26 +43,41 @@
       </div>
       <div class="p-fluid">
         <div class="field">
-          <span class="p-float-label">
-            <p-password id="currentPassword" [(ngModel)]="currentPassword" [feedback]="false" [toggleMask]="true" styleClass="w-full"></p-password>
-            <label for="currentPassword">Mevcut Şifre</label>
-          </span>
+          <div class="p-inputgroup">
+            <span class="p-inputgroup-addon">
+              <i class="pi pi-lock"></i>
+            </span>
+            <input [type]="showCurrentPassword ? 'text' : 'password'" pInputText id="currentPassword" [(ngModel)]="currentPassword" placeholder="Mevcut Şifre" class="modern-input" />
+            <button pButton type="button" class="p-button-text p-button-rounded p-button-plain" (click)="toggleCurrentPasswordVisibility()">
+              <i class="pi" [ngClass]="showCurrentPassword ? 'pi-eye' : 'pi-eye-slash'"></i>
+            </button>
+          </div>
         </div>
         <div class="field">
-          <span class="p-float-label">
-            <p-password id="newPassword" [(ngModel)]="newPassword" [toggleMask]="true" styleClass="w-full"></p-password>
-            <label for="newPassword">Yeni Şifre</label>
-          </span>
+          <div class="p-inputgroup">
+            <span class="p-inputgroup-addon">
+              <i class="pi pi-key"></i>
+            </span>
+            <input [type]="showNewPassword ? 'text' : 'password'" pInputText id="newPassword" [(ngModel)]="newPassword" placeholder="Yeni Şifre" class="modern-input" />
+            <button pButton type="button" class="p-button-text p-button-rounded p-button-plain" (click)="toggleNewPasswordVisibility()">
+              <i class="pi" [ngClass]="showNewPassword ? 'pi-eye' : 'pi-eye-slash'"></i>
+            </button>
+          </div>
         </div>
         <div class="field">
-          <span class="p-float-label">
-            <p-password id="confirmPassword" [(ngModel)]="confirmPassword" [feedback]="false" [toggleMask]="true" styleClass="w-full"></p-password>
-            <label for="confirmPassword">Yeni Şifre (Tekrar)</label>
-          </span>
+          <div class="p-inputgroup">
+            <span class="p-inputgroup-addon">
+              <i class="pi pi-key"></i>
+            </span>
+            <input [type]="showConfirmPassword ? 'text' : 'password'" pInputText id="confirmPassword" [(ngModel)]="confirmPassword" placeholder="Yeni Şifre (Tekrar)" class="modern-input" />
+            <button pButton type="button" class="p-button-text p-button-rounded p-button-plain" (click)="toggleConfirmPasswordVisibility()">
+              <i class="pi" [ngClass]="showConfirmPassword ? 'pi-eye' : 'pi-eye-slash'"></i>
+            </button>
+          </div>
         </div>
         <div class="password-actions">
-          <p-button label="Değiştir" icon="pi pi-check" styleClass="p-button-rounded" (onClick)="changePassword()"></p-button>
-          <p-button label="İptal" icon="pi pi-times" styleClass="p-button-rounded p-button-outlined p-button-secondary" (onClick)="togglePasswordChange()"></p-button>
+          <button pButton class="p-button-sm p-button-primary change-button" label="Değiştir" icon="pi pi-check" (click)="changePassword()"></button>
+          <button pButton class="p-button-sm p-button-outlined p-button-secondary cancel-button" label="İptal" icon="pi pi-times" (click)="togglePasswordChange()"></button>
         </div>
       </div>
     </div>
