@@ -16,6 +16,18 @@ Bu dosya, proje geliştirme sürecinde karşılaşılan hataları ve çözümler
 - [Login Hataları](#login-hataları)
 - [PowerShell Komut Çalıştırma Sorunları](#powershell-komut-çalıştırma-sorunları)
 - [Profil Resmi Ekleme Sorunları](#profil-resmi-ekleme-sorunları)
+- [Kullanıcı Yönetimi Entegrasyonu](#kullanıcı-yönetimi-entegrasyonu)
+- [Admin Dashboard'dan Kullanıcı Yönetimine Yönlendirme](#admin-dashboard'dan-kullanıcı-yönetimine-yönlendirme)
+- [Kullanıcı Yönetimi Bileşeni Entegrasyonu](#kullanıcı-yönetimi-bileşeni-entegrasyonu)
+- [PrimeNG ve Tailwind CSS Entegrasyonu](#primeNG-ve-tailwind-CSS-entegrasyonu)
+- [Tasarım Renk Şeması Değişikliği](#tasarım-renk-şeması-değişikliği)
+- [PrimeNG Bileşen Özellikleri Hataları](#primeNG-bileşen-özellikleri-hataları)
+- [Kullanıcı Yönetimi Sayfası Tasarım ve İşlevsellik Sorunları](#kullanıcı-yönetimi-sayfası-tasarım-ve-işlevsellik-sorunları)
+- [Kullanıcı Yönetimi Sayfası Tasarım Güncellemeleri](#kullanıcı-yönetimi-sayfası-tasarım-güncellemeleri)
+  - [Checkbox Görünümü Sorunları](#checkbox-görünümü-sorunları)
+  - [Form Alanları Etiket Sorunları](#form-alanları-etiket-sorunları)
+  - [Dialog Footer Düzenleme Sorunları](#dialog-footer-düzenleme-sorunları)
+  - [PowerShell Komut Çalıştırma Sorunları (Angular Serve)](#powershell-komut-çalıştırma-sorunları-angular-serve)
 
 ## Clean Architecture Geçişi Hataları
 
@@ -65,7 +77,7 @@ Bu dosya, proje geliştirme sürecinde karşılaşılan hataları ve çözümler
 
 **Çözüm:**
 1. Eski yapıyı yedekle (backup_old_structure klasörüne)
-2. Aşağıdaki eski klasörleri ve dosyaları sil:
+2. Aşağıdaki eski klasörleri ve dosyalarını sil:
    - backend/StockAPI
    - Stock.API (kök dizindeki)
    - Stock.Infrastructure (kök dizindeki)
@@ -417,7 +429,7 @@ npm error code ENOENT
 npm error syscall open
 npm error path C:\Users\IT\Documents\Cz_Web\Web_Stock\package.json
 npm error errno -4058
-npm error enoent Could not read package.json: Error: ENOENT: no such file or directory
+npm error enoent Could not read package.json: Error: ENOENT
 ```
 
 **Nedeni:**
@@ -698,7 +710,7 @@ dotnet restore --force
 ```
 C:\Program Files\dotnet\sdk\9.0.100-rc.2.24474.11\Microsoft.Common.CurrentVersion.targets(2413,5): warning MSB3277:
   Farklı "Microsoft.EntityFrameworkCore.Relational" sürümleri arasında çözümlenemeyen çakışmalar bulundu.
-  "Microsoft.EntityFrameworkCore.Relational, Version=9.0.1.0, Culture=neutral, PublicKeyToken=adb9793829ddae60" ve "Microsoft.EntityFrameworkCore.Relational, Version=9.0.2.0, Culture=neutral, PublicKeyToken=adb9793829ddae60" arasında çakışma vardı.
+  "Microsoft.EntityFrameworkCore.Relational, Version=9.0.2.0, Culture=neutral, PublicKeyToken=adb9793829ddae60" ve "Microsoft.EntityFrameworkCore.Relational, Version=9.0.2.0, Culture=neutral, PublicKeyToken=adb9793829ddae60" arasında çakışma vardı.
 ```
 
 **Nedeni:**
@@ -710,9 +722,9 @@ C:\Program Files\dotnet\sdk\9.0.100-rc.2.24474.11\Microsoft.Common.CurrentVersio
 1. Tüm projelerde aynı sürümde Entity Framework Core paketlerini kullanın:
 ```powershell
 cd Stock.API
-dotnet add package Microsoft.EntityFrameworkCore.Relational --version 9.0.2
+dotnet add package Microsoft.EntityFrameworkCore --version 9.0.2
 cd ../src/Stock.Infrastructure
-dotnet add package Microsoft.EntityFrameworkCore.Relational --version 9.0.2
+dotnet add package Microsoft.EntityFrameworkCore --version 9.0.2
 ```
 
 2. Tüm projeleri temizleyip yeniden derleyin:
@@ -735,302 +747,6 @@ dotnet build
 - Paket sürüm çakışmaları projenin derlenmesini engelleyebilir
 - Paket sürümlerini güncellerken tüm bağımlı paketleri de güncellemeyi unutmayın
 - Paket sürüm çakışmalarını çözmek için `dotnet restore --force` komutunu kullanabilirsiniz
-
-### Hata: 401 Unauthorized Hatası (Giriş Yapma Sorunu)
-**Tarih:** 2025-03-02
-**Hata Mesajı:** 
-```
-POST http://localhost:5126/api/auth/login 401 (Unauthorized)
-```
-
-**Nedeni:**
-1. Veritabanında kullanıcı kaydı bulunmuyor olabilir
-2. Kullanıcı adı veya şifre yanlış olabilir
-3. Veritabanı bağlantısı doğru yapılandırılmamış olabilir
-4. Veritabanı migration'ları uygulanmamış olabilir
-5. Seed data oluşturulmamış olabilir
-
-**Çözüm:**
-1. Veritabanını sıfırlayıp yeniden oluşturun:
-```powershell
-cd Stock.API
-dotnet ef database drop --force
-dotnet ef database update
-```
-
-2. Admin kullanıcısını manuel olarak oluşturun:
-```csharp
-// Seed data oluşturma
-var adminUser = new User
-{
-    Id = 1,
-    Username = "Admin",
-    PasswordHash = BCrypt.Net.BCrypt.HashPassword("Admin123"), // BCrypt formatında hash
-    IsAdmin = true,
-    RoleId = 1,
-    CreatedAt = seedDate,
-    IsDeleted = false
-};
-context.Users.Add(adminUser);
-context.SaveChanges();
-```
-
-3. Doğru kullanıcı adı ve şifre ile giriş yapmayı deneyin:
-```json
-{
-  "username": "Admin",
-  "password": "Admin123"
-}
-```
-
-4. Veritabanı bağlantı ayarlarını kontrol edin:
-```json
-"ConnectionStrings": {
-  "DefaultConnection": "Host=localhost;Database=czDb;Username=postgres;Password=19909687"
-}
-```
-
-5. API'nin çalıştığından ve doğru portta olduğundan emin olun (5126)
-
-**Önemli Notlar:**
-- Veritabanı migration'larının başarıyla uygulandığından emin olun
-- Seed data'nın oluşturulduğundan emin olun
-- Kullanıcı adı ve şifrenin doğru olduğundan emin olun
-- Şifre hash'leme algoritmasının doğru çalıştığından emin olun
-- API'nin doğru portta çalıştığından emin olun
-- Swagger UI üzerinden API'yi test edin
-
-## Şifre Hashleme ve Doğrulama Sorunları
-
-### BCrypt.Net-Next Güncellemesi
-
-**Sorun:** Şifre hashleme için kullanılan PBKDF2 algoritması, modern güvenlik standartlarına göre yeterince güçlü değil ve Türkçe karakterleri doğru şekilde işleyemiyor.
-
-**Nedeni:**
-1. PBKDF2 algoritması, brute-force saldırılarına karşı BCrypt kadar dirençli değil
-2. Karakter kodlama sorunları nedeniyle Türkçe karakterler doğru şekilde işlenemiyor
-3. Şifre hashleme için work factor parametresi kullanılmıyor
-
-**Çözüm:**
-1. BCrypt.Net-Next paketini NuGet üzerinden projeye ekle:
-```bash
-dotnet add package BCrypt.Net-Next
-```
-
-2. PasswordHasher sınıfını güncelle:
-```csharp
-public string HashPassword(string password)
-{
-    // BCrypt.Net-Next kullanarak şifreyi hashle
-    // Varsayılan olarak 13 work factor kullanılıyor
-    return BCrypt.Net.BCrypt.EnhancedHashPassword(password, 13);
-}
-
-public bool VerifyPassword(string password, string passwordHash)
-{
-    // BCrypt.Net-Next kullanarak şifreyi doğrula
-    return BCrypt.Net.BCrypt.EnhancedVerify(password, passwordHash);
-}
-```
-
-3. CreateAdminUser.cs dosyasını güncelle:
-```csharp
-var passwordHash = BCrypt.Net.BCrypt.EnhancedHashPassword("Admin123", 13);
-```
-
-**Önemli Notlar:**
-- EnhancedHashPassword ve EnhancedVerify metotları, UTF-8 karakter kodlamasını destekler
-- Work factor değeri (13), güvenlik ve performans arasında denge sağlar
-- Mevcut kullanıcıların şifreleri, giriş yaptıklarında otomatik olarak BCrypt formatına dönüştürülmelidir
-
-### Seed Data ve PasswordHasher Uyumsuzluğu
-
-**Sorun:** ApplicationDbContext'teki seed data'da PBKDF2 formatında bir hash kullanılırken, PasswordHasher sınıfı BCrypt kullanıyor. Bu nedenle, seed data ile oluşturulan kullanıcılar ile giriş yapılamıyor.
-
-**Hata Mesajı:**
-```
-POST http://localhost:5037/api/auth/login 401 (Unauthorized)
-```
-
-**Nedeni:**
-1. Seed data'daki şifre hash'i ile PasswordHasher sınıfındaki doğrulama algoritması uyumsuz
-2. Seed data'da PBKDF2 formatında hash kullanılırken, PasswordHasher BCrypt kullanıyor
-3. BCrypt.Verify metodu PBKDF2 formatındaki hash'leri doğrulayamıyor
-
-**Çözüm:**
-1. Veritabanını sıfırla:
-```powershell
-cd src/Stock.API
-dotnet ef database drop --force
-```
-
-2. ApplicationDbContext'teki seed data'yı BCrypt formatına güncelle:
-```csharp
-// Seed admin user
-modelBuilder.Entity<User>().HasData(
-    new User
-    {
-        Id = 1,
-        Username = "admin",
-        PasswordHash = BCrypt.Net.BCrypt.HashPassword("Admin123"), // BCrypt formatında hash
-        IsAdmin = true,
-        RoleId = 1,
-        CreatedAt = seedDate,
-        IsDeleted = false
-    }
-);
-```
-
-3. Veritabanını yeniden oluştur:
-```powershell
-dotnet ef database update
-```
-
-4. Alternatif olarak, register endpoint'i ile manuel kullanıcı oluştur:
-```
-POST http://localhost:5037/api/auth/register
-{
-  "username": "Admin",
-  "password": "Admin123",
-  "confirmPassword": "Admin123",
-  "isAdmin": true
-}
-```
-
-**Önemli Notlar:**
-- Şifre değiştirme işlemi için kullanıcının kimliği doğrulanmalı (Authorize attribute)
-- Mevcut şifre doğrulanmalı
-- Yeni şifre güvenli bir şekilde hash'lenmeli
-- İşlem sonucu detaylı bir şekilde loglanmalı
-- Başarılı işlemler için Message özelliği, başarısız işlemler için ErrorMessage özelliği kullanılmalı
-
-## BCrypt Verify Metodu Sorunu
-
-**Hata:** 
-```
-POST http://localhost:5037/api/auth/login 401 (Unauthorized)
-```
-
-**Tarih:** 2025-03-03
-
-**Sorun:** 
-Kullanıcı giriş yaparken 401 Unauthorized hatası alınıyor. Hata mesajları incelendiğinde, BCrypt.Verify metodunun şifre doğrulamasında başarısız olduğu görülüyor.
-
-**Nedeni:**
-1. PasswordHasher sınıfında BCrypt.Verify metodu kullanılırken, seed data'da BCrypt.EnhancedHashPassword ile oluşturulan hash değeri kullanılıyor.
-2. BCrypt.Verify metodu, BCrypt.EnhancedHashPassword ile oluşturulan hash'leri doğrulayamıyor.
-
-**Çözüm:**
-1. PasswordHasher sınıfındaki VerifyPassword metodunu güncelleyerek BCrypt.Verify yerine BCrypt.EnhancedVerify kullanmak:
-
-```csharp
-public bool VerifyPassword(string password, string passwordHash)
-{
-    try
-    {
-        // BCrypt.Net-Next kullanarak şifreyi doğrula
-        return BCrypt.Net.BCrypt.EnhancedVerify(password, passwordHash);
-    }
-    catch (Exception)
-    {
-        // Hata durumunda false döndür
-        return false;
-    }
-}
-```
-
-2. Veritabanını sıfırlayıp yeniden oluşturmak:
-```
-dotnet ef database drop --force
-dotnet ef database update
-```
-
-**Önemli Notlar:**
-- BCrypt.EnhancedHashPassword ve BCrypt.EnhancedVerify metotları UTF-8 karakter kodlamasını destekler ve Türkçe karakterleri doğru şekilde işler.
-- BCrypt.Verify ve BCrypt.EnhancedVerify metotları farklı hash formatları kullanır ve birbirlerinin yerine kullanılamazlar.
-- Şifre doğrulama hatalarında 401 Unauthorized hatası döner, bu normal bir davranıştır.
-- Kullanıcı adı: `admin`, şifre: `Admin123`
-
-**Log Kayıtları:**
-```
-info: Stock.Infrastructure.Services.AuthService[0]
-      Kullanıcı bulundu: admin, ID: 1, IsAdmin: True
-info: Stock.Infrastructure.Services.PasswordHasher[0]
-      Şifre doğrulama sonucu: True
-info: Stock.Infrastructure.Services.AuthService[0]
-      Başarılı giriş: admin, Token üretildi
-```
-
-## Bağımlılık Enjeksiyon Hataları
-
-### Hata: IAuthService Bağımlılık Çözümleme Hatası
-**Tarih:** 2025-03-03
-**Hata Mesajı:** 
-```
-System.InvalidOperationException: Unable to resolve service for type 'Stock.Application.Common.Interfaces.IAuthService' while attempting to activate 'Stock.API.Controllers.AuthController'.
-```
-
-**Nedeni:**
-1. `IAuthService` arayüzünün bağımlılık enjeksiyon konteynerine kaydedilmemesi
-2. Program.cs dosyasında Application ve Infrastructure katmanlarındaki DependencyInjection sınıflarının çağrılmaması
-3. Infrastructure katmanında IAuthService kaydının eksik olması
-
-**Çözüm:**
-1. `Program.cs` dosyasında Application ve Infrastructure katmanlarının DependencyInjection sınıflarının çağrıldığından emin olun:
-
-```csharp
-// Add Application and Infrastructure services
-builder.Services.AddApplication();
-builder.Services.AddInfrastructure(builder.Configuration);
-```
-
-2. Infrastructure katmanındaki `DependencyInjection.cs` dosyasında `IAuthService` arayüzünün `AuthService` sınıfına bağlandığından emin olun:
-
-```csharp
-services.AddScoped<IAuthService, AuthService>();
-```
-
-3. Uygulamayı yeniden başlatın.
-
-**Kontrol Listesi:**
-- Program.cs dosyasında AddApplication() ve AddInfrastructure() metotları çağrılmış mı?
-- Infrastructure katmanında IAuthService kaydı var mı?
-- Uygulama yeniden başlatıldı mı?
-- Entity Framework paket sürümleri arasında çakışma var mı? (Uyarı olarak görünebilir)
-
-**Önemli Notlar:**
-- Clean Architecture'da her katmanın kendi DependencyInjection sınıfı olmalıdır.
-- Bu sınıflar `Program.cs` dosyasında mutlaka çağrılmalıdır.
-- Bağımlılıkların doğru sırada kaydedilmesi önemlidir. Önce Application, sonra Infrastructure katmanı kaydedilmelidir.
-- Servis kayıtları eksik olduğunda, controller'lar oluşturulurken bağımlılık çözümleme hataları alınabilir.
-
-## Entity Framework Core Paket Sürüm Uyumsuzluğu Hatası
-
-**Hata Mesajı:** System.IO.FileNotFoundException: Could not load file or assembly 'Microsoft.EntityFrameworkCore.Relational, Version=9.0.2.0, Culture=neutral, PublicKeyToken=adb9793829ddae60'.
-
-**Nedeni:** Stock.API projesi ile Infrastructure projesi arasında Entity Framework Core paketlerinin sürüm uyumsuzluğu.
-
-**Çözüm:**
-1. Stock.API projesindeki Entity Framework Core paketlerini, Infrastructure projesinde kullanılan sürümlerle uyumlu hale getirin:
-   ```
-   dotnet add package Microsoft.EntityFrameworkCore --version 9.0.2
-   dotnet add package Microsoft.EntityFrameworkCore.Relational --version 9.0.2
-   dotnet add package Npgsql.EntityFrameworkCore.PostgreSQL --version 9.0.4
-   ```
-2. Çalışan API sürecini durdurun:
-   ```
-   Get-Process -Name "Stock.API" | Stop-Process -Force
-   ```
-3. Projeyi yeniden derleyin:
-   ```
-   dotnet build
-   ```
-4. API'yi yeniden başlatın:
-   ```
-   dotnet run
-   ```
-
-**Not:** Farklı projelerde kullanılan paket sürümlerinin uyumlu olduğundan emin olun. Çalışan süreçlerin dosyaları kilitleyebileceğini ve derleme hatalarına neden olabileceğini unutmayın.
 
 ## Entity Framework Core PendingModelChangesWarning Hatası
 
@@ -1085,28 +801,26 @@ setTimeout(() => {
 }, 1000);
 ```
 
-2. app.routes.ts dosyasında rotaların tanımlı olduğundan emin ol:
-```typescript
-export const routes: Routes = [
-  { 
-    path: 'admin-dashboard', 
-    component: AdminDashboardComponent,
-    canActivate: [AuthGuard],
-    data: { requiresAdmin: true }
-  },
-  { 
-    path: 'user-dashboard', 
-    component: UserDashboardComponent,
-    canActivate: [AuthGuard]
-  }
-];
-```
+2. app.routes.ts dosyasına `/admin/users` rotası eklendi ve navigateToUserManagement metodu güncellendi.
 
-**Önemli Notlar:**
-- Yönlendirme işlemi sırasında konsola detaylı log mesajları eklendi
-- AuthService'den kullanıcı bilgisi alınarak doğru dashboard'a yönlendirme yapılıyor
-- Her iki dashboard rotası da AuthGuard ile korunuyor
-- Admin dashboard için ekstra requiresAdmin data parametresi eklendi
+## Kullanıcı Yönetimi Entegrasyonu
+
+### Admin Dashboard'dan Kullanıcı Yönetimine Yönlendirme
+- **Sorun**: Admin dashboard'dan Kullanıcı Yönetimi sayfasına yönlendirme yapılırken rota hatası oluşuyordu.
+- **Çözüm**: app.routes.ts dosyasına `/admin/users` rotası eklendi ve navigateToUserManagement metodu güncellendi.
+
+### Kullanıcı Yönetimi Sayfasından Geri Dönüş
+- **Sorun**: Kullanıcı yönetimi sayfasından admin dashboard'a geri dönüş için bir buton gerekiyordu.
+- **Çözüm**: Kullanıcı yönetimi bileşenine geri dönüş butonu eklendi ve goBack metodu oluşturuldu.
+  ```typescript
+  goBack() {
+    this.router.navigate(['/admin-dashboard']);
+  }
+  ```
+
+### Kullanıcı Yönetimi Bileşeni Entegrasyonu
+- **Sorun**: Mevcut UserManagementComponent'in admin dashboard ile entegrasyonu gerekiyordu.
+- **Çözüm**: Admin dashboard içerisinde Kullanıcı Yönetimi bölümüne erişim sağlandı ve ilgili rota yapılandırması yapıldı.
 
 # Login Hataları
 
@@ -1272,15 +986,9 @@ public async Task<IActionResult> ChangePassword([FromBody] ChangePasswordDto cha
 **Önemli Notlar:**
 - Şifre değiştirme işlemi için kullanıcının kimliği doğrulanmalı (Authorize attribute)
 - Mevcut şifre doğrulanmalı
-- Yeni şifre güvenli bir şekilde hash'lenmeli
-- İşlem sonucu detaylı bir şekilde loglanmalı
-- Başarılı işlemler için Message özelliği, başarısız işlemler için ErrorMessage özelliği kullanılmalı
-
-**Test Sonucu:**
-- Şifre değiştirme endpoint'i başarıyla uygulandı
-- Admin kullanıcısı şifresini başarıyla değiştirebildi
-- Frontend uygulaması şifre değiştirme işlemini sorunsuz gerçekleştirebildi
-- Tüm güvenlik kontrolleri başarıyla çalıştı
+- Yeni şifre ve şifre tekrarı alanları eşleşmelidir
+- Şifre değiştirme işlemi başarılı olduğunda kullanıcıya bildirim gösterilmelidir
+- Hata durumlarında kullanıcıya anlamlı hata mesajları gösterilmelidir
 
 ## Şifre Değiştirme Formu Güncellemesi
 
@@ -1316,108 +1024,376 @@ public async Task<IActionResult> ChangePassword([FromBody] ChangePasswordDto cha
 - Şifre değiştirme işlemi başarılı olduğunda kullanıcıya bildirim gösterilmelidir
 - Hata durumlarında kullanıcıya anlamlı hata mesajları gösterilmelidir
 
-## PowerShell Komut Çalıştırma Sorunları
+## Kullanıcı Yönetimi Sayfası Tasarım ve İşlevsellik Sorunları
 
-### && Operatörü Kullanımı Hatası
+### Sorun: Kullanıcı Yönetimi Sayfası Tasarım Uyumsuzluğu
 
-**Hata:** PowerShell'de && operatörü kullanıldığında komutlar düzgün çalışmıyor.
-
-**Nedeni:**
-1. PowerShell, && operatörünü mantıksal AND operatörü olarak kullanır, komut zincirleme için değil.
-2. Windows Command Prompt (cmd.exe) ve Bash gibi kabukların aksine, PowerShell'de komutları zincirleme için farklı bir sözdizimi kullanılır.
-
-**Çözüm:**
-PowerShell'de komutları zincirleme için aşağıdaki yöntemlerden birini kullanın:
-
-1. Noktalı virgül (;) kullanarak:
-```powershell
-cd .. ; cd frontend ; npm run start
-```
-
-2. Pipeline operatörü (|) ve ForEach-Object cmdlet'i kullanarak:
-```powershell
-"cd ..", "cd frontend", "npm run start" | ForEach-Object { Invoke-Expression $_ }
-```
-
-3. Komutları ayrı satırlara yazarak:
-```powershell
-cd ..
-cd frontend
-npm run start
-```
-
-**Önemli Notlar:**
-- PowerShell'de && operatörü, iki boolean ifadenin AND işlemi için kullanılır, komut zincirleme için değil.
-- Noktalı virgül (;) kullanımı, önceki komutun başarılı olup olmadığına bakılmaksızın sonraki komutu çalıştırır.
-- Eğer önceki komutun başarılı olması durumunda sonraki komutu çalıştırmak istiyorsanız, şu şekilde kullanabilirsiniz:
-```powershell
-cmd1.exe; if ($?) { cmd2.exe }
-```
-
-## Profil Resmi Ekleme Sorunları
-
-### Varsayılan Profil Resmi Ekleme
-
-**Sorun:** Admin dashboard'da profil resmi görüntülenmiyordu.
+**Hata Açıklaması:** Kullanıcı yönetimi sayfası, istenen tasarıma uygun değildi. Satır yükseklikleri, avatar boyutları, metin stilleri ve genel düzen referans görüntüden farklıydı.
 
 **Nedeni:**
-1. Varsayılan profil resmi dosyası eksikti
-2. HTML'de profil resmi için doğru yol tanımlanmamıştı
-3. Profil resmi için gerekli CSS stilleri yetersizdi
+1. PrimeNG tablosunun varsayılan stilleri istenen tasarıma uygun değildi
+2. Kullanıcı satırları arasında çizgiler vardı, ancak referans tasarımda sadece boşluk bulunuyordu
+3. Avatar görüntüleri çok küçüktü ve kullanıcı bilgileri yeterince belirgin değildi
+4. Rozet stilleri referans tasarımla uyuşmuyordu
 
 **Çözüm:**
-1. `frontend/src/assets/images/` klasörüne varsayılan profil resmi (`default-avatar.png`) eklendi
-2. Component'e `profileImageUrl` değişkeni eklendi:
-```typescript
-profileImageUrl: string = 'assets/images/default-avatar.png';
-```
-3. HTML şablonunda profil resmi referansları güncellendi:
+1. PrimeNG tablosu yerine özel bir tablo yapısı oluşturuldu:
+
 ```html
-<img [src]="profileImageUrl" alt="Profil" class="admin-avatar" onerror="this.src='https://via.placeholder.com/40x40?text=A'">
-```
-4. CSS stilleri iyileştirildi:
-```css
-.admin-avatar {
-  width: 40px;
-  height: 40px;
-  border-radius: 50%;
-  object-fit: cover;
-  border: 2px solid #f0f0f0;
-  margin-right: 0.75rem;
-  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-  transition: all 0.3s ease;
-}
-
-.admin-button:hover .admin-avatar {
-  border-color: #3B82F6;
-  transform: scale(1.05);
-}
+<div class="custom-table">
+  <div class="table-header">
+    <!-- Tablo başlıkları -->
+  </div>
+  <div class="table-row" *ngFor="let user of filteredUsers">
+    <!-- Kullanıcı bilgileri -->
+  </div>
+</div>
 ```
 
-**Önemli Notlar:**
-- PowerShell'de `&&` operatörü yerine `;` kullanılmalıdır
-- Profil resmi için `onerror` özelliği, resim yüklenemediğinde yedek bir görüntü gösterir
-- Profil resmi için hover efektleri kullanıcı deneyimini iyileştirir
-- Gerçek uygulamada, profil resmi API'den alınabilir ve `loadProfileImage()` metodu buna göre güncellenebilir
+2. Özel CSS stilleri eklendi:
 
-### Profil Resmi Yükleme Sorunları
+```scss
+.custom-table {
+  background-color: #1e1e1e;
+  border-radius: 8px;
+  overflow: hidden;
+  
+  .table-row {
+    display: flex;
+    align-items: center;
+    padding: 15px 20px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    min-height: 100px;
+    
+    &:hover {
+      background-color: rgba(255, 255, 255, 0.05);
+    }
+  }
+  
+  .user-avatar {
+    width: 70px;
+    height: 70px;
+    border-radius: 50%;
+    object-fit: cover;
+  }
+}
+```
 
-**Sorun:** Profil resmi dosyası yüklenirken PowerShell komut hatası alındı.
+3. Rozet stilleri güncellendi:
+
+```scss
+.user-badge {
+  padding: 5px 10px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 500;
+  
+  &.admin {
+    background-color: rgba(220, 38, 38, 0.2);
+    color: #ef4444;
+  }
+  
+  &.editor {
+    background-color: rgba(59, 130, 246, 0.2);
+    color: #3b82f6;
+  }
+  
+  &.user {
+    background-color: rgba(34, 197, 94, 0.2);
+    color: #22c55e;
+  }
+}
+```
+
+### Sorun: Kullanıcı Yönetimi Sayfası İşlevsellik Eksikliği
+
+**Hata Açıklaması:** Kullanıcı yönetimi sayfasında arama, filtreleme ve sayfalama işlevleri çalışmıyordu.
 
 **Nedeni:**
-PowerShell'de komutları birleştirmek için `&&` operatörü yerine `;` kullanılmalıdır.
+1. Bileşen dosyasında gerekli fonksiyonlar tanımlanmamıştı
+2. HTML dosyasında işlevsellik için gerekli bağlantılar eksikti
+3. Türkçe dil desteği yoktu
 
 **Çözüm:**
-```powershell
-# Hatalı komut
-echo "Creating default avatar image..." && Invoke-WebRequest -Uri "https://cdn-icons-png.flaticon.com/512/149/149071.png" -OutFile "frontend/src/assets/images/default-avatar.png"
+1. Bileşen dosyasına gerekli özellikler ve fonksiyonlar eklendi:
 
-# Doğru komut
-echo "Creating default avatar image..."; Invoke-WebRequest -Uri "https://cdn-icons-png.flaticon.com/512/149/149071.png" -OutFile "frontend/src/assets/images/default-avatar.png"
+```typescript
+filteredUsers: User[] = [];
+activeFilters: { role: string | null, joined: string | null } = { role: null, joined: null };
+searchText: string = '';
+
+ngOnInit(): void {
+  this.loadUsers();
+}
+
+applyFilters(): void {
+  this.filteredUsers = [...this.users];
+  
+  // Arama filtresi
+  if (this.searchText) {
+    const searchLower = this.searchText.toLowerCase();
+    this.filteredUsers = this.filteredUsers.filter(user => 
+      user.name.toLowerCase().includes(searchLower) || 
+      user.email.toLowerCase().includes(searchLower)
+    );
+  }
+  
+  // Rol filtresi
+  if (this.activeFilters.role) {
+    this.filteredUsers = this.filteredUsers.filter(user => 
+      user.role.toLowerCase() === this.activeFilters.role?.toLowerCase()
+    );
+  }
+  
+  // Katılma tarihi filtresi
+  if (this.activeFilters.joined) {
+    // Katılma tarihine göre filtreleme mantığı
+  }
+}
 ```
 
-**Öğrenilen Dersler:**
-- Windows PowerShell'de komutları birleştirmek için `;` kullanılmalıdır
-- Dosya indirme işlemleri için `Invoke-WebRequest` komutu kullanılabilir
-- Profil resmi gibi statik dosyalar için `assets/images/` klasörü kullanılmalıdır
-- Resim dosyaları için yedek görüntü (fallback) tanımlamak önemlidir
+2. HTML dosyasında arama ve filtreleme bileşenleri eklendi:
+
+```html
+<div class="search-filters">
+  <div class="search-box">
+    <i class="pi pi-search"></i>
+    <input type="text" [(ngModel)]="searchText" (input)="applyFilters()" placeholder="Kullanıcı ara...">
+  </div>
+  
+  <div class="filter-options">
+    <p-dropdown [options]="roleOptions" [(ngModel)]="activeFilters.role" 
+                (onChange)="applyFilters()" placeholder="Rol filtresi">
+    </p-dropdown>
+    
+    <p-dropdown [options]="joinedOptions" [(ngModel)]="activeFilters.joined" 
+                (onChange)="applyFilters()" placeholder="Katılma tarihi">
+    </p-dropdown>
+  </div>
+</div>
+```
+
+### Öğrenilen Dersler
+
+1. **Tasarım Referanslarına Sadık Kalma:** Bir tasarımı uygularken, referans görüntüye mümkün olduğunca sadık kalmak önemlidir. Bu, kullanıcı deneyiminin tutarlılığını sağlar.
+
+2. **Özel Bileşenler vs. Kütüphane Bileşenleri:** Bazen kütüphane bileşenlerini (PrimeNG gibi) özelleştirmek yerine, sıfırdan özel bileşenler oluşturmak daha etkili olabilir. Bu, daha fazla kontrol sağlar ve tasarım gereksinimlerine daha iyi uyum sağlar.
+
+3. **İşlevsellik ve Tasarım Dengesi:** Bir sayfayı tasarlarken, hem görsel çekiciliği hem de işlevselliği dengelemek önemlidir. Güzel görünen ancak işlevsel olmayan bir sayfa, kullanıcı deneyimini olumsuz etkiler.
+
+4. **Dil Desteği:** Uluslararası kullanıcılar için dil desteği sağlamak, kullanıcı deneyimini iyileştirir. Türkçe gibi yerel dilleri desteklemek, kullanıcıların uygulamayı daha kolay kullanmasını sağlar.
+
+5. **Responsive Tasarım:** Farklı ekran boyutlarında düzgün çalışan responsive bir tasarım oluşturmak, tüm kullanıcılar için tutarlı bir deneyim sağlar.
+
+## Kullanıcı Yönetimi Sayfası Tasarım Güncellemeleri
+
+### Checkbox Görünümü Sorunları
+
+**Hata:** Checkbox'ların görünümü referans görseldeki gibi değildi. PrimeNG'nin varsayılan checkbox stilleri istenen tasarıma uygun değildi.
+
+**Nedeni:**
+1. PrimeNG'nin varsayılan checkbox stilleri koyu tema ile uyumlu değildi
+2. Checkbox'ların boyutu ve renkleri istenen tasarıma uygun değildi
+3. Checkbox'ların yanındaki etiketler için özel stiller gerekiyordu
+
+**Çözüm:**
+1. SCSS dosyasında checkbox'lar için özel stiller tanımlandı:
+```scss
+.field-checkbox {
+  display: flex;
+  align-items: center;
+  margin-bottom: 1rem;
+  position: relative;
+  padding: 0.5rem 0.75rem;
+  border-radius: 6px;
+  transition: all 0.2s;
+  
+  &:hover {
+    background-color: rgba(255, 255, 255, 0.05);
+  }
+  
+  .p-checkbox {
+    width: 24px;
+    height: 24px;
+    
+    .p-checkbox-box {
+      border-radius: 4px;
+      border: 2px solid rgba(255, 255, 255, 0.3);
+      background-color: transparent;
+      transition: all 0.2s;
+      width: 24px;
+      height: 24px;
+      
+      &.p-highlight {
+        border-color: #ff5722;
+        background-color: #ff5722;
+      }
+    }
+  }
+}
+```
+
+2. Checkbox etiketleri için özel stiller ve ikonlar eklendi:
+```html
+<label for="isAdmin" class="ml-2">
+  <i class="pi pi-shield mr-1"></i>
+  Yönetici yetkisi
+</label>
+```
+
+3. Farklı checkbox'lar için farklı renkler tanımlandı:
+```scss
+#isAdmin + label {
+  color: #ff5722;
+  
+  .pi-shield {
+    color: #ff5722;
+  }
+}
+
+#isActive + label {
+  color: #4caf50;
+  
+  .pi-check-circle {
+    color: #4caf50;
+  }
+}
+```
+
+### Form Alanları Etiket Sorunları
+
+**Hata:** Form alanlarının üzerindeki etiketler gereksiz yer kaplıyordu ve tasarımı karmaşıklaştırıyordu.
+
+**Nedeni:**
+1. Form alanlarının üzerinde etiketler vardı, ancak input alanlarının içinde zaten placeholder metinleri bulunuyordu
+2. Bu durum gereksiz tekrara ve karmaşık bir görünüme neden oluyordu
+
+**Çözüm:**
+1. HTML dosyasından etiketler kaldırıldı:
+```html
+<div class="field mb-4">
+  <div class="p-inputgroup">
+    <span class="p-inputgroup-addon">
+      <i class="pi pi-id-card"></i>
+    </span>
+    <input type="text" id="fullName" pInputText formControlName="fullName" 
+      placeholder="Ad soyad girin">
+  </div>
+</div>
+```
+
+2. Input alanlarının görünümü iyileştirildi:
+```scss
+.p-inputgroup {
+  border-radius: 4px;
+  overflow: hidden;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  
+  .p-inputgroup-addon {
+    background-color: #2d2d2d;
+    border: none;
+    border-right: 1px solid rgba(255, 255, 255, 0.1);
+    color: rgba(255, 255, 255, 0.6);
+    border-radius: 4px 0 0 4px;
+    width: 48px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+  
+  input {
+    background-color: #2d2d2d;
+    border: none;
+    color: #fff;
+    padding: 0.75rem 1rem;
+    height: 48px;
+    font-size: 1rem;
+    
+    &::placeholder {
+      color: rgba(255, 255, 255, 0.5);
+    }
+    
+    &:focus {
+      outline: none;
+      box-shadow: 0 0 0 2px rgba(255, 87, 34, 0.3);
+    }
+  }
+}
+```
+
+### Dialog Footer Düzenleme Sorunları
+
+**Hata:** Dialog footer kısmındaki butonlar istenen tasarıma uygun değildi.
+
+**Nedeni:**
+1. Butonlar arasında yeterli boşluk yoktu
+2. Butonların genişliği tutarsızdı
+3. Buton stilleri istenen tasarıma uygun değildi
+
+**Çözüm:**
+1. Dialog footer kısmı için özel bir div eklendi:
+```html
+<ng-template pTemplate="footer">
+  <div class="dialog-footer">
+    <button pButton pRipple label="İptal" icon="pi pi-times" class="p-button-text p-button-outlined" (click)="hideDialog()"></button>
+    <button pButton pRipple label="Kaydet" icon="pi pi-check" class="p-button-primary" (click)="saveUser()"></button>
+  </div>
+</ng-template>
+```
+
+2. Dialog footer için özel stiller tanımlandı:
+```scss
+.dialog-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.75rem;
+  
+  button {
+    min-width: 100px;
+  }
+}
+```
+
+3. Buton stilleri özelleştirildi:
+```scss
+button {
+  &.p-button-outlined {
+    color: rgba(255, 255, 255, 0.8);
+    border-color: rgba(255, 255, 255, 0.2);
+    
+    &:hover {
+      background-color: rgba(255, 255, 255, 0.05);
+      border-color: rgba(255, 255, 255, 0.3);
+    }
+  }
+  
+  &.p-button-primary {
+    background-color: #ff5722;
+    border-color: #ff5722;
+    
+    &:hover {
+      background-color: darken(#ff5722, 5%);
+      border-color: darken(#ff5722, 5%);
+    }
+  }
+}
+```
+
+### PowerShell Komut Çalıştırma Sorunları (Angular Serve)
+
+**Hata:** Angular uygulamasını başlatırken port çakışması sorunu yaşandı.
+
+**Nedeni:**
+1. 4200 portu zaten kullanımda olduğu için Angular uygulaması başlatılamadı
+2. PowerShell'de komutları birleştirmek için && operatörü kullanıldı, ancak bu PowerShell'de çalışmıyor
+
+**Çözüm:**
+1. Farklı bir port numarası belirtildi:
+```powershell
+cd frontend; ng serve --port 4206
+```
+
+2. PowerShell'de komutları birleştirmek için ; (noktalı virgül) kullanıldı:
+```powershell
+cd frontend; ng serve
+```

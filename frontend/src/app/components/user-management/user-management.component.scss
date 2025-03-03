@@ -1,46 +1,849 @@
-.user-management-container {
-  padding: 20px;
-  height: 100vh;
-  display: flex;
-  flex-direction: column;
-  gap: 20px;
+:host {
+  display: block;
+  height: 100%;
+  
+  ::ng-deep {
+    .user-management-container {
+      background-color: #1e1e1e;
+      min-height: 100vh;
+      padding: 1.5rem;
+      color: #fff;
+    }
+
+    h1 {
+      color: #fff;
+      font-weight: 600;
+      margin-bottom: 1.5rem;
+    }
+
+    .search-filters {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.75rem;
+      margin-bottom: 1.5rem;
+      align-items: center;
+
+      .search-box {
+        flex-grow: 1;
+        max-width: 300px;
+      }
+
+      .filter-dropdown {
+        .dropdown-filter {
+          min-width: 150px;
+          
+          .p-dropdown-label {
+            display: flex;
+            align-items: center;
+          }
+        }
+      }
+
+      .actions-group {
+        margin-left: auto;
+        display: flex;
+        align-items: center;
+      }
+    }
+
+    .user-table {
+      width: 100%;
+      border-collapse: collapse;
+      
+      .table-header {
+        display: flex;
+        padding: 0.5rem 0;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        
+        .header-cell {
+          color: rgba(255, 255, 255, 0.7);
+          font-weight: 600;
+          padding: 0 1rem;
+          text-align: left;
+        }
+      }
+      
+      .table-row {
+        display: flex;
+        padding: 0.75rem 0;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        
+        &:hover {
+          background-color: rgba(255, 255, 255, 0.02);
+        }
+        
+        .row-cell {
+          padding: 0 1rem;
+          color: rgba(255, 255, 255, 0.9);
+          display: flex;
+          align-items: center;
+        }
+      }
+      
+      .checkbox-cell {
+        width: 3rem;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+      }
+      
+      .name-cell {
+        flex: 3;
+      }
+      
+      .email-cell {
+        flex: 2;
+      }
+      
+      .permissions-cell {
+        flex: 2;
+      }
+      
+      .actions-cell {
+        width: 3rem;
+        display: flex;
+        justify-content: center;
+        position: relative;
+        
+        .action-menu {
+          display: none;
+          position: absolute;
+          right: 100%;
+          top: 0;
+          background-color: #2a2a2a;
+          border-radius: 4px;
+          box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+          padding: 0.5rem;
+          z-index: 10;
+        }
+        
+        &:hover .action-menu {
+          display: flex;
+          flex-direction: column;
+          gap: 0.25rem;
+        }
+        
+        .action-buttons {
+          display: flex;
+          gap: 0.5rem;
+          justify-content: center;
+        }
+      }
+      
+      .user-info {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+      }
+      
+      .avatar-container {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        overflow: hidden;
+        background-color: #4b5563;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+      
+      .avatar-image {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+      }
+      
+      .user-name {
+        font-size: 1rem;
+        font-weight: 500;
+        color: rgba(255, 255, 255, 0.9);
+      }
+      
+      .permission-badge {
+        display: inline-flex;
+        align-items: center;
+        padding: 0.25rem 0.75rem;
+        border-radius: 4px;
+        font-size: 0.75rem;
+        font-weight: 600;
+        
+        &.admin-badge {
+          background-color: rgba(244, 67, 54, 0.1);
+          color: #f44336;
+        }
+        
+        &.contributor-badge {
+          background-color: rgba(33, 150, 243, 0.1);
+          color: #2196f3;
+        }
+        
+        &.viewer-badge {
+          background-color: rgba(156, 39, 176, 0.1);
+          color: #9c27b0;
+        }
+      }
+      
+      .empty-message {
+        padding: 2rem;
+        text-align: center;
+        color: rgba(255, 255, 255, 0.5);
+        font-style: italic;
+      }
+    }
+      
+    .pagination-container {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 1rem 0;
+      margin-top: 1rem;
+      
+      .pagination-controls {
+        display: flex;
+        align-items: center;
+        gap: 0.25rem;
+      }
+      
+      .rows-selector {
+        display: flex;
+        align-items: center;
+      }
+    }
+
+    .p-inputtext {
+      background-color: rgba(255, 255, 255, 0.1);
+      color: rgba(255, 255, 255, 0.9);
+      border-color: rgba(255, 255, 255, 0.2);
+      
+      &:focus {
+        border-color: #ff5722;
+        box-shadow: 0 0 0 1px rgba(255, 115, 22, 0.2);
+      }
+      
+      &::placeholder {
+        color: rgba(255, 255, 255, 0.5);
+      }
+    }
+
+    .p-button {
+      &.p-button-primary {
+        background-color: #ff5722;
+        border-color: #ff5722;
+        
+        &:hover {
+          background-color: darken(#ff5722, 10%);
+          border-color: darken(#ff5722, 10%);
+        }
+      }
+      
+      &.p-button-outlined {
+        color: rgba(255, 255, 255, 0.9);
+        border-color: rgba(255, 255, 255, 0.3);
+        
+        &:hover {
+          background-color: rgba(255, 255, 255, 0.1);
+          border-color: rgba(255, 255, 255, 0.5);
+        }
+      }
+      
+      &.p-button-text {
+        color: rgba(255, 255, 255, 0.7);
+        
+        &:hover {
+          background-color: rgba(255, 255, 255, 0.1);
+        }
+        
+        &:disabled {
+          color: rgba(255, 255, 255, 0.3);
+          pointer-events: none;
+        }
+      }
+      
+      &.p-button-sm {
+        padding: 0.25rem 0.5rem;
+        font-size: 0.75rem;
+      }
+      
+      &.p-button-danger {
+        color: #f44336;
+        
+        &:hover {
+          background-color: rgba(244, 67, 54, 0.1);
+        }
+      }
+    }
+
+    .p-checkbox {
+      .p-checkbox-box {
+        border-radius: 4px;
+        border: 2px solid rgba(255, 255, 255, 0.3);
+        background-color: transparent;
+        transition: all 0.2s;
+        
+        &.p-highlight {
+          border-color: #ff5722;
+          background-color: #ff5722;
+        }
+        
+        .p-checkbox-icon {
+          color: #ffffff;
+          font-size: 14px;
+        }
+      }
+    }
+
+    .p-dialog {
+      .p-dialog-header {
+        background-color: #2a2a2a;
+        color: rgba(255, 255, 255, 0.9);
+        border-color: rgba(255, 255, 255, 0.1);
+        
+        .p-dialog-title {
+          color: rgba(255, 255, 255, 0.9);
+        }
+        
+        .p-dialog-header-icon {
+          color: rgba(255, 255, 255, 0.7);
+          
+          &:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+            color: rgba(255, 255, 255, 0.9);
+          }
+        }
+      }
+      
+      .p-dialog-content {
+        background-color: #2a2a2a;
+        color: #fff;
+        padding: 1.5rem;
+        
+        .field {
+          margin-bottom: 1.5rem;
+          
+          .p-inputgroup {
+            border-radius: 4px;
+            overflow: hidden;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            
+            .p-inputgroup-addon {
+              background-color: #2d2d2d;
+              border: none;
+              border-right: 1px solid rgba(255, 255, 255, 0.1);
+              color: rgba(255, 255, 255, 0.6);
+              border-radius: 4px 0 0 4px;
+              width: 48px;
+              display: flex;
+              justify-content: center;
+              align-items: center;
+              
+              i {
+                font-size: 1.2rem;
+              }
+            }
+            
+            input {
+              background-color: #2d2d2d;
+              border: none;
+              color: #fff;
+              padding: 0.75rem 1rem;
+              height: 48px;
+              font-size: 1rem;
+              
+              &::placeholder {
+                color: rgba(255, 255, 255, 0.5);
+              }
+              
+              &:focus {
+                outline: none;
+                box-shadow: 0 0 0 2px rgba(255, 87, 34, 0.3);
+              }
+            }
+          }
+          
+          .p-error {
+            margin-top: 0.5rem;
+            font-size: 0.85rem;
+            color: #f44336;
+          }
+        }
+        
+        .field-checkbox {
+          background-color: rgba(255, 255, 255, 0.03);
+          border: 1px solid rgba(255, 255, 255, 0.1);
+          margin-bottom: 1rem;
+          
+          &:hover {
+            background-color: rgba(255, 255, 255, 0.05);
+            border-color: rgba(255, 255, 255, 0.15);
+          }
+        }
+      }
+      
+      .p-dialog-footer {
+        background-color: #2a2a2a;
+        border-top: 1px solid rgba(255, 255, 255, 0.1);
+        padding: 1rem 1.5rem;
+        
+        button {
+          &.p-button-outlined {
+            color: rgba(255, 255, 255, 0.8);
+            border-color: rgba(255, 255, 255, 0.2);
+            
+            &:hover {
+              background-color: rgba(255, 255, 255, 0.05);
+              border-color: rgba(255, 255, 255, 0.3);
+            }
+          }
+          
+          &.p-button-primary {
+            background-color: #ff5722;
+            border-color: #ff5722;
+            
+            &:hover {
+              background-color: darken(#ff5722, 5%);
+              border-color: darken(#ff5722, 5%);
+            }
+          }
+        }
+      }
+    }
+
+    .p-dropdown {
+      background-color: rgba(255, 255, 255, 0.1);
+      border-color: rgba(255, 255, 255, 0.2);
+      
+      .p-dropdown-label {
+        color: rgba(255, 255, 255, 0.9);
+      }
+      
+      .p-dropdown-trigger {
+        color: rgba(255, 255, 255, 0.7);
+      }
+      
+      .p-dropdown-panel {
+        background-color: #2a2a2a;
+        border-color: rgba(255, 255, 255, 0.2);
+        
+        .p-dropdown-items {
+          .p-dropdown-item {
+            color: rgba(255, 255, 255, 0.9);
+            
+            &:hover {
+              background-color: rgba(255, 255, 255, 0.1);
+            }
+            
+            &.p-highlight {
+              background-color: rgba(255, 115, 22, 0.2);
+              color: #ff5722;
+            }
+          }
+        }
+      }
+    }
+
+    .p-toolbar {
+      background-color: #111827 !important;
+      color: #f3f4f6 !important;
+      border: none !important;
+      border-radius: 0.5rem !important;
+      margin-bottom: 1rem !important;
+      
+      .p-button-text {
+        color: #f3f4f6 !important;
+        
+        &:hover {
+          background-color: rgba(255, 255, 255, 0.1) !important;
+        }
+      }
+    }
+
+    .p-datatable {
+      background-color: transparent !important;
+      
+      .p-datatable-header {
+        background-color: #111827 !important;
+        color: #f3f4f6 !important;
+        border-color: #374151 !important;
+      }
+      
+      .p-datatable-thead > tr > th {
+        background-color: transparent;
+        color: rgba(255, 255, 255, 0.7);
+        border-color: rgba(255, 255, 255, 0.1);
+        font-weight: 600;
+        padding: 0.75rem 1rem;
+        text-align: left;
+      }
+      
+      .p-datatable-tbody > tr {
+        background-color: transparent;
+        color: rgba(255, 255, 255, 0.9);
+        border-color: rgba(255, 255, 255, 0.1);
+        
+        &:hover {
+          background-color: rgba(255, 255, 255, 0.05);
+        }
+        
+        > td {
+          padding: 1.5rem 1rem;
+          border-color: rgba(255, 255, 255, 0.1);
+        }
+        
+        &.user-row {
+          height: 100px;
+        }
+      }
+      
+      .avatar-container {
+        width: 70px;
+        height: 70px;
+        border-radius: 50%;
+        overflow: hidden;
+        background-color: #4b5563;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+      
+      .avatar-image {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+      }
+      
+      .user-name {
+        font-size: 1rem;
+        font-weight: 500;
+        color: rgba(255, 255, 255, 0.9);
+      }
+      
+      .p-paginator {
+        background-color: transparent;
+        color: rgba(255, 255, 255, 0.7);
+        border: none;
+        
+        .p-paginator-page {
+          color: rgba(255, 255, 255, 0.7);
+          
+          &.p-highlight {
+            background-color: #ff5722;
+            color: #ffffff;
+          }
+          
+          &:not(.p-highlight):hover {
+            background-color: rgba(255, 255, 255, 0.1);
+          }
+        }
+        
+        .p-paginator-first,
+        .p-paginator-prev,
+        .p-paginator-next,
+        .p-paginator-last {
+          color: rgba(255, 255, 255, 0.7);
+          
+          &:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+          }
+          
+          &.p-disabled {
+            color: rgba(255, 255, 255, 0.3);
+          }
+        }
+      }
+    }
+
+    .p-toast {
+      .p-toast-message {
+        &.p-toast-message-success {
+          background-color: #2e7d32;
+          border-color: #2e7d32;
+          color: #ffffff;
+          
+          .p-toast-message-icon,
+          .p-toast-icon-close {
+            color: #ffffff;
+          }
+        }
+        
+        &.p-toast-message-error {
+          background-color: #d32f2f;
+          border-color: #d32f2f;
+          color: #ffffff;
+          
+          .p-toast-message-icon,
+          .p-toast-icon-close {
+            color: #ffffff;
+          }
+        }
+      }
+    }
+
+    .p-inputgroup-addon {
+      background-color: rgba(255, 255, 255, 0.1);
+      color: rgba(255, 255, 255, 0.5);
+      border-color: rgba(255, 255, 255, 0.2);
+    }
+
+    .p-confirm-dialog {
+      .p-dialog-content {
+        .p-confirm-dialog-icon {
+          color: #f97316 !important;
+        }
+        
+        .p-confirm-dialog-message {
+          color: #f3f4f6 !important;
+        }
+      }
+    }
+
+    .p-tooltip {
+      .p-tooltip-text {
+        background-color: #2a2a2a;
+        color: rgba(255, 255, 255, 0.9);
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+        padding: 0.5rem 0.75rem;
+        font-size: 0.75rem;
+      }
+      
+      &.p-tooltip-right {
+        .p-tooltip-arrow {
+          border-right-color: #1f2937 !important;
+        }
+      }
+      
+      &.p-tooltip-left {
+        .p-tooltip-arrow {
+          border-left-color: #1f2937 !important;
+        }
+      }
+      
+      &.p-tooltip-top {
+        .p-tooltip-arrow {
+          border-top-color: #1f2937 !important;
+        }
+      }
+      
+      &.p-tooltip-bottom {
+        .p-tooltip-arrow {
+          border-bottom-color: #1f2937 !important;
+        }
+      }
+    }
+
+    /* Etiketler için stil */
+    .p-tag {
+      &.p-tag-success {
+        background-color: #065f46 !important; /* bg-green-800 */
+        color: #d1fae5 !important; /* text-green-100 */
+      }
+      
+      &.p-tag-danger {
+        background-color: #991b1b !important; /* bg-red-800 */
+        color: #fee2e2 !important; /* text-red-100 */
+      }
+      
+      &.p-tag-info {
+        background-color: #0369a1 !important; /* bg-sky-800 */
+        color: #e0f2fe !important; /* text-sky-100 */
+      }
+      
+      &.p-tag-warning {
+        background-color: #92400e !important; /* bg-amber-800 */
+        color: #fef3c7 !important; /* text-amber-100 */
+      }
+    }
+
+    /* Hata mesajları */
+    .p-error {
+      color: #f87171 !important; /* text-red-400 */
+    }
+
+    /* Form etiketleri */
+    label {
+      color: #f3f4f6 !important; /* text-gray-100 */
+    }
+
+    /* Input group addon */
+    .p-inputgroup-addon {
+      background-color: #374151 !important;
+      border-color: #4b5563 !important;
+      color: #9ca3af !important;
+    }
+    
+    /* Responsive tasarım ayarlamaları */
+    @media (max-width: 768px) {
+      .user-management-container {
+        padding: 1rem !important;
+      }
+      
+      .p-datatable {
+        .p-datatable-thead > tr > th,
+        .p-datatable-tbody > tr > td {
+          padding: 0.5rem !important;
+        }
+      }
+      
+      .p-dialog {
+        width: 90vw !important;
+        
+        .p-dialog-content {
+          padding: 1rem !important;
+        }
+      }
+    }
+
+    // Kullanıcı rozet stilleri
+    .user-badge {
+      display: inline-flex;
+      align-items: center;
+      padding: 0.25rem 0.75rem;
+      border-radius: 0.25rem;
+      font-size: 0.75rem;
+      font-weight: 600;
+      
+      &.admin-badge {
+        background-color: rgba(244, 67, 54, 0.2);
+        color: #f44336;
+      }
+      
+      &.contributor-badge {
+        background-color: rgba(33, 150, 243, 0.2);
+        color: #2196f3;
+      }
+      
+      &.viewer-badge {
+        background-color: rgba(156, 39, 176, 0.2);
+        color: #9c27b0;
+      }
+    }
+
+    .field-checkbox {
+      display: flex;
+      align-items: center;
+      margin-bottom: 1rem;
+      position: relative;
+      padding: 0.5rem 0.75rem;
+      border-radius: 6px;
+      transition: all 0.2s;
+      
+      &:hover {
+        background-color: rgba(255, 255, 255, 0.05);
+      }
+      
+      .p-checkbox {
+        width: 24px;
+        height: 24px;
+        
+        .p-checkbox-box {
+          border-radius: 4px;
+          border: 2px solid rgba(255, 255, 255, 0.3);
+          background-color: transparent;
+          transition: all 0.2s;
+          width: 24px;
+          height: 24px;
+          
+          &.p-highlight {
+            border-color: #ff5722;
+            background-color: #ff5722;
+          }
+          
+          .p-checkbox-icon {
+            color: #ffffff;
+            font-size: 14px;
+            font-weight: bold;
+          }
+        }
+      }
+      
+      label {
+        margin-left: 0.75rem;
+        color: rgba(255, 255, 255, 0.9);
+        font-weight: 500;
+        cursor: pointer;
+        font-size: 0.95rem;
+        display: flex;
+        align-items: center;
+        
+        i {
+          margin-right: 0.5rem;
+          font-size: 1.1rem;
+        }
+      }
+    }
+    
+    // Yönetici yetkisi checkbox'ı için özel stil
+    #isAdmin + label {
+      color: #ff5722;
+      
+      .pi-shield {
+        color: #ff5722;
+      }
+    }
+    
+    // Aktif kullanıcı checkbox'ı için özel stil
+    #isActive + label {
+      color: #4caf50;
+      
+      .pi-check-circle {
+        color: #4caf50;
+      }
+    }
+    
+    // Checkbox'lar için genel stil
+    .p-checkbox {
+      .p-checkbox-box {
+        &.p-highlight {
+          border-color: #ff5722;
+          background-color: #ff5722;
+        }
+        
+        &:not(.p-disabled):hover {
+          border-color: #ff5722;
+        }
+      }
+    }
+    
+    // Aktif kullanıcı checkbox'ı için özel stil (seçildiğinde)
+    [formControlName="isActive"] + .p-checkbox-box.p-highlight {
+      background-color: #4caf50 !important;
+      border-color: #4caf50 !important;
+    }
+
+    .dialog-footer {
+      display: flex;
+      justify-content: flex-end;
+      gap: 0.75rem;
+      
+      button {
+        min-width: 100px;
+      }
+    }
+  }
 }
 
-.toolbar-spacer {
-  flex: 1 1 auto;
-}
-
-.table-container {
-  margin-top: 20px;
-  width: 100%;
-  overflow-x: auto;
-}
-
-table {
-  width: 100%;
+/* Özel Rozet Stilleri */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.25rem 0.5rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  line-height: 1;
+  border-radius: 9999px;
   
-  th.mat-header-cell {
-    font-weight: bold;
-    color: rgba(0, 0, 0, 0.87);
+  &.badge-admin {
+    background-color: #065f46;
+    color: #ecfdf5;
   }
   
-  td.mat-cell, th.mat-header-cell {
-    padding: 12px;
+  &.badge-contributor {
+    background-color: #1e40af;
+    color: #e0f2fe;
   }
   
-  .mat-column-actions {
-    width: 120px;
-    text-align: center;
+  &.badge-viewer {
+    background-color: #4b5563;
+    color: #f3f4f6;
   }
-  
-  .mat-column-isAdmin {
-    width: 100px;
-    text-align: center;
-  }
-}
-
-.mat-elevation-z8 {
-  box-shadow: 0 5px 5px -3px rgba(0,0,0,.2), 
-              0 8px 10px 1px rgba(0,0,0,.14), 
-              0 3px 14px 2px rgba(0,0,0,.12);
 }

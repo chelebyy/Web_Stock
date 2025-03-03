@@ -1,87 +1,216 @@
-<div class="user-management-container">
-  <p-toolbar>
-    <div class="p-toolbar-group-left">
-      <h2>Kullanıcı Yönetimi</h2>
+<!-- Kullanıcı Yönetimi Sayfası -->
+<div class="user-management-container min-h-screen p-4">
+  <h1 class="text-2xl font-semibold mb-6">Kullanıcı Yönetimi</h1>
+  
+  <div class="search-filters mb-6">
+    <div class="search-box">
+      <span class="p-input-icon-left w-full">
+        <i class="pi pi-search"></i>
+        <input type="text" pInputText class="w-full" 
+          placeholder="Öğeleri ara..." (input)="applyFilterGlobal($event, 'contains')">
+      </span>
     </div>
-    <div class="p-toolbar-group-right">
-      <button pButton pRipple icon="pi pi-plus" label="Yeni Kullanıcı" (click)="openDialog()"></button>
+    
+    <div class="filter-dropdown">
+      <p-dropdown [options]="roleFilterOptions" placeholder="İzinler" 
+        styleClass="dropdown-filter" (onChange)="filterByRole($event)">
+        <ng-template pTemplate="selectedItem" let-option>
+          <div class="flex align-items-center">
+            <span>İzinler:</span>
+            <span class="ml-1">{{ option?.label || 'Tümü' }}</span>
+          </div>
+        </ng-template>
+      </p-dropdown>
     </div>
-  </p-toolbar>
-
-  <div class="table-container">
-    <p-table [value]="users" [paginator]="true" [rows]="10" [responsive]="true" [loading]="loading">
-      <ng-template pTemplate="header">
-        <tr>
-          <th>ID</th>
-          <th>Kullanıcı Adı</th>
-          <th>Admin</th>
-          <th>Rol</th>
-          <th>Oluşturulma Tarihi</th>
-          <th>Son Giriş</th>
-          <th>İşlemler</th>
-        </tr>
-      </ng-template>
-      <ng-template pTemplate="body" let-user>
-        <tr>
-          <td>{{user.id}}</td>
-          <td>{{user.username}}</td>
-          <td>
-            <i class="pi" [class.pi-check-circle]="user.isAdmin" [class.pi-times-circle]="!user.isAdmin"
-              [ngStyle]="{'color': user.isAdmin ? 'var(--primary-color)' : 'var(--text-color-secondary)'}"></i>
-          </td>
-          <td>{{getRoleName(user.roleId)}}</td>
-          <td>{{user.createdAt | date:'medium'}}</td>
-          <td>{{user.lastLoginAt | date:'medium'}}</td>
-          <td>
-            <button pButton pRipple icon="pi pi-pencil" class="p-button-rounded p-button-text" (click)="openDialog(user)"></button>
-            <button pButton pRipple icon="pi pi-trash" class="p-button-rounded p-button-text p-button-danger" (click)="deleteUser(user)"></button>
-          </td>
-        </tr>
-      </ng-template>
-      <ng-template pTemplate="emptymessage">
-        <tr>
-          <td colspan="7" class="text-center">Kullanıcı bulunamadı</td>
-        </tr>
-      </ng-template>
-    </p-table>
+    
+    <div class="actions-group">
+      <button pButton pRipple label="Yeni Kullanıcı" icon="pi pi-plus" 
+        class="p-button-primary" (click)="openNewUserDialog()"></button>
+    </div>
+  </div>
+  
+  <!-- Kullanıcı Tablosu -->
+  <div class="user-table">
+    <!-- Tablo Başlığı -->
+    <div class="table-header">
+      <div class="header-cell checkbox-cell">
+        <p-checkbox [binary]="true"></p-checkbox>
+      </div>
+      <div class="header-cell name-cell">Ad Soyad</div>
+      <div class="header-cell email-cell">Sicil</div>
+      <div class="header-cell permissions-cell">İzinler</div>
+      <div class="header-cell actions-cell">İşlemler</div>
+    </div>
+    
+    <!-- Kullanıcı Satırları -->
+    <div class="table-row" *ngFor="let user of paginatedUsers">
+      <div class="row-cell checkbox-cell">
+        <p-checkbox [binary]="true"></p-checkbox>
+      </div>
+      <div class="row-cell name-cell">
+        <div class="user-info">
+          <div class="avatar-container">
+            <img src="assets/images/avatars/default-avatar.png" class="avatar-image" />
+          </div>
+          <div class="user-name">{{ user.fullName }}</div>
+        </div>
+      </div>
+      <div class="row-cell email-cell">{{ user.email }}</div>
+      <div class="row-cell permissions-cell">
+        <span class="permission-badge" [ngClass]="{
+          'admin-badge': user.permissions === 'Admin',
+          'contributor-badge': user.permissions === 'Contributor',
+          'viewer-badge': user.permissions === 'Viewer'
+        }">
+          {{ user.permissions === 'Admin' ? 'Yönetici' : 
+             user.permissions === 'Contributor' ? 'Katkıda Bulunan' : 
+             user.permissions === 'Viewer' ? 'İzleyici' : user.permissions }}
+        </span>
+      </div>
+      <div class="row-cell actions-cell">
+        <div class="action-buttons">
+          <button pButton pRipple icon="pi pi-pencil" class="p-button-rounded p-button-text p-button-sm" 
+            (click)="editUser(user)" pTooltip="Düzenle"></button>
+          <button pButton pRipple icon="pi pi-trash" class="p-button-rounded p-button-text p-button-sm p-button-danger" 
+            (click)="deleteUser(user)" pTooltip="Sil"></button>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Veri yoksa gösterilecek mesaj -->
+    <div class="empty-message" *ngIf="filteredUsers.length === 0">
+      <p>Arama kriterlerinize uygun kullanıcı bulunamadı.</p>
+    </div>
+  </div>
+  
+  <!-- Sayfalama -->
+  <div class="pagination-container" *ngIf="filteredUsers.length > 0">
+    <div class="pagination-controls">
+      <button pButton pRipple icon="pi pi-angle-left" class="p-button-text" 
+        [disabled]="currentPage === 1" (click)="goToPage(currentPage - 1)"></button>
+      
+      <ng-container *ngFor="let page of [].constructor(totalPages > 5 ? 5 : totalPages); let i = index">
+        <ng-container *ngIf="totalPages <= 5 || 
+          (i < 3 && currentPage <= 3) || 
+          (i >= totalPages - 3 && currentPage >= totalPages - 2) || 
+          (i >= currentPage - 2 && i <= currentPage)">
+          <button pButton pRipple [label]="(totalPages <= 5 || 
+            (currentPage <= 3 && i < 3) || 
+            (currentPage >= totalPages - 2 && i >= totalPages - 3)) ? 
+            (i + 1).toString() : 
+            (currentPage - 2 + i).toString()" 
+            class="p-button-text p-button-rounded" 
+            [class.p-button-primary]="(totalPages <= 5 || 
+              (currentPage <= 3 && i < 3) || 
+              (currentPage >= totalPages - 2 && i >= totalPages - 3)) ? 
+              (i + 1) === currentPage : 
+              (currentPage - 2 + i) === currentPage" 
+            (click)="goToPage((totalPages <= 5 || 
+              (currentPage <= 3 && i < 3) || 
+              (currentPage >= totalPages - 2 && i >= totalPages - 3)) ? 
+              (i + 1) : 
+              (currentPage - 2 + i))"></button>
+        </ng-container>
+        
+        <ng-container *ngIf="totalPages > 5 && i === 2 && currentPage > 3 && currentPage < totalPages - 2">
+          <button pButton pRipple label="..." class="p-button-text p-button-rounded" disabled></button>
+        </ng-container>
+        
+        <ng-container *ngIf="totalPages > 5 && i === 3 && currentPage < totalPages - 2">
+          <button pButton pRipple [label]="totalPages.toString()" 
+            class="p-button-text p-button-rounded" 
+            (click)="goToPage(totalPages)"></button>
+        </ng-container>
+      </ng-container>
+      
+      <button pButton pRipple icon="pi pi-angle-right" class="p-button-text" 
+        [disabled]="currentPage === totalPages" (click)="goToPage(currentPage + 1)"></button>
+    </div>
+    <div class="rows-selector">
+      <span class="mr-2">Göster:</span>
+      <p-dropdown [options]="[
+        {label: '5 satır', value: 5},
+        {label: '10 satır', value: 10},
+        {label: '20 satır', value: 20}
+      ]" [(ngModel)]="rowsPerPage" (onChange)="changeRowsPerPage($event)" styleClass="p-dropdown-sm"></p-dropdown>
+    </div>
   </div>
 </div>
 
-<p-dialog [(visible)]="userDialog" [style]="{width: '450px'}" header="Kullanıcı Detayları" [modal]="true" class="p-fluid">
-  <form [formGroup]="userForm">
-    <div class="field">
-      <label for="username">Kullanıcı Adı</label>
-      <input pInputText id="username" formControlName="username" required autofocus />
-      <small class="p-error" *ngIf="userForm.get('username')?.errors?.['required'] && userForm.get('username')?.touched">
-        Kullanıcı adı gereklidir.
+<!-- Kullanıcı Ekleme/Düzenleme Dialog -->
+<p-dialog [(visible)]="userDialog" [style]="{width: '450px'}" 
+  header="{{editMode ? 'Kullanıcı Düzenle' : 'Yeni Kullanıcı'}}" 
+  [modal]="true" styleClass="p-fluid" [draggable]="false" [resizable]="false">
+  <form [formGroup]="userForm" (ngSubmit)="saveUser()">
+    <div class="field mb-4">
+      <div class="p-inputgroup">
+        <span class="p-inputgroup-addon">
+          <i class="pi pi-id-card"></i>
+        </span>
+        <input type="text" id="fullName" pInputText formControlName="fullName" 
+          placeholder="Ad soyad girin">
+      </div>
+      <small *ngIf="submitted && f['fullName'].errors" class="p-error">
+        Ad soyad gereklidir.
       </small>
     </div>
-
-    <div class="field">
-      <label for="password">Şifre {{editMode ? '(Boş bırakılırsa değişmez)' : ''}}</label>
-      <p-password id="password" [feedback]="false" [toggleMask]="true" formControlName="password"></p-password>
-      <small class="p-error" *ngIf="userForm.get('password')?.errors?.['required'] && userForm.get('password')?.touched">
+    
+    <div class="field mb-4">
+      <div class="p-inputgroup">
+        <span class="p-inputgroup-addon">
+          <i class="pi pi-id-card"></i>
+        </span>
+        <input type="text" id="email" pInputText formControlName="email" 
+          placeholder="Sicil numarası girin">
+      </div>
+      <small *ngIf="submitted && f['email'].errors?.['required']" class="p-error">
+        Sicil numarası gereklidir.
+      </small>
+    </div>
+    
+    <div class="field mb-4" *ngIf="!editMode">
+      <div class="p-inputgroup">
+        <span class="p-inputgroup-addon">
+          <i class="pi pi-lock"></i>
+        </span>
+        <input type="password" id="password" pInputText formControlName="password" 
+          placeholder="Şifre girin">
+      </div>
+      <small *ngIf="submitted && f['password'].errors?.['required']" class="p-error">
         Şifre gereklidir.
       </small>
+      <small *ngIf="submitted && f['password'].errors?.['minlength']" class="p-error">
+        Şifre en az 6 karakter olmalıdır.
+      </small>
     </div>
-
-    <div class="field">
-      <label for="role">Rol</label>
-      <p-dropdown id="role" [options]="roles" formControlName="roleId" optionLabel="name" optionValue="id" 
-        [showClear]="true" placeholder="Rol seçin"></p-dropdown>
+    
+    <div class="field-checkbox mb-4">
+      <p-checkbox formControlName="isAdmin" [binary]="true" inputId="isAdmin"></p-checkbox>
+      <label for="isAdmin" class="ml-2">
+        <i class="pi pi-shield mr-1"></i>
+        Yönetici yetkisi
+      </label>
     </div>
-
-    <div class="field-checkbox">
-      <p-checkbox formControlName="isAdmin" [binary]="true" id="isAdmin"></p-checkbox>
-      <label for="isAdmin">Admin</label>
+    
+    <div class="field-checkbox mb-4">
+      <p-checkbox formControlName="isActive" [binary]="true" inputId="isActive"></p-checkbox>
+      <label for="isActive" class="ml-2">
+        <i class="pi pi-check-circle mr-1"></i>
+        Aktif kullanıcı
+      </label>
     </div>
   </form>
-
+  
   <ng-template pTemplate="footer">
-    <button pButton pRipple label="İptal" icon="pi pi-times" class="p-button-text" (click)="hideDialog()"></button>
-    <button pButton pRipple label="Kaydet" icon="pi pi-check" class="p-button-text" (click)="saveUser()" [disabled]="userForm.invalid"></button>
+    <div class="dialog-footer">
+      <button pButton pRipple label="İptal" icon="pi pi-times" class="p-button-text p-button-outlined" (click)="hideDialog()"></button>
+      <button pButton pRipple label="Kaydet" icon="pi pi-check" class="p-button-primary" (click)="saveUser()"></button>
+    </div>
   </ng-template>
 </p-dialog>
 
-<p-confirmDialog [style]="{width: '450px'}"></p-confirmDialog>
+<p-confirmDialog [style]="{width: '450px'}"
+  acceptButtonStyleClass="p-button-danger" 
+  rejectButtonStyleClass="p-button-text"></p-confirmDialog>
+
 <p-toast></p-toast>
