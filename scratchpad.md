@@ -194,40 +194,34 @@
 - Frontend sorunları ve çözümleri belgelendi (knowledge-base/frontend_troubleshooting.md)
 - Errors.md dosyası güncellendi
 
-## Son Güncellemeler (3 Mart 2025)
-- Admin Dashboard bileşeninde userActivityLogs hatası çözüldü:
-  - API yanıtı için null kontrolü eklendi
-  - Hata durumunda fallback mekanizması eklendi
-  - Detaylı hata mesajları ve loglar eklendi
-- Frontend uygulaması stabil çalışıyor
-- Tüm servisler sorunsuz çalışıyor
-- Errors.md ve scratchpad.md dosyaları güncellendi
+## Son Güncellemeler (4 Mart 2025)
+- Şifre değiştirme işlevi başarıyla uygulandı:
+  - IAuthService arayüzüne ChangePasswordAsync metodu eklendi
+  - ChangePasswordDto sınıfı oluşturuldu
+  - AuthResponseDto sınıfına Message özelliği eklendi
+  - AuthService sınıfına ChangePasswordAsync metodu uygulandı
+  - AuthController'a şifre değiştirme endpoint'i eklendi
+- Şifre değiştirme işlevi için güvenlik kontrolleri uygulandı:
+  - Kullanıcı kimlik doğrulaması (Authorize attribute)
+  - Mevcut şifre doğrulaması
+  - Yeni şifre için minimum uzunluk kontrolü
+  - Güvenli şifre hashleme
+  - Detaylı loglama
+- Şifre değiştirme işlevi başarıyla test edildi:
+  - Admin kullanıcısı şifresini başarıyla değiştirebildi
+  - Frontend uygulaması şifre değiştirme işlemini sorunsuz gerçekleştirebildi
+  - Tüm güvenlik kontrolleri başarıyla çalıştı
+- Errors.md dosyası güncellendi
+- Knowledge-base klasöründe password_change_endpoint.md dosyası oluşturuldu
 
-## Frontend Başlatma Sorunları (3 Mart 2025)
-- Angular CLI tanınmama sorunu:
-  - Angular CLI global olarak yüklü değil
-  - Çözüm: `npx ng serve` veya `npm run start` komutları kullanıldı
-- Port çakışması sorunu:
-  - 4200 portu başka bir uygulama tarafından kullanılıyor
-  - Çözüm: `Get-Process -Name "node" | Stop-Process -Force` ile çalışan işlemler durduruldu
-  - Çözüm: `--port=4202` parametresi ile farklı port kullanıldı
-- npm komut çalıştırma sorunu:
-  - Komutlar yanlış dizinde çalıştırılıyor
-  - Çözüm: `cd frontend` ile doğru dizine geçildi
-  - Çözüm: PowerShell'de `&&` yerine `;` kullanıldı
-- Başarılı başlatma komutu:
-  ```powershell
-  cd frontend
-  npm run start -- --port=4202
-  ```
-- Frontend uygulaması http://localhost:4202 adresinde çalışıyor
-
-## GitHub İşlemleri (3 Mart 2025)
-- Clean Architecture geçişi sonrası yapılan değişiklikler GitHub'a push edildi
-- Eski yapının temizlenmesi ile ilgili bilgiler belgelendi
-- Frontend başlatma sorunları ve çözümleri errors.md dosyasına eklendi
-- Scratchpad.md dosyası güncellendi
-- Knowledge-base klasöründe clean-architecture-cleanup.md dosyası oluşturuldu
+### Sistem Durumu (4 Mart 2025)
+- Backend API (http://localhost:5037): ✅ Çalışıyor
+- Frontend (http://localhost:4202): ✅ Çalışıyor
+- Veritabanı: ✅ Güncel ve stabil
+- Admin Dashboard: ✅ Hataları giderildi
+- Kullanıcı aktivite logları: ✅ Çalışıyor
+- Swagger UI: ✅ Erişilebilir
+- Şifre değiştirme işlevi: ✅ Çalışıyor
 
 ### Sonraki Adımlar
 1. GitHub'a son değişiklikleri yükle
@@ -239,11 +233,3 @@
    - Unit testler
    - Integration testler
    - E2E testler
-
-### Sistem Durumu
-- Backend API (http://localhost:5037): ✅ Çalışıyor
-- Frontend (http://localhost:4202): ✅ Çalışıyor
-- Veritabanı: ✅ Güncel ve stabil
-- Admin Dashboard: ✅ Hataları giderildi
-- Kullanıcı aktivite logları: ✅ Çalışıyor
-- Swagger UI: ✅ Erişilebilir

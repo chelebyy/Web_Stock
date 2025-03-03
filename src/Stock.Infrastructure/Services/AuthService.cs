@@ -155,5 +155,69 @@ namespace Stock.Infrastructure.Services
                 Role = user.RoleName != null ? new Role { Id = user.RoleId ?? 0, Name = user.RoleName } : null
             });
         }
+
+        public async Task<AuthResponseDto> ChangePasswordAsync(ChangePasswordDto changePasswordDto, int userId)
+        {
+            _logger.LogInformation($"Şifre değiştirme isteği - Kullanıcı ID: {userId}");
+            
+            var user = await _unitOfWork.Users.GetByIdAsync(userId);
+            if (user == null)
+            {
+                _logger.LogWarning($"Kullanıcı bulunamadı - ID: {userId}");
+                return new AuthResponseDto
+                {
+                    Success = false,
+                    ErrorMessage = "Kullanıcı bulunamadı"
+                };
+            }
+
+            bool isCurrentPasswordValid = false;
+            try
+            {
+                isCurrentPasswordValid = _passwordHasher.VerifyPassword(changePasswordDto.CurrentPassword, user.PasswordHash);
+                _logger.LogInformation($"Mevcut şifre doğrulama sonucu: {isCurrentPasswordValid}");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError($"Şifre doğrulama hatası: {ex.Message}, StackTrace: {ex.StackTrace}");
+                return new AuthResponseDto
+                {
+                    Success = false,
+                    ErrorMessage = "Şifre doğrulama hatası"
+                };
+            }
+
+            if (!isCurrentPasswordValid)
+            {
+                _logger.LogWarning($"Mevcut şifre hatalı - Kullanıcı ID: {userId}");
+                return new AuthResponseDto
+                {
+                    Success = false,
+                    ErrorMessage = "Mevcut şifre hatalı"
+                };
+            }
+
+            try
+            {
+                user.PasswordHash = _passwordHasher.HashPassword(changePasswordDto.NewPassword);
+                await _unitOfWork.SaveChangesAsync();
+                
+                _logger.LogInformation($"Şifre başarıyla değiştirildi - Kullanıcı ID: {userId}");
+                return new AuthResponseDto
+                {
+                    Success = true,
+                    Message = "Şifre başarıyla değiştirildi"
+                };
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError($"Şifre değiştirme hatası: {ex.Message}, StackTrace: {ex.StackTrace}");
+                return new AuthResponseDto
+                {
+                    Success = false,
+                    ErrorMessage = $"Şifre değiştirme hatası: {ex.Message}"
+                };
+            }
+        }
     }
 } 

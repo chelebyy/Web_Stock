@@ -8,5 +8,6 @@ namespace Stock.Application.Common.Interfaces
         Task<AuthResponseDto> LoginAsync(LoginDto loginDto);
         Task<AuthResponseDto> RegisterAsync(RegisterDto registerDto);
         string GenerateJwtToken(UserDto user);
+        Task<AuthResponseDto> ChangePasswordAsync(ChangePasswordDto changePasswordDto, int userId);
     }
 } 

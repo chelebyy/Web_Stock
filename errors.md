@@ -1144,3 +1144,137 @@ info: Stock.Infrastructure.Services.PasswordHasher[0]
 info: Stock.Infrastructure.Services.AuthService[0]
       Başarılı giriş: admin, Token üretildi
 ```
+
+### Şifre Değiştirme Endpoint Hatası (04.03.2025)
+
+**Hata:**
+```
+POST http://localhost:5037/api/auth/change-password 404 (Not Found)
+```
+
+**Nedeni:**
+1. Clean Architecture geçişi sırasında şifre değiştirme endpoint'i uygulanmamış
+2. IAuthService arayüzünde şifre değiştirme metodu eksik
+3. AuthController'da şifre değiştirme endpoint'i eksik
+4. ChangePasswordDto sınıfı oluşturulmamış
+
+**Çözüm:**
+1. IAuthService arayüzüne ChangePasswordAsync metodu ekle:
+```csharp
+Task<AuthResponseDto> ChangePasswordAsync(ChangePasswordDto changePasswordDto, int userId);
+```
+
+2. ChangePasswordDto sınıfını oluştur:
+```csharp
+public class ChangePasswordDto
+{
+    [Required(ErrorMessage = "Mevcut şifre gereklidir")]
+    public string CurrentPassword { get; set; } = string.Empty;
+
+    [Required(ErrorMessage = "Yeni şifre gereklidir")]
+    [MinLength(6, ErrorMessage = "Yeni şifre en az 6 karakter olmalıdır")]
+    public string NewPassword { get; set; } = string.Empty;
+}
+```
+
+3. AuthResponseDto sınıfına Message özelliği ekle:
+```csharp
+public string? Message { get; set; }
+```
+
+4. AuthService sınıfına ChangePasswordAsync metodunu uygula:
+```csharp
+public async Task<AuthResponseDto> ChangePasswordAsync(ChangePasswordDto changePasswordDto, int userId)
+{
+    _logger.LogInformation($"Şifre değiştirme isteği - Kullanıcı ID: {userId}");
+    
+    var user = await _unitOfWork.Users.GetByIdAsync(userId);
+    if (user == null)
+    {
+        _logger.LogWarning($"Kullanıcı bulunamadı - ID: {userId}");
+        return new AuthResponseDto
+        {
+            Success = false,
+            ErrorMessage = "Kullanıcı bulunamadı"
+        };
+    }
+
+    bool isCurrentPasswordValid = _passwordHasher.VerifyPassword(changePasswordDto.CurrentPassword, user.PasswordHash);
+    _logger.LogInformation($"Mevcut şifre doğrulama sonucu: {isCurrentPasswordValid}");
+
+    if (!isCurrentPasswordValid)
+    {
+        _logger.LogWarning($"Mevcut şifre hatalı - Kullanıcı ID: {userId}");
+        return new AuthResponseDto
+        {
+            Success = false,
+            ErrorMessage = "Mevcut şifre hatalı"
+        };
+    }
+
+    try
+    {
+        user.PasswordHash = _passwordHasher.HashPassword(changePasswordDto.NewPassword);
+        await _unitOfWork.SaveChangesAsync();
+        
+        _logger.LogInformation($"Şifre başarıyla değiştirildi - Kullanıcı ID: {userId}");
+        return new AuthResponseDto
+        {
+            Success = true,
+            Message = "Şifre başarıyla değiştirildi"
+        };
+    }
+    catch (Exception ex)
+    {
+        _logger.LogError($"Şifre değiştirme hatası: {ex.Message}");
+        return new AuthResponseDto
+        {
+            Success = false,
+            ErrorMessage = $"Şifre değiştirme hatası: {ex.Message}"
+        };
+    }
+}
+```
+
+5. AuthController'a şifre değiştirme endpoint'ini ekle:
+```csharp
+[Authorize]
+[HttpPost("change-password")]
+public async Task<IActionResult> ChangePassword([FromBody] ChangePasswordDto changePasswordDto)
+{
+    _logger.LogInformation("Şifre değiştirme isteği başlatılıyor...");
+    
+    var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier);
+    if (userIdClaim == null || !int.TryParse(userIdClaim.Value, out int userId))
+    {
+        _logger.LogWarning("Token'da kullanıcı ID'si bulunamadı veya geçersiz");
+        return Unauthorized(new { message = "Geçersiz kullanıcı kimliği" });
+    }
+
+    _logger.LogInformation($"Şifre değiştirme isteği - Kullanıcı ID: {userId}");
+    
+    var result = await _authService.ChangePasswordAsync(changePasswordDto, userId);
+    
+    if (!result.Success)
+    {
+        _logger.LogWarning($"Şifre değiştirme başarısız - Kullanıcı ID: {userId}, Hata: {result.ErrorMessage}");
+        return BadRequest(result);
+    }
+    
+    _logger.LogInformation($"Şifre başarıyla değiştirildi - Kullanıcı ID: {userId}");
+    return Ok(result);
+}
+```
+
+**Önemli Notlar:**
+- Şifre değiştirme işlemi için kullanıcının kimliği doğrulanmalı (Authorize attribute)
+- Mevcut şifre doğrulanmalı
+- Yeni şifre güvenli bir şekilde hash'lenmeli
+- İşlem sonucu detaylı bir şekilde loglanmalı
+- Başarılı işlemler için Message özelliği, başarısız işlemler için ErrorMessage özelliği kullanılmalı
+
+**Test Sonucu:**
+- Şifre değiştirme endpoint'i başarıyla uygulandı
+- Admin kullanıcısı şifresini başarıyla değiştirebildi
+- Frontend uygulaması şifre değiştirme işlemini sorunsuz gerçekleştirebildi
+- Tüm güvenlik kontrolleri başarıyla çalıştı

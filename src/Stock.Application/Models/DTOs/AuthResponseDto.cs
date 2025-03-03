@@ -8,5 +8,6 @@ namespace Stock.Application.Models.DTOs
         public bool IsAdmin { get; set; }
         public string? RoleName { get; set; }
         public string? ErrorMessage { get; set; }
+        public string? Message { get; set; }
     }
 } 
