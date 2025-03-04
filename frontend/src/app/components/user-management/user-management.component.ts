@@ -289,11 +289,15 @@ export class UserManagementComponent implements OnInit {
           },
           error: (error) => {
             console.error('Kullanıcı güncelleme hatası:', error);
+            
+            // API'dan dönen hata mesajını göster (varsa)
+            const errorMessage = error.error?.error || 'Kullanıcı güncellenirken bir hata oluştu.';
+            
             this.messageService.add({
               severity: 'error',
               summary: 'Hata',
-              detail: 'Kullanıcı güncellenirken bir hata oluştu.',
-              life: 3000
+              detail: errorMessage,
+              life: 5000
             });
           }
         });
@@ -303,10 +307,13 @@ export class UserManagementComponent implements OnInit {
       // Backend'e gönderilecek kullanıcı nesnesi
       const userToCreate: any = {
         username: formValues.fullName,
-        passwordHash: formValues.password,
+        password: formValues.password,
         isAdmin: formValues.isAdmin,
         sicil: formValues.sicil
       };
+      
+      console.log('Form değerleri:', formValues);
+      console.log('Oluşturulacak kullanıcı:', userToCreate);
       
       // Backend API'ye ekleme isteği gönder
       this.userService.createUser(userToCreate).subscribe({
@@ -341,11 +348,15 @@ export class UserManagementComponent implements OnInit {
         },
         error: (error) => {
           console.error('Kullanıcı ekleme hatası:', error);
+          
+          // API'dan dönen hata mesajını göster (varsa)
+          const errorMessage = error.error?.error || 'Kullanıcı eklenirken bir hata oluştu.';
+          
           this.messageService.add({
             severity: 'error',
             summary: 'Hata',
-            detail: 'Kullanıcı eklenirken bir hata oluştu.',
-            life: 3000
+            detail: errorMessage,
+            life: 5000
           });
         }
       });

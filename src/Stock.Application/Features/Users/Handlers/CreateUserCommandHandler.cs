@@ -6,6 +6,8 @@ using Stock.Domain.Entities;
 using Stock.Domain.Interfaces;
 using System.Threading;
 using System.Threading.Tasks;
+using System;
+using System.Linq;
 
 namespace Stock.Application.Features.Users.Handlers
 {
@@ -24,12 +26,20 @@ namespace Stock.Application.Features.Users.Handlers
 
         public async Task<UserDto> Handle(CreateUserCommand request, CancellationToken cancellationToken)
         {
+            // Sicil numarası kontrolü
+            var existingUsers = await _unitOfWork.Users.FindAsync(u => u.Sicil == request.Sicil);
+            if (existingUsers.Any())
+            {
+                throw new InvalidOperationException($"'{request.Sicil}' sicil numarası zaten kullanılmaktadır. Her kullanıcının benzersiz bir sicil numarası olmalıdır.");
+            }
+            
             var user = new User
             {
                 Username = request.Username,
                 PasswordHash = _passwordHasher.HashPassword(request.Password),
                 IsAdmin = request.IsAdmin,
-                RoleId = request.RoleId
+                RoleId = request.RoleId,
+                Sicil = request.Sicil
             };
 
             await _unitOfWork.Users.AddAsync(user);

@@ -20,6 +20,10 @@ namespace Stock.Infrastructure.Data.Config
             builder.Property(x => x.IsAdmin)
                 .HasDefaultValue(false);
 
+            builder.Property(x => x.Sicil)
+                .IsRequired()
+                .HasMaxLength(50);
+
             builder.Property(x => x.CreatedAt)
                 .IsRequired();
 

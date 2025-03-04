@@ -642,3 +642,62 @@ Sistemin başlatılması ve karşılaşılan sorunların giderilmesi.
 - Frontend modellerinin backend modelleriyle uyumlu olması gerekir
 - Zorunlu alanların eksik olması derleme hatalarına neden olur
 - Model değişikliklerinde ilgili servislerin de güncellenmesi gerekir
+
+## Kullanıcı Ekleme Hatası Çözümü (9 Mart 2025)
+
+### Sorun
+Kullanıcı ekleme işlemi sırasında 500 Internal Server Error hatası alınıyordu. API isteğinde şifre alanı boş string olarak gönderiliyordu.
+
+### Yapılan İşlemler
+- [x] user-management.component.ts dosyasında form değerlerini inceledik
+- [x] UserService'deki createUser metodunu düzelttik
+- [x] API isteklerinde parametre uyumsuzluğunu giderdik
+- [x] Hata mesajlarını daha açıklayıcı hale getirdik
+- [x] errors.md dosyasını güncelledik
+- [x] Değişiklikleri test ettik
+
+### Teknik Detaylar
+1. **Frontend-Backend Model Uyumsuzluğu:**
+   - Frontend'de `passwordHash` alanı kullanılırken, backend'de `password` alanı vardı
+   - `user-management.component.ts` dosyasında form değerleri `passwordHash` olarak atanıyordu
+   - `user.service.ts` dosyasında `createUser` metodunda paramatre isimleri düzeltildi
+
+2. **Yapılan Değişiklikler:**
+   ```typescript
+   // user-management.component.ts
+   const userToCreate = {
+     username: this.userForm.value.username,
+     password: this.userForm.value.password, // passwordHash yerine password
+     isAdmin: this.userForm.value.isAdmin || false,
+     sicil: this.userForm.value.sicil || '',
+     roleId: this.userForm.value.roleId || null
+   };
+   
+   // user.service.ts
+   password: user.password || user.passwordHash || '', // Önce password, yoksa passwordHash kullan
+   ```
+
+3. **Debug İyileştirmeleri:**
+   - Form değerleri konsola yazdırılarak hata ayıklama yapıldı
+   - API isteklerinde hangi parametrelerin gönderildiği kontrol edildi
+   - HTTP durum kodları ve hata mesajları analiz edildi
+
+### Öğrenilen Dersler
+- Frontend ve backend arasındaki model uyumsuzlukları API hatalarına neden olabilir
+- Veri modeli değişikliklerinde hem frontend hem de backend güncellenmelidir
+- Şifre gibi hassas bilgilerin üretim ortamında loglanmasından kaçınılmalıdır
+- Parametrelerin isimlerinin doğru olduğundan emin olunmalıdır
+- API isteği öncesinde gerekli kontroller yapılmalıdır
+
+### Sistem Durumu (9 Mart 2025)
+- Backend API (http://localhost:5037): ✅ Çalışıyor
+- Frontend (http://localhost:4202): ✅ Çalışıyor
+- Kullanıcı Ekleme İşlemi: ✅ Sorunsuz çalışıyor
+- Veritabanı: ✅ Güncel ve stabil
+- Kullanıcı Yönetimi: ✅ Hataları giderildi
+
+### Sonraki Adımlar
+1. Diğer kullanıcı yönetimi özelliklerini test etmek
+2. Güvenlik kontrolleri eklemek
+3. Performans ve kullanıcı deneyimi iyileştirmeleri yapmak
+4. Birim testleri yazmak

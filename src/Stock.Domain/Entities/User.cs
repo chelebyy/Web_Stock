@@ -16,6 +16,7 @@ namespace Stock.Domain.Entities
 
         public DateTime? LastLoginAt { get; set; }
         
+        [Required]
         [StringLength(50)]
         public string Sicil { get; set; } = string.Empty;
 

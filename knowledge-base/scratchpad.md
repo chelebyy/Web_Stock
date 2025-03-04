@@ -243,4 +243,54 @@ Kullanıcı ve admin dashboard sayfalarındaki şifre değiştirme formunun tasa
 ### Dikkat Edilmesi Gerekenler
 - Login işlemi artık kullanıcı adı değil sicil numarası ile yapılıyor
 - Kullanıcı işlemlerinde sicil numarası zorunlu alan olarak eklenmiş durumda
-- Eski kullanıcılar için sicil numarası güncellemesi gerekli olabilir 
+- Eski kullanıcılar için sicil numarası güncellemesi gerekli olabilir
+
+## Görev: Sicil Alanı Benzersizlik Kontrolü ve Hata Mesajlarının İyileştirilmesi
+
+### Görev Tanımı
+Kullanıcıların sicil numaralarının benzersiz olmasını sağlamak ve kullanıcı dostu hata mesajları göstermek için backend ve frontend kodlarında iyileştirmeler yapmak.
+
+### İlerleme
+[X] Sicil alanı için veritabanı seviyesinde benzersizlik kısıtlaması kaldırıldı (mevcut veri çakışmaları nedeniyle)
+[X] Uygulama seviyesinde sicil benzersizlik kontrolü eklendi
+[X] Kullanıcı Oluşturma Handler'ına sicil kontrolü eklendi
+[X] Kullanıcı Güncelleme Handler'ına sicil kontrolü eklendi
+[X] Backend'de hata yönetimi iyileştirildi (UsersController)
+[X] Backend'de hata yönetimi iyileştirildi (AuthController)
+[X] Frontend'de API hatalarının doğrudan gösterilmesi sağlandı
+[X] Hata mesajları kullanıcı dostu hale getirildi
+[X] Daha açıklayıcı ve spesifik hata mesajları eklendi
+[X] Loglama mekanizması iyileştirildi
+[X] Hata ayıklama ve tanılama bilgileri zenginleştirildi
+[X] Sicil benzersizliği bilgi tabanı (knowledge-base) dosyasına gerekli bilgiler eklendi
+[X] errors.md dosyasına gerekli bilgiler eklendi
+
+### Yapılan Değişiklikler
+1. CreateUserCommandHandler ve UpdateUserCommandHandler sınıflarında sicil benzersizlik kontrolleri eklendi:
+   - Kullanıcı oluşturma sırasında sicil kontrolü
+   - Kullanıcı güncelleme sırasında sicil değişikliği kontrolü
+   - Spesifik hata mesajları fırlatma
+
+2. Controller sınıflarında hata yönetimi iyileştirildi:
+   - UsersController içinde Create ve Update metotlarında hata yönetimi
+   - AuthController içinde CreateUser metodunda hata yönetimi
+   - Sicil numarası benzersizlik hatası için özel kontrol
+   - Daha detaylı loglama
+
+3. Frontend bileşeninde hata gösterimi iyileştirildi:
+   - API'dan dönen hata mesajlarının doğrudan gösterilmesi
+   - Hata mesajlarının daha uzun süre (5 saniye) ekranda kalması
+   - Konsol loglamasının zenginleştirilmesi
+
+4. Bilgi Tabanı Güncellemeleri:
+   - sicil-uniqueness-implementation.md dosyasına hata mesajı iyileştirmeleri eklendi
+   - errors.md dosyasına sicil benzersizliği ile ilgili hata ve çözüm bilgileri eklendi
+
+### Sonuç
+Kullanıcılar artık zaten kullanımda olan bir sicil numarası ile kullanıcı eklemek veya mevcut kullanıcının sicil numarasını güncellemek istediklerinde, genel bir hata mesajı yerine spesifik bir hata mesajı alacaklardır:
+
+```
+"12345 sicil numarası zaten başka bir kullanıcı tarafından kullanılmaktadır. Her kullanıcının benzersiz bir sicil numarası olmalıdır."
+```
+
+Bu sayede kullanıcılar, hatanın tam olarak ne olduğunu ve nasıl düzelteceklerini anlayabilirler. 

@@ -5,6 +5,8 @@ using Stock.Application.Models.DTOs;
 using Stock.Domain.Interfaces;
 using System.Threading;
 using System.Threading.Tasks;
+using System;
+using System.Linq;
 
 namespace Stock.Application.Features.Users.Handlers
 {
@@ -25,6 +27,16 @@ namespace Stock.Application.Features.Users.Handlers
             
             if (user == null)
                 return null;
+                
+            // Sicil değiştiyse ve başka bir kullanıcı bu sicili kullanıyorsa hata fırlat
+            if (user.Sicil != request.Sicil)
+            {
+                var existingUsers = await _unitOfWork.Users.FindAsync(u => u.Sicil == request.Sicil && u.Id != request.Id);
+                if (existingUsers.Any())
+                {
+                    throw new InvalidOperationException($"'{request.Sicil}' sicil numarası zaten başka bir kullanıcı tarafından kullanılmaktadır. Her kullanıcının benzersiz bir sicil numarası olmalıdır.");
+                }
+            }
 
             user.Username = request.Username;
             user.IsAdmin = request.IsAdmin;

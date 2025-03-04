@@ -19,6 +19,13 @@ namespace Stock.Infrastructure.Data.Configurations
             builder.Property(u => u.PasswordHash)
                 .IsRequired();
 
+            builder.Property(u => u.Sicil)
+                .IsRequired()
+                .HasMaxLength(50);
+
+            // Sicil alanı için unique index kaldırıldı
+            // Uygulama seviyesinde kontrol yapılacak
+
             builder.Property(u => u.IsAdmin)
                 .HasDefaultValue(false);
 

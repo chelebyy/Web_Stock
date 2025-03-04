@@ -6,6 +6,8 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using System.Security.Claims;
 using Microsoft.Extensions.Logging;
+using Stock.Application.Features.Users.Commands;
+using System;
 
 namespace Stock.API.Controllers
 {
@@ -15,11 +17,13 @@ namespace Stock.API.Controllers
     {
         private readonly IAuthService _authService;
         private readonly ILogger<AuthController> _logger;
+        private readonly IMediator _mediator;
 
-        public AuthController(IAuthService authService, ILogger<AuthController> logger)
+        public AuthController(IAuthService authService, ILogger<AuthController> logger, IMediator mediator)
         {
             _authService = authService;
             _logger = logger;
+            _mediator = mediator;
         }
 
         [HttpPost("login")]
@@ -42,6 +46,38 @@ namespace Stock.API.Controllers
                 return BadRequest(result);
                 
             return Ok(result);
+        }
+
+        [Authorize(Roles = "Admin")]
+        [HttpPost("create-user")]
+        public async Task<IActionResult> CreateUser([FromBody] CreateUserCommand command)
+        {
+            try
+            {
+                _logger.LogInformation("Yeni kullanıcı oluşturma isteği alındı: {Username}, Sicil: {Sicil}", command.Username, command.Sicil);
+                var result = await _mediator.Send(command);
+                _logger.LogInformation("Kullanıcı başarıyla oluşturuldu: {Username}, ID: {Id}", result.Username, result.Id);
+                return CreatedAtAction(nameof(CreateUser), new { id = result.Id }, result);
+            }
+            catch (InvalidOperationException ex)
+            {
+                // Sicil benzersizlik hatası veya diğer doğrulama hataları
+                string errorMessage = ex.Message;
+                _logger.LogWarning("Kullanıcı oluşturma işlemi sırasında doğrulama hatası: {Message}", errorMessage);
+                
+                // Özel olarak sicil numarası hatası için kontrol et
+                if (errorMessage.Contains("sicil numarası zaten kullanılmaktadır"))
+                {
+                    return BadRequest(new { error = errorMessage });
+                }
+                
+                return BadRequest(new { error = errorMessage });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Kullanıcı oluşturma sırasında bir hata meydana geldi");
+                return StatusCode(500, new { error = "Kullanıcı oluşturulurken bir hata oluştu" });
+            }
         }
 
         [Authorize]

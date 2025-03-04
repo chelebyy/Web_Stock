@@ -39,6 +39,8 @@ Bu dosya, proje geliştirme sürecinde karşılaşılan hataları ve çözümler
 - [Kullanıcı Silme İşlemi Hataları](#kullanıcı-silme-işlemi-hataları)
 - [Kullanıcı Güncelleme Hatası](#kullanıcı-güncelleme-hatası)
 - [Frontend Derleme Hataları](#frontend-derleme-hataları)
+- [Kullanıcı Ekleme Hatası (500 Internal Server Error)](#kullanıcı-ekleme-hatası-500-internal-server-error)
+- [Sicil Alanı Benzersizlik Kontrolü](#sicil-alanı-benzersizlik-kontrolü)
 
 ## Clean Architecture Geçişi Hataları
 
@@ -1104,15 +1106,10 @@ UsersController.cs dosyasında tam nitelikli tip adları kullanıldı:
 
 ```csharp
 // Hatalı kod
-using Stock.Application.Features.Users.Commands.CreateUser;
-using Stock.Application.Features.Users.Commands.UpdateUser;
 using Stock.Application.Features.Users.Commands.DeleteUser;
 
 // Düzeltilmiş kod
-// Using direktifleri kaldırıldı ve tam nitelikli tip adları kullanıldı
-public async Task<IActionResult> Create(Stock.Application.Features.Users.Commands.CreateUserCommand command)
-public async Task<IActionResult> Update(int id, Stock.Application.Features.Users.Commands.UpdateUserCommand command)
-var command = new Stock.Application.Features.Users.Commands.DeleteUserCommand { Id = id };
+using Stock.Application.Features.Users.Commands;
 ```
 
 **Önemli Notlar:**
@@ -1204,27 +1201,27 @@ namespace Stock.Application.Features.Users.Handlers
             _passwordHasher = passwordHasher;
         }
 
-        public async Task<UserDto> Handle(CreateUserCommand request, CancellationToken cancellationToken)
+        public async Task<UserDto> Handle(CreateUserCommand command, CancellationToken cancellationToken)
         {
             var user = new User
             {
-                Username = request.Username,
-                PasswordHash = _passwordHasher.HashPassword(request.Password),
-                IsAdmin = request.IsAdmin,
-                RoleId = request.RoleId
+                Username = command.Username,
+                PasswordHash = _passwordHasher.HashPassword(command.Password),
+                IsAdmin = command.IsAdmin,
+                RoleId = command.RoleId,
+                Sicil = command.Sicil
             };
 
             await _unitOfWork.Users.AddAsync(user);
             await _unitOfWork.SaveChangesAsync();
 
-            var createdUser = await _unitOfWork.Users.GetByIdAsync(user.Id);
-            return _mapper.Map<UserDto>(createdUser);
+            return _mapper.Map<UserDto>(user);
         }
     }
 }
 ```
 
-3. UpdateUserCommand'e sicil alanını ekle:
+3. UpdateUserCommand'e sicil alanını ekledik:
 ```csharp
 public class UpdateUserCommand : IRequest<UserDto>
 {
@@ -1242,71 +1239,143 @@ public class UpdateUserCommand : IRequest<UserDto>
 public string Sicil { get; set; } = string.Empty;
 ```
 
-5. UserDto'ya sicil alanını ekle:
+5. UserDto'ya sicil alanını ekledik:
 ```csharp
-public string Sicil { get; set; } = string.Empty;
-```
-
-6. MappingProfile'da sicil alanı eşleştirmesini ekle:
-```csharp
-CreateMap<User, UserDto>()
-    .ForMember(dest => dest.RoleName, opt => opt.MapFrom(src => src.Role != null ? src.Role.Name : null))
-    .ForMember(dest => dest.Sicil, opt => opt.MapFrom(src => src.Sicil));
-```
-
-**Önemli Notlar:**
-- MediatR, handler sınıflarını otomatik olarak tarar ve kaydeder
-- Handler sınıfları, ilgili Command veya Query sınıflarıyla aynı assembly'de olmalıdır
-- Sicil alanı eklendiğinde veritabanı şemasını güncellemek için migration oluşturulmalıdır
-
-## Frontend Derleme Hataları
-
-### CreateUserRequest Modeli Sicil Alanı Eksikliği
-
-**Hata:**
-```
-X [ERROR] TS2741: Property 'sicil' is missing in type '{ username: string; password: string; isAdmin: boolean; }' but required in type 'CreateUserRequest'.
-```
-
-**Nedeni:**
-1. UserService içindeki createUser metodunda CreateUserRequest nesnesine sicil alanı eklenmemiş
-2. CreateUserRequest modelinde sicil alanı zorunlu olarak tanımlanmış
-
-**Çözüm:**
-UserService içindeki createUser metodunda CreateUserRequest nesnesine sicil alanını ekle:
-```typescript
-createUser(user: User): Observable<any> {
-  const createUserRequest: CreateUserRequest = {
-    username: user.username,
-    password: user.passwordHash || '',
-    sicil: user.sicil,
-    isAdmin: user.isAdmin
-  };
-  return this.http.post<any>(`${this.apiUrl}/auth/create-user`, createUserRequest);
+public class UserDto
+{
+    public int Id { get; set; }
+    public string Username { get; set; } = string.Empty;
+    public bool IsAdmin { get; set; }
+    public int? RoleId { get; set; }
+    public string? RoleName { get; set; }
+    public string Sicil { get; set; } = string.Empty;
 }
 ```
 
-**Önemli Notlar:**
-- Frontend modellerinin backend modelleriyle uyumlu olması gerekir
-- Zorunlu alanların eksik olması derleme hatalarına neden olur
-- Model değişikliklerinde ilgili servislerin de güncellenmesi gerekir
-
-### Backend ve Frontend Port Yapılandırması
-
-**Durum:**
-- Backend servisi 5037 portunda çalışıyor (http://localhost:5037)
-- Frontend servisi 4202 portunda çalışıyor (http://localhost:4202)
-
-**Yapılandırma:**
-Frontend environment.ts dosyasında API URL'si doğru şekilde yapılandırılmış:
-```typescript
-export const environment = {
-    production: false,
-    apiUrl: 'http://localhost:5037'
-};
+6. Veritabanı şemasını güncellemek için migration oluşturduk ve uyguladık:
+```bash
+dotnet ef migrations add AddSicilFieldToUser
+dotnet ef database update
 ```
 
+### Clean Architecture Perspektifinden Değerlendirme
+Bu hata, Clean Architecture'ın temel prensiplerinden biri olan "iç katmanlar dış katmanlara bağımlı olmamalıdır" ilkesini vurgulamaktadır. Frontend (dış katman) tarafından beklenen bir alan (sicil), Domain ve Application katmanlarında (iç katmanlar) tanımlanmamıştı.
+
+Çözüm süreci, Clean Architecture'ın aşağıdaki katmanlarında değişiklik gerektirdi:
+- **Domain Layer**: User entity'sinin güncellenmesi
+- **Application Layer**: Command ve DTO modellerinin güncellenmesi
+- **Infrastructure Layer**: Veritabanı şemasının güncellenmesi
+- **API Layer**: Controller'ın düzgün yapılandırılması
+
+Bu çözüm, tüm katmanların uyumlu çalışmasını sağlayarak Clean Architecture prensiplerini korumaktadır.
+
+### Öğrenilen Dersler
+1. Frontend ve backend arasındaki model uyumluluğu kritik önem taşır
+2. Clean Architecture'da değişiklikler tüm katmanları etkileyebilir
+3. CQRS pattern kullanıldığı için Command ve Handler sınıflarının eksiksiz tanımlanması gerekir
+4. API endpoint'lerini test etmek için Swagger veya Postman gibi araçlar kullanılmalıdır
+5. Hata ayıklama için detaylı loglama yapılması sorunların hızlı çözülmesine yardımcı olur
+6. Frontend isteklerinin beklendiği gibi formatlarda gönderilip gönderilmediğini kontrol etmek önemlidir
+
+## Kullanıcı Ekleme Hatası (500 Internal Server Error)
+
+**Hata:** Kullanıcı ekleme işlemi sırasında 500 Internal Server Error alınıyor.
+
+**Nedeni:**
+1. Frontend'den gönderilen istekte `passwordHash` parametresi kullanılıyordu, ancak backend `password` parametresi bekliyordu.
+2. `userToCreate` nesnesi frontend'de `passwordHash` alanına sahipti, backend'de ise bu alan `password` olarak tanımlanmıştı.
+3. `CreateUserCommand` sınıfında `password` alanı varken, frontend'den `passwordHash` gönderiliyordu.
+
+**Çözüm:**
+1. `user-management.component.ts` dosyasında `passwordHash` alanı `password` olarak değiştirildi.
+2. `user.service.ts` dosyasında `createUser` metodu değiştirildi:
+```typescript
+password: user.password || user.passwordHash || '', // Önce password, yoksa passwordHash kullan
+```
+
+3. Form değerleri konsola yazdırılarak hata ayıklama yapıldı.
+
 **Önemli Notlar:**
-- Backend ve frontend servislerinin farklı portlarda çalışması gerekir
-- CORS yapılandırmasının doğru olması gerekir
-- Frontend'in backend API'sine erişebilmesi için doğru URL yapılandırması önemlidir
+- Frontend ve backend arasındaki model uyumsuzlukları API hatalarına neden olabilir
+- Veri modeli değişikliklerinde hem frontend hem de backend güncellenmelidir
+- Şifre gibi hassas bilgilerin üretim ortamında loglanmasından kaçınılmalıdır
+- HTTP durum kodları (500, 400 vb.) sorunların kaynağını belirlemeye yardımcı olur
+
+## Sicil Alanı Benzersizlik Kontrolü
+
+**Hata:** Sicil alanı için benzersizlik kontrolü uygulanırken veritabanı güncelleme hatası alındı.
+
+**Nedeni:**
+1. Entity Framework Core migrasyonu, sicil alanı için veritabanında benzersiz indeks oluşturmaya çalışıyordu.
+2. Veritabanında zaten aynı sicil numarasına sahip kullanıcılar olduğu için bu işlem başarısız oldu.
+3. Bu durum, "The model for context 'ApplicationDbContext' has pending changes. Add a new migration before updating the database." hatası ile sonuçlandı.
+
+**Çözüm:**
+1. `src/Stock.Infrastructure/Data/Configurations/UserConfiguration.cs` dosyasından `Sicil` alanı için tanımlanmış benzersizlik indeksi kaldırıldı:
+   ```csharp
+   // Kaldırılan kod
+   builder.HasIndex(u => u.Sicil)
+       .IsUnique();
+   ```
+
+2. Yeni bir "RemoveSicilUniquenessConstraint" migrasyonu oluşturuldu.
+3. Veritabanı güncellendi.
+4. Benzersizlik kontrolü, uygulama seviyesinde (Command Handler sınıflarında) uygulandı:
+   ```csharp
+   // Eklenen veya Güncellenen kullanıcının sicil numarası kontrolü
+   var existingUsers = await _unitOfWork.Users.FindAsync(u => u.Sicil == request.Sicil && u.Id != request.Id);
+   if (existingUsers.Any())
+   {
+       throw new InvalidOperationException($"'{request.Sicil}' sicil numarası zaten başka bir kullanıcı tarafından kullanılmaktadır. Her kullanıcının benzersiz bir sicil numarası olmalıdır.");
+   }
+   ```
+
+5. Controller sınıflarında hata yönetimi iyileştirildi:
+   ```csharp
+   catch (InvalidOperationException ex)
+   {
+       // Sicil benzersizlik hatası veya diğer doğrulama hataları
+       string errorMessage = ex.Message;
+       _logger.LogWarning("Kullanıcı işlemi sırasında doğrulama hatası: {Message}", errorMessage);
+       
+       // Özel olarak sicil numarası hatası için kontrol et
+       if (errorMessage.Contains("sicil numarası zaten"))
+       {
+           return BadRequest(new { error = errorMessage });
+       }
+       
+       return BadRequest(new { error = errorMessage });
+   }
+   ```
+
+6. Frontend bileşenlerinde API'dan dönen hata mesajları doğrudan kullanıcıya gösterildi:
+   ```typescript
+   error: (error) => {
+     console.error('Kullanıcı ekleme hatası:', error);
+     
+     // API'dan dönen hata mesajını göster (varsa)
+     const errorMessage = error.error?.error || 'Kullanıcı eklenirken bir hata oluştu.';
+     
+     this.messageService.add({
+       severity: 'error',
+       summary: 'Hata',
+       detail: errorMessage,
+       life: 5000
+     });
+   }
+   ```
+
+**Kullanıcı Deneyimi İyileştirmeleri:**
+1. Hata mesajları daha açıklayıcı ve kullanıcı dostu hale getirildi.
+2. Spesifik hata durumlarına göre özelleştirilmiş mesajlar sunuldu.
+3. Sicil benzersizlik hatası için özel kontrol eklenip kullanıcıya net bir mesaj gösterildi.
+4. Hata mesajları daha uzun süre ekranda tutuldu (5 saniye).
+5. Loglama iyileştirildi ve hata ayıklama bilgileri zenginleştirildi.
+
+**Öğrenilen Dersler:**
+1. Veritabanı kısıtlamaları eklemeden önce mevcut verilerin bu kısıtlamalara uygun olup olmadığı kontrol edilmelidir.
+2. Mevcut veriler kısıtlamalara uymuyorsa, önce veri temizliği yapılmalı veya uygulama seviyesinde kontrollerle ilerlenmelidir.
+3. Hata durumlarını kullanıcıya net ve anlaşılır mesajlarla iletmek, kullanıcı memnuniyetini artırır.
+4. Farklı katmanlar arasında hata mesajlarının iletimi, iyi tasarlanmış bir API sözleşmesi ile sağlanmalıdır.
+5. Frontend uygulamasında API hata mesajlarını doğrudan göstermek, sorunların hızlı teşhisine olanak tanır.
+6. Loglama stratejisi, hem geliştirme hem de canlı ortamlarda sorunların tespit edilmesine yardımcı olur.

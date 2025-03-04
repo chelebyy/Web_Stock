@@ -25,10 +25,14 @@ export class UserService {
   createUser(user: User): Observable<any> {
     const createUserRequest: CreateUserRequest = {
       username: user.username,
-      password: user.passwordHash || '', // passwordHash alanını password olarak kullan
+      password: user.password || user.passwordHash || '', // Önce password, yoksa passwordHash kullan
       sicil: user.sicil,
       isAdmin: user.isAdmin
     };
+    
+    // Kontrol amaçlı log
+    console.log('Gönderilen kullanıcı verisi:', createUserRequest);
+    
     return this.http.post<any>(`${this.apiUrl}/auth/create-user`, createUserRequest);
   }
 
