@@ -12,6 +12,7 @@ import { ToolbarModule } from 'primeng/toolbar';
 import { DropdownModule } from 'primeng/dropdown';
 import { RoleService } from '../../services/role.service';
 import { Role, RoleWithUsers } from '../../models/role.model';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-role-management',
@@ -34,7 +35,7 @@ import { Role, RoleWithUsers } from '../../models/role.model';
   providers: [ConfirmationService, MessageService]
 })
 export class RoleManagementComponent implements OnInit {
-  roles: RoleWithUsers[] = [];
+  roles: Role[] = [];
   roleDialog: boolean = false;
   roleForm: FormGroup;
   editMode: boolean = false;
@@ -44,11 +45,13 @@ export class RoleManagementComponent implements OnInit {
     private roleService: RoleService,
     private messageService: MessageService,
     private confirmationService: ConfirmationService,
-    private fb: FormBuilder
+    private fb: FormBuilder,
+    private router: Router
   ) {
     this.roleForm = this.fb.group({
       id: [null],
-      name: ['', [Validators.required]]
+      name: ['', [Validators.required]],
+      description: ['', [Validators.required]]
     });
   }
 
@@ -76,17 +79,19 @@ export class RoleManagementComponent implements OnInit {
     });
   }
 
-  openDialog(role?: RoleWithUsers) {
+  openDialog(role?: Role) {
     this.editMode = !!role;
     if (role) {
       this.roleForm.patchValue({
         id: role.id,
-        name: role
+        name: role.name,
+        description: role.description
       });
     } else {
       this.roleForm.reset({
         id: null,
-        name: null
+        name: '',
+        description: ''
       });
     }
     this.roleDialog = true;
@@ -108,10 +113,10 @@ export class RoleManagementComponent implements OnInit {
       return;
     }
 
-    const selectedRole = this.roleForm.get('name')?.value;
     const roleData = {
-      id: this.editMode ? selectedRole.id : null,
-      name: selectedRole.name
+      id: this.roleForm.get('id')?.value,
+      name: this.roleForm.get('name')?.value,
+      description: this.roleForm.get('description')?.value
     };
     
     if (this.editMode) {
@@ -157,7 +162,7 @@ export class RoleManagementComponent implements OnInit {
     }
   }
 
-  deleteRole(role: RoleWithUsers) {
+  deleteRole(role: Role) {
     this.confirmationService.confirm({
       message: 'Bu rolü silmek istediğinizden emin misiniz?',
       header: 'Onay',
@@ -183,5 +188,9 @@ export class RoleManagementComponent implements OnInit {
         });
       }
     });
+  }
+  
+  managePermissions(role: Role) {
+    this.router.navigate(['/roles', role.id]);
   }
 } 

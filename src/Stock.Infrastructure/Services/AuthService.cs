@@ -145,15 +145,46 @@ namespace Stock.Infrastructure.Services
 
         public string GenerateJwtToken(UserDto user)
         {
-            _logger.LogInformation($"Token üretiliyor: {user.Username}, ID: {user.Id}");
-            return _tokenGenerator.GenerateToken(new User
+            var userEntity = new User
             {
                 Id = user.Id,
                 Username = user.Username,
                 IsAdmin = user.IsAdmin,
-                RoleId = user.RoleId,
-                Role = user.RoleName != null ? new Role { Id = user.RoleId ?? 0, Name = user.RoleName } : null
-            });
+                RoleId = user.RoleId
+            };
+
+            if (user.RoleId.HasValue && !string.IsNullOrEmpty(user.RoleName))
+            {
+                userEntity.Role = new Role
+                {
+                    Id = user.RoleId.Value,
+                    Name = user.RoleName
+                };
+            }
+
+            return _tokenGenerator.GenerateToken(userEntity);
+        }
+
+        public async Task<string> GenerateJwtTokenAsync(UserDto user)
+        {
+            var userEntity = new User
+            {
+                Id = user.Id,
+                Username = user.Username,
+                IsAdmin = user.IsAdmin,
+                RoleId = user.RoleId
+            };
+
+            if (user.RoleId.HasValue && !string.IsNullOrEmpty(user.RoleName))
+            {
+                userEntity.Role = new Role
+                {
+                    Id = user.RoleId.Value,
+                    Name = user.RoleName
+                };
+            }
+
+            return await _tokenGenerator.GenerateTokenAsync(userEntity);
         }
 
         public async Task<AuthResponseDto> ChangePasswordAsync(ChangePasswordDto changePasswordDto, int userId)

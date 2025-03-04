@@ -1,0 +1,71 @@
+<div class="card">
+    <div class="card-header">
+        <div class="d-flex justify-content-between align-items-center">
+            <h3 *ngIf="role">{{ role.name }} - İzin Yönetimi</h3>
+            <button pButton icon="pi pi-arrow-left" label="Geri Dön" class="p-button-secondary" (click)="goBack()"></button>
+        </div>
+    </div>
+    <div class="card-body">
+        <p-progressSpinner *ngIf="loading" styleClass="w-4rem h-4rem" strokeWidth="8" fill="var(--surface-ground)" animationDuration=".5s"></p-progressSpinner>
+        
+        <div *ngIf="!loading && role">
+            <div class="mb-4">
+                <h4>Rol Bilgileri</h4>
+                <div class="p-grid">
+                    <div class="p-col-12 p-md-6">
+                        <div class="p-field">
+                            <label>Rol Adı</label>
+                            <div>{{ role.name }}</div>
+                        </div>
+                    </div>
+                    <div class="p-col-12 p-md-6">
+                        <div class="p-field">
+                            <label>Açıklama</label>
+                            <div>{{ role.description }}</div>
+                        </div>
+                    </div>
+                    <div class="p-col-12 p-md-6" *ngIf="role.userCount !== undefined">
+                        <div class="p-field">
+                            <label>Kullanıcı Sayısı</label>
+                            <div>{{ role.userCount }}</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="mb-4">
+                <h4>İzinler</h4>
+                <p>Bu role atanacak izinleri seçin:</p>
+                
+                <div *ngFor="let group of permissionGroups" class="mb-3">
+                    <h5>{{ group.group }}</h5>
+                    <div class="p-grid">
+                        <div *ngFor="let permission of group.permissions" class="p-col-12 p-md-4 mb-2">
+                            <p-checkbox 
+                                [value]="permission.id" 
+                                [label]="permission.name" 
+                                [(ngModel)]="selectedPermissions" 
+                                [inputId]="'permission_' + permission.id">
+                            </p-checkbox>
+                            <small class="text-muted d-block">{{ permission.description }}</small>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="mt-4">
+                    <button 
+                        pButton 
+                        icon="pi pi-save" 
+                        label="İzinleri Kaydet" 
+                        [loading]="savingPermissions"
+                        (click)="savePermissions()">
+                    </button>
+                </div>
+            </div>
+        </div>
+        
+        <div *ngIf="!loading && !role" class="alert alert-warning">
+            Rol bulunamadı.
+        </div>
+    </div>
+</div> 

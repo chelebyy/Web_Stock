@@ -1,15 +1,13 @@
+import { Permission } from './permission.model';
+
 export interface Role {
     id: number;
     name: string;
-    createdAt: string | Date;
-    updatedAt?: string | Date;
+    description: string;
+    userCount?: number;
+    permissions?: Permission[];
 }
 
 export interface RoleWithUsers extends Role {
-    users: {
-        id: number;
-        username: string;
-        isAdmin: boolean;
-        createdAt: string;
-    }[];
+    users: any[];
 } 

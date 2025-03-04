@@ -24,6 +24,7 @@ namespace Stock.Infrastructure
             services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
             services.AddScoped<IUserRepository, UserRepository>();
             services.AddScoped<IRoleRepository, RoleRepository>();
+            services.AddScoped<IPermissionRepository, PermissionRepository>();
 
             // UnitOfWork
             services.AddScoped<IUnitOfWork, UnitOfWork.UnitOfWork>();
@@ -33,6 +34,7 @@ namespace Stock.Infrastructure
             services.AddScoped<JwtTokenGenerator>();
             services.AddScoped<IAuthService, AuthService>();
             services.AddScoped<IAuditService, AuditService>();
+            services.AddScoped<IPermissionService, PermissionService>();
 
             return services;
         }

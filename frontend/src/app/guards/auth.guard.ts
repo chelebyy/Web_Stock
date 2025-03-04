@@ -20,6 +20,16 @@ export class AuthGuard implements CanActivate {
       return false;
     }
 
+    // İzin gerektiren rotalar için kontrol
+    if (route.data['requiredPermission']) {
+      const requiredPermission = route.data['requiredPermission'];
+      
+      if (!this.authService.hasPermission(requiredPermission)) {
+        this.router.navigate(['/user-dashboard']);
+        return false;
+      }
+    }
+
     return true;
   }
 }

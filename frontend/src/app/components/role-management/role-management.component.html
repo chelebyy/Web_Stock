@@ -14,8 +14,7 @@
         <tr>
           <th>ID</th>
           <th>Rol Adı</th>
-          <th>Kullanıcılar</th>
-          <th>Oluşturulma Tarihi</th>
+          <th>Açıklama</th>
           <th>İşlemler</th>
         </tr>
       </ng-template>
@@ -23,21 +22,17 @@
         <tr>
           <td>{{role.id}}</td>
           <td>{{role.name}}</td>
-          <td>
-            <div *ngFor="let user of role.users">
-              {{user.username}}
-            </div>
-          </td>
-          <td>{{role.createdAt | date:'medium'}}</td>
+          <td>{{role.description}}</td>
           <td>
             <button pButton pRipple icon="pi pi-pencil" class="p-button-rounded p-button-text" (click)="openDialog(role)"></button>
             <button pButton pRipple icon="pi pi-trash" class="p-button-rounded p-button-text p-button-danger" (click)="deleteRole(role)"></button>
+            <button pButton pRipple icon="pi pi-key" class="p-button-rounded p-button-text p-button-success" (click)="managePermissions(role)" pTooltip="İzinleri Yönet"></button>
           </td>
         </tr>
       </ng-template>
       <ng-template pTemplate="emptymessage">
         <tr>
-          <td colspan="5" class="text-center">Rol bulunamadı</td>
+          <td colspan="4" class="text-center">Rol bulunamadı</td>
         </tr>
       </ng-template>
     </p-table>
@@ -48,15 +43,17 @@
   <form [formGroup]="roleForm">
     <div class="field">
       <label for="name">Rol Adı</label>
-      <p-dropdown id="name" [options]="roles" formControlName="name" optionLabel="name" [showClear]="true" 
-        placeholder="Rol seçin" [filter]="true" [virtualScroll]="true" [virtualScrollItemSize]="38"
-        [style]="{'width':'100%'}" appendTo="body">
-        <ng-template pTemplate="selectedItem" let-role>
-          <span>{{role?.name}}</span>
-        </ng-template>
-      </p-dropdown>
+      <input type="text" pInputText id="name" formControlName="name" />
       <small class="p-error" *ngIf="roleForm.get('name')?.errors?.['required'] && roleForm.get('name')?.touched">
         Rol adı gereklidir.
+      </small>
+    </div>
+    
+    <div class="field">
+      <label for="description">Açıklama</label>
+      <input type="text" pInputText id="description" formControlName="description" />
+      <small class="p-error" *ngIf="roleForm.get('description')?.errors?.['required'] && roleForm.get('description')?.touched">
+        Açıklama gereklidir.
       </small>
     </div>
   </form>

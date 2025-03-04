@@ -17,6 +17,7 @@ Bu dosya, proje geliştirme sürecinde karşılaşılan hataları ve çözümler
 - [PowerShell Komut Çalıştırma Sorunları](#powershell-komut-çalıştırma-sorunları)
 - [Profil Resmi Ekleme Sorunları](#profil-resmi-ekleme-sorunları)
 - [Şifre Değiştirme Formu Sorunları](#şifre-değiştirme-formu-sorunları)
+- [Frontend Rol Yönetimi Hataları](#frontend-rol-yönetimi-hataları)
 
 ## Kullanıcı Aktivitesi Grafiği Yerine Log Kaydetme Sistemi
 
@@ -792,3 +793,79 @@ public async Task<IActionResult> ChangePassword([FromBody] ChangePasswordDto cha
 - İşlem tamamlandığında form sıfırlandı
 - Loading durumu için finalize operatörü kullanıldı
 - API endpoint'i doğru şekilde tanımlandı 
+
+## Frontend Rol Yönetimi Hataları
+
+### Hata 1: Role modeli uyumsuzluğu
+**Hata Açıklaması:** Role modeli güncellendiğinde, RoleManagementComponent içinde hala eski model yapısı kullanılıyordu. Bu durum, `Type 'Role[]' is not assignable to type 'RoleWithUsers[]'` ve `Property 'description' is missing in type '{ id: any; name: any; }' but required in type 'Omit<Role, "id" | "createdAt" | "updatedAt">'` hatalarına neden oldu.
+
+**Çözüm:** 
+1. RoleManagementComponent içinde `roles` değişkeni `RoleWithUsers[]` yerine `Role[]` olarak değiştirildi.
+2. Form yapısı güncellendi ve `description` alanı eklendi.
+3. HTML şablonu güncellendi, gereksiz alanlar kaldırıldı ve izin yönetimi butonu eklendi.
+4. RoleService'deki metotlar güncellendi.
+
+```typescript
+// Önceki hatalı kod
+roles: RoleWithUsers[] = [];
+this.roleForm = this.fb.group({
+  id: [null],
+  name: ['', [Validators.required]]
+});
+
+// Düzeltilmiş kod
+roles: Role[] = [];
+this.roleForm = this.fb.group({
+  id: [null],
+  name: ['', [Validators.required]],
+  description: ['', [Validators.required]]
+});
+```
+
+### Hata 2: Form değerlerinin yanlış alınması
+**Hata Açıklaması:** Form değerleri yanlış şekilde alınıyordu, özellikle dropdown kullanımı sorunluydu.
+
+**Çözüm:** 
+1. Dropdown yerine normal input alanları kullanıldı.
+2. Form değerlerinin alınma şekli düzeltildi:
+
+```typescript
+// Önceki hatalı kod
+const selectedRole = this.roleForm.get('name')?.value;
+const roleData = {
+  id: this.editMode ? selectedRole.id : null,
+  name: selectedRole.name
+};
+
+// Düzeltilmiş kod
+const roleData = {
+  id: this.roleForm.get('id')?.value,
+  name: this.roleForm.get('name')?.value,
+  description: this.roleForm.get('description')?.value
+};
+```
+
+### Hata 3: API URL'lerinin yanlış yapılandırılması
+**Hata Açıklaması:** RoleService içindeki API URL'leri yanlış yapılandırılmıştı.
+
+**Çözüm:** URL'ler düzeltildi:
+
+```typescript
+// Önceki hatalı kod
+getRoles(): Observable<Role[]> {
+  return this.http.get<Role[]>(`${this.apiUrl}/roles`);
+}
+
+getRoleById(id: number): Observable<Role> {
+  return this.http.get<Role>(`${this.apiUrl}/roles/${id}`);
+}
+
+// Düzeltilmiş kod
+getRoles(): Observable<Role[]> {
+  return this.http.get<Role[]>(`${this.apiUrl}`);
+}
+
+getRoleById(id: number): Observable<Role> {
+  return this.http.get<Role>(`${this.apiUrl}/${id}`);
+}
+``` 

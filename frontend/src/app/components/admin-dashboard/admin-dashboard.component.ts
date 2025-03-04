@@ -19,6 +19,7 @@ import { DropdownModule } from 'primeng/dropdown';
 import { CalendarModule } from 'primeng/calendar';
 import { DialogModule } from 'primeng/dialog';
 import { HostListener } from '@angular/core';
+import { DragDropModule } from '@angular/cdk/drag-drop';
 
 // PrimeNG Tag bileşeni için geçerli severity tipleri
 type TagSeverity = 'success' | 'info' | 'warning' | 'danger' | 'secondary' | 'contrast' | undefined;
@@ -41,7 +42,8 @@ type TagSeverity = 'success' | 'info' | 'warning' | 'danger' | 'secondary' | 'co
     PaginatorModule,
     DropdownModule,
     CalendarModule,
-    DialogModule
+    DialogModule,
+    DragDropModule
   ],
   providers: [MessageService],
   templateUrl: './admin-dashboard.component.html',

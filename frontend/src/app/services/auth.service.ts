@@ -10,10 +10,10 @@ import { Router } from '@angular/router';
 })
 export class AuthService {
   private apiUrl = 'http://localhost:5037/api'; // API URL'sini 5037 portuna güncelledim
-  private currentUserSubject = new BehaviorSubject<User | null>(null);
+  private currentUserSubject: BehaviorSubject<User | null> = new BehaviorSubject<User | null>(null);
+  public currentUser$: Observable<User | null> = this.currentUserSubject.asObservable();
   private jwtHelper = new JwtHelperService();
-
-  currentUser$ = this.currentUserSubject.asObservable();
+  private permissions: string[] = [];
 
   constructor(
     private http: HttpClient,
@@ -35,6 +35,9 @@ export class AuthService {
           lastLoginAt: decodedToken.last_login_at
         };
         this.currentUserSubject.next(user);
+        
+        // İzinleri yükle
+        this.permissions = decodedToken.Permission || [];
       }
     }
   }
@@ -140,5 +143,15 @@ export class AuthService {
         return throwError(() => error);
       })
     );
+  }
+
+  hasPermission(permissionName: string): boolean {
+    // Admin her zaman tüm izinlere sahiptir
+    if (this.isAdmin()) {
+      return true;
+    }
+    
+    // Token'dan izinleri kontrol et
+    return this.permissions.includes(permissionName);
   }
 }

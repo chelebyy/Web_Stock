@@ -28,6 +28,9 @@ Bu dosya, proje geliştirme sürecinde karşılaşılan hataları ve çözümler
   - [Form Alanları Etiket Sorunları](#form-alanları-etiket-sorunları)
   - [Dialog Footer Düzenleme Sorunları](#dialog-footer-düzenleme-sorunları)
   - [PowerShell Komut Çalıştırma Sorunları (Angular Serve)](#powershell-komut-çalıştırma-sorunları-angular-serve)
+- [İzin Yönetimi Hataları](#izin-yönetimi-hataları)
+  - [Hata 1: RoleService'de getRoleById metodu eksikti](#hata-1-role-service-de-getrolebyid-metodu-eksikti)
+  - [Hata 2: App routing modülünde Routes ve AuthGuard tanımlı değildi](#hata-2-app-routing-modülünde-routes-ve-authguard-tanımlı-değildi)
 
 ## Clean Architecture Geçişi Hataları
 
@@ -1396,4 +1399,25 @@ cd frontend; ng serve --port 4206
 2. PowerShell'de komutları birleştirmek için ; (noktalı virgül) kullanıldı:
 ```powershell
 cd frontend; ng serve
+```
+
+## İzin Yönetimi Hataları
+
+### Hata 1: RoleService'de getRoleById metodu eksikti
+**Hata Açıklaması:** RoleDetailComponent içinde RoleService'in getRoleById metodu kullanılıyordu ancak bu metot RoleService içinde tanımlı değildi.
+
+**Çözüm:** RoleService sınıfına getRoleById metodu eklendi:
+```typescript
+getRoleById(id: number): Observable<Role> {
+  return this.http.get<Role>(`${this.apiUrl}/roles/${id}`);
+}
+```
+
+### Hata 2: App routing modülünde Routes ve AuthGuard tanımlı değildi
+**Hata Açıklaması:** app-routing.module.ts dosyasında Routes ve AuthGuard için gerekli import ifadeleri eksikti.
+
+**Çözüm:** Gerekli import ifadeleri eklendi:
+```typescript
+import { RouterModule, Routes } from '@angular/router';
+import { AuthGuard } from './guards/auth.guard';
 ```

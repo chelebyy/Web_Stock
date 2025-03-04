@@ -3,7 +3,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace Stock.Domain.Entities
 {
-    public class Role : BaseEntity
+    public class Permission : BaseEntity
     {
         [Required]
         [StringLength(50)]
@@ -12,8 +12,9 @@ namespace Stock.Domain.Entities
         [StringLength(200)]
         public string Description { get; set; } = string.Empty;
 
-        public virtual ICollection<User> Users { get; set; } = new HashSet<User>();
-        
+        [StringLength(50)]
+        public string Group { get; set; } = string.Empty;
+
         public virtual ICollection<RolePermission> RolePermissions { get; set; } = new HashSet<RolePermission>();
     }
 } 
