@@ -1190,234 +1190,78 @@ applyFilters(): void {
 
 ## Kullanıcı Yönetimi Sayfası Tasarım Güncellemeleri
 
-### Checkbox Görünümü Sorunları
+### Kullanıcı Verilerinin Kalıcı Olmaması Sorunu
 
-**Hata:** Checkbox'ların görünümü referans görseldeki gibi değildi. PrimeNG'nin varsayılan checkbox stilleri istenen tasarıma uygun değildi.
-
-**Nedeni:**
-1. PrimeNG'nin varsayılan checkbox stilleri koyu tema ile uyumlu değildi
-2. Checkbox'ların boyutu ve renkleri istenen tasarıma uygun değildi
-3. Checkbox'ların yanındaki etiketler için özel stiller gerekiyordu
-
-**Çözüm:**
-1. SCSS dosyasında checkbox'lar için özel stiller tanımlandı:
-```scss
-.field-checkbox {
-  display: flex;
-  align-items: center;
-  margin-bottom: 1rem;
-  position: relative;
-  padding: 0.5rem 0.75rem;
-  border-radius: 6px;
-  transition: all 0.2s;
-  
-  &:hover {
-    background-color: rgba(255, 255, 255, 0.05);
-  }
-  
-  .p-checkbox {
-    width: 24px;
-    height: 24px;
-    
-    .p-checkbox-box {
-      border-radius: 4px;
-      border: 2px solid rgba(255, 255, 255, 0.3);
-      background-color: transparent;
-      transition: all 0.2s;
-      width: 24px;
-      height: 24px;
-      
-      &.p-highlight {
-        border-color: #ff5722;
-        background-color: #ff5722;
-      }
-    }
-  }
-}
-```
-
-2. Checkbox etiketleri için özel stiller ve ikonlar eklendi:
-```html
-<label for="isAdmin" class="ml-2">
-  <i class="pi pi-shield mr-1"></i>
-  Yönetici yetkisi
-</label>
-```
-
-3. Farklı checkbox'lar için farklı renkler tanımlandı:
-```scss
-#isAdmin + label {
-  color: #ff5722;
-  
-  .pi-shield {
-    color: #ff5722;
-  }
-}
-
-#isActive + label {
-  color: #4caf50;
-  
-  .pi-check-circle {
-    color: #4caf50;
-  }
-}
-```
-
-### Form Alanları Etiket Sorunları
-
-**Hata:** Form alanlarının üzerindeki etiketler gereksiz yer kaplıyordu ve tasarımı karmaşıklaştırıyordu.
+**Sorun:** Kullanıcı yönetimi sayfasında eklenen veya silinen kullanıcılar, sayfa yenilendiğinde eski haline dönüyordu. Bu durum, kullanıcıların kendi test verilerini oluşturmasını ve bunları kalıcı olarak saklamasını engelliyordu.
 
 **Nedeni:**
-1. Form alanlarının üzerinde etiketler vardı, ancak input alanlarının içinde zaten placeholder metinleri bulunuyordu
-2. Bu durum gereksiz tekrara ve karmaşık bir görünüme neden oluyordu
+1. Kullanıcı verileri, bileşen içinde sabit bir dizi olarak tanımlanmıştı
+2. Sayfa her yenilendiğinde, bu sabit diziyi tekrar yükleniyordu
+3. Yapılan değişiklikler sadece geçici olarak hafızada tutuluyordu
 
 **Çözüm:**
-1. HTML dosyasından etiketler kaldırıldı:
-```html
-<div class="field mb-4">
-  <div class="p-inputgroup">
-    <span class="p-inputgroup-addon">
-      <i class="pi pi-id-card"></i>
-    </span>
-    <input type="text" id="fullName" pInputText formControlName="fullName" 
-      placeholder="Ad soyad girin">
-  </div>
-</div>
-```
-
-2. Input alanlarının görünümü iyileştirildi:
-```scss
-.p-inputgroup {
-  border-radius: 4px;
-  overflow: hidden;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  
-  .p-inputgroup-addon {
-    background-color: #2d2d2d;
-    border: none;
-    border-right: 1px solid rgba(255, 255, 255, 0.1);
-    color: rgba(255, 255, 255, 0.6);
-    border-radius: 4px 0 0 4px;
-    width: 48px;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-  }
-  
-  input {
-    background-color: #2d2d2d;
-    border: none;
-    color: #fff;
-    padding: 0.75rem 1rem;
-    height: 48px;
-    font-size: 1rem;
-    
-    &::placeholder {
-      color: rgba(255, 255, 255, 0.5);
-    }
-    
-    &:focus {
-      outline: none;
-      box-shadow: 0 0 0 2px rgba(255, 87, 34, 0.3);
-    }
-  }
-}
-```
-
-### Dialog Footer Düzenleme Sorunları
-
-**Hata:** Dialog footer kısmındaki butonlar istenen tasarıma uygun değildi.
-
-**Nedeni:**
-1. Butonlar arasında yeterli boşluk yoktu
-2. Butonların genişliği tutarsızdı
-3. Buton stilleri istenen tasarıma uygun değildi
-
-**Çözüm:**
-1. Dialog footer kısmı için özel bir div eklendi:
-```html
-<ng-template pTemplate="footer">
-  <div class="dialog-footer">
-    <button pButton pRipple label="İptal" icon="pi pi-times" class="p-button-text p-button-outlined" (click)="hideDialog()"></button>
-    <button pButton pRipple label="Kaydet" icon="pi pi-check" class="p-button-primary" (click)="saveUser()"></button>
-  </div>
-</ng-template>
-```
-
-2. Dialog footer için özel stiller tanımlandı:
-```scss
-.dialog-footer {
-  display: flex;
-  justify-content: flex-end;
-  gap: 0.75rem;
-  
-  button {
-    min-width: 100px;
-  }
-}
-```
-
-3. Buton stilleri özelleştirildi:
-```scss
-button {
-  &.p-button-outlined {
-    color: rgba(255, 255, 255, 0.8);
-    border-color: rgba(255, 255, 255, 0.2);
-    
-    &:hover {
-      background-color: rgba(255, 255, 255, 0.05);
-      border-color: rgba(255, 255, 255, 0.3);
-    }
-  }
-  
-  &.p-button-primary {
-    background-color: #ff5722;
-    border-color: #ff5722;
-    
-    &:hover {
-      background-color: darken(#ff5722, 5%);
-      border-color: darken(#ff5722, 5%);
-    }
-  }
-}
-```
-
-### PowerShell Komut Çalıştırma Sorunları (Angular Serve)
-
-**Hata:** Angular uygulamasını başlatırken port çakışması sorunu yaşandı.
-
-**Nedeni:**
-1. 4200 portu zaten kullanımda olduğu için Angular uygulaması başlatılamadı
-2. PowerShell'de komutları birleştirmek için && operatörü kullanıldı, ancak bu PowerShell'de çalışmıyor
-
-**Çözüm:**
-1. Farklı bir port numarası belirtildi:
-```powershell
-cd frontend; ng serve --port 4206
-```
-
-2. PowerShell'de komutları birleştirmek için ; (noktalı virgül) kullanıldı:
-```powershell
-cd frontend; ng serve
-```
-
-## İzin Yönetimi Hataları
-
-### Hata 1: RoleService'de getRoleById metodu eksikti
-**Hata Açıklaması:** RoleDetailComponent içinde RoleService'in getRoleById metodu kullanılıyordu ancak bu metot RoleService içinde tanımlı değildi.
-
-**Çözüm:** RoleService sınıfına getRoleById metodu eklendi:
+1. Kullanıcı verilerini localStorage'da saklamak için loadUsers, saveUser ve deleteUser metodları güncellendi:
 ```typescript
-getRoleById(id: number): Observable<Role> {
-  return this.http.get<Role>(`${this.apiUrl}/roles/${id}`);
+loadUsers() {
+  // localStorage'dan kullanıcıları yükle
+  const storedUsers = localStorage.getItem('users');
+  
+  if (storedUsers) {
+    this.users = JSON.parse(storedUsers);
+  } else {
+    // Eğer localStorage'da kullanıcı yoksa boş bir dizi oluştur
+    this.users = [];
+    // localStorage'a boş diziyi kaydet
+    localStorage.setItem('users', JSON.stringify(this.users));
+  }
+  
+  this.filteredUsers = [...this.users];
+  this.updatePagination();
 }
 ```
 
-### Hata 2: App routing modülünde Routes ve AuthGuard tanımlı değildi
-**Hata Açıklaması:** app-routing.module.ts dosyasında Routes ve AuthGuard için gerekli import ifadeleri eksikti.
-
-**Çözüm:** Gerekli import ifadeleri eklendi:
+2. Kullanıcı ekleme, güncelleme ve silme işlemlerinde localStorage güncellendi:
 ```typescript
-import { RouterModule, Routes } from '@angular/router';
-import { AuthGuard } from './guards/auth.guard';
+// Kullanıcı eklerken
+this.users.unshift(newUser);
+localStorage.setItem('users', JSON.stringify(this.users));
+
+// Kullanıcı güncellerken
+this.users[index] = { ...updatedUser };
+localStorage.setItem('users', JSON.stringify(this.users));
+
+// Kullanıcı silerken
+this.users = this.users.filter(u => u.id !== user.id);
+localStorage.setItem('users', JSON.stringify(this.users));
 ```
+
+3. Tüm kullanıcıları temizlemek için yeni bir metot ve buton eklendi:
+```typescript
+clearAllUsers() {
+  this.confirmationService.confirm({
+    message: 'Tüm kullanıcıları silmek istediğinizden emin misiniz?',
+    header: 'Tümünü Silme Onayı',
+    icon: 'pi pi-exclamation-triangle',
+    acceptLabel: 'Evet',
+    rejectLabel: 'Hayır',
+    accept: () => {
+      this.users = [];
+      this.filteredUsers = [];
+      localStorage.setItem('users', JSON.stringify(this.users));
+      this.updatePagination();
+      // Başarı mesajı göster
+    }
+  });
+}
+```
+
+**Sonuç:**
+- Kullanıcı verileri artık tarayıcının localStorage'ında saklanıyor
+- Sayfa yenilense bile kullanıcı verileri korunuyor
+- Kullanıcılar kendi test verilerini oluşturup saklayabiliyorlar
+- "Tümünü Temizle" butonu ile tüm kullanıcılar kolayca silinebiliyor
+
+**Önemli Notlar:**
+- localStorage tarayıcıya özgüdür, farklı tarayıcılarda farklı veriler görünecektir
+- localStorage'daki veriler, tarayıcı önbelleği temizlendiğinde silinecektir
+- Gerçek bir uygulamada, bu veriler bir veritabanında saklanmalıdır

@@ -106,99 +106,17 @@ export class UserManagementComponent implements OnInit {
   }
 
   loadUsers() {
-    // Örnek kullanıcı verileri
-    this.users = [
-      {
-        id: 1,
-        username: 'leslie',
-        fullName: 'Leslie Maya',
-        email: 'leslie@gmail.com',
-        location: 'Los Angeles,CA',
-        joinDate: 'October 2, 2010',
-        permissions: 'Admin',
-        avatar: 'avatar1.jpg'
-      },
-      {
-        id: 2,
-        username: 'josie',
-        fullName: 'Josie Deck',
-        email: 'josie@gmail.com',
-        location: 'Cheyenne,WY',
-        joinDate: 'October 3, 2011',
-        permissions: 'Admin',
-        avatar: 'avatar2.jpg'
-      },
-      {
-        id: 3,
-        username: 'alex',
-        fullName: 'Alex Pfeiffer',
-        email: 'alex@gmail.com',
-        location: 'Cheyenne,WY',
-        joinDate: 'May 20, 2015',
-        permissions: 'Admin',
-        avatar: 'avatar3.jpg'
-      },
-      {
-        id: 4,
-        username: 'mike',
-        fullName: 'Mike Dean',
-        email: 'mike@gmail.com',
-        location: 'Syracuse,NY',
-        joinDate: 'July 14, 2015',
-        permissions: 'Contributor',
-        avatar: 'avatar4.jpg'
-      },
-      {
-        id: 5,
-        username: 'mateus',
-        fullName: 'Mateus Cunha',
-        email: 'cunha@gmail.com',
-        location: 'Luanda,AN',
-        joinDate: 'October, 2016',
-        permissions: 'Contributor',
-        avatar: 'avatar5.jpg'
-      },
-      {
-        id: 6,
-        username: 'nzola',
-        fullName: 'Nzola Uemo',
-        email: 'nzola@gmail.com',
-        location: 'Lagos,NG',
-        joinDate: 'June 5, 2016',
-        permissions: 'Viewer',
-        avatar: 'avatar6.jpg'
-      },
-      {
-        id: 7,
-        username: 'antony',
-        fullName: 'Antony Mack',
-        email: 'mack@gmail.com',
-        location: 'London,ENG',
-        joinDate: 'June 15, 2015',
-        permissions: 'Contributor',
-        avatar: 'avatar7.jpg'
-      },
-      {
-        id: 8,
-        username: 'andre',
-        fullName: 'André da Silva',
-        email: 'andré@gmail.com',
-        location: 'São Paulo,BR',
-        joinDate: 'March 13, 2018',
-        permissions: 'Contributor',
-        avatar: 'avatar8.jpg'
-      },
-      {
-        id: 9,
-        username: 'jorge',
-        fullName: 'Jorge Ferreira',
-        email: 'jorge@gmail.com',
-        location: 'Huambo,Angola',
-        joinDate: 'March 14, 2018',
-        permissions: 'Contributor',
-        avatar: 'avatar9.jpg'
-      }
-    ];
+    // localStorage'dan kullanıcıları yükle
+    const storedUsers = localStorage.getItem('users');
+    
+    if (storedUsers) {
+      this.users = JSON.parse(storedUsers);
+    } else {
+      // Eğer localStorage'da kullanıcı yoksa boş bir dizi oluştur
+      this.users = [];
+      // localStorage'a boş diziyi kaydet
+      localStorage.setItem('users', JSON.stringify(this.users));
+    }
     
     this.filteredUsers = [...this.users];
     this.updatePagination();
@@ -250,6 +168,10 @@ export class UserManagementComponent implements OnInit {
       rejectLabel: 'Hayır',
       accept: () => {
         this.users = this.users.filter(u => u.id !== user.id);
+        
+        // localStorage'a güncellenmiş kullanıcıları kaydet
+        localStorage.setItem('users', JSON.stringify(this.users));
+        
         this.applyFilters();
         this.messageService.add({
           severity: 'success',
@@ -287,6 +209,9 @@ export class UserManagementComponent implements OnInit {
           isActive: formValues.isActive
         };
         
+        // localStorage'a güncellenmiş kullanıcıları kaydet
+        localStorage.setItem('users', JSON.stringify(this.users));
+        
         this.messageService.add({
           severity: 'success',
           summary: 'Başarılı',
@@ -308,6 +233,10 @@ export class UserManagementComponent implements OnInit {
       };
       
       this.users.unshift(newUser);
+      
+      // localStorage'a güncellenmiş kullanıcıları kaydet
+      localStorage.setItem('users', JSON.stringify(this.users));
+      
       this.messageService.add({
         severity: 'success',
         summary: 'Başarılı',
@@ -410,6 +339,32 @@ export class UserManagementComponent implements OnInit {
   }
 
   goBack() {
-    this.router.navigate(['/dashboard']);
+    this.router.navigate(['/admin-dashboard']);
+  }
+
+  // Tüm kullanıcıları temizleme metodu
+  clearAllUsers() {
+    this.confirmationService.confirm({
+      message: 'Tüm kullanıcıları silmek istediğinizden emin misiniz?',
+      header: 'Tümünü Silme Onayı',
+      icon: 'pi pi-exclamation-triangle',
+      acceptLabel: 'Evet',
+      rejectLabel: 'Hayır',
+      accept: () => {
+        this.users = [];
+        this.filteredUsers = [];
+        
+        // localStorage'a boş kullanıcı dizisini kaydet
+        localStorage.setItem('users', JSON.stringify(this.users));
+        
+        this.updatePagination();
+        this.messageService.add({
+          severity: 'success',
+          summary: 'Başarılı',
+          detail: 'Tüm kullanıcılar silindi',
+          life: 3000
+        });
+      }
+    });
   }
 }

@@ -317,6 +317,47 @@ Kullanıcı yönetimi sayfasının tasarımını Tailwind CSS kullanarak daha mo
 [ ] Kullanıcı tercihlerine göre renk şeması özelleştirilebilir
 [ ] Animasyonlar ve geçiş efektleri daha da geliştirilebilir
 
+## Kullanıcı Yönetimi Sayfası Güncellemeleri
+
+### Geri Dönme Butonu Ekleme
+
+#### Görev Tanımı
+Kullanıcı yönetimi sayfasına, kullanıcıların dashboard sayfasına kolayca dönebilmesi için bir geri dönme butonu eklemek.
+
+#### Yapılan İşlemler
+- [x] HTML dosyasına geri dönme butonu eklendi
+- [x] SCSS dosyasına geri dönme butonu için stil eklendi
+- [x] TypeScript dosyasında zaten tanımlı olan `goBack()` metodu kullanıldı
+- [x] Errors.md dosyası güncellendi
+- [x] Knowledge-base/user_management_knowledge_base.md dosyası güncellendi
+
+#### Teknik Detaylar
+1. **HTML Değişiklikleri:**
+   - Sayfanın üst kısmına geri dönme butonu eklendi
+   - PrimeNG buton bileşeni kullanıldı
+   - Sol ok ikonu ve "Geri Dön" metni eklendi
+
+2. **CSS Değişiklikleri:**
+   - Geri dönme butonu için turuncu metin rengi tanımlandı
+   - Hover durumunda hafif turuncu arka plan rengi eklendi
+   - İkon boyutu ve kenar boşlukları ayarlandı
+
+3. **TypeScript Değişiklikleri:**
+   - Zaten tanımlı olan `goBack()` metodu kullanıldı
+   - Bu metot, kullanıcıyı dashboard sayfasına yönlendiriyor
+
+#### Dosya Değişiklikleri
+- frontend/src/app/components/user-management/user-management.component.html
+- frontend/src/app/components/user-management/user-management.component.scss
+- errors.md
+- knowledge-base/user_management_knowledge_base.md
+
+#### Sistem Durumu
+- Backend API (http://localhost:5037): ✅ Çalışıyor
+- Frontend (http://localhost:4202): ✅ Çalışıyor
+- Veritabanı: ✅ Güncel ve stabil
+- Kullanıcı Yönetimi Sayfası: ✅ Geri dönme butonu eklendi
+
 ## Kullanıcı Yönetimi Sayfası Güncellemeleri (5 Mart 2025)
 
 ### Görev Tanımı
@@ -388,3 +429,166 @@ Kullanıcı yönetimi sayfasının tasarımını ve işlevselliğini iyileştirm
    - Unit testler
    - Integration testler
    - E2E testler
+
+## Kullanıcı Yönetimi Sayfası Güncellemeleri (6 Mart 2025)
+
+### Geri Dönme Butonu Rota Hatası Düzeltmesi
+
+#### Görev Tanımı
+Kullanıcı yönetimi sayfasındaki geri dönme butonunun çalışmaması sorununu çözmek.
+
+#### Sorun
+Geri dönme butonu tıklandığında aşağıdaki hata alınıyordu:
+```
+ERROR RuntimeError: NG04002: Cannot match any routes. URL Segment: 'dashboard'
+```
+
+#### Nedeni
+1. UserManagementComponent'in goBack() metodu '/dashboard' rotasına yönlendirme yapıyordu
+2. Ancak app.routes.ts dosyasında 'dashboard' rotası tanımlanmamıştı
+3. Bunun yerine 'admin-dashboard' ve 'user-dashboard' rotaları vardı
+
+#### Yapılan İşlemler
+- [x] UserManagementComponent'in goBack() metodunu düzelterek '/admin-dashboard' rotasına yönlendirme yapacak şekilde değiştirildi
+- [x] Errors.md dosyası güncellendi
+- [x] Knowledge-base/user_management_knowledge_base.md dosyası güncellendi
+
+#### Teknik Detaylar
+1. **TypeScript Değişiklikleri:**
+   ```typescript
+   // Önceki kod
+   goBack() {
+     this.router.navigate(['/dashboard']);
+   }
+   
+   // Düzeltilmiş kod
+   goBack() {
+     this.router.navigate(['/admin-dashboard']);
+   }
+   ```
+
+2. **Öğrenilen Dersler:**
+   - Rota adlarının doğru yazılması önemlidir
+   - Yönlendirme yapmadan önce rotanın tanımlı olduğundan emin olunmalıdır
+   - Hata mesajları, sorunun kaynağını bulmak için dikkatle incelenmelidir
+
+#### Dosya Değişiklikleri
+- frontend/src/app/components/user-management/user-management.component.ts
+- errors.md
+- knowledge-base/user_management_knowledge_base.md
+
+#### Sistem Durumu
+- Backend API (http://localhost:5037): ✅ Çalışıyor
+- Frontend (http://localhost:4202): ✅ Çalışıyor
+- Veritabanı: ✅ Güncel ve stabil
+- Kullanıcı Yönetimi Sayfası: ✅ Geri dönme butonu düzgün çalışıyor
+
+## Kullanıcı Yönetimi Sayfası Güncellemeleri (7 Mart 2025)
+
+### Kullanıcı Verilerinin localStorage'da Saklanması
+
+#### Görev Tanımı
+Kullanıcı yönetimi sayfasında eklenen veya silinen kullanıcıların kalıcı olarak saklanmasını sağlamak ve tüm kullanıcıları temizlemek için bir buton eklemek.
+
+#### Sorun
+Kullanıcı yönetimi sayfasında eklenen veya silinen kullanıcılar, sayfa yenilendiğinde eski haline dönüyordu. Bu durum, kullanıcıların kendi test verilerini oluşturmasını ve bunları kalıcı olarak saklamasını engelliyordu.
+
+#### Nedeni
+1. Kullanıcı verileri, bileşen içinde sabit bir dizi olarak tanımlanmıştı
+2. Sayfa her yenilendiğinde, bu sabit dizi tekrar yükleniyordu
+3. Yapılan değişiklikler sadece geçici olarak hafızada tutuluyordu
+
+#### Yapılan İşlemler
+- [x] loadUsers metodu localStorage'dan veri okuyacak şekilde güncellendi
+- [x] saveUser metodu localStorage'a veri yazacak şekilde güncellendi
+- [x] deleteUser metodu localStorage'dan veri silecek şekilde güncellendi
+- [x] clearAllUsers metodu eklendi
+- [x] "Tümünü Temizle" butonu eklendi
+- [x] Errors.md dosyası güncellendi
+- [x] Knowledge-base/user_management_knowledge_base.md dosyası güncellendi
+
+#### Teknik Detaylar
+1. **localStorage Entegrasyonu:**
+   ```typescript
+   // localStorage'dan veri okuma
+   loadUsers() {
+     const storedUsers = localStorage.getItem('users');
+     
+     if (storedUsers) {
+       this.users = JSON.parse(storedUsers);
+     } else {
+       this.users = [];
+       localStorage.setItem('users', JSON.stringify(this.users));
+     }
+     
+     this.filteredUsers = [...this.users];
+     this.updatePagination();
+   }
+   
+   // localStorage'a veri yazma
+   saveUser() {
+     // ... kullanıcı ekleme/güncelleme işlemleri ...
+     localStorage.setItem('users', JSON.stringify(this.users));
+   }
+   
+   // localStorage'dan veri silme
+   deleteUser(user: any) {
+     // ... kullanıcı silme işlemleri ...
+     this.users = this.users.filter(u => u.id !== user.id);
+     localStorage.setItem('users', JSON.stringify(this.users));
+   }
+   ```
+
+2. **Tümünü Temizle Butonu:**
+   ```typescript
+   clearAllUsers() {
+     this.confirmationService.confirm({
+       message: 'Tüm kullanıcıları silmek istediğinizden emin misiniz?',
+       header: 'Tümünü Silme Onayı',
+       icon: 'pi pi-exclamation-triangle',
+       acceptLabel: 'Evet',
+       rejectLabel: 'Hayır',
+       accept: () => {
+         this.users = [];
+         this.filteredUsers = [];
+         localStorage.setItem('users', JSON.stringify(this.users));
+         this.updatePagination();
+         this.messageService.add({
+           severity: 'success',
+           summary: 'Başarılı',
+           detail: 'Tüm kullanıcılar silindi',
+           life: 3000
+         });
+       }
+     });
+   }
+   ```
+
+3. **HTML Değişiklikleri:**
+   ```html
+   <div class="actions-group">
+     <button pButton pRipple label="Yeni Kullanıcı" icon="pi pi-plus" 
+       class="p-button-primary mr-2" (click)="openNewUserDialog()"></button>
+     <button pButton pRipple label="Tümünü Temizle" icon="pi pi-trash" 
+       class="p-button-danger" (click)="clearAllUsers()"></button>
+   </div>
+   ```
+
+#### Dosya Değişiklikleri
+- frontend/src/app/components/user-management/user-management.component.ts
+- frontend/src/app/components/user-management/user-management.component.html
+- errors.md
+- knowledge-base/user_management_knowledge_base.md
+
+#### Sistem Durumu
+- Backend API (http://localhost:5037): ✅ Çalışıyor
+- Frontend (http://localhost:4202): ✅ Çalışıyor
+- Veritabanı: ✅ Güncel ve stabil
+- Kullanıcı Yönetimi Sayfası: ✅ localStorage entegrasyonu tamamlandı
+- Tümünü Temizle Butonu: ✅ Çalışıyor
+
+#### Öğrenilen Dersler
+- localStorage, tarayıcı tarafında veri saklamak için kullanışlı bir yöntemdir
+- localStorage'daki veriler, tarayıcı önbelleği temizlenene kadar kalıcıdır
+- JSON.stringify() ve JSON.parse() metodları, nesneleri localStorage'da saklamak için kullanılır
+- Gerçek uygulamalarda, hassas veriler için localStorage yerine güvenli bir veritabanı kullanılmalıdır

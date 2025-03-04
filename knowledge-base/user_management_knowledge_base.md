@@ -33,6 +33,7 @@ Kullanıcı yönetimi sayfası, aşağıdaki renk paletini kullanan koyu bir tem
   - Birincil butonlar: Turuncu arka plan
   - Metin butonları: Saydam arka plan, açık gri metin
   - İkon butonlar: Yuvarlak, minimal tasarım
+  - Geri dönme butonu: Turuncu metin, saydam arka plan, sol ok ikonu
 - **Form Elemanları**:
   - Input alanları: Koyu gri arka plan, açık gri metin
   - Dropdown menüler: Koyu tema ile uyumlu
@@ -49,11 +50,12 @@ Kullanıcı izinleri için özel rozet stilleri:
 
 Kullanıcı yönetimi sayfası aşağıdaki ana bileşenlerden oluşur:
 
-1. **Üst Toolbar**: Sayfa başlığı ve "Yeni Kullanıcı" butonu içerir.
-2. **Filtre Bölümü**: Kullanıcı arama ve rol filtreleme seçenekleri sunar.
-3. **Kullanıcı Tablosu**: Kullanıcı listesini gösterir, sayfalama ve sıralama özellikleri içerir.
-4. **Kullanıcı Dialog**: Kullanıcı ekleme/düzenleme formu.
-5. **Onay Dialog**: Silme işlemi için onay kutusu.
+1. **Geri Dönme Butonu**: Sayfanın üst kısmında yer alan, dashboard sayfasına dönmeyi sağlayan buton.
+2. **Üst Toolbar**: Sayfa başlığı ve "Yeni Kullanıcı" butonu içerir.
+3. **Filtre Bölümü**: Kullanıcı arama ve rol filtreleme seçenekleri sunar.
+4. **Kullanıcı Tablosu**: Kullanıcı listesini gösterir, sayfalama ve sıralama özellikleri içerir.
+5. **Kullanıcı Dialog**: Kullanıcı ekleme/düzenleme formu.
+6. **Onay Dialog**: Silme işlemi için onay kutusu.
 
 ## Teknik Detaylar
 
@@ -164,8 +166,82 @@ Kullanıcı yönetimi sayfası aşağıdaki temel işlevleri sağlar:
 - **v1.5.0** - Arama, filtreleme ve sayfalama işlevselliği eklendi
 - **v1.6.0** - Türkçe dil desteği eklendi
 - **v1.7.0** - Form alanları ve checkbox'lar için tasarım iyileştirmeleri
+- **v1.8.0** - Geri dönme butonu eklendi ve navigasyon iyileştirmeleri yapıldı
+- **v1.9.0** - Kullanıcı verilerinin localStorage'da saklanması ve "Tümünü Temizle" butonu eklendi
 
-## Son Güncellemeler (v1.7.0)
+## Son Güncellemeler (v1.9.0)
+
+### Kullanıcı Verilerinin Kalıcı Saklanması
+
+Kullanıcı yönetimi sayfasında aşağıdaki veri saklama iyileştirmeleri yapıldı:
+
+1. **localStorage Entegrasyonu**: Kullanıcı verileri artık tarayıcının localStorage'ında saklanıyor:
+   - Sayfa yüklendiğinde localStorage'dan veriler okunuyor
+   - Kullanıcı eklendiğinde, güncellendiğinde veya silindiğinde localStorage güncelleniyor
+   - Sayfa yenilense bile kullanıcı verileri korunuyor
+
+2. **Tümünü Temizle Butonu**: Tüm kullanıcıları silmek için yeni bir buton eklendi:
+   - Turuncu renkli "Tümünü Temizle" butonu, "Yeni Kullanıcı" butonunun yanına yerleştirildi
+   - Buton tıklandığında onay dialogu gösteriliyor
+   - Onay verildiğinde tüm kullanıcılar siliniyor ve localStorage güncelleniyor
+
+3. **Kod Yapısı**: localStorage entegrasyonu için aşağıdaki değişiklikler yapıldı:
+   - loadUsers metodu localStorage'dan veri okuyacak şekilde güncellendi
+   - saveUser metodu localStorage'a veri yazacak şekilde güncellendi
+   - deleteUser metodu localStorage'dan veri silecek şekilde güncellendi
+   - clearAllUsers metodu eklendi
+
+4. **Teknik Detaylar**:
+   ```typescript
+   // localStorage'dan veri okuma
+   const storedUsers = localStorage.getItem('users');
+   if (storedUsers) {
+     this.users = JSON.parse(storedUsers);
+   }
+   
+   // localStorage'a veri yazma
+   localStorage.setItem('users', JSON.stringify(this.users));
+   ```
+
+### Kullanıcı Deneyimi İyileştirmeleri
+
+1. **Test Verisi Oluşturma**: Kullanıcılar artık kendi test verilerini oluşturup saklayabiliyorlar.
+2. **Veri Sürekliliği**: Sayfa yenilense bile kullanıcı verileri korunuyor.
+3. **Kolay Temizleme**: "Tümünü Temizle" butonu ile tüm kullanıcılar kolayca silinebiliyor.
+
+### Teknik Sınırlamalar
+
+1. **Tarayıcı Bağımlılığı**: localStorage tarayıcıya özgüdür, farklı tarayıcılarda farklı veriler görünecektir.
+2. **Veri Kalıcılığı**: localStorage'daki veriler, tarayıcı önbelleği temizlendiğinde silinecektir.
+3. **Veri Boyutu**: localStorage'da saklanan veri miktarı sınırlıdır (genellikle 5-10 MB).
+4. **Güvenlik**: Hassas veriler localStorage'da saklanmamalıdır, çünkü bu veriler şifrelenmemiştir.
+
+### Gelecek Geliştirmeler
+
+1. **Veri Senkronizasyonu**: Farklı tarayıcılar ve cihazlar arasında veri senkronizasyonu sağlanabilir.
+2. **Veri Yedekleme**: Kullanıcı verilerini dışa aktarma ve içe aktarma özelliği eklenebilir.
+3. **Gerçek Veritabanı Entegrasyonu**: Gerçek bir uygulamada, bu veriler bir veritabanında saklanmalıdır.
+
+### Navigasyon İyileştirmeleri
+
+Kullanıcı yönetimi sayfasında aşağıdaki navigasyon iyileştirmeleri yapıldı:
+
+1. **Geri Dönme Butonu**: Sayfanın üst kısmına, kullanıcıların dashboard sayfasına kolayca dönebilmesi için bir geri dönme butonu eklendi:
+   - Turuncu metin rengi (#ff5722) kullanıldı
+   - Sol ok ikonu (pi-arrow-left) eklendi
+   - Hover durumunda hafif turuncu arka plan rengi (rgba(255, 87, 34, 0.1)) eklendi
+   - Buton metni "Geri Dön" olarak ayarlandı
+
+2. **Buton Konumu**: Geri dönme butonu, sayfa başlığının üzerinde, sayfanın sol üst köşesine yakın bir konuma yerleştirildi.
+
+3. **Fonksiyonalite**: Buton, kullanıcı tıkladığında `goBack()` metodunu çağırarak admin dashboard sayfasına yönlendirme yapar.
+
+4. **Kod Yapısı**: Geri dönme butonu için HTML, CSS ve TypeScript kodları aşağıdaki şekilde uygulandı:
+   - HTML: `<button pButton pRipple icon="pi pi-arrow-left" label="Geri Dön" class="p-button-text p-button-secondary" (click)="goBack()"></button>`
+   - CSS: `.p-button-secondary.p-button-text { color: #ff5722; }`
+   - TypeScript: `goBack() { this.router.navigate(['/admin-dashboard']); }`
+
+5. **Hata Düzeltmesi**: Başlangıçta goBack() metodu '/dashboard' rotasına yönlendirme yapıyordu, ancak bu rota tanımlı olmadığı için hata alınıyordu. Metot, '/admin-dashboard' rotasına yönlendirme yapacak şekilde düzeltildi.
 
 ### Form Alanları İyileştirmeleri
 
