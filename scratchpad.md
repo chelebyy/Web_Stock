@@ -22,6 +22,8 @@
 - Sistem başlatma rehberi oluşturuldu (knowledge-base/system_startup_guide.md)
 - Chart.js kütüphanesi başarıyla yüklendi ve PrimeNG Chart bileşeni çalışıyor
 - Frontend uygulaması 4202 portunda çalışıyor (port çakışması çözüldü)
+- Kullanıcı yönetimi sayfasında backend'den veri çekme işlemi tamamlandı
+- API endpoint'leri büyük/küçük harf duyarlılığı düzeltildi
 
 ## Clean Architecture Geçişi
 
@@ -445,7 +447,7 @@ ERROR RuntimeError: NG04002: Cannot match any routes. URL Segment: 'dashboard'
 
 #### Nedeni
 1. UserManagementComponent'in goBack() metodu '/dashboard' rotasına yönlendirme yapıyordu
-2. Ancak app.routes.ts dosyasında 'dashboard' rotası tanımlanmamıştı
+2. Ancak app.routes.ts dosyasında 'dashboard' rotası tanımlanmıştı
 3. Bunun yerine 'admin-dashboard' ve 'user-dashboard' rotaları vardı
 
 #### Yapılan İşlemler
@@ -483,112 +485,87 @@ ERROR RuntimeError: NG04002: Cannot match any routes. URL Segment: 'dashboard'
 - Veritabanı: ✅ Güncel ve stabil
 - Kullanıcı Yönetimi Sayfası: ✅ Geri dönme butonu düzgün çalışıyor
 
-## Kullanıcı Yönetimi Sayfası Güncellemeleri (7 Mart 2025)
+## Kullanıcı Silme İşlemi Kalıcı Olmama Sorunu Çözümü
 
-### Kullanıcı Verilerinin localStorage'da Saklanması
+### Sorun
+Kullanıcı yönetimi sayfasında kullanıcı silme işlemi yapıldığında, sayfa yenilendiğinde silinen kullanıcılar tekrar görünüyordu. Bu durum, kullanıcıların yaptığı değişikliklerin kalıcı olmamasına neden oluyordu.
 
-#### Görev Tanımı
-Kullanıcı yönetimi sayfasında eklenen veya silinen kullanıcıların kalıcı olarak saklanmasını sağlamak ve tüm kullanıcıları temizlemek için bir buton eklemek.
+### Analiz
+Sorunu incelediğimde, kullanıcı silme işleminin sadece frontend'de localStorage'a kaydedildiğini, backend API'ye silme isteği gönderilmediğini tespit ettim. Sayfa yenilendiğinde, frontend uygulaması backend API'den tüm kullanıcıları tekrar yüklediği için, silinen kullanıcılar tekrar görünüyordu.
 
-#### Sorun
-Kullanıcı yönetimi sayfasında eklenen veya silinen kullanıcılar, sayfa yenilendiğinde eski haline dönüyordu. Bu durum, kullanıcıların kendi test verilerini oluşturmasını ve bunları kalıcı olarak saklamasını engelliyordu.
-
-#### Nedeni
-1. Kullanıcı verileri, bileşen içinde sabit bir dizi olarak tanımlanmıştı
-2. Sayfa her yenilendiğinde, bu sabit dizi tekrar yükleniyordu
-3. Yapılan değişiklikler sadece geçici olarak hafızada tutuluyordu
-
-#### Yapılan İşlemler
-- [x] loadUsers metodu localStorage'dan veri okuyacak şekilde güncellendi
-- [x] saveUser metodu localStorage'a veri yazacak şekilde güncellendi
-- [x] deleteUser metodu localStorage'dan veri silecek şekilde güncellendi
-- [x] clearAllUsers metodu eklendi
-- [x] "Tümünü Temizle" butonu eklendi
-- [x] Errors.md dosyası güncellendi
-- [x] Knowledge-base/user_management_knowledge_base.md dosyası güncellendi
-
-#### Teknik Detaylar
-1. **localStorage Entegrasyonu:**
+### Yapılan İşlemler
+1. `deleteUser` metodunu düzenleyerek backend API'ye silme isteği göndermesini sağladım:
    ```typescript
-   // localStorage'dan veri okuma
-   loadUsers() {
-     const storedUsers = localStorage.getItem('users');
-     
-     if (storedUsers) {
-       this.users = JSON.parse(storedUsers);
-     } else {
-       this.users = [];
+   this.userService.deleteUser(user.id).subscribe({
+     next: () => {
+       // Başarılı silme işlemi sonrası
+       this.users = this.users.filter(u => u.id !== user.id);
        localStorage.setItem('users', JSON.stringify(this.users));
+       // ...
+     },
+     error: (error) => {
+       // Hata yönetimi
+       // ...
      }
-     
-     this.filteredUsers = [...this.users];
-     this.updatePagination();
-   }
-   
-   // localStorage'a veri yazma
-   saveUser() {
-     // ... kullanıcı ekleme/güncelleme işlemleri ...
-     localStorage.setItem('users', JSON.stringify(this.users));
-   }
-   
-   // localStorage'dan veri silme
-   deleteUser(user: any) {
-     // ... kullanıcı silme işlemleri ...
-     this.users = this.users.filter(u => u.id !== user.id);
-     localStorage.setItem('users', JSON.stringify(this.users));
-   }
+   });
    ```
 
-2. **Tümünü Temizle Butonu:**
-   ```typescript
-   clearAllUsers() {
-     this.confirmationService.confirm({
-       message: 'Tüm kullanıcıları silmek istediğinizden emin misiniz?',
-       header: 'Tümünü Silme Onayı',
-       icon: 'pi pi-exclamation-triangle',
-       acceptLabel: 'Evet',
-       rejectLabel: 'Hayır',
-       accept: () => {
-         this.users = [];
-         this.filteredUsers = [];
-         localStorage.setItem('users', JSON.stringify(this.users));
-         this.updatePagination();
-         this.messageService.add({
-           severity: 'success',
-           summary: 'Başarılı',
-           detail: 'Tüm kullanıcılar silindi',
-           life: 3000
-         });
-       }
-     });
-   }
-   ```
+2. `clearAllUsers` metodunu düzenleyerek tüm kullanıcılar için backend API'ye silme istekleri göndermesini sağladım.
 
-3. **HTML Değişiklikleri:**
-   ```html
-   <div class="actions-group">
-     <button pButton pRipple label="Yeni Kullanıcı" icon="pi pi-plus" 
-       class="p-button-primary mr-2" (click)="openNewUserDialog()"></button>
-     <button pButton pRipple label="Tümünü Temizle" icon="pi pi-trash" 
-       class="p-button-danger" (click)="clearAllUsers()"></button>
-   </div>
-   ```
+3. `loadUsers` metodunu düzenleyerek backend API'den kullanıcıları doğru şekilde yüklemesini sağladım.
 
-#### Dosya Değişiklikleri
-- frontend/src/app/components/user-management/user-management.component.ts
-- frontend/src/app/components/user-management/user-management.component.html
-- errors.md
-- knowledge-base/user_management_knowledge_base.md
+4. `saveUser` metodunu düzenleyerek kullanıcı ekleme ve güncelleme işlemlerinde backend API'ye istekler göndermesini sağladım.
 
-#### Sistem Durumu
-- Backend API (http://localhost:5037): ✅ Çalışıyor
-- Frontend (http://localhost:4202): ✅ Çalışıyor
-- Veritabanı: ✅ Güncel ve stabil
-- Kullanıcı Yönetimi Sayfası: ✅ localStorage entegrasyonu tamamlandı
-- Tümünü Temizle Butonu: ✅ Çalışıyor
+### Öğrenilen Dersler
+- Frontend'de yapılan değişikliklerin kalıcı olması için backend API ile senkronize edilmesi gerekir.
+- localStorage sadece geçici veri saklama için kullanılmalıdır.
+- Silme, ekleme ve güncelleme işlemlerinde hem frontend hem de backend güncellenmelidir.
+- API isteklerinde oluşabilecek hatalar için uygun hata yönetimi yapılmalıdır.
 
-#### Öğrenilen Dersler
-- localStorage, tarayıcı tarafında veri saklamak için kullanışlı bir yöntemdir
-- localStorage'daki veriler, tarayıcı önbelleği temizlenene kadar kalıcıdır
-- JSON.stringify() ve JSON.parse() metodları, nesneleri localStorage'da saklamak için kullanılır
-- Gerçek uygulamalarda, hassas veriler için localStorage yerine güvenli bir veritabanı kullanılmalıdır
+### Sonuç
+Yapılan değişiklikler sonrasında, kullanıcı silme işlemi artık kalıcı olarak gerçekleşiyor ve sayfa yenilendiğinde silinen kullanıcılar tekrar görünmüyor. Kullanıcı yönetimi sayfası, backend API ile tam entegre çalışıyor.
+
+## Kullanıcı Silme İşlemi Sorunları (8 Mart 2025)
+
+### Sorun
+Kullanıcı yönetimi sayfasından kullanıcı silme işlemi sırasında çeşitli sorunlar yaşandı:
+1. Kullanıcı Controller'ları arasında tutarsızlık
+2. Komut sınıflarında namespace çakışması
+3. DeleteUserCommandHandler'da Repository fonksiyonu hatası
+
+### Yapılan İşlemler
+- [x] UserController ve UsersController tutarsızlığını tespit ettik ve düzelttik
+- [x] Eski yapıdan kalan dosyaları temizledik (Stock.API, Stock.Infrastructure, UserController.cs)
+- [x] DeleteUserCommand sınıfı için doğru namespace'i belirledik
+- [x] UpdateUserCommand sınıfı için doğru namespace'i belirledik
+- [x] UsersController içinde komut sınıfları için tam nitelikli tip adları kullandık
+- [x] DeleteUserCommandHandler'da Remove metodu yerine DeleteAsync metodu kullanımını düzelttik
+- [x] Errors.md dosyasını güncelledik
+- [x] Tüm düzeltmeleri test ettik
+
+### Teknik Detaylar
+1. **Controller Tutarsızlıkları:**
+   - Eski yapıdan kalan `UserController` (tekil) ve yeni Clean Architecture yapısındaki `UsersController` (çoğul) aynı anda bulunuyordu.
+   - Frontend, `/api/User/${id}` endpoint'ini kullanırken, yeni yapıda bu endpointler `/api/Users/${id}` şeklinde olmalıydı.
+   - Eski yapıya ait tüm dosyalar temizlendi ve frontend tarafındaki referanslar düzeltildi.
+
+2. **Namespace Çakışmaları:**
+   - İki farklı namespace'te aynı isimli komut sınıfları tanımlanmıştı:
+     - `Stock.Application.Features.Users.Commands.DeleteUser.DeleteUserCommand`
+     - `Stock.Application.Features.Users.Commands.DeleteUserCommand`
+   - Doğru handler'a sahip olan sınıflar belirlenip, controller'daki referanslar düzeltildi.
+
+3. **Repository Metot Hataları:**
+   - `DeleteUserCommandHandler` sınıfında `_unitOfWork.Users.Remove(user)` şeklinde bir çağrı vardı.
+   - Ancak interface'de `Remove` metodu değil, `DeleteAsync` metodu bulunuyordu.
+   - Kod düzeltilerek `await _unitOfWork.Users.DeleteAsync(user);` şekline getirildi.
+
+### Öğrenilen Dersler
+- Clean Architecture geçişi sırasında eski yapıya ait tüm dosyalar temizlenmeli veya açıkça işaretlenmeli
+- Controller isimlendirmelerinde tutarlılık önemli (tekil/çoğul)
+- API endpoint'leri frontend ve backend arasında tam olarak eşleşmeli
+- Aynı isimli sınıflar farklı namespace'lerde tanımlanmamalı
+- Repository interface'leri ve uygulamaları arasında metot isimleri tutarlı olmalı
+
+### Sonuç
+Kullanıcı silme işlemi artık düzgün çalışıyor. Frontend'den gönderilen DELETE istekleri backend API'ye ulaşıyor ve kullanıcılar veritabanından kalıcı olarak silinebiliyor. Clean Architecture yapısı tutarlı bir şekilde kullanılıyor.

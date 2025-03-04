@@ -31,6 +31,12 @@ Bu dosya, proje geliştirme sürecinde karşılaşılan hataları ve çözümler
 - [İzin Yönetimi Hataları](#izin-yönetimi-hataları)
   - [Hata 1: RoleService'de getRoleById metodu eksikti](#hata-1-role-service-de-getrolebyid-metodu-eksikti)
   - [Hata 2: App routing modülünde Routes ve AuthGuard tanımlı değildi](#hata-2-app-routing-modülünde-routes-ve-authguard-tanımlı-değildi)
+- [Sicil Alanı Ekleme İşlemi](#sicil-alanı-ekleme-işlemi)
+  - [Kullanıcı Modeline Sicil Alanı Ekleme](#kullanıcı-modeline-sicil-alanı-ekleme)
+  - [Kullanıcı Verilerinin Görüntülenmesi Sorunu](#kullanıcı-verilerinin-görüntülenmesi-sorunu)
+  - [API Endpoint Hatası](#api-endpoint-hatası)
+  - [API URL Hatası](#api-url-hatası)
+- [Kullanıcı Silme İşlemi Hataları](#kullanıcı-silme-işlemi-hataları)
 
 ## Clean Architecture Geçişi Hataları
 
@@ -593,10 +599,8 @@ API'ye gönderilen kayıt isteği başarısız olabilir.
 POST http://localhost:5037/api/auth/login 500 (Internal Server Error)
 ```
 
-**Nedeni:** Backend API'si çalışmıyor veya hatalı çalışıyor olabilir.
-
-**Çözüm:**
-1. Backend API'sinin çalıştığından emin olun.
+**Nedeni:**
+1. Backend API'si çalışmıyor veya hatalı çalışıyor olabilir.
 2. API'nin doğru portta çalıştığını kontrol edin (5037).
 3. API'nin CORS ayarlarının frontend'in çalıştığı porta (4200) izin verdiğinden emin olun.
 
@@ -987,8 +991,7 @@ public async Task<IActionResult> ChangePassword([FromBody] ChangePasswordDto cha
 ```
 
 **Önemli Notlar:**
-- Şifre değiştirme işlemi için kullanıcının kimliği doğrulanmalı (Authorize attribute)
-- Mevcut şifre doğrulanmalı
+- Şifre değiştirme işlemi için her zaman mevcut şifre doğrulaması yapılmalıdır
 - Yeni şifre ve şifre tekrarı alanları eşleşmelidir
 - Şifre değiştirme işlemi başarılı olduğunda kullanıcıya bildirim gösterilmelidir
 - Hata durumlarında kullanıcıya anlamlı hata mesajları gösterilmelidir
@@ -1027,241 +1030,91 @@ public async Task<IActionResult> ChangePassword([FromBody] ChangePasswordDto cha
 - Şifre değiştirme işlemi başarılı olduğunda kullanıcıya bildirim gösterilmelidir
 - Hata durumlarında kullanıcıya anlamlı hata mesajları gösterilmelidir
 
-## Kullanıcı Yönetimi Sayfası Tasarım ve İşlevsellik Sorunları
+## Kullanıcı Silme İşlemi Hataları
 
-### Sorun: Kullanıcı Yönetimi Sayfası Tasarım Uyumsuzluğu
+### Hata 1: DeleteUserCommandHandler'da Remove Metodu Hatası
 
-**Hata Açıklaması:** Kullanıcı yönetimi sayfası, istenen tasarıma uygun değildi. Satır yükseklikleri, avatar boyutları, metin stilleri ve genel düzen referans görüntüden farklıydı.
+**Tarih:** 2025-03-08
 
-**Nedeni:**
-1. PrimeNG tablosunun varsayılan stilleri istenen tasarıma uygun değildi
-2. Kullanıcı satırları arasında çizgiler vardı, ancak referans tasarımda sadece boşluk bulunuyordu
-3. Avatar görüntüleri çok küçüktü ve kullanıcı bilgileri yeterince belirgin değildi
-4. Rozet stilleri referans tasarımla uyuşmuyordu
+**Hata Mesajı:** DeleteUserCommandHandler.cs dosyasında derleme hatası: Remove metodu için gerekli argüman eksik.
+
+**Nedeni:** DeleteUserCommandHandler içinde `_unitOfWork.Users.Remove(user)` şeklinde bir metot çağrısı yapılıyor.
 
 **Çözüm:**
-1. PrimeNG tablosu yerine özel bir tablo yapısı oluşturuldu:
+```csharp
+// Hatalı kod
+_unitOfWork.Users.Remove(user);
 
-```html
-<div class="custom-table">
-  <div class="table-header">
-    <!-- Tablo başlıkları -->
-  </div>
-  <div class="table-row" *ngFor="let user of filteredUsers">
-    <!-- Kullanıcı bilgileri -->
-  </div>
-</div>
+// Düzeltilmiş kod
+await _unitOfWork.Users.DeleteAsync(user);
 ```
-
-2. Özel CSS stilleri eklendi:
-
-```scss
-.custom-table {
-  background-color: #1e1e1e;
-  border-radius: 8px;
-  overflow: hidden;
-  
-  .table-row {
-    display: flex;
-    align-items: center;
-    padding: 15px 20px;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-    min-height: 100px;
-    
-    &:hover {
-      background-color: rgba(255, 255, 255, 0.05);
-    }
-  }
-  
-  .user-avatar {
-    width: 70px;
-    height: 70px;
-    border-radius: 50%;
-    object-fit: cover;
-  }
-}
-```
-
-3. Rozet stilleri güncellendi:
-
-```scss
-.user-badge {
-  padding: 5px 10px;
-  border-radius: 20px;
-  font-size: 12px;
-  font-weight: 500;
-  
-  &.admin {
-    background-color: rgba(220, 38, 38, 0.2);
-    color: #ef4444;
-  }
-  
-  &.editor {
-    background-color: rgba(59, 130, 246, 0.2);
-    color: #3b82f6;
-  }
-  
-  &.user {
-    background-color: rgba(34, 197, 94, 0.2);
-    color: #22c55e;
-  }
-}
-```
-
-### Sorun: Kullanıcı Yönetimi Sayfası İşlevsellik Eksikliği
-
-**Hata Açıklaması:** Kullanıcı yönetimi sayfasında arama, filtreleme ve sayfalama işlevleri çalışmıyordu.
-
-**Nedeni:**
-1. Bileşen dosyasında gerekli fonksiyonlar tanımlanmamıştı
-2. HTML dosyasında işlevsellik için gerekli bağlantılar eksikti
-3. Türkçe dil desteği yoktu
-
-**Çözüm:**
-1. Bileşen dosyasına gerekli özellikler ve fonksiyonlar eklendi:
-
-```typescript
-filteredUsers: User[] = [];
-activeFilters: { role: string | null, joined: string | null } = { role: null, joined: null };
-searchText: string = '';
-
-ngOnInit(): void {
-  this.loadUsers();
-}
-
-applyFilters(): void {
-  this.filteredUsers = [...this.users];
-  
-  // Arama filtresi
-  if (this.searchText) {
-    const searchLower = this.searchText.toLowerCase();
-    this.filteredUsers = this.filteredUsers.filter(user => 
-      user.name.toLowerCase().includes(searchLower) || 
-      user.email.toLowerCase().includes(searchLower)
-    );
-  }
-  
-  // Rol filtresi
-  if (this.activeFilters.role) {
-    this.filteredUsers = this.filteredUsers.filter(user => 
-      user.role.toLowerCase() === this.activeFilters.role?.toLowerCase()
-    );
-  }
-  
-  // Katılma tarihi filtresi
-  if (this.activeFilters.joined) {
-    // Katılma tarihine göre filtreleme mantığı
-  }
-}
-```
-
-2. HTML dosyasında arama ve filtreleme bileşenleri eklendi:
-
-```html
-<div class="search-filters">
-  <div class="search-box">
-    <i class="pi pi-search"></i>
-    <input type="text" [(ngModel)]="searchText" (input)="applyFilters()" placeholder="Kullanıcı ara...">
-  </div>
-  
-  <div class="filter-options">
-    <p-dropdown [options]="roleOptions" [(ngModel)]="activeFilters.role" 
-                (onChange)="applyFilters()" placeholder="Rol filtresi">
-    </p-dropdown>
-    
-    <p-dropdown [options]="joinedOptions" [(ngModel)]="activeFilters.joined" 
-                (onChange)="applyFilters()" placeholder="Katılma tarihi">
-    </p-dropdown>
-  </div>
-</div>
-```
-
-### Öğrenilen Dersler
-
-1. **Tasarım Referanslarına Sadık Kalma:** Bir tasarımı uygularken, referans görüntüye mümkün olduğunca sadık kalmak önemlidir. Bu, kullanıcı deneyiminin tutarlılığını sağlar.
-
-2. **Özel Bileşenler vs. Kütüphane Bileşenleri:** Bazen kütüphane bileşenlerini (PrimeNG gibi) özelleştirmek yerine, sıfırdan özel bileşenler oluşturmak daha etkili olabilir. Bu, daha fazla kontrol sağlar ve tasarım gereksinimlerine daha iyi uyum sağlar.
-
-3. **İşlevsellik ve Tasarım Dengesi:** Bir sayfayı tasarlarken, hem görsel çekiciliği hem de işlevselliği dengelemek önemlidir. Güzel görünen ancak işlevsel olmayan bir sayfa, kullanıcı deneyimini olumsuz etkiler.
-
-4. **Dil Desteği:** Uluslararası kullanıcılar için dil desteği sağlamak, kullanıcı deneyimini iyileştirir. Türkçe gibi yerel dilleri desteklemek, kullanıcıların uygulamayı daha kolay kullanmasını sağlar.
-
-5. **Responsive Tasarım:** Farklı ekran boyutlarında düzgün çalışan responsive bir tasarım oluşturmak, tüm kullanıcılar için tutarlı bir deneyim sağlar.
-
-## Kullanıcı Yönetimi Sayfası Tasarım Güncellemeleri
-
-### Kullanıcı Verilerinin Kalıcı Olmaması Sorunu
-
-**Sorun:** Kullanıcı yönetimi sayfasında eklenen veya silinen kullanıcılar, sayfa yenilendiğinde eski haline dönüyordu. Bu durum, kullanıcıların kendi test verilerini oluşturmasını ve bunları kalıcı olarak saklamasını engelliyordu.
-
-**Nedeni:**
-1. Kullanıcı verileri, bileşen içinde sabit bir dizi olarak tanımlanmıştı
-2. Sayfa her yenilendiğinde, bu sabit diziyi tekrar yükleniyordu
-3. Yapılan değişiklikler sadece geçici olarak hafızada tutuluyordu
-
-**Çözüm:**
-1. Kullanıcı verilerini localStorage'da saklamak için loadUsers, saveUser ve deleteUser metodları güncellendi:
-```typescript
-loadUsers() {
-  // localStorage'dan kullanıcıları yükle
-  const storedUsers = localStorage.getItem('users');
-  
-  if (storedUsers) {
-    this.users = JSON.parse(storedUsers);
-  } else {
-    // Eğer localStorage'da kullanıcı yoksa boş bir dizi oluştur
-    this.users = [];
-    // localStorage'a boş diziyi kaydet
-    localStorage.setItem('users', JSON.stringify(this.users));
-  }
-  
-  this.filteredUsers = [...this.users];
-  this.updatePagination();
-}
-```
-
-2. Kullanıcı ekleme, güncelleme ve silme işlemlerinde localStorage güncellendi:
-```typescript
-// Kullanıcı eklerken
-this.users.unshift(newUser);
-localStorage.setItem('users', JSON.stringify(this.users));
-
-// Kullanıcı güncellerken
-this.users[index] = { ...updatedUser };
-localStorage.setItem('users', JSON.stringify(this.users));
-
-// Kullanıcı silerken
-this.users = this.users.filter(u => u.id !== user.id);
-localStorage.setItem('users', JSON.stringify(this.users));
-```
-
-3. Tüm kullanıcıları temizlemek için yeni bir metot ve buton eklendi:
-```typescript
-clearAllUsers() {
-  this.confirmationService.confirm({
-    message: 'Tüm kullanıcıları silmek istediğinizden emin misiniz?',
-    header: 'Tümünü Silme Onayı',
-    icon: 'pi pi-exclamation-triangle',
-    acceptLabel: 'Evet',
-    rejectLabel: 'Hayır',
-    accept: () => {
-      this.users = [];
-      this.filteredUsers = [];
-      localStorage.setItem('users', JSON.stringify(this.users));
-      this.updatePagination();
-      // Başarı mesajı göster
-    }
-  });
-}
-```
-
-**Sonuç:**
-- Kullanıcı verileri artık tarayıcının localStorage'ında saklanıyor
-- Sayfa yenilense bile kullanıcı verileri korunuyor
-- Kullanıcılar kendi test verilerini oluşturup saklayabiliyorlar
-- "Tümünü Temizle" butonu ile tüm kullanıcılar kolayca silinebiliyor
 
 **Önemli Notlar:**
-- localStorage tarayıcıya özgüdür, farklı tarayıcılarda farklı veriler görünecektir
-- localStorage'daki veriler, tarayıcı önbelleği temizlendiğinde silinecektir
-- Gerçek bir uygulamada, bu veriler bir veritabanında saklanmalıdır
+- Repository arayüzlerinde metot isimleri tutarlı olmalı
+- Asenkron metotlar için await kullanılmalı
+- Metot isimleri ve imzaları arayüz ile uyumlu olmalı
+
+### Hata 2: API Endpoint Tutarsızlıkları ve Karışıklık
+
+**Tarih:** 2025-03-08
+
+**Sorun:** Hem UserController (tekil) hem de UsersController (çoğul) olması, API endpoint'lerinde tutarsızlıklara ve frontend uygulamasında karışıklığa neden oldu.
+
+**Nedeni:**
+1. Clean Architecture'a geçiş sırasında eski yapı tamamen kaldırılmamış
+2. Frontend hala eski endpoint'i referans alıyordu
+3. Tekil (User) ve çoğul (Users) controller'lar arasında karışıklık vardı
+
+**Çözüm:**
+1. Eski proje dosyalarını yedekleyip kaldırdık:
+   - Stock.API
+   - Stock.Infrastructure
+   - UserController.cs
+2. Yeni UsersController.cs dosyasında Delete metodu oluşturduk
+3. Frontend'deki UserService içindeki endpoint'leri düzelttik:
+   ```typescript
+   // Hatalı
+   return this.http.delete<void>(`${this.apiUrl}/User/${id}`);
+   
+   // Düzeltilmiş
+   return this.http.delete<void>(`${this.apiUrl}/Users/${id}`);
+   ```
+
+**Önemli Notlar:**
+- Clean Architecture'da çoğul isimlendirme tercih edilmeli (UsersController)
+- Frontend ve backend arasındaki API endpoint'leri tutarlı olmalı
+- Yapısal değişiklikler sırasında eski kod tamamen kaldırılmalı veya açıkça işaretlenmeli
+
+### Hata 3: Çoklu Command Sınıfları Çakışması
+
+**Tarih:** 2025-03-08
+
+**Hata Mesajı:** CS0104: 'DeleteUserCommand' adı iki farklı ad alanında bulundu.
+
+**Nedeni:** Projede iki farklı namespace'te DeleteUserCommand sınıfı tanımlanmıştı:
+1. `Stock.Application.Features.Users.Commands.DeleteUserCommand`
+2. `Stock.Application.Features.Users.Commands.DeleteUser.DeleteUserCommand`
+
+Aynı şekilde, CreateUserCommand ve UpdateUserCommand için de benzer çakışmalar vardı.
+
+**Çözüm:**
+UsersController.cs dosyasında tam nitelikli tip adları kullanıldı:
+
+```csharp
+// Hatalı kod
+using Stock.Application.Features.Users.Commands.CreateUser;
+using Stock.Application.Features.Users.Commands.UpdateUser;
+using Stock.Application.Features.Users.Commands.DeleteUser;
+
+// Düzeltilmiş kod
+// Using direktifleri kaldırıldı ve tam nitelikli tip adları kullanıldı
+public async Task<IActionResult> Create(Stock.Application.Features.Users.Commands.CreateUserCommand command)
+public async Task<IActionResult> Update(int id, Stock.Application.Features.Users.Commands.UpdateUserCommand command)
+var command = new Stock.Application.Features.Users.Commands.DeleteUserCommand { Id = id };
+```
+
+**Önemli Notlar:**
+- Namespace'lerde tutarlı bir yapı kullanılmalı
+- Aynı isimli sınıflar farklı namespace'lerde olmamalı
+- Çakışma durumunda tam nitelikli tip adları kullanılabilir
+- Uzun vadede, proje yapısı düzenlenerek çakışmalar giderilmeli

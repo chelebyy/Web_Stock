@@ -4,6 +4,7 @@ using Stock.Infrastructure.Repositories;
 using System;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore.Storage;
+using Stock.Domain.Entities;
 
 namespace Stock.Infrastructure.UnitOfWork
 {
@@ -23,6 +24,16 @@ namespace Stock.Infrastructure.UnitOfWork
         public IUserRepository Users => _userRepository ??= new UserRepository(_context);
 
         public IRoleRepository Roles => _roleRepository ??= new RoleRepository(_context);
+        
+        public IRepository<T> GetRepository<T>() where T : BaseEntity
+        {
+            if (typeof(T) == typeof(Permission))
+            {
+                return (IRepository<T>)(object)new PermissionRepository(_context);
+            }
+            
+            return new Repository<T>(_context);
+        }
 
         public async Task<int> SaveChangesAsync()
         {

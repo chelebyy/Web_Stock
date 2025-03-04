@@ -1,49 +1,49 @@
-using Microsoft.EntityFrameworkCore;
-using Stock.Domain.Entities;
-using Stock.Domain.Interfaces;
-using Stock.Infrastructure.Data;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.EntityFrameworkCore;
+using Stock.Domain.Entities;
+using Stock.Domain.Interfaces;
 
-namespace Stock.Infrastructure.Repositories
+namespace Stock.Infrastructure.Data.Repositories
 {
-    public class PermissionRepository : Repository<Permission>, IPermissionRepository
+    public class PermissionRepository : GenericRepository<Permission>, IPermissionRepository
     {
+        private readonly new ApplicationDbContext _context;
+
         public PermissionRepository(ApplicationDbContext context) : base(context)
         {
+            _context = context;
         }
 
         public async Task<Permission?> GetByNameAsync(string name)
         {
-            return await _dbSet
-                .FirstOrDefaultAsync(p => p.Name == name && !p.IsDeleted);
+            return await _context.Permissions
+                .FirstOrDefaultAsync(p => p.Name == name);
         }
 
         public async Task<IEnumerable<Permission>> GetPermissionsByRoleIdAsync(int roleId)
         {
-            return await _context.Set<RolePermission>()
+            return await _context.RolePermissions
                 .Where(rp => rp.RoleId == roleId)
-                .Include(rp => rp.Permission)
-                .Where(rp => !rp.Permission.IsDeleted)
                 .Select(rp => rp.Permission)
                 .ToListAsync();
         }
 
         public async Task<IEnumerable<Permission>> GetPermissionsByGroupAsync(string group)
         {
-            return await _dbSet
-                .Where(p => p.Group == group && !p.IsDeleted)
+            return await _context.Permissions
+                .Where(p => p.Group == group)
                 .ToListAsync();
         }
         
         public async Task RemoveRolePermissionsAsync(int roleId)
         {
-            var existingRolePermissions = await _context.Set<RolePermission>()
+            var existingRolePermissions = await _context.RolePermissions
                 .Where(rp => rp.RoleId == roleId)
                 .ToListAsync();
             
-            _context.Set<RolePermission>().RemoveRange(existingRolePermissions);
+            _context.RolePermissions.RemoveRange(existingRolePermissions);
         }
         
         public async Task AddRolePermissionsAsync(int roleId, List<int> permissionIds)
@@ -56,7 +56,7 @@ namespace Stock.Infrastructure.Repositories
                     PermissionId = permissionId
                 };
                 
-                await _context.Set<RolePermission>().AddAsync(rolePermission);
+                await _context.RolePermissions.AddAsync(rolePermission);
             }
         }
     }

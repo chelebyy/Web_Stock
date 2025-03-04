@@ -66,24 +66,14 @@ namespace Stock.Infrastructure.Services
         {
             try
             {
-                // Önce mevcut rol-izin ilişkilerini temizle
-                var existingRolePermissions = await _unitOfWork.Context.Set<RolePermission>()
-                    .Where(rp => rp.RoleId == roleId)
-                    .ToListAsync();
+                // IRolePermissionRepository arayüzünü kullanarak işlem yap
+                var permissionRepo = _unitOfWork.GetRepository<Permission>() as IPermissionRepository;
                 
-                _unitOfWork.Context.Set<RolePermission>().RemoveRange(existingRolePermissions);
+                // Önce mevcut rol-izin ilişkilerini temizle
+                await permissionRepo.RemoveRolePermissionsAsync(roleId);
                 
                 // Yeni rol-izin ilişkilerini ekle
-                foreach (var permissionId in permissionIds)
-                {
-                    var rolePermission = new RolePermission
-                    {
-                        RoleId = roleId,
-                        PermissionId = permissionId
-                    };
-                    
-                    await _unitOfWork.Context.Set<RolePermission>().AddAsync(rolePermission);
-                }
+                await permissionRepo.AddRolePermissionsAsync(roleId, permissionIds);
                 
                 await _unitOfWork.SaveChangesAsync();
                 return true;

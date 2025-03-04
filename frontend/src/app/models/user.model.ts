@@ -5,6 +5,7 @@ export interface User {
     username: string;
     passwordHash?: string;
     password?: string;
+    sicil: string;
     isAdmin: boolean;
     createdAt: Date;
     lastLoginAt?: Date;
@@ -25,6 +26,7 @@ export interface LoginResponse {
 export interface CreateUserDto {
     username: string;
     password: string;
+    sicil: string;
     passwordHash?: string;
     isAdmin: boolean;
     roleId?: number;
@@ -34,6 +36,7 @@ export interface CreateUserDto {
 export interface UpdateUserDto {
     username?: string;
     password?: string;
+    sicil?: string;
     isAdmin?: boolean;
     roleId?: number;
 }

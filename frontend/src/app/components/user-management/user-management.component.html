@@ -43,7 +43,7 @@
         <p-checkbox [binary]="true"></p-checkbox>
       </div>
       <div class="header-cell name-cell">Ad Soyad</div>
-      <div class="header-cell email-cell">Sicil</div>
+      <div class="header-cell sicil-cell">Sicil</div>
       <div class="header-cell permissions-cell">İzinler</div>
       <div class="header-cell actions-cell">İşlemler</div>
     </div>
@@ -61,7 +61,7 @@
           <div class="user-name">{{ user.fullName }}</div>
         </div>
       </div>
-      <div class="row-cell email-cell">{{ user.email }}</div>
+      <div class="row-cell sicil-cell">{{ user.sicil }}</div>
       <div class="row-cell permissions-cell">
         <span class="permission-badge" [ngClass]="{
           'admin-badge': user.permissions === 'Admin',
@@ -166,10 +166,10 @@
         <span class="p-inputgroup-addon">
           <i class="pi pi-id-card"></i>
         </span>
-        <input type="text" id="email" pInputText formControlName="email" 
+        <input type="text" id="sicil" pInputText formControlName="sicil" 
           placeholder="Sicil numarası girin">
       </div>
-      <small *ngIf="submitted && f['email'].errors?.['required']" class="p-error">
+      <small *ngIf="submitted && f['sicil'].errors?.['required']" class="p-error">
         Sicil numarası gereklidir.
       </small>
     </div>

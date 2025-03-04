@@ -9,6 +9,8 @@ namespace Stock.Domain.Interfaces
         IUserRepository Users { get; }
         IRoleRepository Roles { get; }
         
+        IRepository<T> GetRepository<T>() where T : BaseEntity;
+        
         Task<int> SaveChangesAsync();
         Task BeginTransactionAsync();
         Task CommitTransactionAsync();

@@ -86,7 +86,8 @@ export class UserManagementComponent implements OnInit {
     private formBuilder: FormBuilder,
     private router: Router,
     private confirmationService: ConfirmationService,
-    private messageService: MessageService
+    private messageService: MessageService,
+    private userService: UserService
   ) {}
 
   ngOnInit() {
@@ -97,7 +98,7 @@ export class UserManagementComponent implements OnInit {
   initForm() {
     this.userForm = this.formBuilder.group({
       id: [null],
-      email: ['', [Validators.required, Validators.email]],
+      sicil: ['', [Validators.required]],
       fullName: ['', Validators.required],
       password: ['', [Validators.required, Validators.minLength(6)]],
       isAdmin: [false],
@@ -106,20 +107,56 @@ export class UserManagementComponent implements OnInit {
   }
 
   loadUsers() {
-    // localStorage'dan kullanıcıları yükle
-    const storedUsers = localStorage.getItem('users');
-    
-    if (storedUsers) {
-      this.users = JSON.parse(storedUsers);
-    } else {
-      // Eğer localStorage'da kullanıcı yoksa boş bir dizi oluştur
-      this.users = [];
-      // localStorage'a boş diziyi kaydet
-      localStorage.setItem('users', JSON.stringify(this.users));
-    }
-    
-    this.filteredUsers = [...this.users];
-    this.updatePagination();
+    // Backend'den kullanıcıları çekelim
+    this.userService.getUsers().subscribe({
+      next: (users) => {
+        if (users && users.length > 0) {
+          // Backend'den gelen kullanıcıları formatlayalım
+          this.users = users.map(user => ({
+            id: user.id,
+            sicil: user.sicil || '',
+            fullName: user.username,
+            permissions: user.isAdmin ? 'Admin' : user.roleId ? 'Contributor' : 'Viewer',
+            isActive: true,
+            joinDate: new Date(user.createdAt || new Date()).toLocaleDateString('tr-TR', { year: 'numeric', month: 'long', day: 'numeric' }),
+            avatar: 'default-avatar.png'
+          }));
+          
+          // Kullanıcıları localStorage'a kaydedelim
+          localStorage.setItem('users', JSON.stringify(this.users));
+          
+          this.filteredUsers = [...this.users];
+          this.updatePagination();
+        } else {
+          console.log('Backend\'den kullanıcı verisi alınamadı veya boş.');
+          
+          // Eğer backend'den veri gelmezse, localStorage'dan yüklemeyi deneyelim
+          const storedUsers = localStorage.getItem('users');
+          if (storedUsers) {
+            this.users = JSON.parse(storedUsers);
+            this.filteredUsers = [...this.users];
+            this.updatePagination();
+          }
+        }
+      },
+      error: (error) => {
+        console.error('Kullanıcıları yükleme hatası:', error);
+        this.messageService.add({
+          severity: 'error',
+          summary: 'Hata',
+          detail: 'Kullanıcılar yüklenirken bir hata oluştu.',
+          life: 3000
+        });
+        
+        // Hata durumunda localStorage'dan yüklemeyi deneyelim
+        const storedUsers = localStorage.getItem('users');
+        if (storedUsers) {
+          this.users = JSON.parse(storedUsers);
+          this.filteredUsers = [...this.users];
+          this.updatePagination();
+        }
+      }
+    });
   }
 
   get f() {
@@ -143,7 +180,7 @@ export class UserManagementComponent implements OnInit {
     this.editMode = true;
     this.userForm.patchValue({
       id: this.user.id,
-      email: this.user.email,
+      sicil: this.user.email,
       fullName: this.user.fullName,
       isAdmin: this.user.permissions === 'Admin',
       isActive: this.user.isActive
@@ -167,17 +204,32 @@ export class UserManagementComponent implements OnInit {
       acceptLabel: 'Evet',
       rejectLabel: 'Hayır',
       accept: () => {
-        this.users = this.users.filter(u => u.id !== user.id);
-        
-        // localStorage'a güncellenmiş kullanıcıları kaydet
-        localStorage.setItem('users', JSON.stringify(this.users));
-        
-        this.applyFilters();
-        this.messageService.add({
-          severity: 'success',
-          summary: 'Başarılı',
-          detail: 'Kullanıcı silindi',
-          life: 3000
+        // Backend API'ye silme isteği gönder
+        this.userService.deleteUser(user.id).subscribe({
+          next: () => {
+            // Başarılı silme işlemi sonrası
+            this.users = this.users.filter(u => u.id !== user.id);
+            
+            // localStorage'a güncellenmiş kullanıcıları kaydet
+            localStorage.setItem('users', JSON.stringify(this.users));
+            
+            this.applyFilters();
+            this.messageService.add({
+              severity: 'success',
+              summary: 'Başarılı',
+              detail: 'Kullanıcı silindi',
+              life: 3000
+            });
+          },
+          error: (error) => {
+            console.error('Kullanıcı silme hatası:', error);
+            this.messageService.add({
+              severity: 'error',
+              summary: 'Hata',
+              detail: 'Kullanıcı silinirken bir hata oluştu.',
+              life: 3000
+            });
+          }
         });
       }
     });
@@ -201,53 +253,103 @@ export class UserManagementComponent implements OnInit {
       // Kullanıcı güncelleme
       const index = this.users.findIndex(u => u.id === formValues.id);
       if (index !== -1) {
-        this.users[index] = {
-          ...this.users[index],
-          email: formValues.email,
-          fullName: formValues.fullName,
-          permissions: formValues.isAdmin ? 'Admin' : 'Contributor',
-          isActive: formValues.isActive
+        // Backend'e gönderilecek kullanıcı nesnesi
+        const userToUpdate: any = {
+          id: formValues.id,
+          username: formValues.fullName,
+          isAdmin: formValues.isAdmin,
+          sicil: formValues.sicil
         };
         
-        // localStorage'a güncellenmiş kullanıcıları kaydet
-        localStorage.setItem('users', JSON.stringify(this.users));
-        
-        this.messageService.add({
-          severity: 'success',
-          summary: 'Başarılı',
-          detail: 'Kullanıcı güncellendi',
-          life: 3000
+        // Backend API'ye güncelleme isteği gönder
+        this.userService.updateUser(formValues.id, userToUpdate).subscribe({
+          next: () => {
+            // Başarılı güncelleme sonrası
+            this.users[index] = {
+              ...this.users[index],
+              sicil: formValues.sicil,
+              fullName: formValues.fullName,
+              permissions: formValues.isAdmin ? 'Admin' : 'Contributor',
+              isActive: formValues.isActive
+            };
+            
+            // localStorage'a güncellenmiş kullanıcıları kaydet
+            localStorage.setItem('users', JSON.stringify(this.users));
+            
+            this.messageService.add({
+              severity: 'success',
+              summary: 'Başarılı',
+              detail: 'Kullanıcı güncellendi',
+              life: 3000
+            });
+            
+            this.applyFilters();
+            this.userDialog = false;
+            this.user = {};
+          },
+          error: (error) => {
+            console.error('Kullanıcı güncelleme hatası:', error);
+            this.messageService.add({
+              severity: 'error',
+              summary: 'Hata',
+              detail: 'Kullanıcı güncellenirken bir hata oluştu.',
+              life: 3000
+            });
+          }
         });
       }
     } else {
       // Yeni kullanıcı ekleme
-      const newUser = {
-        id: this.generateId(),
-        email: formValues.email,
-        fullName: formValues.fullName,
-        location: 'İstanbul,TR',
-        joinDate: new Date().toLocaleDateString('tr-TR', { year: 'numeric', month: 'long', day: 'numeric' }),
-        permissions: formValues.isAdmin ? 'Admin' : 'Contributor',
-        isActive: formValues.isActive,
-        avatar: 'default-avatar.png'
+      // Backend'e gönderilecek kullanıcı nesnesi
+      const userToCreate: any = {
+        username: formValues.fullName,
+        passwordHash: formValues.password,
+        isAdmin: formValues.isAdmin,
+        sicil: formValues.sicil
       };
       
-      this.users.unshift(newUser);
-      
-      // localStorage'a güncellenmiş kullanıcıları kaydet
-      localStorage.setItem('users', JSON.stringify(this.users));
-      
-      this.messageService.add({
-        severity: 'success',
-        summary: 'Başarılı',
-        detail: 'Kullanıcı eklendi',
-        life: 3000
+      // Backend API'ye ekleme isteği gönder
+      this.userService.createUser(userToCreate).subscribe({
+        next: (response) => {
+          // Başarılı ekleme sonrası
+          const newUser = {
+            id: response.id || this.generateId(),
+            sicil: formValues.sicil,
+            fullName: formValues.fullName,
+            location: 'İstanbul,TR',
+            joinDate: new Date().toLocaleDateString('tr-TR', { year: 'numeric', month: 'long', day: 'numeric' }),
+            permissions: formValues.isAdmin ? 'Admin' : 'Contributor',
+            isActive: formValues.isActive,
+            avatar: 'default-avatar.png'
+          };
+          
+          this.users.unshift(newUser);
+          
+          // localStorage'a güncellenmiş kullanıcıları kaydet
+          localStorage.setItem('users', JSON.stringify(this.users));
+          
+          this.messageService.add({
+            severity: 'success',
+            summary: 'Başarılı',
+            detail: 'Kullanıcı eklendi',
+            life: 3000
+          });
+          
+          this.applyFilters();
+          this.userDialog = false;
+          this.user = {};
+        },
+        error: (error) => {
+          console.error('Kullanıcı ekleme hatası:', error);
+          this.messageService.add({
+            severity: 'error',
+            summary: 'Hata',
+            detail: 'Kullanıcı eklenirken bir hata oluştu.',
+            life: 3000
+          });
+        }
       });
     }
-    
-    this.applyFilters();
-    this.userDialog = false;
-    this.user = {};
   }
 
   generateId(): number {
@@ -280,7 +382,7 @@ export class UserManagementComponent implements OnInit {
     if (this.activeFilters.search) {
       filtered = filtered.filter(user => 
         user.fullName.toLowerCase().includes(this.activeFilters.search) ||
-        user.email.toLowerCase().includes(this.activeFilters.search)
+        user.sicil.toLowerCase().includes(this.activeFilters.search)
       );
     }
     
@@ -351,19 +453,47 @@ export class UserManagementComponent implements OnInit {
       acceptLabel: 'Evet',
       rejectLabel: 'Hayır',
       accept: () => {
-        this.users = [];
-        this.filteredUsers = [];
-        
-        // localStorage'a boş kullanıcı dizisini kaydet
-        localStorage.setItem('users', JSON.stringify(this.users));
-        
-        this.updatePagination();
-        this.messageService.add({
-          severity: 'success',
-          summary: 'Başarılı',
-          detail: 'Tüm kullanıcılar silindi',
-          life: 3000
+        // Tüm kullanıcılar için silme istekleri gönder
+        const deletePromises = this.users.map(user => {
+          return new Promise<void>((resolve, reject) => {
+            this.userService.deleteUser(user.id).subscribe({
+              next: () => resolve(),
+              error: (err) => {
+                console.error(`Kullanıcı silme hatası (ID: ${user.id}):`, err);
+                reject(err);
+              }
+            });
+          });
         });
+
+        // Tüm silme istekleri tamamlandığında
+        Promise.all(deletePromises)
+          .then(() => {
+            this.users = [];
+            this.filteredUsers = [];
+            
+            // localStorage'a boş kullanıcı dizisini kaydet
+            localStorage.setItem('users', JSON.stringify(this.users));
+            
+            this.updatePagination();
+            this.messageService.add({
+              severity: 'success',
+              summary: 'Başarılı',
+              detail: 'Tüm kullanıcılar silindi',
+              life: 3000
+            });
+          })
+          .catch(error => {
+            console.error('Toplu silme işlemi sırasında hata:', error);
+            this.messageService.add({
+              severity: 'error',
+              summary: 'Hata',
+              detail: 'Bazı kullanıcılar silinirken hata oluştu.',
+              life: 3000
+            });
+            // Hata olsa bile güncel listeyi yeniden yükle
+            this.loadUsers();
+          });
       }
     });
   }

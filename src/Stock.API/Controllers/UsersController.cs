@@ -1,8 +1,8 @@
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Stock.Application.Features.Users.Commands;
 using Stock.Application.Features.Users.Queries;
+using Stock.Application.Features.Users.Commands;
 using System.Threading.Tasks;
 
 namespace Stock.API.Controllers

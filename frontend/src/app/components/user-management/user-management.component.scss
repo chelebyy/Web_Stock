@@ -106,12 +106,14 @@
         flex: 3;
       }
       
-      .email-cell {
+      .sicil-cell {
         flex: 2;
       }
       
       .permissions-cell {
         flex: 2;
+        display: flex;
+        align-items: center;
       }
       
       .actions-cell {
@@ -181,6 +183,7 @@
         border-radius: 4px;
         font-size: 0.75rem;
         font-weight: 600;
+        text-align: center;
         
         &.admin-badge {
           background-color: rgba(244, 67, 54, 0.1);

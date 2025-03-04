@@ -21,6 +21,13 @@ namespace Stock.Infrastructure.Data
 
         public IUserRepository Users => _users ??= new UserRepository(_context);
         public IRoleRepository Roles => _roles ??= new RoleRepository(_context);
+        
+        public DbContext Context => _context;
+        
+        public IRepository<T> GetRepository<T>() where T : BaseEntity
+        {
+            return new GenericRepository<T>(_context);
+        }
 
         public async Task<int> SaveChangesAsync()
         {

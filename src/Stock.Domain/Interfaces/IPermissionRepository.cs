@@ -9,5 +9,7 @@ namespace Stock.Domain.Interfaces
         Task<Permission?> GetByNameAsync(string name);
         Task<IEnumerable<Permission>> GetPermissionsByRoleIdAsync(int roleId);
         Task<IEnumerable<Permission>> GetPermissionsByGroupAsync(string group);
+        Task RemoveRolePermissionsAsync(int roleId);
+        Task AddRolePermissionsAsync(int roleId, List<int> permissionIds);
     }
 } 
