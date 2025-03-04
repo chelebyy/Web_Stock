@@ -15,6 +15,9 @@ namespace Stock.Domain.Entities
         public bool IsAdmin { get; set; }
 
         public DateTime? LastLoginAt { get; set; }
+        
+        [StringLength(50)]
+        public string Sicil { get; set; } = string.Empty;
 
         // Role ilişkisi
         public int? RoleId { get; set; }

@@ -10,7 +10,8 @@ namespace Stock.Application.Common.Mappings
         {
             // User mappings
             CreateMap<User, UserDto>()
-                .ForMember(dest => dest.RoleName, opt => opt.MapFrom(src => src.Role != null ? src.Role.Name : null));
+                .ForMember(dest => dest.RoleName, opt => opt.MapFrom(src => src.Role != null ? src.Role.Name : null))
+                .ForMember(dest => dest.Sicil, opt => opt.MapFrom(src => src.Sicil));
 
             // Role mappings
             CreateMap<Role, RoleDto>()

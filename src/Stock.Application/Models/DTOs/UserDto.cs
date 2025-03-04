@@ -9,6 +9,7 @@ namespace Stock.Application.Models.DTOs
         public bool IsAdmin { get; set; }
         public int? RoleId { get; set; }
         public string? RoleName { get; set; }
+        public string Sicil { get; set; } = string.Empty;
         public DateTime CreatedAt { get; set; }
         public DateTime? LastLoginAt { get; set; }
     }

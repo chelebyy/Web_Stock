@@ -37,6 +37,7 @@ Bu dosya, proje geliştirme sürecinde karşılaşılan hataları ve çözümler
   - [API Endpoint Hatası](#api-endpoint-hatası)
   - [API URL Hatası](#api-url-hatası)
 - [Kullanıcı Silme İşlemi Hataları](#kullanıcı-silme-işlemi-hataları)
+- [Kullanıcı Güncelleme Hatası](#kullanıcı-güncelleme-hatası)
 
 ## Clean Architecture Geçişi Hataları
 
@@ -1118,3 +1119,141 @@ var command = new Stock.Application.Features.Users.Commands.DeleteUserCommand { 
 - Aynı isimli sınıflar farklı namespace'lerde olmamalı
 - Çakışma durumunda tam nitelikli tip adları kullanılabilir
 - Uzun vadede, proje yapısı düzenlenerek çakışmalar giderilmeli
+
+## Kullanıcı Güncelleme Hatası
+
+**Hata:**
+```
+System.InvalidOperationException: No service for type 'MediatR.IRequestHandler`2[Stock.Application.Features.Users.Commands.UpdateUserCommand,Stock.Application.Models.DTOs.UserDto]' has been registered.
+```
+
+**Nedeni:**
+1. UpdateUserCommand için bir handler sınıfı (UpdateUserCommandHandler) oluşturulmamış
+2. MediatR, UpdateUserCommand için bir handler bulamıyor
+
+**Çözüm:**
+1. UpdateUserCommandHandler sınıfını oluştur:
+```csharp
+using AutoMapper;
+using MediatR;
+using Stock.Application.Features.Users.Commands;
+using Stock.Application.Models.DTOs;
+using Stock.Domain.Interfaces;
+using System.Threading;
+using System.Threading.Tasks;
+
+namespace Stock.Application.Features.Users.Handlers
+{
+    public class UpdateUserCommandHandler : IRequestHandler<UpdateUserCommand, UserDto>
+    {
+        private readonly IUnitOfWork _unitOfWork;
+        private readonly IMapper _mapper;
+
+        public UpdateUserCommandHandler(IUnitOfWork unitOfWork, IMapper mapper)
+        {
+            _unitOfWork = unitOfWork;
+            _mapper = mapper;
+        }
+
+        public async Task<UserDto> Handle(UpdateUserCommand request, CancellationToken cancellationToken)
+        {
+            var user = await _unitOfWork.Users.GetByIdAsync(request.Id);
+            
+            if (user == null)
+                return null;
+
+            user.Username = request.Username;
+            user.IsAdmin = request.IsAdmin;
+            user.RoleId = request.RoleId;
+            user.Sicil = request.Sicil;
+
+            await _unitOfWork.Users.UpdateAsync(user);
+            await _unitOfWork.SaveChangesAsync();
+
+            var updatedUser = await _unitOfWork.Users.GetByIdAsync(user.Id);
+            return _mapper.Map<UserDto>(updatedUser);
+        }
+    }
+}
+```
+
+2. Ayrıca CreateUserCommandHandler sınıfını da oluştur (eksikse):
+```csharp
+using AutoMapper;
+using MediatR;
+using Stock.Application.Features.Users.Commands;
+using Stock.Application.Models.DTOs;
+using Stock.Domain.Entities;
+using Stock.Domain.Interfaces;
+using System.Threading;
+using System.Threading.Tasks;
+
+namespace Stock.Application.Features.Users.Handlers
+{
+    public class CreateUserCommandHandler : IRequestHandler<CreateUserCommand, UserDto>
+    {
+        private readonly IUnitOfWork _unitOfWork;
+        private readonly IMapper _mapper;
+        private readonly IPasswordHasher _passwordHasher;
+
+        public CreateUserCommandHandler(IUnitOfWork unitOfWork, IMapper mapper, IPasswordHasher passwordHasher)
+        {
+            _unitOfWork = unitOfWork;
+            _mapper = mapper;
+            _passwordHasher = passwordHasher;
+        }
+
+        public async Task<UserDto> Handle(CreateUserCommand request, CancellationToken cancellationToken)
+        {
+            var user = new User
+            {
+                Username = request.Username,
+                PasswordHash = _passwordHasher.HashPassword(request.Password),
+                IsAdmin = request.IsAdmin,
+                RoleId = request.RoleId
+            };
+
+            await _unitOfWork.Users.AddAsync(user);
+            await _unitOfWork.SaveChangesAsync();
+
+            var createdUser = await _unitOfWork.Users.GetByIdAsync(user.Id);
+            return _mapper.Map<UserDto>(createdUser);
+        }
+    }
+}
+```
+
+3. UpdateUserCommand'e sicil alanını ekle:
+```csharp
+public class UpdateUserCommand : IRequest<UserDto>
+{
+    public int Id { get; set; }
+    public string Username { get; set; } = string.Empty;
+    public bool IsAdmin { get; set; }
+    public int? RoleId { get; set; }
+    public string Sicil { get; set; } = string.Empty;
+}
+```
+
+4. User entity'sine sicil alanını ekle:
+```csharp
+[StringLength(50)]
+public string Sicil { get; set; } = string.Empty;
+```
+
+5. UserDto'ya sicil alanını ekle:
+```csharp
+public string Sicil { get; set; } = string.Empty;
+```
+
+6. MappingProfile'da sicil alanı eşleştirmesini ekle:
+```csharp
+CreateMap<User, UserDto>()
+    .ForMember(dest => dest.RoleName, opt => opt.MapFrom(src => src.Role != null ? src.Role.Name : null))
+    .ForMember(dest => dest.Sicil, opt => opt.MapFrom(src => src.Sicil));
+```
+
+**Önemli Notlar:**
+- MediatR, handler sınıflarını otomatik olarak tarar ve kaydeder
+- Handler sınıfları, ilgili Command veya Query sınıflarıyla aynı assembly'de olmalıdır
+- Sicil alanı eklendiğinde veritabanı şemasını güncellemek için migration oluşturulmalıdır

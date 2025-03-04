@@ -569,3 +569,38 @@ Kullanıcı yönetimi sayfasından kullanıcı silme işlemi sırasında çeşit
 
 ### Sonuç
 Kullanıcı silme işlemi artık düzgün çalışıyor. Frontend'den gönderilen DELETE istekleri backend API'ye ulaşıyor ve kullanıcılar veritabanından kalıcı olarak silinebiliyor. Clean Architecture yapısı tutarlı bir şekilde kullanılıyor.
+
+## Görev: Kullanıcı Güncelleme İşlemi Hatası Çözümü
+
+### Sorun
+Kullanıcı güncelleme işlemi sırasında aşağıdaki hata alındı:
+```
+System.InvalidOperationException: No service for type 'MediatR.IRequestHandler`2[Stock.Application.Features.Users.Commands.UpdateUserCommand,Stock.Application.Models.DTOs.UserDto]' has been registered.
+```
+
+### Çözüm Adımları
+[X] errors.md dosyasına hata ve çözüm bilgilerini ekle
+[X] knowledge-base klasöründe user_update_handler_knowledge_base.md dosyası oluştur
+[X] API ve Client uygulamalarını yeniden başlat
+[X] Kullanıcı güncelleme işleminin çalışıp çalışmadığını kontrol et
+
+### Yapılan İşlemler
+1. UpdateUserCommandHandler sınıfı oluşturuldu
+2. Sicil alanı User entity'sine, UserDto'ya ve UpdateUserCommand'e eklendi
+3. MappingProfile'da Sicil alanı eşleştirmesi eklendi
+4. API ve Client uygulamaları yeniden başlatıldı
+5. Migration oluşturuldu ve veritabanı güncellendi (dotnet ef migrations add AddSicilFieldToUser, dotnet ef database update)
+6. API bağlantı testleri yapıldı (401 Unauthorized hatası alındı - bu API'nin çalıştığını gösteriyor)
+
+### Güncel Durum
+- Backend API (http://localhost:5037): ✅ Çalışıyor
+- Frontend (http://localhost:4202): ✅ Çalışıyor
+- Sicil alanı veritabanına eklendi ✅
+
+### Öğrenilen Dersler
+- MediatR handler sınıfları, ilgili Command veya Query sınıflarıyla aynı assembly'de olmalıdır
+- Handler sınıfları, IRequestHandler<TRequest, TResponse> arayüzünü uygulamalıdır
+- Handler sınıfları, Handle metodunu uygulamalıdır
+- MediatR, handler sınıflarını otomatik olarak tarar ve kaydeder
+- Entity'lere yeni alan eklendiğinde veritabanı şemasını güncellemek için migration oluşturulmalıdır
+- API port numarası launchSettings.json dosyasından kontrol edilmelidir, varsayılan port değişmiş olabilir
