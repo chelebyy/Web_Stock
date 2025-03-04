@@ -29,21 +29,21 @@ namespace Stock.Infrastructure.Services
 
         public async Task<AuthResponseDto> LoginAsync(LoginDto loginDto)
         {
-            _logger.LogInformation($"Giriş denemesi: {loginDto.Username}, Şifre uzunluğu: {loginDto.Password?.Length ?? 0}");
+            _logger.LogInformation($"Giriş denemesi: {loginDto.Sicil}, Şifre uzunluğu: {loginDto.Password?.Length ?? 0}");
             
-            var user = await _unitOfWork.Users.GetByUsernameAsync(loginDto.Username);
+            var user = await _unitOfWork.Users.GetBySicilAsync(loginDto.Sicil);
             
             if (user == null)
             {
-                _logger.LogWarning($"Kullanıcı bulunamadı: {loginDto.Username}");
+                _logger.LogWarning($"Kullanıcı bulunamadı: Sicil No: {loginDto.Sicil}");
                 return new AuthResponseDto
                 {
                     Success = false,
-                    ErrorMessage = "Invalid username or password"
+                    ErrorMessage = "Geçersiz sicil numarası veya şifre"
                 };
             }
 
-            _logger.LogInformation($"Kullanıcı bulundu: {loginDto.Username}, ID: {user.Id}, IsAdmin: {user.IsAdmin}");
+            _logger.LogInformation($"Kullanıcı bulundu: Sicil No: {loginDto.Sicil}, ID: {user.Id}, IsAdmin: {user.IsAdmin}");
             _logger.LogInformation($"Şifre doğrulanıyor. Hash: {user.PasswordHash}");
             _logger.LogInformation($"Hash uzunluğu: {user.PasswordHash?.Length ?? 0}");
             _logger.LogInformation($"Hash formatı: {(user.PasswordHash?.StartsWith("$2") == true ? "BCrypt" : "Bilinmeyen")}");
@@ -61,22 +61,22 @@ namespace Stock.Infrastructure.Services
                 return new AuthResponseDto
                 {
                     Success = false,
-                    ErrorMessage = "Error verifying password"
+                    ErrorMessage = "Şifre doğrulama hatası"
                 };
             }
 
             if (!isPasswordValid)
             {
-                _logger.LogWarning($"Geçersiz şifre: {loginDto.Username}");
+                _logger.LogWarning($"Geçersiz şifre: Sicil No: {loginDto.Sicil}");
                 return new AuthResponseDto
                 {
                     Success = false,
-                    ErrorMessage = "Invalid username or password"
+                    ErrorMessage = "Geçersiz sicil numarası veya şifre"
                 };
             }
 
             var token = _tokenGenerator.GenerateToken(user);
-            _logger.LogInformation($"Başarılı giriş: {loginDto.Username}, Token üretildi");
+            _logger.LogInformation($"Başarılı giriş: Sicil No: {loginDto.Sicil}, Token üretildi");
 
             return new AuthResponseDto
             {

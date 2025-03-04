@@ -604,3 +604,41 @@ System.InvalidOperationException: No service for type 'MediatR.IRequestHandler`2
 - MediatR, handler sınıflarını otomatik olarak tarar ve kaydeder
 - Entity'lere yeni alan eklendiğinde veritabanı şemasını güncellemek için migration oluşturulmalıdır
 - API port numarası launchSettings.json dosyasından kontrol edilmelidir, varsayılan port değişmiş olabilir
+
+## Sistem Başlatma ve Sorun Giderme (5 Mart 2025)
+
+### Görev Tanımı
+Sistemin başlatılması ve karşılaşılan sorunların giderilmesi.
+
+### Yapılan İşlemler
+- [x] Frontend servisini başlatma
+- [x] Frontend derleme hatalarını düzeltme
+- [x] Backend servisini başlatma
+- [x] Servislerin erişilebilirliğini kontrol etme
+- [x] Hataları belgeleme (errors.md)
+
+### Karşılaşılan Sorunlar ve Çözümleri
+1. **Frontend Derleme Hatası:**
+   - Sorun: CreateUserRequest modelinde sicil alanı eksikliği
+   - Çözüm: UserService içindeki createUser metodunda CreateUserRequest nesnesine sicil alanı eklendi
+
+2. **Port Yapılandırması:**
+   - Backend: 5037 portunda çalışıyor (http://localhost:5037)
+   - Frontend: 4202 portunda çalışıyor (http://localhost:4202)
+   - Environment.ts dosyasında API URL'si doğru şekilde yapılandırıldı
+
+### Sistem Durumu (5 Mart 2025)
+- Backend API (http://localhost:5037): ✅ Çalışıyor
+- Frontend (http://localhost:4202): ✅ Çalışıyor
+- Veritabanı: ✅ Güncel ve stabil
+
+### Öğrenilen Dersler
+- MediatR handler sınıfları, ilgili Command veya Query sınıflarıyla aynı assembly'de olmalıdır
+- Handler sınıfları, IRequestHandler<TRequest, TResponse> arayüzünü uygulamalıdır
+- Handler sınıfları, Handle metodunu uygulamalıdır
+- MediatR, handler sınıflarını otomatik olarak tarar ve kaydeder
+- Entity'lere yeni alan eklendiğinde veritabanı şemasını güncellemek için migration oluşturulmalıdır
+- API port numarası launchSettings.json dosyasından kontrol edilmelidir, varsayılan port değişmiş olabilir
+- Frontend modellerinin backend modelleriyle uyumlu olması gerekir
+- Zorunlu alanların eksik olması derleme hatalarına neden olur
+- Model değişikliklerinde ilgili servislerin de güncellenmesi gerekir

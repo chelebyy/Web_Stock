@@ -26,6 +26,7 @@ export class UserService {
     const createUserRequest: CreateUserRequest = {
       username: user.username,
       password: user.passwordHash || '', // passwordHash alanını password olarak kullan
+      sicil: user.sicil,
       isAdmin: user.isAdmin
     };
     return this.http.post<any>(`${this.apiUrl}/auth/create-user`, createUserRequest);

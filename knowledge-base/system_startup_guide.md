@@ -46,18 +46,18 @@ Frontend'i başlatmak için:
 
 ```powershell
 cd frontend
-npm run start
+npm run start -- --port=4202
 ```
 
 Frontend başarıyla başlatıldığında, aşağıdaki URL'de erişilebilir olacaktır:
-- http://localhost:4200
+- http://localhost:4202
 
 ## Sistem Testi
 
 Sistemin doğru çalıştığını test etmek için:
 
 1. Swagger UI üzerinden API'yi test edin: http://localhost:5037/swagger/index.html
-2. Frontend üzerinden login işlemini test edin: http://localhost:4200/login
+2. Frontend üzerinden login işlemini test edin: http://localhost:4202/login
    - Kullanıcı adı: admin
    - Şifre: admin123
 
@@ -103,6 +103,37 @@ cd frontend
 npm run start
 ```
 
+**Sorun:** Frontend derleme hatası - CreateUserRequest modelinde sicil alanı eksikliği
+```
+X [ERROR] TS2741: Property 'sicil' is missing in type '{ username: string; password: string; isAdmin: boolean; }' but required in type 'CreateUserRequest'.
+```
+
+**Çözüm:**
+UserService içindeki createUser metodunda CreateUserRequest nesnesine sicil alanını ekleyin:
+```typescript
+createUser(user: User): Observable<any> {
+  const createUserRequest: CreateUserRequest = {
+    username: user.username,
+    password: user.passwordHash || '',
+    sicil: user.sicil,
+    isAdmin: user.isAdmin
+  };
+  return this.http.post<any>(`${this.apiUrl}/auth/create-user`, createUserRequest);
+}
+```
+
+**Sorun:** Port çakışması
+```
+Port 4200 is already in use.
+```
+
+**Çözüm:**
+Farklı bir port numarası belirterek frontend'i başlatın:
+```powershell
+cd frontend
+npm run start -- --port=4202
+```
+
 ### Veritabanı Sorunları
 
 **Sorun:** Migrations uygulanırken hata
@@ -123,6 +154,8 @@ dotnet ef database update -s ../Stock.API/Stock.API.csproj
 
 - Her servis için ayrı terminal penceresi kullanın
 - Backend servisi 5037 portunda çalışır
-- Frontend servisi 4200 portunda çalışır
+- Frontend servisi 4202 portunda çalışır (port çakışması durumunda değiştirildi)
 - Servisleri başlatmadan önce tüm portların müsait olduğundan emin olun
-- Veritabanı işlemlerinde hata alındığında, veritabanını temizleyip yeniden oluşturmak etkili bir çözümdür 
+- Veritabanı işlemlerinde hata alındığında, veritabanını temizleyip yeniden oluşturmak etkili bir çözümdür
+- Frontend modellerinin backend modelleriyle uyumlu olması gerekir
+- API URL'sinin environment.ts dosyasında doğru yapılandırıldığından emin olun 

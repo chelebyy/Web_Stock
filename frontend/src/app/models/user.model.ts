@@ -14,7 +14,7 @@ export interface User {
 }
 
 export interface LoginRequest {
-    username: string;
+    sicil: string;
     password: string;
 }
 

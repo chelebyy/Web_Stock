@@ -43,7 +43,7 @@ export class LoginComponent implements OnInit, AfterViewInit {
   private rows: number = 0;
   private mouseRadius: number = 150; // Mouse etki alanı
 
-  username: string = '';
+  sicil: string = '';
   password: string = '';
   rememberMe: boolean = false;
 
@@ -153,19 +153,19 @@ export class LoginComponent implements OnInit, AfterViewInit {
   }
 
   onSubmit(): void {
-    if (!this.username || !this.password) {
+    if (!this.sicil || !this.password) {
       this.messageService.add({
         severity: 'error',
         summary: 'Hata',
-        detail: 'Kullanıcı adı ve şifre gereklidir!',
+        detail: 'Sicil numarası ve şifre gereklidir!',
         life: 3000
       });
       return;
     }
 
-    console.log('Login isteği gönderiliyor:', { username: this.username, password: this.password });
+    console.log('Login isteği gönderiliyor:', { sicil: this.sicil, password: this.password });
 
-    this.authService.login({ username: this.username, password: this.password }).subscribe({
+    this.authService.login({ sicil: this.sicil, password: this.password }).subscribe({
       next: (response) => {
         console.log('Login başarılı:', response);
         this.messageService.add({
@@ -191,9 +191,9 @@ export class LoginComponent implements OnInit, AfterViewInit {
         let errorMessage = 'Bir hata oluştu!';
         
         if (error.status === 400) {
-          errorMessage = error.error?.message || 'Geçersiz kullanıcı adı veya şifre!';
+          errorMessage = error.error?.message || 'Geçersiz sicil numarası veya şifre!';
         } else if (error.status === 401) {
-          errorMessage = 'Kullanıcı adı veya şifre hatalı!';
+          errorMessage = 'Sicil numarası veya şifre hatalı!';
         }
 
         this.messageService.add({

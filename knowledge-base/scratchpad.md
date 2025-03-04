@@ -227,4 +227,20 @@ Kullanıcı ve admin dashboard sayfalarındaki şifre değiştirme formunun tasa
 - **Test Yazımı**: 5-6 gün
 - **Dokümantasyon**: 2-3 gün
 
-**Toplam Kalan Süre**: ~10-13 gün 
+**Toplam Kalan Süre**: ~10-13 gün
+
+## Login İşleminde Sicil Numarası Kullanma Değişikliği
+
+### Yapılan İşlemler
+- [X] Frontend'de login component.ts dosyasındaki username alanı sicil olarak değiştirildi
+- [X] Frontend'de login component.html dosyasındaki kullanıcı adı girişi sicil numarası girişi olarak değiştirildi
+- [X] Frontend'de auth.model.ts ve user.model.ts dosyalarındaki model sınıflarındaki username alanı sicil olarak güncellendi
+- [X] Frontend'de auth.service.ts dosyasındaki login metodu sicil ile çalışacak şekilde güncellendi
+- [X] Backend'de login ile ilgili DTO ve servis sınıflarında sicil numarası kullanılacak şekilde değişiklik yapıldı
+- [X] Errors.md dosyası güncellendi
+- [X] Ayrıntılı knowledge base dosyası login_sicil_knowledge_base.md oluşturuldu
+
+### Dikkat Edilmesi Gerekenler
+- Login işlemi artık kullanıcı adı değil sicil numarası ile yapılıyor
+- Kullanıcı işlemlerinde sicil numarası zorunlu alan olarak eklenmiş durumda
+- Eski kullanıcılar için sicil numarası güncellemesi gerekli olabilir 

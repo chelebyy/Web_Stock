@@ -868,4 +868,86 @@ getRoles(): Observable<Role[]> {
 getRoleById(id: number): Observable<Role> {
   return this.http.get<Role>(`${this.apiUrl}/${id}`);
 }
+```
+
+## Login İşleminde Sicil Numarası Kullanma
+
+### Yapılan Değişiklik
+**Açıklama:** Login işlemi kullanıcı adı yerine sicil numarası kullanacak şekilde değiştirildi.
+
+**Değiştirilen Dosyalar:**
+1. `frontend/src/app/models/auth.model.ts`: LoginRequest arayüzünde "username" yerine "sicil" eklendi
+2. `frontend/src/app/models/user.model.ts`: User arayüzünde sicil alanı güncellemesi
+3. `frontend/src/app/services/auth.service.ts`: Login metodu sicil kullanacak şekilde güncellendi
+4. `frontend/src/app/components/login/login.component.ts`: Bileşen sicil değişkeni kullanacak şekilde güncellendi
+5. `frontend/src/app/components/login/login.component.html`: Kullanıcı adı giriş alanı sicil numarası olarak değiştirildi
+6. Backend tarafında `LoginDto` sınıfı ve `AuthService` sınıfları sicil numarası kullanacak şekilde güncellendi
+
+**Dikkat Edilmesi Gerekenler:**
+1. Login işlemi artık kullanıcı adı yerine sicil numarası ile yapılıyor
+2. Kullanıcı oluşturma ve güncelleme işlemlerinde sicil numarası alanının zorunlu olması sağlandı
+3. Hata mesajlarında "kullanıcı adı" yerine "sicil numarası" ifadesi kullanıldı
+4. Frontend tarafında login işlemi için istek formatı değiştiği için API endpoint'i de buna göre güncellendi
+
+**Potansiyel Hatalar:**
+1. Eski kullanıcı adı ile giriş yapmaya çalışmak
+2. Backend'in sicil numarası ile kullanıcı bulma işlemi için uygun metot eksikliği
+3. Login formunda yanlış alan adı kullanılması
+
+**Çözümler:**
+1. Kullanıcılara sicil numaralarını kullanmaları gerektiği bildirilmeli
+2. Backend'de UserRepository'ye GetBySicilAsync metodu eklendi
+3. Login bileşeninde tüm kullanıcı adı alanları sicil alanı ile değiştirildi
+
+```typescript
+// Önceki hatalı kod
+roles: RoleWithUsers[] = [];
+this.roleForm = this.fb.group({
+  id: [null],
+  name: ['', [Validators.required]]
+});
+
+// Düzeltilmiş kod
+roles: Role[] = [];
+this.roleForm = this.fb.group({
+  id: [null],
+  name: ['', [Validators.required]],
+  description: ['', [Validators.required]]
+});
+```
+
+```typescript
+// Önceki hatalı kod
+const selectedRole = this.roleForm.get('name')?.value;
+const roleData = {
+  id: this.editMode ? selectedRole.id : null,
+  name: selectedRole.name
+};
+
+// Düzeltilmiş kod
+const roleData = {
+  id: this.roleForm.get('id')?.value,
+  name: this.roleForm.get('name')?.value,
+  description: this.roleForm.get('description')?.value
+};
+```
+
+```typescript
+// Önceki hatalı kod
+getRoles(): Observable<Role[]> {
+  return this.http.get<Role[]>(`${this.apiUrl}/roles`);
+}
+
+getRoleById(id: number): Observable<Role> {
+  return this.http.get<Role>(`${this.apiUrl}/roles/${id}`);
+}
+
+// Düzeltilmiş kod
+getRoles(): Observable<Role[]> {
+  return this.http.get<Role[]>(`${this.apiUrl}`);
+}
+
+getRoleById(id: number): Observable<Role> {
+  return this.http.get<Role>(`${this.apiUrl}/${id}`);
+}
 ``` 

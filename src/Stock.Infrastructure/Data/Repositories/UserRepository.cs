@@ -33,6 +33,13 @@ namespace Stock.Infrastructure.Data.Repositories
                 .FirstOrDefaultAsync(x => x.Username == username);
         }
 
+        public async Task<User?> GetBySicilAsync(string sicil)
+        {
+            return await _dbSet
+                .Include(x => x.Role)
+                .FirstOrDefaultAsync(x => x.Sicil == sicil);
+        }
+
         public async Task<IEnumerable<User>> GetUsersWithRolesAsync()
         {
             return await _dbSet

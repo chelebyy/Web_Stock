@@ -21,6 +21,13 @@ namespace Stock.Infrastructure.Repositories
                 .FirstOrDefaultAsync(u => u.Username == username && !u.IsDeleted);
         }
 
+        public async Task<User?> GetBySicilAsync(string sicil)
+        {
+            return await _dbSet
+                .Include(u => u.Role)
+                .FirstOrDefaultAsync(u => u.Sicil == sicil && !u.IsDeleted);
+        }
+
         public async Task<IEnumerable<User>> GetUsersWithRolesAsync()
         {
             return await _dbSet

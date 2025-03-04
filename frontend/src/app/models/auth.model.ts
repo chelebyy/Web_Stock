@@ -1,5 +1,5 @@
 export interface LoginRequest {
-    username: string;
+    sicil: string;
     password: string;
 }
 
@@ -15,6 +15,7 @@ export interface LoginResponse {
 export interface User {
     id: number;
     username: string;
+    sicil: string;
     isAdmin: boolean;
     createdAt: string;
     lastLoginAt: string | null;
@@ -23,6 +24,7 @@ export interface User {
 export interface CreateUserRequest {
     username: string;
     password: string;
+    sicil: string;
     isAdmin: boolean;
 }
 

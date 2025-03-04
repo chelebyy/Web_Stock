@@ -38,6 +38,7 @@ Bu dosya, proje geliştirme sürecinde karşılaşılan hataları ve çözümler
   - [API URL Hatası](#api-url-hatası)
 - [Kullanıcı Silme İşlemi Hataları](#kullanıcı-silme-işlemi-hataları)
 - [Kullanıcı Güncelleme Hatası](#kullanıcı-güncelleme-hatası)
+- [Frontend Derleme Hataları](#frontend-derleme-hataları)
 
 ## Clean Architecture Geçişi Hataları
 
@@ -1257,3 +1258,55 @@ CreateMap<User, UserDto>()
 - MediatR, handler sınıflarını otomatik olarak tarar ve kaydeder
 - Handler sınıfları, ilgili Command veya Query sınıflarıyla aynı assembly'de olmalıdır
 - Sicil alanı eklendiğinde veritabanı şemasını güncellemek için migration oluşturulmalıdır
+
+## Frontend Derleme Hataları
+
+### CreateUserRequest Modeli Sicil Alanı Eksikliği
+
+**Hata:**
+```
+X [ERROR] TS2741: Property 'sicil' is missing in type '{ username: string; password: string; isAdmin: boolean; }' but required in type 'CreateUserRequest'.
+```
+
+**Nedeni:**
+1. UserService içindeki createUser metodunda CreateUserRequest nesnesine sicil alanı eklenmemiş
+2. CreateUserRequest modelinde sicil alanı zorunlu olarak tanımlanmış
+
+**Çözüm:**
+UserService içindeki createUser metodunda CreateUserRequest nesnesine sicil alanını ekle:
+```typescript
+createUser(user: User): Observable<any> {
+  const createUserRequest: CreateUserRequest = {
+    username: user.username,
+    password: user.passwordHash || '',
+    sicil: user.sicil,
+    isAdmin: user.isAdmin
+  };
+  return this.http.post<any>(`${this.apiUrl}/auth/create-user`, createUserRequest);
+}
+```
+
+**Önemli Notlar:**
+- Frontend modellerinin backend modelleriyle uyumlu olması gerekir
+- Zorunlu alanların eksik olması derleme hatalarına neden olur
+- Model değişikliklerinde ilgili servislerin de güncellenmesi gerekir
+
+### Backend ve Frontend Port Yapılandırması
+
+**Durum:**
+- Backend servisi 5037 portunda çalışıyor (http://localhost:5037)
+- Frontend servisi 4202 portunda çalışıyor (http://localhost:4202)
+
+**Yapılandırma:**
+Frontend environment.ts dosyasında API URL'si doğru şekilde yapılandırılmış:
+```typescript
+export const environment = {
+    production: false,
+    apiUrl: 'http://localhost:5037'
+};
+```
+
+**Önemli Notlar:**
+- Backend ve frontend servislerinin farklı portlarda çalışması gerekir
+- CORS yapılandırmasının doğru olması gerekir
+- Frontend'in backend API'sine erişebilmesi için doğru URL yapılandırması önemlidir

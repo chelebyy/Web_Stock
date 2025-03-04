@@ -30,6 +30,7 @@ export class AuthService {
         const user: User = {
           id: parseInt(decodedToken.nameid),
           username: decodedToken.name,
+          sicil: decodedToken.sicil || '',
           isAdmin: decodedToken.role === 'Admin',
           createdAt: decodedToken.created_at || '',
           lastLoginAt: decodedToken.last_login_at
@@ -54,6 +55,7 @@ export class AuthService {
             const user: User = {
               id: parseInt(decodedToken.nameid),
               username: decodedToken.unique_name,
+              sicil: decodedToken.sicil || '',
               isAdmin: decodedToken.role === 'Admin',
               createdAt: new Date().toISOString(),
               lastLoginAt: new Date().toISOString()
