@@ -294,3 +294,106 @@ Kullanıcılar artık zaten kullanımda olan bir sicil numarası ile kullanıcı
 ```
 
 Bu sayede kullanıcılar, hatanın tam olarak ne olduğunu ve nasıl düzelteceklerini anlayabilirler. 
+
+## Aktif Görev: İzin Yönetimi Sayfası ve Entegrasyon İyileştirmeleri
+
+### Görev Tanımı
+İzin yönetimi sayfasındaki "Sayfa Erişim İzinleri" bölümünü geliştirmek, kullanıcı oluşturma/düzenleme işlevlerini test etmek ve frontend-backend entegrasyonunu iyileştirmek.
+
+### Yapılacaklar
+- [X] API yanıt formatı ile ilgili sorunları çözmek (ReferenceHandler.Preserve)
+- [X] *ngFor ve ReferenceHandler.Preserve sorunlarını çözmek
+- [X] Kullanıcı ekleme/silme API bağlantı sorunlarını çözmek
+- [X] Rol yönetimi sayfasında sayfa erişim izinleri bölümünü tasarlamak
+- [X] ToggleButton bileşeni sorunlarını çözmek
+- [ ] İzin yönetimi sayfasındaki "Sayfa Erişim İzinleri" bölümünü geliştirmek 
+- [ ] Kullanıcı oluşturma/düzenleme işlevlerini test etmek
+- [ ] Frontend ve backend entegrasyonunu daha da iyileştirmek
+
+### Güncel İlerleme (10 Mart 2025)
+
+#### Tamamlanan İşler
+1. **Backend API ve ReferenceHandler.Preserve İyileştirmeleri**
+   - Program.cs'de JSON serileştirme ayarlarını değiştirdik (IgnoreCycles -> Preserve)
+   - API yanıtlarının frontend tarafında doğru işlenmesi için normalizeResponse metodu ekledik
+   - İç içe veri yapılarında da format kontrolü yapacak şekilde kodları güncelledik
+
+2. **Frontend İyileştirmeleri**
+   - UserService ve RoleService'de API yanıt işleme mantığını geliştirdik
+   - PrimeNG Table ve ngFor sorunlarını çözdük
+   - Bileşenlerde veri bağlama mantığını düzelttik
+
+3. **Kullanıcı Yönetimi Entegrasyonu**
+   - UserController ve UsersController tutarsızlığını giderdik
+   - Frontend API endpoint referanslarını düzelttik
+   - Token doğrulama sorunlarını çözdük
+
+#### Devam Eden İşler
+1. **İzin Yönetimi Sayfası Geliştirmeleri**
+   - Sayfa Erişim İzinleri bölümünün içeriğini zenginleştirme
+   - İzin gruplamasını iyileştirme
+   - Daha görsel ve kullanıcı dostu bir arayüz tasarlama
+
+2. **Kullanıcı İşlemleri Test ve İyileştirmeleri**
+   - Kullanıcı oluşturma işlemlerini ayrıntılı test etme
+   - Rol-izin ilişkilerini doğrulama
+   - Kullanıcı silme işleminde ilişkili veri kontrollerini iyileştirme
+
+3. **Frontend-Backend Entegrasyonu**
+   - API endpoint tutarlılığını sağlama
+   - Hata yönetimini geliştirme
+   - Kullanıcı deneyimini iyileştirme
+
+## Proje Bilgileri
+
+### Teknoloji Stack
+- Backend: .NET Core 9
+- Veritabanı: PostgreSQL 17.3 (Local)
+- Frontend: Angular 19.1.2
+- UI Kütüphanesi: PrimeNG 19.0.6
+- CSS Framework: Tailwind CSS 3.4.1
+- Geliştirme Araçları: npm, ESLint
+
+### Sistem Durumu
+- Backend: http://localhost:5037 adresinde çalışıyor
+- Frontend: http://localhost:4207 adresinde çalışıyor
+- Admin kullanıcısı (admin/admin123) ile giriş başarıyla yapılabiliyor
+- JWT token doğrulama sistemi sorunsuz çalışıyor
+- Rol ve kullanıcı yönetimi sayfaları aktif
+- Http 200 OK yanıtları alınıyor
+- API yanıt formatı ReferenceHandler.Preserve kullanılıyor
+- Frontend bileşenleri ReferenceHandler.Preserve formatıyla uyumlu çalışacak şekilde güncellendi
+
+## Öğrenilen Dersler
+
+### API ve Veri Formatı
+- ReferenceHandler.Preserve kullanıldığında, API yanıtlarının formatta oynamalara dikkat edilmeli
+- Frontend'de diziyi doğrudan kullanmak yerine $values içeriğine erişilmeli
+- jQuery ve Angular direktivleri düz diziler bekler, özel formatta dönüşüm yapılmalı
+
+### API Endpoint İsimlendirmesi
+- Controller isimlendirmelerinde tutarlı olmak çok önemli (tekil/çoğul)
+- Frontend'de API endpoint yollarının backend ile tam uyumlu olmasına dikkat edilmeli
+- API endpoint değişikliklerinde tüm servis çağrıları gözden geçirilmeli
+
+### PrimeNG Bileşenleri
+- ToggleButton özellikleri için doğru bağlama teknikleri kullanılmalı
+- Tablo bileşenlerinde veri formatı düzgün olmalı
+- Bileşen özelliklerinde kullanımdan kalkan özelliklere dikkat edilmeli
+
+### Hata Yönetimi
+- Backend API hatalarının frontend'de düzgün gösterilmesi sağlanmalı
+- API yanıtlarında farklı formatlar kontrol edilmeli
+- Tip dönüşümleri için güvenli yöntemler kullanılmalı
+
+## Yapılan Güncellemeler (10 Mart 2025)
+- API yanıt formatı sorunları çözüldü
+- Role ve User service'lerde normalizeResponse metodu iyileştirildi
+- Frontend bileşenlerinde veri bağlama sorunları giderildi
+- ToggleButton kullanımı düzeltildi
+- API endpoint tutarsızlıkları giderildi
+
+## Sonraki Adımlar
+1. İzin yönetimi sayfasındaki "Sayfa Erişim İzinleri" bölümünü geliştirme 
+2. Kullanıcı oluşturma/düzenleme işlevlerini test etme
+3. Frontend ve backend entegrasyonunu daha da iyileştirme 
