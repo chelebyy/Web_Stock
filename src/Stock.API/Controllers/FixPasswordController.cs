@@ -93,15 +93,17 @@ namespace Stock.API.Controllers
         {
             try
             {
-                _logger.LogInformation("Kullanıcı şifrelerini düzeltme işlemi başlatıldı");
-                
-                // Admin kullanıcısının şifresini düzelt
+                _logger.LogInformation("Kullanıcı şifrelerini ve sicil alanlarını düzeltme işlemi başlatıldı");
+
+                // Admin kullanıcısının şifresini ve sicil alanını düzelt
                 var adminUser = await _context.Users.FirstOrDefaultAsync(u => u.Username == "admin");
                 if (adminUser != null)
                 {
                     var adminPassword = "admin123";
                     adminUser.PasswordHash = _passwordHasher.HashPassword(adminPassword);
+                    adminUser.Sicil = "A001";
                     _logger.LogInformation($"Admin kullanıcısının şifresi güncellendi. Yeni hash: {adminUser.PasswordHash}");
+                    _logger.LogInformation($"Admin kullanıcısının sicil alanı güncellendi: {adminUser.Sicil}");
                     await _context.SaveChangesAsync();
                 }
                 else
@@ -109,30 +111,61 @@ namespace Stock.API.Controllers
                     _logger.LogWarning("Admin kullanıcısı bulunamadı");
                 }
 
-                // Normal kullanıcının şifresini düzelt
+                // Normal kullanıcının şifresini ve sicil alanını düzelt
                 var normalUser = await _context.Users.FirstOrDefaultAsync(u => u.Username == "user");
                 if (normalUser != null)
                 {
                     var userPassword = "user123";
                     normalUser.PasswordHash = _passwordHasher.HashPassword(userPassword);
+                    normalUser.Sicil = "U001";
                     _logger.LogInformation($"User kullanıcısının şifresi güncellendi. Yeni hash: {normalUser.PasswordHash}");
+                    _logger.LogInformation($"User kullanıcısının sicil alanı güncellendi: {normalUser.Sicil}");
                     await _context.SaveChangesAsync();
                 }
                 else
                 {
-                    _logger.LogWarning("User kullanıcısı bulunamadı");
+                    _logger.LogWarning("User kullanıcısı bulunamadı, oluşturuluyor...");
+                    
+                    // User kullanıcısı yoksa oluştur
+                    var userRole = await _context.Roles.FirstOrDefaultAsync(r => r.Name == "User");
+                    if (userRole == null)
+                    {
+                        _logger.LogWarning("User rolü bulunamadı, oluşturuluyor...");
+                        userRole = new Domain.Entities.Role
+                        {
+                            Name = "User",
+                            Description = "Normal kullanıcı",
+                            CreatedAt = DateTime.UtcNow
+                        };
+                        await _context.Roles.AddAsync(userRole);
+                        await _context.SaveChangesAsync();
+                    }
+                    
+                    var newUser = new Domain.Entities.User
+                    {
+                        Username = "user",
+                        PasswordHash = _passwordHasher.HashPassword("user123"),
+                        IsAdmin = false,
+                        RoleId = userRole.Id,
+                        Sicil = "U001",
+                        CreatedAt = DateTime.UtcNow
+                    };
+                    
+                    await _context.Users.AddAsync(newUser);
+                    await _context.SaveChangesAsync();
+                    _logger.LogInformation("User kullanıcısı başarıyla oluşturuldu");
                 }
 
-                return Ok(new { 
-                    message = "Kullanıcı şifreleri başarıyla güncellendi.",
+                return Ok(new {
+                    message = "Kullanıcı şifreleri ve sicil alanları başarıyla güncellendi.",
                     adminInfo = "Kullanıcı adı: admin, Sicil: A001, Şifre: admin123",
                     userInfo = "Kullanıcı adı: user, Sicil: U001, Şifre: user123"
                 });
             }
             catch (Exception ex)
             {
-                _logger.LogError($"Şifreler güncellenirken hata oluştu: {ex.Message}");
-                return StatusCode(500, "Bir hata oluştu");
+                _logger.LogError($"Şifre ve sicil alanları güncellenirken hata oluştu: {ex.Message}");
+                return StatusCode(500, "Bir hata oluştu: " + ex.Message);
             }
         }
     }

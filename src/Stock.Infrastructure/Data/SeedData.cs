@@ -2,6 +2,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Stock.Domain.Entities;
+using Stock.Domain.Interfaces;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -23,7 +24,7 @@ namespace Stock.Infrastructure.Data
                 
                 await SeedPermissionsAsync(context);
                 await SeedRolesAsync(context);
-                await SeedUsersAsync(context);
+                await SeedUsersAsync(context, services);
                 await SeedRolePermissionsAsync(context);
             }
             catch (Exception ex)
@@ -87,37 +88,92 @@ namespace Stock.Infrastructure.Data
             await context.SaveChangesAsync();
         }
 
-        private static async Task SeedUsersAsync(ApplicationDbContext context)
+        private static async Task SeedUsersAsync(ApplicationDbContext context, IServiceProvider services)
         {
-            if (await context.Users.AnyAsync())
-                return;
+            var passwordHasher = services.GetRequiredService<IPasswordHasher>();
+            var logger = services.GetRequiredService<ILogger<ApplicationDbContext>>();
 
             var adminRole = await context.Roles.FirstOrDefaultAsync(r => r.Name == "Admin");
             var userRole = await context.Roles.FirstOrDefaultAsync(r => r.Name == "User");
 
-            var users = new List<User>
+            if (adminRole == null || userRole == null)
             {
-                new User
+                logger.LogWarning("Admin veya User rolü bulunamadı. Roller oluşturulduktan sonra tekrar deneyin.");
+                return;
+            }
+
+            // Admin kullanıcısını kontrol et ve güncelle
+            var adminUser = await context.Users.FirstOrDefaultAsync(u => u.Username == "admin");
+            if (adminUser == null)
+            {
+                // Admin kullanıcısı yoksa oluştur
+                adminUser = new User
                 {
                     Username = "admin",
-                    PasswordHash = BCrypt.Net.BCrypt.HashPassword("admin123"),
+                    PasswordHash = passwordHasher.HashPassword("admin123"),
                     IsAdmin = true,
-                    RoleId = adminRole?.Id,
+                    RoleId = adminRole.Id,
                     Sicil = "A001",
                     CreatedAt = DateTime.UtcNow
-                },
-                new User
+                };
+                
+                await context.Users.AddAsync(adminUser);
+                logger.LogInformation("Admin kullanıcısı oluşturuldu.");
+            }
+            else
+            {
+                // Admin kullanıcısı varsa kontrol et ve güncelle
+                if (string.IsNullOrEmpty(adminUser.Sicil))
+                {
+                    adminUser.Sicil = "A001";
+                    logger.LogInformation("Admin kullanıcısının sicil alanı güncellendi: A001");
+                }
+                
+                adminUser.PasswordHash = passwordHasher.HashPassword("admin123");
+                adminUser.IsAdmin = true;
+                adminUser.RoleId = adminRole.Id;
+                
+                context.Users.Update(adminUser);
+                logger.LogInformation("Admin kullanıcısı güncellendi.");
+            }
+            
+            await context.SaveChangesAsync();
+
+            // Normal kullanıcıyı kontrol et ve güncelle
+            var normalUser = await context.Users.FirstOrDefaultAsync(u => u.Username == "user");
+            if (normalUser == null)
+            {
+                // Normal kullanıcı yoksa oluştur
+                normalUser = new User
                 {
                     Username = "user",
-                    PasswordHash = BCrypt.Net.BCrypt.HashPassword("user123"),
+                    PasswordHash = passwordHasher.HashPassword("user123"),
                     IsAdmin = false,
-                    RoleId = userRole?.Id,
+                    RoleId = userRole.Id,
                     Sicil = "U001",
                     CreatedAt = DateTime.UtcNow
+                };
+                
+                await context.Users.AddAsync(normalUser);
+                logger.LogInformation("User kullanıcısı oluşturuldu.");
+            }
+            else
+            {
+                // Normal kullanıcı varsa kontrol et ve güncelle
+                if (string.IsNullOrEmpty(normalUser.Sicil))
+                {
+                    normalUser.Sicil = "U001";
+                    logger.LogInformation("User kullanıcısının sicil alanı güncellendi: U001");
                 }
-            };
-
-            await context.Users.AddRangeAsync(users);
+                
+                normalUser.PasswordHash = passwordHasher.HashPassword("user123");
+                normalUser.IsAdmin = false;
+                normalUser.RoleId = userRole.Id;
+                
+                context.Users.Update(normalUser);
+                logger.LogInformation("User kullanıcısı güncellendi.");
+            }
+            
             await context.SaveChangesAsync();
         }
 

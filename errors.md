@@ -1270,12 +1270,12 @@ Bu hata, Clean Architecture'ın temel prensiplerinden biri olan "iç katmanlar d
 Bu çözüm, tüm katmanların uyumlu çalışmasını sağlayarak Clean Architecture prensiplerini korumaktadır.
 
 ### Öğrenilen Dersler
-1. Frontend ve backend arasındaki model uyumluluğu kritik önem taşır
-2. Clean Architecture'da değişiklikler tüm katmanları etkileyebilir
-3. CQRS pattern kullanıldığı için Command ve Handler sınıflarının eksiksiz tanımlanması gerekir
-4. API endpoint'lerini test etmek için Swagger veya Postman gibi araçlar kullanılmalıdır
-5. Hata ayıklama için detaylı loglama yapılması sorunların hızlı çözülmesine yardımcı olur
-6. Frontend isteklerinin beklendiği gibi formatlarda gönderilip gönderilmediğini kontrol etmek önemlidir
+1. Veritabanı kısıtlamaları eklemeden önce mevcut verilerin bu kısıtlamalara uygun olup olmadığı kontrol edilmelidir.
+2. Mevcut veriler kısıtlamalara uymuyorsa, önce veri temizliği yapılmalı veya uygulama seviyesinde kontrollerle ilerlenmelidir.
+3. Hata durumlarını kullanıcıya net ve anlaşılır mesajlarla iletmek, kullanıcı memnuniyetini artırır.
+4. Farklı katmanlar arasında hata mesajlarının iletimi, iyi tasarlanmış bir API sözleşmesi ile sağlanmalıdır.
+5. Frontend uygulamasında API hata mesajlarını doğrudan göstermek, sorunların hızlı teşhisine olanak tanır.
+6. Loglama stratejisi, hem geliştirme hem de canlı ortamlarda sorunların tespit edilmesine yardımcı olur.
 
 ## Kullanıcı Ekleme Hatası (500 Internal Server Error)
 
@@ -1379,3 +1379,133 @@ password: user.password || user.passwordHash || '', // Önce password, yoksa pas
 4. Farklı katmanlar arasında hata mesajlarının iletimi, iyi tasarlanmış bir API sözleşmesi ile sağlanmalıdır.
 5. Frontend uygulamasında API hata mesajlarını doğrudan göstermek, sorunların hızlı teşhisine olanak tanır.
 6. Loglama stratejisi, hem geliştirme hem de canlı ortamlarda sorunların tespit edilmesine yardımcı olur.
+
+## GitHub Senkronizasyonu ve Kullanıcı Şifre/Sicil Sorunları
+
+**Hata:** GitHub'dan son değişiklikleri çektikten sonra kullanıcı girişi yapılamıyor. Veritabanında sadece admin kullanıcısı kalıyor ve sicil alanı boş oluyor.
+
+**Tarih:** 2025-03-05
+
+**Nedeni:**
+1. Son migration'lar veritabanında kritik değişiklikler yapıyor:
+   - Normal kullanıcı (user) siliniyor
+   - User rolü siliniyor
+   - Admin kullanıcısının şifresi değişiyor ve sicil alanı boşaltılıyor
+2. SeedData mekanizması, veritabanında zaten bir admin kullanıcısı olduğu için çalışmıyor ve yeni kullanıcıları eklemiyor.
+3. Farklı ortamlarda (ev ve iş) aynı GitHub repo kullanıldığında, her ortamda migration'lar farklı durumda olabiliyor.
+
+**İncelenen Migration'lar:**
+```sql
+-- 20250305173319_PendingChanges migration'ından
+DELETE FROM "Users" WHERE "Id" = 2;
+DELETE FROM "Roles" WHERE "Id" = 2;
+UPDATE "Users" SET "PasswordHash" = '...', "Sicil" = '' WHERE "Id" = 1;
+```
+
+**Çözüm:**
+1. FixPasswordController adında yeni bir controller oluşturuldu:
+   ```csharp
+   [HttpGet("fix-passwords")]
+   public async Task<IActionResult> FixPasswords()
+   {
+       // Admin kullanıcısının şifresini ve sicil alanını düzelt
+       var adminUser = await _context.Users.FirstOrDefaultAsync(u => u.Username == "admin");
+       if (adminUser != null)
+       {
+           adminUser.PasswordHash = _passwordHasher.HashPassword("admin123");
+           adminUser.Sicil = "A001";
+           await _context.SaveChangesAsync();
+       }
+       
+       // Normal kullanıcı yoksa oluştur veya güncelle
+       var normalUser = await _context.Users.FirstOrDefaultAsync(u => u.Username == "user");
+       if (normalUser == null)
+       {
+           // User kullanıcısı yoksa oluştur
+           var userRole = await _context.Roles.FirstOrDefaultAsync(r => r.Name == "User");
+           if (userRole == null)
+           {
+               // User rolü yoksa oluştur
+               userRole = new Role { Name = "User", Description = "Normal kullanıcı" };
+               await _context.Roles.AddAsync(userRole);
+               await _context.SaveChangesAsync();
+           }
+           
+           var newUser = new User
+           {
+               Username = "user",
+               PasswordHash = _passwordHasher.HashPassword("user123"),
+               IsAdmin = false,
+               RoleId = userRole.Id,
+               Sicil = "U001"
+           };
+           
+           await _context.Users.AddAsync(newUser);
+           await _context.SaveChangesAsync();
+       }
+       else
+       {
+           normalUser.PasswordHash = _passwordHasher.HashPassword("user123");
+           normalUser.Sicil = "U001";
+           await _context.SaveChangesAsync();
+       }
+   }
+   ```
+
+2. SeedData mekanizması güncellendi, artık kullanıcılar varsa da güncelleniyor:
+   ```csharp
+   private static async Task SeedUsersAsync(ApplicationDbContext context, IServiceProvider services)
+   {
+       var passwordHasher = services.GetRequiredService<IPasswordHasher>();
+       
+       // Admin kullanıcısını kontrol et ve güncelle
+       var adminUser = await context.Users.FirstOrDefaultAsync(u => u.Username == "admin");
+       if (adminUser == null)
+       {
+           // Admin kullanıcısı yoksa oluştur
+           adminUser = new User
+           {
+               Username = "admin",
+               PasswordHash = passwordHasher.HashPassword("admin123"),
+               IsAdmin = true,
+               Sicil = "A001"
+           };
+           
+           await context.Users.AddAsync(adminUser);
+       }
+       else
+       {
+           // Admin kullanıcısı varsa kontrol et ve güncelle
+           if (string.IsNullOrEmpty(adminUser.Sicil))
+           {
+               adminUser.Sicil = "A001";
+           }
+           
+           adminUser.PasswordHash = passwordHasher.HashPassword("admin123");
+           context.Users.Update(adminUser);
+       }
+       
+       // Normal kullanıcı için benzer kontroller ve güncellemeler...
+   }
+   ```
+
+**Kullanımı:**
+GitHub'dan son değişiklikleri çektikten sonra, eğer kullanıcı girişi yapılamıyorsa:
+1. API uygulamasını başlatın
+2. `/api/FixPassword/fix-passwords` endpoint'ine istek atın
+3. Bu işlem hem admin hem de normal kullanıcı hesaplarını düzeltecek
+
+**Öğrenilen Dersler:**
+1. Veritabanı şemasında kritik değişiklikler yapan migration'lar dikkatli planlanmalı
+2. Seed data mekanizmaları mevcut verilerin kontrolünü ve gerektiğinde güncellemesini içermeli
+3. Farklı ortamlar arasında geçiş yapıldığında veritabanı durumunu senkronize tutmak için özel mekanizmalar gerekebilir
+4. Critical fix endpoint'leri gibi acil durum onarım mekanizmaları oluşturulmalı
+5. Migration'ların içeriğini commit etmeden önce olası etkileri değerlendirilmeli
+6. Farklı ortamlar arasındaki senkronizasyon sorunları için dokümantasyon sağlanmalı
+
+**Önleyici Önlemler:**
+1. Migration'lar, mevcut verileri silmek yerine güncellemeyi tercih etmeli
+2. Seed data, var olan verilerin kontrolünü ve gerektiğinde güncellemesini içermeli
+3. Kritik veritabanı değişiklikleri için rollback stratejisi planlanmalı
+4. Önemli alanlar için varsayılan değerler atanmalı
+5. Farklı ortamlar arasında geçiş rehberi oluşturulmalı
