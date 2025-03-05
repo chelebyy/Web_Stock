@@ -8,6 +8,7 @@ Bu rehber, stok yönetim sisteminin doğru şekilde başlatılması için adım 
 - [Backend Başlatma](#backend-başlatma)
 - [Frontend Başlatma](#frontend-başlatma)
 - [Sorun Giderme](#sorun-giderme)
+- [Ortamlar Arası Geçiş (Ev ve İş)](#ortamlar-arası-geçiş-ev-ve-iş)
 
 ## Ön Koşullar
 
@@ -116,11 +117,52 @@ ng serve --port 4203
 
 Farklı ortamlar (ev ve iş) arasında geçiş yaparken, GitHub senkronizasyonu sonrası şu adımları izleyin:
 
-1. Önce değişiklikleri çekin: `git pull`
-2. Backend projesine gidin: `cd src/Stock.API`
-3. Veritabanı güncellemesini kontrol edin: `dotnet ef database update --verbose`
-4. Backend'i başlatın: `dotnet run`
-5. Kullanıcı şifrelerini düzeltin: `http://localhost:5037/api/FixPassword/fix-passwords` (tarayıcıda açın)
-6. Frontend'i başlatın: `cd frontend && ng serve --port 4202`
+1. Önce değişiklikleri çekin: 
+```powershell
+git pull
+```
+
+2. Backend projesine gidin: 
+```powershell
+cd src/Stock.API
+```
+
+3. Veritabanı güncellemesini kontrol edin: 
+```powershell
+dotnet ef database update --verbose
+```
+
+4. Hata almanız durumunda, ortamlar arası geçiş sorunu yaşıyorsanız temiz başlangıç yapabilirsiniz:
+```powershell
+# Veritabanını tamamen yeniden oluşturun
+dotnet ef database drop --force
+dotnet ef database update
+```
+
+5. Backend'i başlatın: 
+```powershell
+dotnet run
+```
+
+6. **Önemli:** Kullanıcı verilerini düzelten endpoint'i çağırın:
+```
+http://localhost:5037/api/FixPassword/fix-passwords
+```
+Bu işlem, aşağıdaki düzeltmeleri gerçekleştirir:
+   - Admin kullanıcısının şifresini ve sicil alanını düzeltir (admin/admin123, sicil: A001)
+   - Normal kullanıcı hesaplarını kontrol eder, yoksa oluşturur, varsa günceller
+   - Rol tanımlamalarını kontrol eder, eksikse oluşturur
+
+7. Frontend'i başlatın: 
+```powershell
+cd frontend
+npm install  # Sadece gerekiyorsa (bağımlılıklar değiştiyse)
+ng serve --port 4202
+```
+
+8. Tarayıcıdan uygulamaya erişin ve login olun: 
+```
+http://localhost:4202
+```
 
 Bu adımlar, farklı ortamlar arasında geçiş yaparken oluşabilecek veritabanı ve kullanıcı kimlik doğrulama sorunlarını önleyecektir. 

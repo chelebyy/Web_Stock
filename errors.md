@@ -55,6 +55,8 @@ Bu dosya, proje geliştirme sürecinde karşılaşılan hataları ve çözümler
 - [PrimeNG Table ve Döngüsel Referans Hatası](#primeNG-table-ve-döngüsel-referans-hatası)
 - [Angular *ngFor ve ReferenceHandler.Preserve Hatası](#angular-ngfor-ve-referencehandlerpreserve-hatası)
 - [ReactiveForm Disabled Özelliği Sorunu](#reactiveform-disabled-özelliği-sorunu)
+- [Kullanıcı Güncelleme ID Uyuşmazlığı Hatası](#kullanıcı-güncelleme-id-uyuşmazlığı-hatası)
+- [Ortamlar Arası Geçiş Sorunları](#ortamlar-arası-geçiş-sorunları)
 
 ## Clean Architecture Geçişi Hataları
 
@@ -2109,3 +2111,94 @@ const userData = {...this.userForm.getRawValue()};
 - Backend'den alınan verilerin frontend'de gösterilmesi için doğru şekilde dönüştürülmesi gerekir
 
 **Referans:** [knowledge-base/user_management_troubleshooting.md](../knowledge-base/user_management_troubleshooting.md)
+
+## Kullanıcı Güncelleme ID Uyuşmazlığı Hatası
+
+**Tarih:** 2025-06-03
+
+**Hata Mesajı:**
+```
+PUT http://localhost:5037/api/Users/2 400 (Bad Request)
+warn: Stock.API.Controllers.UsersController[0]
+      ID uyuşmazlığı: URL'deki 2 ile gönderilen 0 eşleşmiyor
+```
+
+**Nedeni:**
+1. Backend UsersController'da kullanıcı güncellemesi yapılırken, URL'deki ID (örneğin `/api/Users/2`) ile request body'deki ID'nin (örneğin `0` veya eksik) aynı olması beklenir.
+2. Frontend'den gönderilen kullanıcı nesnesinde `id` alanı eksik veya `0` olarak gönderiliyor.
+3. Backend'de aşağıdaki kontrol yapılıyor:
+```csharp
+if (id != command.Id)
+{
+    _logger.LogWarning("ID uyuşmazlığı: URL'deki {UrlId} ile gönderilen {CommandId} eşleşmiyor", id, command.Id);
+    return BadRequest(new { error = "URL'deki ID ile request body'deki ID eşleşmiyor." });
+}
+```
+
+**Çözüm:**
+1. Frontend tarafında `saveUser` metodunda, düzenleme modunda gönderilen formData nesnesine `id` alanını eklemek:
+```typescript
+// Düzenleme modunda id değerini ekleyelim
+if (this.editMode) {
+  formData.id = this.user.id; // ID'yi request body'ye ekliyoruz
+}
+```
+
+2. Frontend'de hata mesajını daha açıklayıcı hale getirmek:
+```typescript
+if (error.error && error.error.error) {
+  errorMessage = `Hata: ${error.error.error}`;
+}
+```
+
+3. Backend'de ID kontrolünü düzgün loglamak (hali hazırda yapılmış durumda)
+
+**Önemli Notlar:**
+- Frontend-backend arasındaki model uyumlulukları önemlidir
+- Backend API'ye yapılan isteklerde gönderilen verilerin formatına dikkat edilmelidir
+- Hata mesajları kullanıcıya anlamlı bir şekilde gösterilmelidir
+- HTTP 400 Bad Request hatası, genellikle istek formatının doğru olmadığını gösterir
+
+## Ortamlar Arası Geçiş Sorunları
+
+**Tarih:** 2025-06-03
+
+**Sorun:** 
+İş ve ev ortamları arasında geçiş yaparken, GitHub'dan son değişiklikleri çektikten sonra veritabanı ve kullanıcı verileri tutarsızlıkları oluşabiliyor. Özellikle:
+1. Kullanıcı giriş bilgileri (şifreler) çalışmayabiliyor
+2. Rol tanımlamaları eksik olabiliyor
+3. Sicil alanları boş kalabiliyor 
+4. Veritabanı migration'ları tutarsız olabiliyor
+
+**Nedeni:**
+1. GitHub'dan çekilen migration'lar halihazırda uygulanmış olabiliyor
+2. Veritabanında bazı kullanıcı bilgileri (özellikle şifreler ve sicil alanları) sıfırlanmış olabiliyor
+3. Farklı ortamlardaki veritabanı durumları arasında tutarsızlıklar olabiliyor
+4. SeedData mekanizması, sadece veritabanı boşsa çalışacak şekilde tasarlanmış olabiliyor
+
+**Çözüm:**
+1. Ortamlar arası geçiş yaptıktan sonra, kullanıcı verilerini düzeltmek için özel bir endpoint kullanın:
+```
+http://localhost:5037/api/FixPassword/fix-passwords
+```
+
+2. Bu endpoint aşağıdaki işlemleri gerçekleştirir:
+   - Admin kullanıcısının şifresini ve sicil alanını düzeltir
+   - Normal kullanıcı hesaplarını kontrol eder ve günceller veya oluşturur
+   - Rol tanımlamalarını kontrol eder ve günceller veya oluşturur
+
+3. Veritabanı migration sorunları için temiz başlangıç yapın (gerekirse):
+```powershell
+cd src/Stock.API
+dotnet ef database drop --force
+dotnet ef database update
+```
+
+4. Sistem Başlatma Rehberi'nde belirtilen adımları takip edin
+
+**Öğrenilen Dersler:**
+1. Farklı ortamlar arasında geçiş yaparken, çalışma adımlarını standartlaştırmak önemlidir
+2. Veritabanını düzeltmek ve güncellemek için özel mekanizmalar oluşturmak faydalıdır
+3. Acil durum onarım endpoint'leri geliştirme sürecinde çok yardımcı olabilir
+4. Migration sorunlarında temiz başlangıç yapmak bazen en iyi çözümdür
+5. Ortamlar arası geçiş sürecini belgelemek ve sistem başlatma rehberine eklemek, sorunların hızlı çözülmesine yardımcı olur
