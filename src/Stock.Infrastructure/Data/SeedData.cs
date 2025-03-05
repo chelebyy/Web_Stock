@@ -66,7 +66,16 @@ namespace Stock.Infrastructure.Data
                 
                 // Dashboard İzinleri
                 new Permission { Name = "Dashboard.View", Description = "Dashboard görüntüleme", Group = "Dashboard", CreatedAt = DateTime.UtcNow },
-                new Permission { Name = "Dashboard.Admin", Description = "Admin dashboard görüntüleme", Group = "Dashboard", CreatedAt = DateTime.UtcNow }
+                new Permission { Name = "Dashboard.Admin", Description = "Admin dashboard görüntüleme", Group = "Dashboard", CreatedAt = DateTime.UtcNow },
+                
+                // Sayfa Erişim İzinleri
+                new Permission { Name = "Pages.AdminDashboard", Description = "Admin paneline erişim", Group = "Sayfa Erişimi", CreatedAt = DateTime.UtcNow },
+                new Permission { Name = "Pages.UserDashboard", Description = "Kullanıcı paneline erişim", Group = "Sayfa Erişimi", CreatedAt = DateTime.UtcNow },
+                new Permission { Name = "Pages.UserManagement", Description = "Kullanıcı yönetimi sayfasına erişim", Group = "Sayfa Erişimi", CreatedAt = DateTime.UtcNow },
+                new Permission { Name = "Pages.RoleManagement", Description = "Rol yönetimi sayfasına erişim", Group = "Sayfa Erişimi", CreatedAt = DateTime.UtcNow },
+                new Permission { Name = "Pages.StockManagement", Description = "Stok yönetimi sayfasına erişim", Group = "Sayfa Erişimi", CreatedAt = DateTime.UtcNow },
+                new Permission { Name = "Pages.Reports", Description = "Raporlar sayfasına erişim", Group = "Sayfa Erişimi", CreatedAt = DateTime.UtcNow },
+                new Permission { Name = "Pages.Settings", Description = "Ayarlar sayfasına erişim", Group = "Sayfa Erişimi", CreatedAt = DateTime.UtcNow }
             };
 
             await context.Permissions.AddRangeAsync(permissions);

@@ -182,15 +182,35 @@ export class AdminDashboardComponent implements OnInit {
     this.loading = true;
     this.logService.getUserActivityLogs(this.currentPage, this.pageSize)
       .subscribe({
-        next: (response) => {
-          if (response && response.Logs) {
-            this.userActivityLogs = response.Logs;
-            this.totalRecords = response.TotalItems || 0;
-          } else {
-            this.userActivityLogs = [];
-            this.totalRecords = 0;
-            console.warn('API yanıtında Logs verisi bulunamadı:', response);
+        next: (response: any) => {
+          console.log('Log yanıtı:', response);
+          this.userActivityLogs = [];
+          this.totalRecords = 0;
+          
+          if (response) {
+            // Farklı veri formatlarını kontrol et
+            if (response.logs && (Array.isArray(response.logs) || response.logs.$values)) {
+              // Küçük harfle logs
+              this.userActivityLogs = Array.isArray(response.logs) ? response.logs : response.logs.$values as UserActivityLog[];
+              this.totalRecords = response.totalItems || 0;
+            } else if (response.Logs && (Array.isArray(response.Logs) || response.Logs.$values)) {
+              // Büyük harfle Logs
+              this.userActivityLogs = Array.isArray(response.Logs) ? response.Logs : response.Logs.$values as UserActivityLog[];
+              this.totalRecords = response.TotalItems || 0;
+            } else if (response.$values) {
+              // Direkt $values
+              this.userActivityLogs = response.$values as UserActivityLog[];
+              this.totalRecords = response.totalItems || response.TotalItems || 0;
+            } else if (response.logs && typeof response.logs === 'object') {
+              // logs obje olabilir
+              this.userActivityLogs = Object.values(response.logs)
+                .filter(item => typeof item === 'object' && item !== null) as UserActivityLog[];
+              this.totalRecords = response.totalItems || 0;
+            } else {
+              console.warn('API yanıtında Logs verisi bulunamadı:', response);
+            }
           }
+          
           this.applyFilters(); // Filtreleri uygula
           this.loading = false;
         },

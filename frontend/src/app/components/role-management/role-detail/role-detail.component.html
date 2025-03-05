@@ -34,23 +34,49 @@
             </div>
             
             <div class="mb-4">
-                <h4>İzinler</h4>
+                <h4>İzin Yönetimi</h4>
                 <p>Bu role atanacak izinleri seçin:</p>
-                
-                <div *ngFor="let group of permissionGroups" class="mb-3">
-                    <h5>{{ group.group }}</h5>
-                    <div class="p-grid">
-                        <div *ngFor="let permission of group.permissions" class="p-col-12 p-md-4 mb-2">
-                            <p-checkbox 
-                                [value]="permission.id" 
-                                [label]="permission.name" 
-                                [(ngModel)]="selectedPermissions" 
-                                [inputId]="'permission_' + permission.id">
-                            </p-checkbox>
-                            <small class="text-muted d-block">{{ permission.description }}</small>
+
+                <!-- Sayfa Erişim İzinleri - Özel Bölüm -->
+                <div class="mb-4">
+                    <h5>Sayfa Erişim İzinleri</h5>
+                    <p>Bu rolün hangi sayfalara erişebileceğini ayarlayın:</p>
+                    
+                    <div class="grid">
+                        <div *ngFor="let permission of getPermissionsByGroup('Sayfa Erişimi')" class="col-12 md:col-4 mb-3">
+                            <div class="page-access-card p-3 border-round">
+                                <p-toggleButton 
+                                    [onLabel]="permission.name.split('.')[1]" 
+                                    [offLabel]="permission.name.split('.')[1]"
+                                    [onIcon]="'pi pi-lock-open'" 
+                                    [offIcon]="'pi pi-lock'"
+                                    [styleClass]="isPermissionSelected(permission.id) ? 'w-full access-enabled' : 'w-full access-disabled'"
+                                    [ngModel]="isPermissionSelected(permission.id)"
+                                    (onChange)="togglePermission(permission.id)">
+                                </p-toggleButton>
+                                <small class="text-muted d-block mt-2">{{ permission.description }}</small>
+                            </div>
                         </div>
                     </div>
                 </div>
+
+                <!-- Diğer İzinler - Akordeon Paneller -->
+                <h5>Diğer İzinler</h5>
+                <p-accordion>
+                    <p-accordionTab *ngFor="let group of getGroupsExcept('Sayfa Erişimi')" [header]="group">
+                        <div class="grid">
+                            <div *ngFor="let permission of getPermissionsByGroup(group)" class="col-12 md:col-4 mb-2">
+                                <p-checkbox 
+                                    [value]="permission.id" 
+                                    [label]="permission.name" 
+                                    [(ngModel)]="selectedPermissions" 
+                                    [inputId]="'permission_' + permission.id">
+                                </p-checkbox>
+                                <small class="text-muted d-block">{{ permission.description }}</small>
+                            </div>
+                        </div>
+                    </p-accordionTab>
+                </p-accordion>
                 
                 <div class="mt-4">
                     <button 

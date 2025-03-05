@@ -6,11 +6,28 @@ import { RoleService } from '../../../services/role.service';
 import { PermissionService } from '../../../services/permission.service';
 import { Permission, PermissionGroup } from '../../../models/permission.model';
 import { forkJoin } from 'rxjs';
+import { AccordionModule } from 'primeng/accordion';
+import { ToggleButtonModule } from 'primeng/togglebutton';
+import { CheckboxModule } from 'primeng/checkbox';
+import { ButtonModule } from 'primeng/button';
+import { ProgressSpinnerModule } from 'primeng/progressspinner';
+import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 
 @Component({
   selector: 'app-role-detail',
   templateUrl: './role-detail.component.html',
-  styleUrls: ['./role-detail.component.scss']
+  styleUrls: ['./role-detail.component.scss'],
+  standalone: true,
+  imports: [
+    CommonModule,
+    FormsModule,
+    AccordionModule,
+    ToggleButtonModule,
+    CheckboxModule,
+    ButtonModule,
+    ProgressSpinnerModule
+  ]
 })
 export class RoleDetailComponent implements OnInit {
   roleId: number = 0;
@@ -97,5 +114,22 @@ export class RoleDetailComponent implements OnInit {
     } else {
       this.selectedPermissions.push(permissionId);
     }
+  }
+  
+  /**
+   * Belirli bir gruba ait izinleri döndürür
+   */
+  getPermissionsByGroup(groupName: string): Permission[] {
+    const group = this.permissionGroups.find(g => g.group === groupName);
+    return group ? group.permissions : [];
+  }
+  
+  /**
+   * Belirli bir grup dışındaki tüm grup adlarını döndürür
+   */
+  getGroupsExcept(excludeGroupName: string): string[] {
+    return this.permissionGroups
+      .map(g => g.group)
+      .filter(groupName => groupName !== excludeGroupName);
   }
 } 

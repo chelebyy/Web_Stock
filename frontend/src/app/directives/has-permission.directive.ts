@@ -6,47 +6,54 @@ import { AuthService } from '../services/auth.service';
   standalone: true
 })
 export class HasPermissionDirective implements OnInit {
-  @Input() hasPermission: string | string[] = [];
-  private isHidden = true;
+  @Input('hasPermission') permissionName!: string;
+  @Input('hasPermissionElse') elseTemplate?: TemplateRef<any>;
+  
+  private hasView = false;
 
   constructor(
     private templateRef: TemplateRef<any>,
     private viewContainer: ViewContainerRef,
     private authService: AuthService
-  ) {}
+  ) { }
 
   ngOnInit(): void {
     this.updateView();
-    
-    // Kullanıcı değiştiğinde görünürlüğü güncelle
-    this.authService.currentUser$.subscribe(() => {
-      this.updateView();
-    });
   }
 
+  /**
+   * İzin değiştiğinde görünümü günceller
+   */
   private updateView(): void {
-    if (this.checkPermission()) {
-      if (this.isHidden) {
-        this.viewContainer.createEmbeddedView(this.templateRef);
-        this.isHidden = false;
-      }
-    } else {
+    const hasPermission = this.checkPermission();
+
+    if (hasPermission && !this.hasView) {
+      // İzin varsa template'i göster
+      this.viewContainer.createEmbeddedView(this.templateRef);
+      this.hasView = true;
+    } else if (!hasPermission && this.hasView) {
+      // İzin yoksa temizle
       this.viewContainer.clear();
-      this.isHidden = true;
+      this.hasView = false;
+      
+      // Alternatif template varsa göster
+      if (this.elseTemplate) {
+        this.viewContainer.createEmbeddedView(this.elseTemplate);
+      }
     }
   }
-
+  
+  /**
+   * İzin kontrolü yapar
+   */
   private checkPermission(): boolean {
-    // Admin her zaman tüm izinlere sahiptir
-    if (this.authService.isAdmin()) {
-      return true;
-    }
-    
-    // İzin kontrolü
-    if (Array.isArray(this.hasPermission)) {
-      return this.hasPermission.some(permission => this.authService.hasPermission(permission));
-    }
-    
-    return this.authService.hasPermission(this.hasPermission);
+    return this.authService.hasPermission(this.permissionName);
+  }
+  
+  /**
+   * Özel izin kontrol metodu - Sayfa erişim izni mi kontrol eder
+   */
+  static isPageAccessPermission(permissionName: string): boolean {
+    return permissionName.startsWith('Pages.');
   }
 } 

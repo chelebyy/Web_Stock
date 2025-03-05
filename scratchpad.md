@@ -702,73 +702,179 @@ Kullanıcı ekleme işlemi sırasında 500 Internal Server Error hatası alını
 3. Performans ve kullanıcı deneyimi iyileştirmeleri yapmak
 4. Birim testleri yazmak
 
-## Görev: Rol Terminolojisi Güncelleme
+## Görev: Rol Yönetimi Sayfası Geliştirme
 
 ### Görev Tanımı
-Kullanıcı tablosunda "Katkıda Bulunan" olarak görünen izin adını, projede tanımlı olan "Yönetici" ve "Kullanıcı" rollerine uygun olarak değiştirmek. Ayrıca, kullanılmayan "İzleyici" rolünü sistemden kaldırmak.
+Rol yönetimi sayfasını geliştirmek ve farklı sayfalara erişim yetkilerini rol bazlı olarak yönetebilmek.
+
+### Plan
+- [ ] Mevcut Rol Yönetimi ve İzin yapısının analizi
+- [ ] Sayfaya erişim izinlerinin tasarlanması
+- [ ] Backend'de gerekli API endpoint'lerin kontrol edilmesi veya geliştirilmesi
+- [ ] Frontend'de rol-izin yönetimi bileşenlerinin geliştirilmesi
+- [ ] Rol-sayfa erişim kontrollerinin uygulanması
+- [ ] Test ve hata giderme
+
+### İlerleme
+Bu görev üzerinde çalışmaya başlandı...
+
+## Görev: Uygulama Başlığı Değişikliği
+
+### Görev Tanımı
+Tarayıcı sekmesinde görünen uygulama başlığını "Frontend" yerine "Bilişim Sistemi" olarak değiştirmek.
 
 ### Yapılan İşlemler
-#### İlk Güncelleme
-- [X] User management bileşeninde izin gösterim kısmı incelendi
-- [X] "Katkıda Bulunan" ifadesi "Kullanıcı" olarak güncellendi (HTML dosyası)
-- [X] Filtre seçeneklerindeki etiketler düzeltildi (TS dosyası)
-- [X] Knowledge-base klasöründe `user_role_terminology_update.md` dosyası oluşturuldu
-- [X] Errors.md dosyasına değişiklik kaydedildi
+- [X] index.html dosyasında title etiketi bulundu
+- [X] Title etiketi "Bilişim Sistemi" olarak değiştirildi
+- [X] knowledge-base/application_title_update.md dosyası oluşturuldu
 - [X] Scratchpad'e görev kaydedildi
 
-#### İkinci Güncelleme
-- [X] User management bileşeninde "İzleyici" rolü kaldırıldı
-- [X] Filtre seçeneklerinden "İzleyici" seçeneği kaldırıldı
-- [X] HTML dosyasındaki izin gösterim koşullarından "İzleyici" kontrolü kaldırıldı
-- [X] Knowledge-base/user_role_terminology_update.md dosyası güncellendi
-- [X] Errors.md dosyası güncellendi
-- [X] Scratchpad görev kaydı güncellendi
-
 ### Teknik Değişiklikler
-1. frontend/src/app/components/user-management/user-management.component.html dosyasında:
-   ```diff
-   {{ user.permissions === 'Admin' ? 'Yönetici' : 
-   -  user.permissions === 'Contributor' ? 'Katkıda Bulunan' : 
-   +  user.permissions === 'Contributor' ? 'Kullanıcı' : 
-      user.permissions === 'Viewer' ? 'İzleyici' : user.permissions }}
-   ```
-
-2. frontend/src/app/components/user-management/user-management.component.ts dosyasında (İlk Güncelleme):
-   ```diff
-   roleFilterOptions: any[] = [
-     { label: 'Tümü', value: null },
-     { label: 'Yönetici', value: 'Admin' },
-   -  { label: 'Katkıda Bulunan', value: 'Contributor' },
-   +  { label: 'Kullanıcı', value: 'Contributor' },
-     { label: 'İzleyici', value: 'Viewer' }
-   ];
-   ```
-
-3. frontend/src/app/components/user-management/user-management.component.ts dosyasında (İkinci Güncelleme):
-   ```diff
-   roleFilterOptions: any[] = [
-     { label: 'Tümü', value: null },
-     { label: 'Yönetici', value: 'Admin' },
-   -  { label: 'Kullanıcı', value: 'Contributor' },
-   -  { label: 'İzleyici', value: 'Viewer' }
-   +  { label: 'Kullanıcı', value: 'Contributor' }
-   ];
-   ```
-
-4. frontend/src/app/components/user-management/user-management.component.html dosyasında (İkinci Güncelleme):
-   ```diff
-   <span class="permission-badge" [ngClass]="{
-     'admin-badge': user.permissions === 'Admin',
-   -  'contributor-badge': user.permissions === 'Contributor',
-   -  'viewer-badge': user.permissions === 'Viewer'
-   +  'contributor-badge': user.permissions === 'Contributor'
-   }">
-     {{ user.permissions === 'Admin' ? 'Yönetici' : 
-        user.permissions === 'Contributor' ? 'Kullanıcı' : 
-   -    user.permissions === 'Viewer' ? 'İzleyici' : user.permissions }}
-   +    user.permissions }}
-   </span>
-   ```
+```diff
+<head>
+  <meta charset="utf-8">
+-  <title>Frontend</title>
++  <title>Bilişim Sistemi</title>
+  <base href="/">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="icon" type="image/x-icon" href="favicon.ico">
+</head>
+```
 
 ### Sonuç
-Kullanıcı yönetimi sayfasındaki rol isimleri, proje genelindeki terminoloji standardına uyumlu hale getirildi. Sistemde artık sadece "Yönetici" ve "Kullanıcı" olmak üzere iki rol bulunuyor, böylece kullanıcı deneyimi daha basit ve anlaşılır hale geldi.
+Tarayıcı sekmesinde artık "Frontend" yerine "Bilişim Sistemi" adı görünecek, bu da uygulamanın kurumsal kimliğine daha uygun bir görünüm sağlayacak.
+
+## Sayfa Erişim İzinleri Geliştirmesi
+
+### Görev Tanımı
+Rol yönetimi sayfasını sayfa erişim izinlerini yönetecek şekilde geliştirmek ve farklı sayfalara erişim yetkilerini rol bazlı olarak yönetebilmeyi sağlamak.
+
+### Plan
+- [x] Mevcut Rol Yönetimi ve İzin yapısının analizi
+- [x] "PageAccess" izin grubu tasarımı ve eklenmesi
+- [x] Backend'de gerekli izin tanımlamalarının yapılması
+- [x] Frontend'de RoleDetailComponent'in iyileştirilmesi
+- [x] AuthGuard'a sayfa erişim kontrollerinin eklenmesi
+- [x] Rotalara sayfa erişim izinlerinin tanımlanması
+- [x] Bilgi tabanı oluşturulması (knowledge-base/role_page_access_knowledge_base.md)
+- [x] Hataların belgelenmesi (errors.md)
+- [ ] Test ve hata giderme (devam ediyor)
+
+### Teknik Detaylar
+1. **Backend İyileştirmeleri:**
+   - "Sayfa Erişimi" grubu altında 7 yeni izin tanımlandı
+   - Seed verilerinde bu izinlerin veritabanına eklenmesi sağlandı
+
+2. **Frontend İyileştirmeleri:**
+   - RoleDetailComponent görsel olarak yenilendi
+   - İzinler kategorilere ayrıldı ve akordeon panellere dönüştürüldü
+   - Sayfa erişim izinleri için toggle butonlar eklendi
+   - İzinlerin kolay anlaşılması için görsel iyileştirmeler yapıldı
+
+3. **Erişim Kontrolü İyileştirmeleri:**
+   - AuthGuard sayfa izinlerini kontrol edecek şekilde güncellendi
+   - Rotalara gerekli erişim izinleri tanımlandı
+   - API endpointlerine izin kontrolleri eklendi
+
+### Yapılan İşlemler
+1. SeedData.cs dosyasına "Sayfa Erişimi" grubu altında 7 yeni izin eklendi:
+   - Pages.AdminDashboard
+   - Pages.UserDashboard
+   - Pages.UserManagement
+   - Pages.RoleManagement
+   - Pages.StockManagement
+   - Pages.Reports
+   - Pages.Settings
+
+2. RoleDetailComponent'te aşağıdaki değişiklikler yapıldı:
+   - Sayfa erişimi için özel bir bölüm oluşturuldu
+   - Toggle butonlar eklendi
+   - Diğer izinler akordeon panellere dönüştürüldü
+   - Yardımcı metotlar eklendi (getPermissionsByGroup, getGroupsExcept)
+   - Stil dosyası güncellendi
+
+3. AuthGuard'a sayfa erişim kontrolü eklendi:
+   - Sayfa rotası - izin eşleştirmesi tanımlandı
+   - URL tabanlı izin kontrolü yapıldı
+   - Yetkisiz erişim durumunda kullanıcı rolüne göre yönlendirme eklendi
+
+4. Uygulama rotalarına sayfa erişim izinleri tanımlandı
+
+5. Bilgi tabanı dosyaları oluşturuldu
+   - knowledge-base/role_page_access_knowledge_base.md
+   - errors.md güncellendi
+
+### Sonraki Adımlar
+- [ ] Yapılacak değişikliklerin test edilmesi
+- [ ] Backend migration'ları oluşturma ve veritabanını güncelleme
+- [ ] Deneyim edilmiş tüm bu izinlerin token ile birlikte gönderilmesini sağlama
+- [ ] Rol sayfasında yeni izinler için varsayılan değerleri oluşturma
+- [ ] Görsel iyileştirmeler ve hata düzeltmeleri
+
+### Sayfa Erişim İzinleri Geliştirmesi - Hata Düzeltmeleri
+
+#### Hata Düzeltmesi 1: ToggleButton Bağlama Sorunları
+- [x] PrimeNG ToggleButton bileşenindeki `[checked]` özelliği hatası düzeltildi
+- [x] PrimeNG ToggleButton bileşenindeki `[value]` özelliği hatası düzeltildi
+- [x] İzin seçimi için doğru veri bağlama uygulandı: `[ngModel]="isPermissionSelected(permission.id)"`
+- [x] Errors.md dosyası güncellendi, bu hata ve çözümü hakkında detaylı bilgi eklendi
+
+#### Hata Düzeltmesi 2: "admin/roles" Rota Hatası
+- [x] Admin Dashboard'dan rol yönetimi sayfasına yönlendirme hatası tespit edildi
+- [x] app.routes.ts dosyasına `admin/roles` rotası eklendi
+- [x] Tutarlılık için `roles` rotası da eklendi
+- [x] Errors.md dosyası güncellendi, rota hatası ve çözümü hakkında detaylı bilgi eklendi
+
+#### Hata Düzeltmesi 3: API Endpoint Uyumsuzluğu ve PrimeNG Uyarıları
+- [x] Rol yönetimi sayfasında API endpoint uyumsuzluğu tespit edildi (`api/roles` -> `api/Role`)
+- [x] RoleService'de API URL'si düzeltildi
+- [x] PrimeNG Table bileşenindeki kullanımdan kaldırılmış `responsive` özelliği kaldırıldı
+- [x] Errors.md dosyası güncellendi, bu hatalar ve çözümleri hakkında detaylı bilgi eklendi
+
+#### Hata Düzeltmesi 4: Döngüsel Referans (System.Text.Json.JsonException) Sorunu
+- [x] RoleController'da döngüsel referans tespit edildi (Role -> Users -> Role -> ... sonsuz döngü)
+- [x] Program.cs'de JSON serialization ayarlarını IgnoreCycles'dan Preserve'e değiştirdik
+- [x] RoleController'da daha güvenli ve optimize edilmiş sorgular için ProjectTo kullandık
+- [x] Entity objelerini döngüsel referans içermeyen anonim tiplere dönüştürdük
+- [x] Tüm loglama ve hata yönetimini geliştirdik
+- [x] Errors.md dosyası güncellendi, bu hata ve çözümü hakkında detaylı bilgi eklendi
+
+### Sonraki Adımlar
+- [ ] API ve Frontend'i yeniden başlatarak değişiklikleri test et
+- [ ] Rol yönetimi sayfasının düzgün çalıştığını doğrula
+- [ ] Rol ekleme, düzenleme ve silme işlemlerini test et
+- [ ] İlişkili roller bulunan kullanıcıları silmeye çalışarak koruma kontrollerini test et
+
+## Frontend ve ReferenceHandler.Preserve Uyum Sorunları
+
+### Sorun
+- PrimeNG Table bileşeninde `_data.slice is not a function` hatası
+- Admin Dashboard'da log verilerinin düzgün görüntülenmemesi
+- Backend'den gelen döngüsel referans formatının frontend tarafından anlaşılamaması
+
+### Analiz
+- Program.cs dosyasında JSON serileştirme ayarları `ReferenceHandler.Preserve` olarak değiştirildi
+- Bu değişiklik, döngüsel referansları `$id` ve `$values` gibi özel alanlarla koruyan bir JSON formatı oluşturuyor
+- PrimeNG bileşenleri ve Angular kod yapısı bu formatı beklemediği için hatalar oluşuyor
+
+### Yapılan İşlemler
+1. **Rol Yönetimi Bileşeni Düzeltmesi**:
+   - loadRoles() metodu güncellendi
+   - `if (data && data.$values)` kontrolü eklendi
+   - API yanıtını düz diziye dönüştürme mantığı uygulandı
+
+2. **Admin Dashboard Log Tablosu Düzeltmesi**:
+   - loadUserActivityLogs() metodu güncellendi
+   - Çeşitli veri formatları (logs, Logs, $values) için kontroller eklendi
+   - Tip güvenliği için `as UserActivityLog[]` dönüşümleri eklendi
+
+3. **Belgeleme**:
+   - errors.md dosyasına yeni bir bölüm eklendi: "PrimeNG Table ve Döngüsel Referans Hatası"
+   - API yanıtı formatı, sorun ve çözüm detaylandırıldı
+   - Öğrenilen dersler kaydedildi
+
+### Sonraki Adımlar
+- [ ] Oluşturulan frontend düzeltmelerinin test edilmesi
+- [ ] Tüm sayfaların benzer şekilde düzeltilmesi
+- [ ] Frontend'in JSON serileştirme ayarlarına duyarlılığının azaltılması
+- [ ] Önerilen alternatif çözümlerin değerlendirilmesi (backend tarafında dönüşüm vs.)

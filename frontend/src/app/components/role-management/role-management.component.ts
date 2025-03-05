@@ -62,18 +62,50 @@ export class RoleManagementComponent implements OnInit {
   loadRoles() {
     this.loading = true;
     this.roleService.getRoles().subscribe({
-      next: (data) => {
+      next: (data: any) => {
         console.log('Loaded roles:', data);
-        this.roles = data;
+        
+        // Döngüsel referans düzeltmesi
+        // ReferenceHandler.Preserve formatını düz diziye dönüştür
+        if (data && data.$values) {
+          this.roles = data.$values as Role[];
+        } else if (data && Array.isArray(data)) {
+          this.roles = data as Role[];
+        } else if (data) {
+          // Herhangi bir şekilde veri varsa bunu dizi olarak al
+          this.roles = Object.values(data).filter(item => typeof item === 'object' && item !== null) as Role[];
+        } else {
+          this.roles = [];
+        }
+        
         this.loading = false;
       },
       error: (error) => {
         console.error('Error loading roles:', error);
+        
+        // Daha açıklayıcı hata mesajı
+        let errorMessage = 'Roller yüklenirken bir hata oluştu';
+        
+        if (error.status === 500) {
+          errorMessage = 'Sunucu hatası: Roller yüklenirken bir sorun oluştu. Lütfen daha sonra tekrar deneyin.';
+        } else if (error.status === 401) {
+          errorMessage = 'Yetkilendirme hatası: Bu işlemi gerçekleştirmek için yetkiniz yok.';
+        } else if (error.status === 404) {
+          errorMessage = 'Roller bulunamadı: API endpoint mevcut değil.';
+        }
+        
+        // Sunucudan gelen hata mesajını kontrol et
+        if (error.error && typeof error.error === 'string') {
+          errorMessage += ` Detay: ${error.error}`;
+        }
+        
         this.messageService.add({
           severity: 'error',
           summary: 'Hata',
-          detail: 'Roller yüklenirken bir hata oluştu'
+          detail: errorMessage,
+          life: 5000
         });
+        
         this.loading = false;
       }
     });

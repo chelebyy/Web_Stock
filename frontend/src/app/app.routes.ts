@@ -7,6 +7,7 @@ import { ComputersComponent } from './components/inventory/computers/computers.c
 import { AuthGuard } from './guards/auth.guard';
 import { AdminDashboardComponent } from './components/admin-dashboard/admin-dashboard.component';
 import { UserDashboardComponent } from './components/user-dashboard/user-dashboard.component';
+import { RoleDetailComponent } from './components/role-management/role-detail/role-detail.component';
 
 export const routes: Routes = [
   { path: '', redirectTo: '/login', pathMatch: 'full' },
@@ -15,35 +16,80 @@ export const routes: Routes = [
     path: 'admin-dashboard', 
     component: AdminDashboardComponent,
     canActivate: [AuthGuard],
-    data: { requiresAdmin: true }
+    data: { 
+      requiresAdmin: true,
+      requiredPermission: 'Pages.AdminDashboard'
+    }
   },
   { 
     path: 'user-dashboard', 
     component: UserDashboardComponent,
-    canActivate: [AuthGuard]
+    canActivate: [AuthGuard],
+    data: {
+      requiredPermission: 'Pages.UserDashboard'
+    }
   },
   { 
     path: 'user-management', 
     component: UserManagementComponent,
     canActivate: [AuthGuard],
-    data: { requiresAdmin: true }
+    data: { 
+      requiresAdmin: true,
+      requiredPermission: 'Pages.UserManagement'
+    }
   },
   { 
     path: 'admin/users', 
     component: UserManagementComponent,
     canActivate: [AuthGuard],
-    data: { requiresAdmin: true }
+    data: { 
+      requiresAdmin: true,
+      requiredPermission: 'Pages.UserManagement'
+    }
   },
   { 
     path: 'role-management', 
     component: RoleManagementComponent,
     canActivate: [AuthGuard],
-    data: { requiresAdmin: true }
+    data: { 
+      requiresAdmin: true,
+      requiredPermission: 'Pages.RoleManagement'
+    }
+  },
+  { 
+    path: 'roles', 
+    component: RoleManagementComponent,
+    canActivate: [AuthGuard],
+    data: { 
+      requiresAdmin: true,
+      requiredPermission: 'Pages.RoleManagement'
+    }
+  },
+  { 
+    path: 'admin/roles', 
+    component: RoleManagementComponent,
+    canActivate: [AuthGuard],
+    data: { 
+      requiresAdmin: true,
+      requiredPermission: 'Pages.RoleManagement'
+    }
+  },
+  { 
+    path: 'roles/:id', 
+    component: RoleDetailComponent,
+    canActivate: [AuthGuard],
+    data: { 
+      requiresAdmin: true,
+      requiredPermission: 'Pages.RoleManagement'
+    }
   },
   {
     path: 'it',
     component: LayoutComponent,
     canActivate: [AuthGuard],
+    data: {
+      requiredPermission: 'Pages.StockManagement'
+    },
     children: [
       { path: '', redirectTo: 'inventory/computers', pathMatch: 'full' },
       { path: 'inventory/computers', component: ComputersComponent },

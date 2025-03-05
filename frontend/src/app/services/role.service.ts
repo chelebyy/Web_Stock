@@ -1,38 +1,134 @@
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
-import { Observable } from 'rxjs';
+import { HttpClient, HttpErrorResponse, HttpHeaders } from '@angular/common/http';
+import { Observable, catchError, map, throwError } from 'rxjs';
 import { Role } from '../models/role.model';
 import { environment } from '../../environments/environment';
+import { AuthService } from './auth.service';
 
 @Injectable({
   providedIn: 'root'
 })
 export class RoleService {
-  private apiUrl = `${environment.apiUrl}/api/roles`;
+  private apiUrl = `${environment.apiUrl}/api/Role`;
 
-  constructor(private http: HttpClient) { }
+  constructor(
+    private http: HttpClient,
+    private authService: AuthService
+  ) { }
+
+  // HTTP Headers oluştur
+  private getHeaders(): HttpHeaders {
+    const token = this.authService.getToken();
+    return new HttpHeaders({
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${token}`
+    });
+  }
+
+  // Hata işleme
+  private handleError(error: HttpErrorResponse) {
+    let errorMessage = 'Bilinmeyen bir hata oluştu';
+    
+    if (error.error instanceof ErrorEvent) {
+      // Client-side hata
+      errorMessage = `Hata: ${error.error.message}`;
+    } else {
+      // Backend hatası
+      errorMessage = `Sunucu hatası: ${error.status}, Mesaj: ${error.message}`;
+      
+      // Sunucudan gelen hata mesajını kontrol et
+      if (error.error && typeof error.error === 'string') {
+        errorMessage = error.error;
+      }
+    }
+    
+    console.error('Rol servisi hatası:', errorMessage);
+    return throwError(() => error);
+  }
+
+  // API yanıtını normalize et - ReferenceHandler.Preserve uyumluluğu için
+  private normalizeResponse<T>(response: any): T {
+    if (!response) return [] as unknown as T;
+    
+    // $values dizisi varsa
+    if (response.$values) {
+      return response.$values as T;
+    } 
+    // Dizi ise doğrudan döndür
+    else if (Array.isArray(response)) {
+      return response as T;
+    } 
+    // Başka özelliklerde veri varsa
+    else if (typeof response === 'object') {
+      // Nesne içinde dizi özelliği ara
+      const arrayProps = Object.entries(response)
+        .filter(([_, v]) => Array.isArray(v) || (v && typeof v === 'object' && '$values' in v));
+      
+      if (arrayProps.length > 0) {
+        const [_, value] = arrayProps[0];
+        
+        if (Array.isArray(value)) {
+          return value as T;
+        } else if (value && typeof value === 'object' && '$values' in value) {
+          return (value as any).$values as T;
+        }
+      }
+    }
+    
+    // Son çare: orijinal yanıtı döndür
+    return response as T;
+  }
 
   getRoles(): Observable<Role[]> {
-    return this.http.get<Role[]>(`${this.apiUrl}`);
+    const options = { headers: this.getHeaders() };
+    return this.http.get<any>(this.apiUrl, options)
+      .pipe(
+        map(response => this.normalizeResponse<Role[]>(response)),
+        catchError(this.handleError)
+      );
   }
 
   getRole(id: number): Observable<Role> {
-    return this.http.get<Role>(`${this.apiUrl}/${id}`);
+    const options = { headers: this.getHeaders() };
+    return this.http.get<any>(`${this.apiUrl}/${id}`, options)
+      .pipe(
+        map(response => this.normalizeResponse<Role>(response)),
+        catchError(this.handleError)
+      );
   }
 
   getRoleById(id: number): Observable<Role> {
-    return this.http.get<Role>(`${this.apiUrl}/${id}`);
+    const options = { headers: this.getHeaders() };
+    return this.http.get<any>(`${this.apiUrl}/${id}`, options)
+      .pipe(
+        map(response => this.normalizeResponse<Role>(response)),
+        catchError(this.handleError)
+      );
   }
 
   createRole(role: Omit<Role, 'id'>): Observable<Role> {
-    return this.http.post<Role>(this.apiUrl, role);
+    const options = { headers: this.getHeaders() };
+    return this.http.post<any>(this.apiUrl, role, options)
+      .pipe(
+        map(response => this.normalizeResponse<Role>(response)),
+        catchError(this.handleError)
+      );
   }
 
   updateRole(id: number, role: Partial<Role>): Observable<Role> {
-    return this.http.put<Role>(`${this.apiUrl}/${id}`, role);
+    const options = { headers: this.getHeaders() };
+    return this.http.put<any>(`${this.apiUrl}/${id}`, role, options)
+      .pipe(
+        map(response => this.normalizeResponse<Role>(response)),
+        catchError(this.handleError)
+      );
   }
 
   deleteRole(id: number): Observable<void> {
-    return this.http.delete<void>(`${this.apiUrl}/${id}`);
+    const options = { headers: this.getHeaders() };
+    return this.http.delete<void>(`${this.apiUrl}/${id}`, options)
+      .pipe(
+        catchError(this.handleError)
+      );
   }
 } 

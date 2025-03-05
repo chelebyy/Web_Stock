@@ -6,6 +6,7 @@ using Stock.Application;
 using Stock.Infrastructure;
 using Microsoft.Extensions.Logging;
 using System.Text;
+using System.Text.Json.Serialization;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -45,7 +46,18 @@ builder.Services.AddAuthentication(options =>
     };
 });
 
-builder.Services.AddControllers();
+// JSON serialization ayarları
+builder.Services.AddControllers()
+    .AddJsonOptions(options =>
+    {
+        // Döngüsel referansları koru
+        options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.Preserve;
+        // Null değerleri dahil etme
+        options.JsonSerializerOptions.DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull;
+        // Enum değerlerini string olarak serialize et
+        options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
+    });
+
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
