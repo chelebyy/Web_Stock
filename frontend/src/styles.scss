@@ -1,10 +1,10 @@
-@import "primeng/resources/themes/lara-dark-blue/theme.css";
+@import "primeng/resources/themes/lara-light-blue/theme.css";
 @import "primeng/resources/primeng.css";
 @import "primeicons/primeicons.css";
 
 /* Global Styles */
 :root {
-  --surface-ground: #f5f7fa;
+  --surface-ground: #f8f9fa;
   --surface-card: #ffffff;
   --primary-color: #3B82F6;
   --text-color: #495057;
@@ -16,7 +16,7 @@ body {
   margin: 0;
   padding: 0;
   font-family: var(--font-family);
-  background: linear-gradient(135deg, #f5f7fa 0%, #e4e9f2 100%);
+  background: linear-gradient(135deg, #ffffff 0%, #f0f4f8 100%);
   min-height: 100vh;
   overflow-x: hidden;
 }

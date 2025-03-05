@@ -54,6 +54,7 @@ Bu dosya, proje geliştirme sürecinde karşılaşılan hataları ve çözümler
 - [Hata 8: 500 Internal Server Error (Rol Yönetimi) - Döngüsel Referans](#hata-8-500-internal-server-error-rol-yönetimi-döngüsel-referans)
 - [PrimeNG Table ve Döngüsel Referans Hatası](#primeNG-table-ve-döngüsel-referans-hatası)
 - [Angular *ngFor ve ReferenceHandler.Preserve Hatası](#angular-ngfor-ve-referencehandlerpreserve-hatası)
+- [ReactiveForm Disabled Özelliği Sorunu](#reactiveform-disabled-özelliği-sorunu)
 
 ## Clean Architecture Geçişi Hataları
 
@@ -2028,3 +2029,83 @@ getItems(): Observable<Item[]> {
 3. *ngFor sadece diziler, Map, Set gibi yinelenebilir (iterable) nesnelerle çalışır.
 4. Güvenli bir yaklaşım için hem servis seviyesinde hem de bileşen seviyesinde normalizasyon uygulanmalıdır.
 5. Veri yapılarının undefined veya null olma ihtimali her zaman kontrol edilmelidir.
+
+## ReactiveForm Disabled Özelliği Sorunu
+
+**Hata:** Kullanıcı yönetimi sayfasında izinler ve ad soyad bilgileri görünmüyor ve konsola şu hata mesajı düşüyor:
+
+```
+It looks like you're using the disabled attribute with a reactive form directive. If you set disabled to true
+when you set up this control in your component class, the disabled attribute will actually be set in the DOM for
+you. We recommend using this approach to avoid 'changed after checked' errors.
+```
+
+**Nedeni:**
+1. ReactiveForm içindeki form kontrolünü HTML şablonunda `[disabled]` özelliği ile devre dışı bırakmak yanlıştır
+2. Kullanıcı verilerinin dönüşümünde eksiklik vardı - username fullName'e atanmıyordu
+3. Permissions (izinler) alanının veri dönüşümü eksikti
+
+**Çözüm:**
+1. HTML'den `[disabled]` niteliğini kaldırıp, component sınıfında formun oluşturulması sırasında veya daha sonra `disable()/enable()` metotlarını kullanmak:
+
+```typescript
+// Form oluşturma
+this.userForm = this.formBuilder.group({
+  // ...
+  roleId: [{value: 2, disabled: false}] // başlangıçta etkin
+});
+
+// Dinamik olarak devre dışı bırakma/etkinleştirme
+this.userForm.get('isAdmin')?.valueChanges.subscribe(isAdmin => {
+  const roleIdControl = this.userForm.get('roleId');
+  
+  if (isAdmin) {
+    roleIdControl?.patchValue(1, {emitEvent: false});
+    roleIdControl?.disable({emitEvent: false});
+  } else {
+    roleIdControl?.enable({emitEvent: false});
+    if (roleIdControl?.value === 1) {
+      roleIdControl?.patchValue(2, {emitEvent: false});
+    }
+  }
+});
+```
+
+2. Veri dönüşümünü düzeltme:
+
+```typescript
+loadUsers() {
+  this.userService.getUsers().subscribe({
+    next: (data) => {
+      this.users = data.map(user => {
+        return {
+          id: user.id,
+          fullName: user.username, // Kullanıcı adını fullName alanına at
+          sicil: user.sicil || `N/A-${user.id}`,
+          permissions: user.isAdmin ? 'Admin' : (user.roleName || 'Kullanıcı'),
+          roleId: user.roleId || (user.isAdmin ? 1 : 2),
+          isAdmin: user.isAdmin,
+          isActive: true,
+          createdAt: user.createdAt || new Date()
+        };
+      });
+      
+      // ...
+    }
+  }
+}
+```
+
+3. Form gönderiminde disabled alanları da almak için `form.getRawValue()` kullanma:
+
+```typescript
+const userData = {...this.userForm.getRawValue()};
+```
+
+**Önemli Notlar:**
+- Angular'da ReactiveForm kullanırken, disabled durumunu her zaman component sınıfı üzerinden yönetin, HTML şablonu üzerinden değil
+- Disabled alanların değerlerini form.value ile alamazsınız, form.getRawValue() kullanmalısınız
+- Form alanları arasında bağımlılık varsa, valueChanges ile dinleyip tepki vermeniz gerekir
+- Backend'den alınan verilerin frontend'de gösterilmesi için doğru şekilde dönüştürülmesi gerekir
+
+**Referans:** [knowledge-base/user_management_troubleshooting.md](../knowledge-base/user_management_troubleshooting.md)

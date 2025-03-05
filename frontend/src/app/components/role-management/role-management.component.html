@@ -1,68 +1,108 @@
 <div class="role-management-container">
-  <p-toolbar>
-    <div class="p-toolbar-group-left">
-      <h2>Kullanıcı Rolleri</h2>
+  <div class="page-header">
+    <div class="page-title-container">
+      <h1 class="page-title">Rol Yönetimi</h1>
+      <p class="page-subtitle">Sistem kullanıcı rollerini yönetin ve gerekli izinleri atayın</p>
     </div>
-    <div class="p-toolbar-group-right">
-      <button pButton pRipple icon="pi pi-plus" label="Yeni Rol" (click)="openDialog()"></button>
-    </div>
-  </p-toolbar>
+    <button pButton pRipple icon="pi pi-arrow-left" label="Geri Dön" class="p-button-outlined back-button" (click)="goBack()"></button>
+  </div>
 
-  <div class="table-container">
-    <p-table [value]="roles" [paginator]="true" [rows]="10" [loading]="loading">
+  <div class="card main-card">
+    <div class="card-header">
+      <div class="card-header-content">
+        <div class="search-container">
+          <span class="p-input-icon-left">
+            <i class="pi pi-search"></i>
+            <input type="text" pInputText placeholder="Rol ara..." #searchInput (input)="filterRoles(searchInput.value)" />
+          </span>
+        </div>
+        <button pButton pRipple icon="pi pi-plus" label="Yeni Rol" class="p-button-primary create-button" (click)="openDialog()"></button>
+      </div>
+    </div>
+
+    <p-table [value]="roles" [paginator]="true" [rows]="10" [loading]="loading" 
+             styleClass="p-datatable-responsive p-datatable-striped"
+             [rowHover]="true" responsiveLayout="scroll">
       <ng-template pTemplate="header">
         <tr>
-          <th>ID</th>
+          <th style="width: 80px">ID</th>
           <th>Rol Adı</th>
           <th>Açıklama</th>
-          <th>İşlemler</th>
+          <th class="action-column">İşlemler</th>
         </tr>
       </ng-template>
       <ng-template pTemplate="body" let-role>
-        <tr>
-          <td>{{role.id}}</td>
-          <td>{{role.name}}</td>
-          <td>{{role.description}}</td>
+        <tr class="role-row">
+          <td><span class="id-badge">{{role.id}}</span></td>
+          <td><span class="role-name">{{role.name}}</span></td>
+          <td><div class="role-description">{{role.description}}</div></td>
           <td>
-            <button pButton pRipple icon="pi pi-pencil" class="p-button-rounded p-button-text" (click)="openDialog(role)"></button>
-            <button pButton pRipple icon="pi pi-trash" class="p-button-rounded p-button-text p-button-danger" (click)="deleteRole(role)"></button>
-            <button pButton pRipple icon="pi pi-key" class="p-button-rounded p-button-text p-button-success" (click)="managePermissions(role)" pTooltip="İzinleri Yönet"></button>
+            <div class="action-buttons">
+              <button pButton pRipple icon="pi pi-pencil" class="p-button-rounded p-button-text p-button-info" 
+                      (click)="openDialog(role)" pTooltip="Düzenle"></button>
+              <button pButton pRipple icon="pi pi-trash" class="p-button-rounded p-button-text p-button-danger" 
+                      (click)="deleteRole(role)" pTooltip="Sil"></button>
+              <button pButton pRipple icon="pi pi-key" class="p-button-rounded p-button-text p-button-success" 
+                      (click)="managePermissions(role)" pTooltip="İzinleri Yönet"></button>
+            </div>
           </td>
         </tr>
       </ng-template>
       <ng-template pTemplate="emptymessage">
         <tr>
-          <td colspan="4" class="text-center">Rol bulunamadı</td>
+          <td colspan="4">
+            <div class="empty-message">
+              <i class="pi pi-inbox empty-icon"></i>
+              <p>Henüz hiç rol oluşturulmadı</p>
+              <button pButton pRipple label="İlk Rolü Oluştur" icon="pi pi-plus" (click)="openDialog()"></button>
+            </div>
+          </td>
         </tr>
+      </ng-template>
+      <ng-template pTemplate="paginatorleft">
+        <div class="table-summary" *ngIf="roles.length > 0">Toplam {{roles.length}} rol</div>
       </ng-template>
     </p-table>
   </div>
 </div>
 
-<p-dialog [(visible)]="roleDialog" [style]="{width: '450px'}" header="Rol Detayları" [modal]="true" class="p-fluid">
-  <form [formGroup]="roleForm">
-    <div class="field">
-      <label for="name">Rol Adı</label>
-      <input type="text" pInputText id="name" formControlName="name" />
-      <small class="p-error" *ngIf="roleForm.get('name')?.errors?.['required'] && roleForm.get('name')?.touched">
-        Rol adı gereklidir.
-      </small>
-    </div>
-    
-    <div class="field">
-      <label for="description">Açıklama</label>
-      <input type="text" pInputText id="description" formControlName="description" />
-      <small class="p-error" *ngIf="roleForm.get('description')?.errors?.['required'] && roleForm.get('description')?.touched">
-        Açıklama gereklidir.
-      </small>
-    </div>
-  </form>
+<!-- Rol Dialog -->
+<p-dialog [(visible)]="roleDialog" [style]="{width: '450px'}" [header]="editMode ? 'Rolü Düzenle' : 'Yeni Rol Ekle'" 
+          [modal]="true" [draggable]="false" [resizable]="false" styleClass="role-dialog modern-dialog" 
+          [closeOnEscape]="true" [dismissableMask]="true">
+  <div class="dialog-content">
+    <form [formGroup]="roleForm" class="role-form">
+      <div class="field">
+        <label for="name" class="form-label">Rol Adı</label>
+        <input type="text" pInputText id="name" formControlName="name" autocomplete="off" />
+        <small class="p-error" *ngIf="roleForm.get('name')?.errors?.['required'] && roleForm.get('name')?.touched">
+          Rol adı gereklidir.
+        </small>
+      </div>
+      
+      <div class="field">
+        <label for="description" class="form-label">Açıklama</label>
+        <textarea pInputTextarea id="description" formControlName="description" rows="3" autoResize="true"></textarea>
+        <small class="p-error" *ngIf="roleForm.get('description')?.errors?.['required'] && roleForm.get('description')?.touched">
+          Açıklama gereklidir.
+        </small>
+      </div>
+    </form>
+  </div>
 
   <ng-template pTemplate="footer">
-    <button pButton pRipple label="İptal" icon="pi pi-times" class="p-button-text" (click)="hideDialog()"></button>
-    <button pButton pRipple label="Kaydet" icon="pi pi-check" class="p-button-text" (click)="saveRole()" [disabled]="roleForm.invalid"></button>
+    <div class="dialog-footer">
+      <button pButton pRipple type="button" label="İptal" icon="pi pi-times" 
+              class="p-button-outlined p-button-secondary cancel-button" (click)="hideDialog()"></button>
+      <button pButton pRipple type="button" [label]="editMode ? 'Güncelle' : 'Kaydet'" icon="pi pi-check" 
+              class="p-button-primary save-button" (click)="saveRole()" 
+              [disabled]="roleForm.invalid || roleForm.pristine"></button>
+    </div>
   </ng-template>
 </p-dialog>
 
-<p-confirmDialog [style]="{width: '450px'}"></p-confirmDialog>
-<p-toast></p-toast>
+<p-confirmDialog [style]="{width: '450px'}" styleClass="modern-confirm-dialog" 
+                rejectButtonStyleClass="p-button-outlined p-button-secondary" 
+                acceptButtonStyleClass="p-button-danger"></p-confirmDialog>
+                
+<p-toast position="top-right" styleClass="modern-toast"></p-toast>

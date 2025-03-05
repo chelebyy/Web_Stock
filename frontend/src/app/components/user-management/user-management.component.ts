@@ -18,6 +18,7 @@ import { RoleService } from '../../services/role.service';
 import { User } from '../../models/user.model';
 import { Role, RoleWithUsers } from '../../models/role.model';
 import { Router } from '@angular/router';
+import { AuthService } from '../../services/auth.service';
 
 @Component({
   selector: 'app-user-management',
@@ -50,14 +51,12 @@ export class UserManagementComponent implements OnInit {
   submitted: boolean = false;
   editMode: boolean = false;
   userForm!: FormGroup;
+  roles: any[] = []; // Roller için dizi
+  roleFilterOptions: any[] = []; // Rol filtre seçenekleri
+  searchText: string = ''; // Arama metni
+  selectedRole: any = null; // Seçili rol
   
   // Filtre seçenekleri
-  roleFilterOptions: any[] = [
-    { label: 'Tümü', value: null },
-    { label: 'Yönetici', value: 'Admin' },
-    { label: 'Kullanıcı', value: 'Contributor' }
-  ];
-  
   joinedFilterOptions: any[] = [
     { label: 'Herhangi', value: null },
     { label: 'Bu Ay', value: 'thisMonth' },
@@ -86,12 +85,32 @@ export class UserManagementComponent implements OnInit {
     private router: Router,
     private confirmationService: ConfirmationService,
     private messageService: MessageService,
-    private userService: UserService
+    private userService: UserService,
+    private roleService: RoleService,
+    private authService: AuthService
   ) {}
 
   ngOnInit() {
+    // Giriş durumunu kontrol et
+    const isLoggedIn = this.authService.isLoggedIn();
+    const token = this.authService.getToken();
+    console.log('Giriş durumu:', { isLoggedIn, hasToken: !!token });
+    
+    if (!isLoggedIn) {
+      console.error('Kullanıcı girişi yapılmamış! Lütfen önce giriş yapın.');
+      this.messageService.add({
+        severity: 'error',
+        summary: 'Hata',
+        detail: 'Oturum açık değil. Lütfen giriş yapın.'
+      });
+      // Giriş sayfasına yönlendir
+      this.router.navigate(['/login']);
+      return;
+    }
+    
     this.initForm();
     this.loadUsers();
+    this.loadRoles();
   }
 
   initForm() {
@@ -101,59 +120,87 @@ export class UserManagementComponent implements OnInit {
       fullName: ['', Validators.required],
       password: ['', [Validators.required, Validators.minLength(6)]],
       isAdmin: [false],
-      isActive: [true]
+      isActive: [true],
+      roleId: [{value: 2, disabled: false}] // Varsayılan Kullanıcı rol ID'si
+    });
+    
+    // isAdmin değiştiğinde roleId alanını etkilemek için dinleyici ekle
+    this.userForm.get('isAdmin')?.valueChanges.subscribe(isAdmin => {
+      const roleIdControl = this.userForm.get('roleId');
+      
+      if (isAdmin) {
+        // Eğer yönetici seçiliyse, roleId değerini Admin rolüne ayarla ve devre dışı bırak
+        roleIdControl?.patchValue(1, {emitEvent: false});
+        roleIdControl?.disable({emitEvent: false});
+      } else {
+        // Yönetici seçili değilse roleId alanını etkinleştir
+        roleIdControl?.enable({emitEvent: false});
+        if (roleIdControl?.value === 1) {
+          roleIdControl?.patchValue(2, {emitEvent: false});
+        }
+      }
     });
   }
 
   loadUsers() {
-    // Backend'den kullanıcıları çekelim
+    console.log('Kullanıcılar yükleniyor...');
+    
     this.userService.getUsers().subscribe({
-      next: (users) => {
-        if (users && users.length > 0) {
-          // Backend'den gelen kullanıcıları formatlayalım
-          this.users = users.map(user => ({
+      next: (data) => {
+        console.log('Kullanıcı verileri alındı:', data);
+        
+        this.users = data.map(user => {
+          // Kullanıcı verilerini dönüştür
+          return {
             id: user.id,
-            sicil: user.sicil || '',
-            fullName: user.username,
-            permissions: user.isAdmin ? 'Admin' : user.roleId ? 'Contributor' : 'Viewer',
+            fullName: user.username, // Kullanıcı adını fullName alanına at
+            sicil: user.sicil || `N/A-${user.id}`,
+            permissions: user.isAdmin ? 'Admin' : (user.roleName || 'Kullanıcı'),
+            roleId: user.roleId || (user.isAdmin ? 1 : 2),
+            isAdmin: user.isAdmin,
             isActive: true,
-            joinDate: new Date(user.createdAt || new Date()).toLocaleDateString('tr-TR', { year: 'numeric', month: 'long', day: 'numeric' }),
-            avatar: 'default-avatar.png'
-          }));
-          
-          // Kullanıcıları localStorage'a kaydedelim
-          localStorage.setItem('users', JSON.stringify(this.users));
-          
-          this.filteredUsers = [...this.users];
-          this.updatePagination();
-        } else {
-          console.log('Backend\'den kullanıcı verisi alınamadı veya boş.');
-          
-          // Eğer backend'den veri gelmezse, localStorage'dan yüklemeyi deneyelim
-          const storedUsers = localStorage.getItem('users');
-          if (storedUsers) {
-            this.users = JSON.parse(storedUsers);
-            this.filteredUsers = [...this.users];
-            this.updatePagination();
-          }
-        }
+            createdAt: user.createdAt || new Date()
+          };
+        });
+        
+        console.log('Kullanıcı verileri işlendi:', this.users);
+        this.filteredUsers = [...this.users];
+        this.updatePagination();
       },
       error: (error) => {
-        console.error('Kullanıcıları yükleme hatası:', error);
+        console.error('Kullanıcı verileri yüklenirken hata oluştu:', error);
         this.messageService.add({
           severity: 'error',
           summary: 'Hata',
-          detail: 'Kullanıcılar yüklenirken bir hata oluştu.',
-          life: 3000
+          detail: 'Kullanıcı verileri yüklenemedi.'
         });
         
-        // Hata durumunda localStorage'dan yüklemeyi deneyelim
-        const storedUsers = localStorage.getItem('users');
-        if (storedUsers) {
-          this.users = JSON.parse(storedUsers);
-          this.filteredUsers = [...this.users];
-          this.updatePagination();
-        }
+        // Hata durumunda test verilerini kullan
+        this.users = [
+          { 
+            id: 1, 
+            fullName: 'Admin Kullanıcı', 
+            sicil: 'A001',
+            permissions: 'Admin', 
+            isAdmin: true, 
+            roleId: 1, 
+            isActive: true,
+            createdAt: new Date()
+          },
+          { 
+            id: 2, 
+            fullName: 'Test Kullanıcı 1', 
+            sicil: 'U001',
+            permissions: 'Kullanıcı', 
+            isAdmin: false, 
+            roleId: 2, 
+            isActive: true,
+            createdAt: new Date()
+          }
+        ];
+        
+        this.filteredUsers = [...this.users];
+        this.updatePagination();
       }
     });
   }
@@ -177,19 +224,45 @@ export class UserManagementComponent implements OnInit {
   editUser(user: any) {
     this.user = { ...user };
     this.editMode = true;
+    
+    // Şifre gereklilik durumunu ayarla (düzenlemede şifre gerekli değil)
+    this.userForm.get('password')?.setValidators([Validators.minLength(6)]);
+    this.userForm.get('password')?.updateValueAndValidity();
+    
+    // İzin bilgisini roleId'ye çevir
+    let roleId = 2; // Varsayılan olarak Kullanıcı rolü
+    const isAdmin = user.permissions === 'Admin';
+    
+    if (!isAdmin) {
+      // Eğer admin değilse, permissions değerine göre rol ata
+      if (user.permissions === 'Contributor' || user.permissions === 'Kullanıcı') {
+        roleId = 2; // Kullanıcı rol ID'si
+      } else if (user.roleId) {
+        // Eğer doğrudan roleId belirtilmişse onu kullan
+        roleId = user.roleId;
+      }
+    } else {
+      roleId = 1; // Admin rol ID'si
+    }
+    
+    // Form değerlerini doldur
     this.userForm.patchValue({
-      id: this.user.id,
-      sicil: this.user.email,
-      fullName: this.user.fullName,
-      isAdmin: this.user.permissions === 'Admin',
-      isActive: this.user.isActive
+      id: user.id,
+      fullName: user.fullName,
+      sicil: user.sicil,
+      isAdmin: isAdmin,
+      isActive: user.isActive || true,
+      roleId: roleId
     });
     
-    // Şifre alanını düzenleme modunda zorunlu olmaktan çıkar
-    const passwordControl = this.userForm.get('password');
-    if (passwordControl) {
-      passwordControl.clearValidators();
-      passwordControl.updateValueAndValidity();
+    // Şifre alanını boşalt
+    this.userForm.get('password')?.setValue('');
+    
+    // isAdmin durumuna göre roleId alanını aktif/pasif yap
+    if (isAdmin) {
+      this.userForm.get('roleId')?.disable();
+    } else {
+      this.userForm.get('roleId')?.enable();
     }
     
     this.userDialog = true;
@@ -243,34 +316,114 @@ export class UserManagementComponent implements OnInit {
     this.submitted = true;
 
     if (this.userForm.invalid) {
+      console.log('Form hatalar içeriyor, gönderilemiyor:', this.userForm.errors);
       return;
     }
 
-    const formValues = this.userForm.value;
+    const userData = {...this.userForm.getRawValue()}; // getRawValue kullanarak disabled alanları da al
+    
+    console.log('Kaydedilecek kullanıcı:', userData);
     
     if (this.editMode) {
       // Kullanıcı güncelleme
-      const index = this.users.findIndex(u => u.id === formValues.id);
+      const index = this.users.findIndex(u => u.id === userData.id);
       if (index !== -1) {
+        try {
+          // Backend'e gönderilecek kullanıcı nesnesi
+          const userToUpdate: any = {
+            id: userData.id,
+            username: userData.fullName,
+            isAdmin: userData.isAdmin,
+            sicil: userData.sicil,
+            roleId: userData.roleId // Rol ID'sini ekle
+          };
+          
+          console.log('Güncellenecek kullanıcı:', userToUpdate);
+          
+          // Backend API'ye güncelleme isteği gönder
+          this.userService.updateUser(userData.id, userToUpdate).subscribe({
+            next: (response) => {
+              // Başarılı güncelleme sonrası
+              const updatedUser = {
+                ...this.users[index],
+                sicil: userData.sicil,
+                fullName: userData.fullName,
+                permissions: this.getUserPermissionLabel(userData.isAdmin, userData.roleId),
+                isActive: userData.isActive,
+                roleId: userData.roleId
+              };
+              
+              this.users[index] = updatedUser;
+              
+              // localStorage'a güncellenmiş kullanıcıları kaydet
+              localStorage.setItem('users', JSON.stringify(this.users));
+              
+              this.messageService.add({
+                severity: 'success',
+                summary: 'Başarılı',
+                detail: 'Kullanıcı bilgileri güncellendi',
+                life: 3000
+              });
+              
+              this.applyFilters();
+              this.userDialog = false;
+              this.user = {};
+            },
+            error: (error) => {
+              console.error('Kullanıcı güncelleme hatası:', error);
+              
+              // API'dan dönen hata mesajını göster (varsa)
+              const errorMessage = error.error?.error || 'Kullanıcı güncellenirken bir hata oluştu.';
+              
+              this.messageService.add({
+                severity: 'error',
+                summary: 'Hata',
+                detail: errorMessage,
+                life: 5000
+              });
+            }
+          });
+        } catch (error) {
+          console.error('Kullanıcı güncelleme işleminde hata:', error);
+          this.messageService.add({
+            severity: 'error',
+            summary: 'Hata',
+            detail: 'Kullanıcı güncellenirken bir hata oluştu.',
+            life: 3000
+          });
+        }
+      }
+    } else {
+      // Yeni kullanıcı ekleme
+      try {
         // Backend'e gönderilecek kullanıcı nesnesi
-        const userToUpdate: any = {
-          id: formValues.id,
-          username: formValues.fullName,
-          isAdmin: formValues.isAdmin,
-          sicil: formValues.sicil
+        const userToCreate: any = {
+          username: userData.fullName,
+          password: userData.password,
+          isAdmin: userData.isAdmin,
+          sicil: userData.sicil,
+          roleId: userData.roleId // Rol ID'sini ekle
         };
         
-        // Backend API'ye güncelleme isteği gönder
-        this.userService.updateUser(formValues.id, userToUpdate).subscribe({
-          next: () => {
-            // Başarılı güncelleme sonrası
-            this.users[index] = {
-              ...this.users[index],
-              sicil: formValues.sicil,
-              fullName: formValues.fullName,
-              permissions: formValues.isAdmin ? 'Admin' : 'Contributor',
-              isActive: formValues.isActive
+        console.log('Oluşturulacak kullanıcı:', userToCreate);
+        
+        // Backend API'ye ekleme isteği gönder
+        this.userService.createUser(userToCreate).subscribe({
+          next: (response) => {
+            // Başarılı ekleme sonrası
+            const newUser = {
+              id: response.id || this.generateId(),
+              sicil: userData.sicil,
+              fullName: userData.fullName,
+              location: 'İstanbul,TR',
+              joinDate: new Date().toLocaleDateString('tr-TR', { year: 'numeric', month: 'long', day: 'numeric' }),
+              permissions: this.getUserPermissionLabel(userData.isAdmin, userData.roleId),
+              isActive: userData.isActive,
+              avatar: 'default-avatar.png',
+              roleId: userData.roleId
             };
+            
+            this.users.push(newUser);
             
             // localStorage'a güncellenmiş kullanıcıları kaydet
             localStorage.setItem('users', JSON.stringify(this.users));
@@ -278,7 +431,7 @@ export class UserManagementComponent implements OnInit {
             this.messageService.add({
               severity: 'success',
               summary: 'Başarılı',
-              detail: 'Kullanıcı güncellendi',
+              detail: 'Kullanıcı oluşturuldu',
               life: 3000
             });
             
@@ -287,10 +440,10 @@ export class UserManagementComponent implements OnInit {
             this.user = {};
           },
           error: (error) => {
-            console.error('Kullanıcı güncelleme hatası:', error);
+            console.error('Kullanıcı ekleme hatası:', error);
             
             // API'dan dönen hata mesajını göster (varsa)
-            const errorMessage = error.error?.error || 'Kullanıcı güncellenirken bir hata oluştu.';
+            const errorMessage = error.error?.error || 'Kullanıcı eklenirken bir hata oluştu.';
             
             this.messageService.add({
               severity: 'error',
@@ -300,65 +453,34 @@ export class UserManagementComponent implements OnInit {
             });
           }
         });
+      } catch (error) {
+        console.error('Kullanıcı ekleme işleminde hata:', error);
+        this.messageService.add({
+          severity: 'error',
+          summary: 'Hata',
+          detail: 'Kullanıcı eklenirken bir hata oluştu.',
+          life: 3000
+        });
       }
-    } else {
-      // Yeni kullanıcı ekleme
-      // Backend'e gönderilecek kullanıcı nesnesi
-      const userToCreate: any = {
-        username: formValues.fullName,
-        password: formValues.password,
-        isAdmin: formValues.isAdmin,
-        sicil: formValues.sicil
-      };
-      
-      console.log('Form değerleri:', formValues);
-      console.log('Oluşturulacak kullanıcı:', userToCreate);
-      
-      // Backend API'ye ekleme isteği gönder
-      this.userService.createUser(userToCreate).subscribe({
-        next: (response) => {
-          // Başarılı ekleme sonrası
-          const newUser = {
-            id: response.id || this.generateId(),
-            sicil: formValues.sicil,
-            fullName: formValues.fullName,
-            location: 'İstanbul,TR',
-            joinDate: new Date().toLocaleDateString('tr-TR', { year: 'numeric', month: 'long', day: 'numeric' }),
-            permissions: formValues.isAdmin ? 'Admin' : 'Contributor',
-            isActive: formValues.isActive,
-            avatar: 'default-avatar.png'
-          };
-          
-          this.users.unshift(newUser);
-          
-          // localStorage'a güncellenmiş kullanıcıları kaydet
-          localStorage.setItem('users', JSON.stringify(this.users));
-          
-          this.messageService.add({
-            severity: 'success',
-            summary: 'Başarılı',
-            detail: 'Kullanıcı eklendi',
-            life: 3000
-          });
-          
-          this.applyFilters();
-          this.userDialog = false;
-          this.user = {};
-        },
-        error: (error) => {
-          console.error('Kullanıcı ekleme hatası:', error);
-          
-          // API'dan dönen hata mesajını göster (varsa)
-          const errorMessage = error.error?.error || 'Kullanıcı eklenirken bir hata oluştu.';
-          
-          this.messageService.add({
-            severity: 'error',
-            summary: 'Hata',
-            detail: errorMessage,
-            life: 5000
-          });
-        }
-      });
+    }
+  }
+  
+  /**
+   * İzin etiketi oluşturur
+   */
+  getUserPermissionLabel(isAdmin: boolean, roleId: number | null): string {
+    if (isAdmin) {
+      return 'Admin';
+    }
+    
+    // roleId'ye göre değerlendirme yap
+    switch (roleId) {
+      case 1:
+        return 'Admin';
+      case 2:
+        return 'Kullanıcı';
+      default:
+        return 'Kullanıcı'; // Varsayılan
     }
   }
 
@@ -386,45 +508,22 @@ export class UserManagementComponent implements OnInit {
   
   // Tüm filtreleri uygula
   applyFilters() {
-    let filtered = [...this.users];
+    // Önce tüm kullanıcıları al
+    this.filteredUsers = [...this.users];
     
-    // Arama filtresi
-    if (this.activeFilters.search) {
-      filtered = filtered.filter(user => 
-        user.fullName.toLowerCase().includes(this.activeFilters.search) ||
-        user.sicil.toLowerCase().includes(this.activeFilters.search)
+    // Arama metnine göre filtrele
+    if (this.searchText && this.searchText.trim() !== '') {
+      const searchLower = this.searchText.toLowerCase().trim();
+      this.filteredUsers = this.filteredUsers.filter(user => 
+        user.fullName.toLowerCase().includes(searchLower) || 
+        user.sicil.toLowerCase().includes(searchLower)
       );
     }
     
-    // Rol filtresi
-    if (this.activeFilters.role) {
-      filtered = filtered.filter(user => user.permissions === this.activeFilters.role);
+    // Eğer rol filtresi aktifse, rol filtresini de uygula
+    if (this.selectedRole !== null) {
+      this.applyRoleFilter({ value: this.selectedRole });
     }
-    
-    // Katılma tarihi filtresi
-    if (this.activeFilters.joined) {
-      const currentYear = new Date().getFullYear();
-      const currentMonth = new Date().getMonth();
-      
-      filtered = filtered.filter(user => {
-        const joinDate = new Date(user.joinDate);
-        
-        switch (this.activeFilters.joined) {
-          case 'thisMonth':
-            return joinDate.getMonth() === currentMonth && joinDate.getFullYear() === currentYear;
-          case 'thisYear':
-            return joinDate.getFullYear() === currentYear;
-          case 'before2020':
-            return joinDate.getFullYear() < 2020;
-          default:
-            return true;
-        }
-      });
-    }
-    
-    this.filteredUsers = filtered;
-    this.currentPage = 1;
-    this.updatePagination();
   }
   
   // Sayfalama işlevleri
@@ -506,5 +605,94 @@ export class UserManagementComponent implements OnInit {
           });
       }
     });
+  }
+
+  loadRoles() {
+    // Backend'den rolleri çekelim
+    this.roleService.getRoles().subscribe({
+      next: (roles) => {
+        if (roles && roles.length > 0) {
+          console.log('Roller yüklendi:', roles);
+          
+          // Rolleri dropdown için formatlayalım
+          this.roles = roles.map(role => ({
+            label: role.name,
+            value: role.id
+          }));
+          
+          // Rol filtre seçeneklerini güncelle
+          this.roleFilterOptions = [
+            { label: 'Tümü', value: null },
+            ...this.roles
+          ];
+        } else {
+          console.log('Backend\'den rol verisi alınamadı veya boş.');
+          
+          // Varsayılan roller
+          this.roles = [
+            { label: 'Yönetici', value: 1 },
+            { label: 'Kullanıcı', value: 2 }
+          ];
+          
+          // Rol filtre seçeneklerini güncelle
+          this.roleFilterOptions = [
+            { label: 'Tümü', value: null },
+            ...this.roles
+          ];
+        }
+      },
+      error: (error) => {
+        console.error('Rolleri yükleme hatası:', error);
+        
+        // Hata durumunda varsayılan roller
+        this.roles = [
+          { label: 'Yönetici', value: 1 },
+          { label: 'Kullanıcı', value: 2 }
+        ];
+        
+        // Rol filtre seçeneklerini güncelle
+        this.roleFilterOptions = [
+          { label: 'Tümü', value: null },
+          ...this.roles
+        ];
+        
+        this.messageService.add({
+          severity: 'warn',
+          summary: 'Uyarı',
+          detail: 'Roller yüklenemedi, varsayılan değerler kullanılıyor.',
+          life: 3000
+        });
+      }
+    });
+  }
+
+  // Rol filtresini uygula
+  applyRoleFilter(event: any) {
+    const selectedRoleId = event.value;
+    
+    if (selectedRoleId === null) {
+      // Tüm roller seçiliyse filtreleme yapma
+      this.applyFilters();
+    } else {
+      // Seçilen role göre filtrele
+      this.filteredUsers = this.users.filter(user => {
+        // Admin kullanıcılar için özel kontrol
+        if (user.permissions === 'Admin' && selectedRoleId === 1) {
+          return true;
+        }
+        
+        // Diğer roller için kontrol
+        if (user.roleId === selectedRoleId) {
+          return true;
+        }
+        
+        // Permissions değerine göre kontrol
+        if (selectedRoleId === 2 && (user.permissions === 'Kullanıcı' || user.permissions === 'Contributor')) {
+          return true;
+        }
+        
+        return false;
+      });
+    }
   }
 }

@@ -11,6 +11,7 @@ export interface User {
     lastLoginAt?: Date;
     roleId?: number;
     role?: Role;
+    roleName?: string;
 }
 
 export interface LoginRequest {

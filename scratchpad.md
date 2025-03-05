@@ -185,79 +185,32 @@
 - Frontend başlatma sorunları çözüldü (PowerShell komut çalıştırma, port çakışması, chart.js bağımlılığı)
 - Bir sonraki adım: Frontend geliştirmesinin devamı ve API ile tam entegrasyonu
 
-## Yapılan Güncellemeler (4 Mart 2025)
-- Chart.js kütüphanesi yüklendi
-- Frontend başlatma sorunları çözüldü:
-  - PowerShell komut çalıştırma sorunu (&&)
-  - Port çakışması sorunu (4200)
-  - Chart.js bağımlılığı sorunu
-- Frontend uygulaması 4202 portunda başarıyla çalışıyor
-- Admin Dashboard bileşeni geliştirildi
-- Frontend sorunları ve çözümleri belgelendi (knowledge-base/frontend_troubleshooting.md)
+## Yapılan Güncellemeler (5 Mart 2025)
+- Kullanıcı yönetimi sayfasında izinler ve ad soyad bilgilerinin görüntülenmesi sorunu çözüldü
+- Angular reactive form'da disabled özelliği düzgün şekilde yapılandırıldı
+- Backend'den gelen verilerin frontend'de doğru şekilde gösterilmesi için dönüşüm işlemleri eklendi
+- Yeni bilgi tabanı dosyası oluşturuldu: knowledge-base/user_management_troubleshooting.md
 - Errors.md dosyası güncellendi
-- Admin Dashboard'a profil resmi eklendi:
-  - Varsayılan profil resmi (default-avatar.png) assets/images klasörüne eklendi
-  - Profil resmi için CSS stilleri iyileştirildi (hover efektleri, gölgeler)
-  - Profil resmi yükleme işlemi için loadProfileImage() metodu eklendi
-  - PowerShell komut çalıştırma sorunları çözüldü (& yerine ; kullanımı)
+- Frontend uygulaması 4207 portunda çalışıyor
+- Kullanıcı yönetimi sayfası tam işlevsel durumda
 
-## Şifre Değiştirme Formu Güncellemesi
+### Kullanıcı Yönetimi İyileştirmesi Teknik Detaylar
 
-### Görev Tanımı
-Kullanıcı dashboard sayfasındaki şifre değiştirme formunun tasarımını ve işlevselliğini iyileştirmek.
+1. **Kullanıcı Verilerinin Dönüştürülmesi:**
+   - Backend'den gelen `username` alanı, frontend'de `fullName` olarak gösterildi
+   - `isAdmin` ve `roleName` bilgileri, `permissions` alanında birleştirildi
+   - Eksik veriler için varsayılan değerler eklendi
 
-### Yapılan İşlemler
-- [x] Şifre değiştirme formunun arka plan rengi ve stilini güncelledik
-- [x] Input alanlarını daha modern bir görünüme kavuşturduk
-- [x] Şifre göster/gizle işlevselliği ekledik
-- [x] Butonların tasarımını iyileştirdik
-- [x] AuthService ile entegrasyonu sağladık
-- [x] Hata yönetimini iyileştirdik
-- [x] Bilgi tabanı dosyası oluşturduk (knowledge-base/password_change_form_knowledge_base.md)
-- [x] Errors.md dosyasını güncelledik
+2. **ReactiveForm Disabled Özelliği Çözümü:**
+   - Reactive form'daki disabled durumu HTML'den component sınıfına taşındı
+   - Form kontrolü oluşturma sırasında `roleId: [{value: 2, disabled: false}]` şeklinde tanımlandı
+   - `isAdmin` değişikliklerini dinleyerek form kontrollerinin durumunu değiştiren bir dinleyici eklendi
+   - Form gönderiminde disabled alanları almak için `form.getRawValue()` kullanıldı
 
-### Teknik Detaylar
-1. **Tasarım Değişiklikleri:**
-   - Form arka planı koyu renkli, yarı saydam bir tasarıma dönüştürüldü
-   - Input alanları modern bir görünüme kavuşturuldu
-   - Butonlar gradient arka plan ve hover efektleriyle zenginleştirildi
-
-2. **İşlevsel Değişiklikler:**
-   - Şifre göster/gizle işlevselliği eklendi
-   - AuthService ile entegrasyon sağlandı
-   - Hata yönetimi iyileştirildi
-
-3. **Dosya Değişiklikleri:**
-   - frontend/src/app/components/user-dashboard/user-dashboard.component.html
-   - frontend/src/app/components/user-dashboard/user-dashboard.component.scss
-   - frontend/src/app/components/user-dashboard/user-dashboard.component.ts
-   - errors.md
-   - knowledge-base/password_change_form_knowledge_base.md
-
-### Gelecek Geliştirmeler
-- [ ] Şifre güçlülük göstergesi eklenebilir
-- [ ] Şifre politikası kontrolleri eklenebilir (minimum uzunluk, karakter çeşitliliği vb.)
-- [ ] İki faktörlü doğrulama desteği eklenebilir
-
-### Sistem Durumu (4 Mart 2025)
-- Backend API (http://localhost:5037): ✅ Çalışıyor
-- Frontend (http://localhost:4202): ✅ Çalışıyor
-- Veritabanı: ✅ Güncel ve stabil
-- Admin Dashboard: ✅ Hataları giderildi
-- Kullanıcı aktivite logları: ✅ Çalışıyor
-- Swagger UI: ✅ Erişilebilir
-- Şifre değiştirme işlevi: ✅ Çalışıyor
-
-### Sonraki Adımlar
-1. GitHub'a son değişiklikleri yükle
-2. Frontend geliştirmesine devam et:
-   - Kullanıcı Dashboard bileşeni
-   - Diğer bileşenler
-   - Service implementasyonları
-3. Test yazımına başla:
-   - Unit testler
-   - Integration testler
-   - E2E testler
+3. **Öğrenilen Dersler:**
+   - Angular reactive form'larda disabled durumu HTML'de değil, component sınıfında yönetilmelidir
+   - Form alanları arasında bağımlılıklar varsa `valueChanges` ile yönetilmelidir
+   - Backend'den frontend'e veri aktarımında doğru field eşleştirmesi yapılmalıdır
 
 ## Kullanıcı Yönetimi Entegrasyonu
 
@@ -359,131 +312,6 @@ Kullanıcı yönetimi sayfasına, kullanıcıların dashboard sayfasına kolayca
 - Frontend (http://localhost:4202): ✅ Çalışıyor
 - Veritabanı: ✅ Güncel ve stabil
 - Kullanıcı Yönetimi Sayfası: ✅ Geri dönme butonu eklendi
-
-## Kullanıcı Yönetimi Sayfası Güncellemeleri (5 Mart 2025)
-
-### Görev Tanımı
-Kullanıcı yönetimi sayfasının tasarımını ve işlevselliğini iyileştirmek.
-
-### Yapılan İşlemler
-- [x] Kullanıcı yönetimi sayfasının tasarımını referans görsele uygun şekilde güncelledik
-- [x] Checkbox'ların görünümünü özelleştirdik
-- [x] Form alanlarının üzerindeki etiketleri kaldırdık
-- [x] Input alanlarının görünümünü modernleştirdik
-- [x] Kullanıcı adı alanını kaldırdık
-- [x] Dialog başlığını dinamik hale getirdik
-- [x] Form submit işlevselliğini düzenledik
-- [x] Bilgi tabanı dosyasını güncelledik (knowledge-base/user_management_knowledge_base.md)
-- [x] Errors.md dosyasını güncelledik
-
-### Teknik Detaylar
-1. **Checkbox Görünümü Değişiklikleri:**
-   - Yönetici yetkisi checkbox'ı için turuncu renk (#ff5722) kullanıldı
-   - Aktif kullanıcı checkbox'ı için yeşil renk (#4caf50) kullanıldı
-   - Checkbox'ların yanına anlamlı ikonlar eklendi (kalkan ve onay)
-   - Hover efekti ve daha belirgin görünüm sağlandı
-
-2. **Form Alanları Değişiklikleri:**
-   - Etiketler kaldırıldı, sadece placeholder metinleri kullanıldı
-   - Input alanlarının yüksekliği 48px olarak ayarlandı
-   - Sol tarafta anlamlı ikonlar eklendi
-   - Arka plan rengi #2d2d2d olarak ayarlandı
-   - Kenarlıklar kaldırıldı, daha modern bir görünüm sağlandı
-   - Odaklandığında turuncu bir gölge efekti eklendi
-
-3. **Dialog Değişiklikleri:**
-   - Dialog başlığı dinamik hale getirildi (Yeni Kullanıcı / Kullanıcı Düzenle)
-   - Dialog footer kısmı yeniden düzenlendi
-   - Butonlar için min-width değeri eklendi
-   - İptal butonu için outline stil kullanıldı
-   - Kaydet butonu için turuncu renk kullanıldı
-
-### Dosya Değişiklikleri:
-- frontend/src/app/components/user-management/user-management.component.html
-- frontend/src/app/components/user-management/user-management.component.scss
-- frontend/src/app/components/user-management/user-management.component.ts
-- knowledge-base/user_management_knowledge_base.md
-- errors.md
-
-### Gelecek Geliştirmeler
-- [ ] Kullanıcı profil resmi yükleme özelliği eklenebilir
-- [ ] Kullanıcı etkinlik günlüğü görüntüleme özelliği eklenebilir
-- [ ] Toplu kullanıcı işlemleri (toplu silme, toplu rol atama) eklenebilir
-- [ ] Gelişmiş arama ve filtreleme seçenekleri eklenebilir
-
-### Sistem Durumu (5 Mart 2025)
-- Backend API (http://localhost:5037): ✅ Çalışıyor
-- Frontend (http://localhost:4206): ✅ Çalışıyor
-- Veritabanı: ✅ Güncel ve stabil
-- Admin Dashboard: ✅ Hataları giderildi
-- Kullanıcı Yönetimi: ✅ Tasarım ve işlevsellik iyileştirildi
-- Swagger UI: ✅ Erişilebilir
-- Şifre değiştirme işlevi: ✅ Çalışıyor
-- Şifre değiştirme formu UI: ✅ Güncellemesi tamamlandı
-
-### Sonraki Adımlar
-1. GitHub'a son değişiklikleri yükle
-2. Frontend geliştirmesine devam et:
-   - Kullanıcı Dashboard bileşeni
-   - Diğer bileşenler
-   - Service implementasyonları
-3. Test yazımına başla:
-   - Unit testler
-   - Integration testler
-   - E2E testler
-
-## Kullanıcı Yönetimi Sayfası Güncellemeleri (6 Mart 2025)
-
-### Geri Dönme Butonu Rota Hatası Düzeltmesi
-
-#### Görev Tanımı
-Kullanıcı yönetimi sayfasındaki geri dönme butonunun çalışmaması sorununu çözmek.
-
-#### Sorun
-Geri dönme butonu tıklandığında aşağıdaki hata alınıyordu:
-```
-ERROR RuntimeError: NG04002: Cannot match any routes. URL Segment: 'dashboard'
-```
-
-#### Nedeni
-1. UserManagementComponent'in goBack() metodu '/dashboard' rotasına yönlendirme yapıyordu
-2. Ancak app.routes.ts dosyasında 'dashboard' rotası tanımlanmıştı
-3. Bunun yerine 'admin-dashboard' ve 'user-dashboard' rotaları vardı
-
-#### Yapılan İşlemler
-- [x] UserManagementComponent'in goBack() metodunu düzelterek '/admin-dashboard' rotasına yönlendirme yapacak şekilde değiştirildi
-- [x] Errors.md dosyası güncellendi
-- [x] Knowledge-base/user_management_knowledge_base.md dosyası güncellendi
-
-#### Teknik Detaylar
-1. **TypeScript Değişiklikleri:**
-   ```typescript
-   // Önceki kod
-   goBack() {
-     this.router.navigate(['/dashboard']);
-   }
-   
-   // Düzeltilmiş kod
-   goBack() {
-     this.router.navigate(['/admin-dashboard']);
-   }
-   ```
-
-2. **Öğrenilen Dersler:**
-   - Rota adlarının doğru yazılması önemlidir
-   - Yönlendirme yapmadan önce rotanın tanımlı olduğundan emin olunmalıdır
-   - Hata mesajları, sorunun kaynağını bulmak için dikkatle incelenmelidir
-
-#### Dosya Değişiklikleri
-- frontend/src/app/components/user-management/user-management.component.ts
-- errors.md
-- knowledge-base/user_management_knowledge_base.md
-
-#### Sistem Durumu
-- Backend API (http://localhost:5037): ✅ Çalışıyor
-- Frontend (http://localhost:4202): ✅ Çalışıyor
-- Veritabanı: ✅ Güncel ve stabil
-- Kullanıcı Yönetimi Sayfası: ✅ Geri dönme butonu düzgün çalışıyor
 
 ## Kullanıcı Silme İşlemi Kalıcı Olmama Sorunu Çözümü
 
@@ -620,7 +448,7 @@ Sistemin başlatılması ve karşılaşılan sorunların giderilmesi.
 ### Karşılaşılan Sorunlar ve Çözümleri
 1. **Frontend Derleme Hatası:**
    - Sorun: CreateUserRequest modelinde sicil alanı eksikliği
-   - Çözüm: UserService içindeki createUser metodunda CreateUserRequest nesnesine sicil alanı eklendi
+   - Çözüm: UserService içindeki createUser metoduna CreateUserRequest nesnesine sicil alanı eklendi
 
 2. **Port Yapılandırması:**
    - Backend: 5037 portunda çalışıyor (http://localhost:5037)

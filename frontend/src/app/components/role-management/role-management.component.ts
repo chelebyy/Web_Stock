@@ -10,6 +10,10 @@ import { TableModule } from 'primeng/table';
 import { ToastModule } from 'primeng/toast';
 import { ToolbarModule } from 'primeng/toolbar';
 import { DropdownModule } from 'primeng/dropdown';
+import { InputTextareaModule } from 'primeng/inputtextarea';
+import { TooltipModule } from 'primeng/tooltip';
+import { CardModule } from 'primeng/card';
+import { RippleModule } from 'primeng/ripple';
 import { RoleService } from '../../services/role.service';
 import { Role, RoleWithUsers } from '../../models/role.model';
 import { Router } from '@angular/router';
@@ -30,12 +34,17 @@ import { Router } from '@angular/router';
     TableModule,
     ToastModule,
     ToolbarModule,
-    DropdownModule
+    DropdownModule,
+    InputTextareaModule,
+    TooltipModule,
+    CardModule,
+    RippleModule
   ],
   providers: [ConfirmationService, MessageService]
 })
 export class RoleManagementComponent implements OnInit {
   roles: Role[] = [];
+  filteredRoles: Role[] = [];
   roleDialog: boolean = false;
   roleForm: FormGroup;
   editMode: boolean = false;
@@ -59,7 +68,7 @@ export class RoleManagementComponent implements OnInit {
     this.loadRoles();
   }
 
-  loadRoles() {
+  loadRoles(): void {
     this.loading = true;
     this.roleService.getRoles().subscribe({
       next: (data: any) => {
@@ -77,35 +86,19 @@ export class RoleManagementComponent implements OnInit {
         } else {
           this.roles = [];
         }
+         
+        this.filteredRoles = [...this.roles];
         
         this.loading = false;
       },
       error: (error) => {
-        console.error('Error loading roles:', error);
-        
-        // Daha açıklayıcı hata mesajı
-        let errorMessage = 'Roller yüklenirken bir hata oluştu';
-        
-        if (error.status === 500) {
-          errorMessage = 'Sunucu hatası: Roller yüklenirken bir sorun oluştu. Lütfen daha sonra tekrar deneyin.';
-        } else if (error.status === 401) {
-          errorMessage = 'Yetkilendirme hatası: Bu işlemi gerçekleştirmek için yetkiniz yok.';
-        } else if (error.status === 404) {
-          errorMessage = 'Roller bulunamadı: API endpoint mevcut değil.';
-        }
-        
-        // Sunucudan gelen hata mesajını kontrol et
-        if (error.error && typeof error.error === 'string') {
-          errorMessage += ` Detay: ${error.error}`;
-        }
-        
         this.messageService.add({
           severity: 'error',
           summary: 'Hata',
-          detail: errorMessage,
-          life: 5000
+          detail: 'Roller yüklenirken bir hata oluştu.',
+          life: 3000
         });
-        
+        console.error('Roller yüklenirken hata:', error);
         this.loading = false;
       }
     });
@@ -224,5 +217,24 @@ export class RoleManagementComponent implements OnInit {
   
   managePermissions(role: Role) {
     this.router.navigate(['/roles', role.id]);
+  }
+
+  filterRoles(searchText: string): void {
+    if (!searchText.trim()) {
+      this.filteredRoles = [...this.roles];
+    } else {
+      const searchTextLower = searchText.toLowerCase();
+      this.filteredRoles = this.roles.filter(role =>
+        role.name.toLowerCase().includes(searchTextLower) ||
+        (role.description && role.description.toLowerCase().includes(searchTextLower))
+      );
+    }
+  }
+
+  /**
+   * Önceki sayfaya veya dashboard'a geri döner
+   */
+  goBack(): void {
+    this.router.navigate(['/admin-dashboard']);
   }
 } 
