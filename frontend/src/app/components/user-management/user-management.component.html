@@ -65,12 +65,11 @@
       <div class="row-cell permissions-cell">
         <span class="permission-badge" [ngClass]="{
           'admin-badge': user.permissions === 'Admin',
-          'contributor-badge': user.permissions === 'Contributor',
-          'viewer-badge': user.permissions === 'Viewer'
+          'contributor-badge': user.permissions === 'Contributor'
         }">
           {{ user.permissions === 'Admin' ? 'Yönetici' : 
-             user.permissions === 'Contributor' ? 'Katkıda Bulunan' : 
-             user.permissions === 'Viewer' ? 'İzleyici' : user.permissions }}
+             user.permissions === 'Contributor' ? 'Kullanıcı' : 
+             user.permissions }}
         </span>
       </div>
       <div class="row-cell actions-cell">

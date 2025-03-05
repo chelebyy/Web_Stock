@@ -55,8 +55,7 @@ export class UserManagementComponent implements OnInit {
   roleFilterOptions: any[] = [
     { label: 'Tümü', value: null },
     { label: 'Yönetici', value: 'Admin' },
-    { label: 'Katkıda Bulunan', value: 'Contributor' },
-    { label: 'İzleyici', value: 'Viewer' }
+    { label: 'Kullanıcı', value: 'Contributor' }
   ];
   
   joinedFilterOptions: any[] = [

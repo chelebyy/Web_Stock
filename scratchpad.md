@@ -701,3 +701,74 @@ Kullanıcı ekleme işlemi sırasında 500 Internal Server Error hatası alını
 2. Güvenlik kontrolleri eklemek
 3. Performans ve kullanıcı deneyimi iyileştirmeleri yapmak
 4. Birim testleri yazmak
+
+## Görev: Rol Terminolojisi Güncelleme
+
+### Görev Tanımı
+Kullanıcı tablosunda "Katkıda Bulunan" olarak görünen izin adını, projede tanımlı olan "Yönetici" ve "Kullanıcı" rollerine uygun olarak değiştirmek. Ayrıca, kullanılmayan "İzleyici" rolünü sistemden kaldırmak.
+
+### Yapılan İşlemler
+#### İlk Güncelleme
+- [X] User management bileşeninde izin gösterim kısmı incelendi
+- [X] "Katkıda Bulunan" ifadesi "Kullanıcı" olarak güncellendi (HTML dosyası)
+- [X] Filtre seçeneklerindeki etiketler düzeltildi (TS dosyası)
+- [X] Knowledge-base klasöründe `user_role_terminology_update.md` dosyası oluşturuldu
+- [X] Errors.md dosyasına değişiklik kaydedildi
+- [X] Scratchpad'e görev kaydedildi
+
+#### İkinci Güncelleme
+- [X] User management bileşeninde "İzleyici" rolü kaldırıldı
+- [X] Filtre seçeneklerinden "İzleyici" seçeneği kaldırıldı
+- [X] HTML dosyasındaki izin gösterim koşullarından "İzleyici" kontrolü kaldırıldı
+- [X] Knowledge-base/user_role_terminology_update.md dosyası güncellendi
+- [X] Errors.md dosyası güncellendi
+- [X] Scratchpad görev kaydı güncellendi
+
+### Teknik Değişiklikler
+1. frontend/src/app/components/user-management/user-management.component.html dosyasında:
+   ```diff
+   {{ user.permissions === 'Admin' ? 'Yönetici' : 
+   -  user.permissions === 'Contributor' ? 'Katkıda Bulunan' : 
+   +  user.permissions === 'Contributor' ? 'Kullanıcı' : 
+      user.permissions === 'Viewer' ? 'İzleyici' : user.permissions }}
+   ```
+
+2. frontend/src/app/components/user-management/user-management.component.ts dosyasında (İlk Güncelleme):
+   ```diff
+   roleFilterOptions: any[] = [
+     { label: 'Tümü', value: null },
+     { label: 'Yönetici', value: 'Admin' },
+   -  { label: 'Katkıda Bulunan', value: 'Contributor' },
+   +  { label: 'Kullanıcı', value: 'Contributor' },
+     { label: 'İzleyici', value: 'Viewer' }
+   ];
+   ```
+
+3. frontend/src/app/components/user-management/user-management.component.ts dosyasında (İkinci Güncelleme):
+   ```diff
+   roleFilterOptions: any[] = [
+     { label: 'Tümü', value: null },
+     { label: 'Yönetici', value: 'Admin' },
+   -  { label: 'Kullanıcı', value: 'Contributor' },
+   -  { label: 'İzleyici', value: 'Viewer' }
+   +  { label: 'Kullanıcı', value: 'Contributor' }
+   ];
+   ```
+
+4. frontend/src/app/components/user-management/user-management.component.html dosyasında (İkinci Güncelleme):
+   ```diff
+   <span class="permission-badge" [ngClass]="{
+     'admin-badge': user.permissions === 'Admin',
+   -  'contributor-badge': user.permissions === 'Contributor',
+   -  'viewer-badge': user.permissions === 'Viewer'
+   +  'contributor-badge': user.permissions === 'Contributor'
+   }">
+     {{ user.permissions === 'Admin' ? 'Yönetici' : 
+        user.permissions === 'Contributor' ? 'Kullanıcı' : 
+   -    user.permissions === 'Viewer' ? 'İzleyici' : user.permissions }}
+   +    user.permissions }}
+   </span>
+   ```
+
+### Sonuç
+Kullanıcı yönetimi sayfasındaki rol isimleri, proje genelindeki terminoloji standardına uyumlu hale getirildi. Sistemde artık sadece "Yönetici" ve "Kullanıcı" olmak üzere iki rol bulunuyor, böylece kullanıcı deneyimi daha basit ve anlaşılır hale geldi.
