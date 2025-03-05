@@ -14,6 +14,12 @@ import { ProgressSpinnerModule } from 'primeng/progressspinner';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 
+// ReferenceHandler.Preserve için ek type tanımı
+interface PreserveFormat<T> {
+  $id?: string;
+  $values?: T[];
+}
+
 @Component({
   selector: 'app-role-detail',
   templateUrl: './role-detail.component.html',
@@ -63,10 +69,31 @@ export class RoleDetailComponent implements OnInit {
     }).subscribe({
       next: (data) => {
         this.role = data.role;
-        this.permissionGroups = data.permissionGroups;
+        
+        // PermissionGroups formatını kontrol et
+        if (data.permissionGroups && Array.isArray(data.permissionGroups)) {
+          this.permissionGroups = data.permissionGroups;
+        } else if (data.permissionGroups && (data.permissionGroups as PreserveFormat<PermissionGroup>).$values) {
+          // ReferenceHandler.Preserve formatını kontrol et
+          const preserveData = data.permissionGroups as PreserveFormat<PermissionGroup>;
+          this.permissionGroups = preserveData.$values || [];
+        } else {
+          console.error('permissionGroups uygun formatta değil:', data.permissionGroups);
+          this.permissionGroups = [];
+        }
         
         // Seçili izinleri ayarla
-        this.selectedPermissions = data.rolePermissions.map(p => p.id);
+        if (data.rolePermissions && Array.isArray(data.rolePermissions)) {
+          this.selectedPermissions = data.rolePermissions.map(p => p.id);
+        } else if (data.rolePermissions && (data.rolePermissions as PreserveFormat<Permission>).$values) {
+          // ReferenceHandler.Preserve formatını kontrol et
+          const preserveData = data.rolePermissions as PreserveFormat<Permission>;
+          this.selectedPermissions = preserveData.$values?.map(p => p.id) || [];
+        } else {
+          console.error('rolePermissions uygun formatta değil:', data.rolePermissions);
+          this.selectedPermissions = [];
+        }
+        
         this.loading = false;
       },
       error: (error) => {
@@ -120,15 +147,37 @@ export class RoleDetailComponent implements OnInit {
    * Belirli bir gruba ait izinleri döndürür
    */
   getPermissionsByGroup(groupName: string): Permission[] {
-    const group = this.permissionGroups.find(g => g.group === groupName);
-    return group ? group.permissions : [];
+    if (!this.permissionGroups || !Array.isArray(this.permissionGroups)) {
+      console.warn('permissionGroups dizi değil veya tanımsız');
+      return [];
+    }
+    
+    const group = this.permissionGroups.find(g => g && g.group === groupName);
+    
+    if (!group) {
+      return [];
+    }
+    
+    if (!group.permissions || !Array.isArray(group.permissions)) {
+      // Belki permissions ReferenceHandler.Preserve formatında olabilir
+      const preserveData = group.permissions as unknown as PreserveFormat<Permission>;
+      return preserveData && preserveData.$values ? preserveData.$values : [];
+    }
+    
+    return group.permissions;
   }
   
   /**
    * Belirli bir grup dışındaki tüm grup adlarını döndürür
    */
   getGroupsExcept(excludeGroupName: string): string[] {
+    if (!this.permissionGroups || !Array.isArray(this.permissionGroups)) {
+      console.warn('permissionGroups dizi değil veya tanımsız');
+      return [];
+    }
+    
     return this.permissionGroups
+      .filter(g => g && g.group) // Undefined kontrolü
       .map(g => g.group)
       .filter(groupName => groupName !== excludeGroupName);
   }

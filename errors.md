@@ -53,6 +53,7 @@ Bu dosya, proje geliştirme sürecinde karşılaşılan hataları ve çözümler
 - [Hata 8: 500 Internal Server Error (Rol Yönetimi)](#hata-8-500-internal-server-error-rol-yönetimi)
 - [Hata 8: 500 Internal Server Error (Rol Yönetimi) - Döngüsel Referans](#hata-8-500-internal-server-error-rol-yönetimi-döngüsel-referans)
 - [PrimeNG Table ve Döngüsel Referans Hatası](#primeNG-table-ve-döngüsel-referans-hatası)
+- [Angular *ngFor ve ReferenceHandler.Preserve Hatası](#angular-ngfor-ve-referencehandlerpreserve-hatası)
 
 ## Clean Architecture Geçişi Hataları
 
@@ -1956,3 +1957,74 @@ return Ok(roles.Select(r => new
     // ... diğer özellikler
 }).ToList());
 ```
+
+## Angular *ngFor ve ReferenceHandler.Preserve Hatası
+
+### Hata
+```
+ERROR RuntimeError: NG02200: Cannot find a differ supporting object '[object Object]' of type 'object'. 
+NgFor only supports binding to Iterables, such as Arrays. Did you mean to use the keyvalue pipe?
+```
+
+### Nedeni
+Bu hata, Angular *ngFor direktifi ile bir dizi (array) olmayan bir nesne (object) üzerinde döngü yapmaya çalıştığımızda oluşur. ReferenceHandler.Preserve kullanıldığında, API'den gelen veriler `{ $id: "1", $values: [...] }` formatında olur, bu da *ngFor ile doğrudan kullanılamaz.
+
+### Çözüm
+
+1. **Bileşen Seviyesinde**:
+```typescript
+// ReferenceHandler.Preserve için ek tip tanımı
+interface PreserveFormat<T> {
+  $id?: string;
+  $values?: T[];
+}
+
+// API çağrıları sonrasında, veriyi normalizasyon işlemi
+if (data.someArray && Array.isArray(data.someArray)) {
+  this.someArray = data.someArray;
+} else if (data.someArray && (data.someArray as PreserveFormat<SomeType>).$values) {
+  const preserveData = data.someArray as PreserveFormat<SomeType>;
+  this.someArray = preserveData.$values || [];
+} else {
+  console.error('someArray uygun formatta değil:', data.someArray);
+  this.someArray = [];
+}
+```
+
+2. **Servis Seviyesinde**:
+```typescript
+private normalizeResponse<T>(response: any): T {
+  if (!response) return [] as unknown as T;
+  
+  // $values dizisi varsa
+  if (response.$values) {
+    return response.$values as T;
+  } 
+  // Dizi ise doğrudan döndür
+  else if (Array.isArray(response)) {
+    return response as T;
+  } 
+  // Son çare: orijinal yanıtı döndür
+  return response as T;
+}
+
+// Servis metodlarında kullanımı
+getItems(): Observable<Item[]> {
+  return this.http.get<any>(this.apiUrl)
+    .pipe(map(response => this.normalizeResponse<Item[]>(response)));
+}
+```
+
+3. **Template'te Keyvalue Pipe Kullanımı (Alternatif)**:
+```html
+<div *ngFor="let item of someObjectData | keyvalue">
+  {{ item.key }}: {{ item.value }}
+</div>
+```
+
+### Öğrenilen Dersler
+1. ReferenceHandler.Preserve kullanıldığında, API'den gelen veriler özel bir formatta olur ve normalizasyon gerektirir.
+2. Bileşen seviyesinde, veri template'e bağlanmadan önce doğru formata dönüştürülmelidir.
+3. *ngFor sadece diziler, Map, Set gibi yinelenebilir (iterable) nesnelerle çalışır.
+4. Güvenli bir yaklaşım için hem servis seviyesinde hem de bileşen seviyesinde normalizasyon uygulanmalıdır.
+5. Veri yapılarının undefined veya null olma ihtimali her zaman kontrol edilmelidir.

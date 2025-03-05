@@ -878,3 +878,39 @@ Rol yönetimi sayfasını sayfa erişim izinlerini yönetecek şekilde geliştir
 - [ ] Tüm sayfaların benzer şekilde düzeltilmesi
 - [ ] Frontend'in JSON serileştirme ayarlarına duyarlılığının azaltılması
 - [ ] Önerilen alternatif çözümlerin değerlendirilmesi (backend tarafında dönüşüm vs.)
+
+### Hata Düzeltmesi 5: NgFor Hataları ve ReferenceHandler.Preserve Uyumluluğu
+
+**Sorun**: `ERROR RuntimeError: NG02200: Cannot find a differ supporting object '[object Object]' of type 'object'` - *ngFor kullanılan bileşenlerde objeler üzerinde döngü yapma hatası.
+
+**Analiz**:
+- Backend'de `ReferenceHandler.Preserve` kullanıldığından, frontend'e gelen veriler `{ $id: "1", $values: [...] }` formatında geliyor
+- Bu format, doğrudan *ngFor ile kullanılamayan bir obje formatı olduğu için hata oluşuyor
+- Veri servis seviyesinde normalize edilse bile, iç içe geçmiş objelerde sorunlar yaşanabiliyor
+
+**Çözüm Stratejisi**:
+1. Component seviyesinde verilerin format kontrolü ve normalizasyonu:
+   - Rol detay sayfasında permissionGroups ve benzeri verilerin array kontrolü
+   - Obje formatı için PreserveFormat<T> interface'i tanımlanması
+   - $values içeren objelerin düzgün şekilde diziye dönüştürülmesi
+
+2. Yardımcı metotların güvenli hale getirilmesi:
+   - getPermissionsByGroup() ve getGroupsExcept() metotlarına null/undefined kontrolleri eklenmesi
+   - İç içe veri yapılarında da $values kontrolü yapılması
+
+3. Dokümentasyon:
+   - errors.md dosyasına detaylı açıklama ve çözüm örneği eklenmesi
+   - Benzer hataların önlenmesi için öğrenilen derslerin kaydedilmesi
+
+**İlerleme**:
+- [x] RoleDetailComponent'te permissionGroups'un normalizasyonu
+- [x] getPermissionsByGroup ve getGroupsExcept metotlarının güvenli hale getirilmesi
+- [x] errors.md'ye dokümantasyon eklenmesi
+- [x] Sorunun scratchpad.md'ye kaydedilmesi
+
+**Öğrenilen Dersler**:
+1. Backend'de ReferenceHandler.Preserve kullanıldığında, frontend'te tüm veri yapılarının normalizasyon ihtiyacı olabilir
+2. ngFor kullanılan tüm template'lerde veri formatları mutlaka kontrol edilmeli
+3. Hem servis seviyesinde hem de component seviyesinde normalizasyon yapılmalı
+4. İç içe veri yapılarında da format kontrolleri düşünülmeli
+5. Metotlar undefined, null ve yanlış formatlar için savunmacı programlanmalı
