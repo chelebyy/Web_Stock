@@ -118,6 +118,26 @@ export class UserService {
     return this.http.get<User>(`${this.apiUrl}/Users/${id}`, options);
   }
 
+  getUserById(id: number): Observable<User> {
+    return this.getUser(id).pipe(
+      map(user => {
+        // Backend'den gelen User nesnesinde firstName ve lastName alanları olmayabilir
+        // Kullanıcı adını parçalayarak bu alanları dolduralım
+        if (user && !user.firstName && !user.lastName && user.username) {
+          const nameParts = user.username.split(' ');
+          if (nameParts.length >= 2) {
+            user.firstName = nameParts[0];
+            user.lastName = nameParts.slice(1).join(' ');
+          } else {
+            user.firstName = user.username;
+            user.lastName = '';
+          }
+        }
+        return user;
+      })
+    );
+  }
+
   createUser(user: User): Observable<any> {
     const createUserRequest: CreateUserRequest = {
       username: user.username,

@@ -22,6 +22,15 @@ namespace Stock.Infrastructure.Data.Configurations
             builder.Property(p => p.Group)
                 .HasMaxLength(50);
 
+            builder.Property(p => p.ResourceType)
+                .HasMaxLength(50);
+
+            builder.Property(p => p.ResourceName)
+                .HasMaxLength(50);
+
+            builder.Property(p => p.Action)
+                .HasMaxLength(50);
+
             builder.Property(p => p.CreatedAt)
                 .IsRequired();
 

@@ -3,6 +3,12 @@ export interface Permission {
     name: string;
     description: string;
     group: string;
+    resourceType?: string;
+    resourceName?: string;
+    action?: string;
+    isFromRole?: boolean;
+    isCustom?: boolean;
+    roleName?: string;
 }
 
 export interface PermissionGroup {

@@ -553,6 +553,10 @@ export class UserManagementComponent implements OnInit {
     this.router.navigate(['/admin-dashboard']);
   }
 
+  manageUserPermissions(user: any) {
+    this.router.navigate([`/users/${user.id}/permissions`]);
+  }
+
   // Tüm kullanıcıları temizleme metodu
   clearAllUsers() {
     this.confirmationService.confirm({

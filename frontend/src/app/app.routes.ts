@@ -8,6 +8,7 @@ import { AuthGuard } from './guards/auth.guard';
 import { AdminDashboardComponent } from './components/admin-dashboard/admin-dashboard.component';
 import { UserDashboardComponent } from './components/user-dashboard/user-dashboard.component';
 import { RoleDetailComponent } from './components/role-management/role-detail/role-detail.component';
+import { UserPermissionComponent } from './components/user-permission/user-permission.component';
 
 export const routes: Routes = [
   { path: '', redirectTo: '/login', pathMatch: 'full' },
@@ -101,6 +102,18 @@ export const routes: Routes = [
       { path: 'tasks/completed', component: ComputersComponent },
       { path: 'settings/general', component: ComputersComponent },
       { path: 'settings/categories', component: ComputersComponent }
+    ]
+  },
+  { 
+    path: 'users/:id/permissions', 
+    component: UserPermissionComponent,
+    canActivate: [AuthGuard],
+    data: { 
+      requiresAdmin: true,
+      requiredPermission: 'Pages.UserManagement'
+    },
+    providers: [
+      // Gerekli servis sağlayıcılar burada belirtilebilir
     ]
   }
 ];

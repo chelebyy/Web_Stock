@@ -5,6 +5,8 @@ using Stock.Domain.Interfaces;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using System;
+using Stock.Application.Common.Interfaces;
+using Stock.Domain.Entities;
 
 namespace Stock.API.Controllers
 {
@@ -69,23 +71,107 @@ namespace Stock.API.Controllers
         [HttpGet("fix-users")]
         public async Task<IActionResult> FixUsers()
         {
-            // Admin kullanıcısına sicil numarası ekle
-            var adminUser = await _context.Users.FirstOrDefaultAsync(u => u.Username == "admin");
-            if (adminUser != null)
+            try
             {
-                adminUser.Sicil = "A001";
-                await _context.SaveChangesAsync();
-            }
+                _logger.LogInformation("Kullanıcıları düzeltme işlemi başlatıldı");
+                
+                // Admin kullanıcısını kontrol et veya oluştur
+                var adminUser = await _context.Users.FirstOrDefaultAsync(u => u.Username == "admin");
+                if (adminUser == null)
+                {
+                    // Admin kullanıcısı yoksa oluştur
+                    _logger.LogInformation("Admin kullanıcısı oluşturuluyor");
+                    
+                    var adminRole = await _context.Roles.FirstOrDefaultAsync(r => r.Name == "Admin");
+                    if (adminRole == null)
+                    {
+                        adminRole = new Role
+                        {
+                            Name = "Admin",
+                            Description = "Sistem yöneticisi"
+                        };
+                        _context.Roles.Add(adminRole);
+                        await _context.SaveChangesAsync();
+                    }
+                    
+                    adminUser = new User
+                    {
+                        Username = "admin",
+                        PasswordHash = _passwordHasher.HashPassword("admin123"),
+                        IsAdmin = true,
+                        Sicil = "A001",
+                        RoleId = adminRole.Id,
+                        CreatedAt = DateTime.UtcNow
+                    };
+                    
+                    _context.Users.Add(adminUser);
+                    await _context.SaveChangesAsync();
+                    _logger.LogInformation($"Admin kullanıcısı oluşturuldu. ID: {adminUser.Id}");
+                }
+                else
+                {
+                    // Admin kullanıcısı varsa güncelle
+                    adminUser.PasswordHash = _passwordHasher.HashPassword("admin123");
+                    adminUser.Sicil = "A001";
+                    adminUser.IsAdmin = true;
+                    await _context.SaveChangesAsync();
+                    _logger.LogInformation($"Admin kullanıcısı güncellendi. ID: {adminUser.Id}");
+                }
 
-            // User kullanıcısına sicil numarası ekle
-            var normalUser = await _context.Users.FirstOrDefaultAsync(u => u.Username == "user");
-            if (normalUser != null)
+                // Normal kullanıcıyı kontrol et veya oluştur
+                var normalUser = await _context.Users.FirstOrDefaultAsync(u => u.Username == "user");
+                if (normalUser == null)
+                {
+                    // Normal kullanıcı yoksa oluştur
+                    _logger.LogInformation("Normal kullanıcı oluşturuluyor");
+                    
+                    var userRole = await _context.Roles.FirstOrDefaultAsync(r => r.Name == "User");
+                    if (userRole == null)
+                    {
+                        userRole = new Role
+                        {
+                            Name = "User",
+                            Description = "Normal kullanıcı"
+                        };
+                        _context.Roles.Add(userRole);
+                        await _context.SaveChangesAsync();
+                    }
+                    
+                    normalUser = new User
+                    {
+                        Username = "user",
+                        PasswordHash = _passwordHasher.HashPassword("user123"),
+                        IsAdmin = false,
+                        Sicil = "U001",
+                        RoleId = userRole.Id,
+                        CreatedAt = DateTime.UtcNow
+                    };
+                    
+                    _context.Users.Add(normalUser);
+                    await _context.SaveChangesAsync();
+                    _logger.LogInformation($"Normal kullanıcı oluşturuldu. ID: {normalUser.Id}");
+                }
+                else
+                {
+                    // Normal kullanıcı varsa güncelle
+                    normalUser.PasswordHash = _passwordHasher.HashPassword("user123");
+                    normalUser.Sicil = "U001";
+                    normalUser.IsAdmin = false;
+                    await _context.SaveChangesAsync();
+                    _logger.LogInformation($"Normal kullanıcı güncellendi. ID: {normalUser.Id}");
+                }
+
+                return Ok(new { 
+                    message = "Kullanıcılar başarıyla düzeltildi",
+                    adminInfo = "Kullanıcı adı: admin, Sicil: A001, Şifre: admin123",
+                    userInfo = "Kullanıcı adı: user, Sicil: U001, Şifre: user123"
+                });
+            }
+            catch (Exception ex)
             {
-                normalUser.Sicil = "U001";
-                await _context.SaveChangesAsync();
+                _logger.LogError($"Kullanıcılar düzeltilirken hata oluştu: {ex.Message}");
+                return StatusCode(500, new { error = "Bir hata oluştu", message = ex.Message });
             }
-
-            return Ok(new { message = "Kullanıcılara sicil numarası eklendi. Admin: A001, User: U001" });
         }
 
         [HttpGet("fix-passwords")]

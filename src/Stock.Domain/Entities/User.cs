@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 
 namespace Stock.Domain.Entities
@@ -23,10 +24,14 @@ namespace Stock.Domain.Entities
         // Role ilişkisi
         public int? RoleId { get; set; }
         public virtual Role? Role { get; set; }
+        
+        // Kullanıcıya özel izinler
+        public virtual ICollection<UserPermission> UserPermissions { get; set; } = new HashSet<UserPermission>();
 
         public User()
         {
             IsAdmin = false;
+            UserPermissions = new HashSet<UserPermission>();
         }
     }
 } 

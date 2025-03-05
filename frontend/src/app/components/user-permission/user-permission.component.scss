@@ -1,0 +1,49 @@
+.user-info {
+    padding: 16px;
+    background-color: #f8f9fa;
+    border-radius: 4px;
+    margin-bottom: 20px;
+}
+
+.user-info h4 {
+    margin-bottom: 8px;
+    color: var(--primary-color);
+}
+
+.permission-accordion {
+    margin-bottom: 20px;
+}
+
+.has-permission {
+    background-color: rgba(40, 167, 69, 0.1);
+}
+
+.custom-permission {
+    font-weight: bold;
+}
+
+::ng-deep .permission-accordion .p-accordion-content {
+    padding: 0;
+}
+
+/* Nested cards within the main card */
+.card .card {
+    box-shadow: none;
+    border: 1px solid rgba(0,0,0,.125);
+}
+
+.card .card .card-header {
+    background-color: #f8f9fa;
+    padding: 10px 15px;
+    font-weight: 500;
+}
+
+.badge {
+    padding: 5px 10px;
+    border-radius: 4px;
+    font-weight: 500;
+}
+
+.badge.ms-1 {
+    margin-left: 5px;
+} 

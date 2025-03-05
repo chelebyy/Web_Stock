@@ -1,0 +1,167 @@
+<div class="card">
+    <div class="card-header d-flex justify-content-between align-items-center">
+        <h3>Kullanıcı İzinleri Yönetimi</h3>
+        <button pButton pRipple type="button" icon="pi pi-arrow-left" label="Geri Dön" (click)="goBack()" class="p-button-secondary"></button>
+    </div>
+
+    <div class="card-body" *ngIf="user">
+        <div class="user-info mb-4">
+            <h4>{{ user.firstName || user.username || 'Kullanıcı' }} {{ user.lastName || '' }}</h4>
+            <p><strong>Kullanıcı Adı:</strong> {{ user.username || '-' }}</p>
+            <p><strong>Rol:</strong> {{ user.roleName || '-' }}</p>
+            <p><strong>Sicil:</strong> {{ user.sicil || '-' }}</p>
+        </div>
+
+        <p-divider></p-divider>
+
+        <div class="row" *ngIf="!loading">
+            <!-- Kullanıcının mevcut izinleri -->
+            <div class="col-md-6">
+                <h5>Mevcut İzinler</h5>
+                <p-accordion [multiple]="true" class="permission-accordion">
+                    <p-accordionTab *ngFor="let group of allPermissionsGroups" [header]="group.group">
+                        <p-table [value]="group.permissions" [scrollable]="true" scrollHeight="250px">
+                            <ng-template pTemplate="header">
+                                <tr>
+                                    <th>İzin Adı</th>
+                                    <th>Kaynak</th>
+                                    <th>İşlem</th>
+                                    <th>Durum</th>
+                                </tr>
+                            </ng-template>
+                            <ng-template pTemplate="body" let-permission>
+                                <tr [ngClass]="{'has-permission': hasPermission(permission.id), 'custom-permission': isCustomPermission(permission.id)}">
+                                    <td>{{ permission.name }}</td>
+                                    <td>{{ permission.resourceName }}</td>
+                                    <td>{{ permission.action }}</td>
+                                    <td>
+                                        <span *ngIf="hasPermission(permission.id)" class="badge bg-success">İzinli</span>
+                                        <span *ngIf="!hasPermission(permission.id)" class="badge bg-danger">İzinsiz</span>
+                                        <span *ngIf="isCustomPermission(permission.id)" class="badge bg-info ms-1">Özel</span>
+                                    </td>
+                                </tr>
+                            </ng-template>
+                            <ng-template pTemplate="emptymessage">
+                                <tr>
+                                    <td colspan="4" class="text-center">İzin bulunamadı</td>
+                                </tr>
+                            </ng-template>
+                        </p-table>
+                    </p-accordionTab>
+                </p-accordion>
+            </div>
+
+            <!-- Özel İzinler Yönetimi -->
+            <div class="col-md-6">
+                <div class="row">
+                    <!-- İzin atama bölümü -->
+                    <div class="col-12 mb-4">
+                        <div class="card">
+                            <div class="card-header">
+                                <h5>İzin Atama</h5>
+                            </div>
+                            <div class="card-body">
+                                <p-pickList 
+                                    [source]="getFilteredPermissions()" 
+                                    [target]="selectedPermissions"
+                                    sourceHeader="Atanabilir İzinler" 
+                                    targetHeader="Atanacak İzinler"
+                                    filterBy="name"
+                                    sourceFilterPlaceholder="İzin ara..."
+                                    targetFilterPlaceholder="İzin ara..."
+                                    [sourceStyle]="{'height':'250px'}" 
+                                    [targetStyle]="{'height':'250px'}">
+                                    <ng-template let-permission pTemplate="item">
+                                        <div>
+                                            <div><strong>{{ permission.name }}</strong></div>
+                                            <div>{{ permission.description }}</div>
+                                            <div><small>Grup: {{ permission.group }}</small></div>
+                                        </div>
+                                    </ng-template>
+                                </p-pickList>
+                                
+                                <div class="d-flex justify-content-end mt-3">
+                                    <button pButton pRipple type="button" icon="pi pi-check" label="İzinleri Ata" 
+                                        (click)="assignSelectedPermissions()" 
+                                        [disabled]="selectedPermissions.length === 0 || saveLoading">
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Özel izinler listesi -->
+                    <div class="col-12">
+                        <div class="card">
+                            <div class="card-header d-flex justify-content-between align-items-center">
+                                <h5>Özel İzinler</h5>
+                                <button pButton pRipple type="button" icon="pi pi-refresh" label="Rol İzinlerine Sıfırla" 
+                                    (click)="resetToRolePermissions()" 
+                                    [disabled]="userCustomPermissions.length === 0 || saveLoading"
+                                    class="p-button-danger">
+                                </button>
+                            </div>
+                            <div class="card-body">
+                                <p-table [value]="userCustomPermissions" [scrollable]="true" scrollHeight="250px" 
+                                    [(selection)]="selectedCustomPermissions" dataKey="id">
+                                    <ng-template pTemplate="header">
+                                        <tr>
+                                            <th style="width: 3rem">
+                                                <p-tableHeaderCheckbox></p-tableHeaderCheckbox>
+                                            </th>
+                                            <th>İzin Adı</th>
+                                            <th>Kaynak</th>
+                                            <th>İşlem</th>
+                                            <th>Durum</th>
+                                        </tr>
+                                    </ng-template>
+                                    <ng-template pTemplate="body" let-customPermission>
+                                        <tr>
+                                            <td>
+                                                <p-tableCheckbox [value]="customPermission"></p-tableCheckbox>
+                                            </td>
+                                            <td>{{ customPermission.permissionName }}</td>
+                                            <td>{{ customPermission.resourceName }}</td>
+                                            <td>{{ customPermission.action }}</td>
+                                            <td>
+                                                <span *ngIf="customPermission.isGranted" class="badge bg-success">İzinli</span>
+                                                <span *ngIf="!customPermission.isGranted" class="badge bg-danger">İzinsiz</span>
+                                            </td>
+                                        </tr>
+                                    </ng-template>
+                                    <ng-template pTemplate="emptymessage">
+                                        <tr>
+                                            <td colspan="5" class="text-center">Özel izin bulunamadı</td>
+                                        </tr>
+                                    </ng-template>
+                                    <ng-template pTemplate="footer" *ngIf="userCustomPermissions.length > 0">
+                                        <tr>
+                                            <td colspan="5">
+                                                <button pButton pRipple type="button" icon="pi pi-trash" label="Seçilenleri Kaldır" 
+                                                    (click)="removeSelectedCustomPermissions()" 
+                                                    [disabled]="selectedCustomPermissions.length === 0 || saveLoading"
+                                                    class="p-button-danger">
+                                                </button>
+                                            </td>
+                                        </tr>
+                                    </ng-template>
+                                </p-table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div *ngIf="loading" class="d-flex justify-content-center align-items-center py-5">
+            <p-progressSpinner></p-progressSpinner>
+            <span class="ms-3">Yükleniyor...</span>
+        </div>
+    </div>
+
+    <div class="card-body" *ngIf="!user && !loading">
+        <div class="alert alert-warning">
+            Kullanıcı bulunamadı.
+        </div>
+    </div>
+</div> 

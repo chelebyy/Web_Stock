@@ -61,6 +61,11 @@ export class PermissionService {
       .pipe(map(response => this.normalizeResponse<PermissionGroup[]>(response)));
   }
 
+  // Alias - bileşen tarafından kullanılan isim
+  getPermissionGroups(): Observable<PermissionGroup[]> {
+    return this.getPermissionsByGroups();
+  }
+
   getPermissionsByRoleId(roleId: number): Observable<Permission[]> {
     return this.http.get<any>(`${this.apiUrl}/role/${roleId}`)
       .pipe(map(response => this.normalizeResponse<Permission[]>(response)));

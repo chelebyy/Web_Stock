@@ -21,6 +21,7 @@ namespace Stock.Infrastructure.Data
         public DbSet<ActivityLog> ActivityLogs { get; set; }
         public DbSet<Permission> Permissions { get; set; } = null!;
         public DbSet<RolePermission> RolePermissions { get; set; } = null!;
+        public DbSet<UserPermission> UserPermissions { get; set; } = null!;
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

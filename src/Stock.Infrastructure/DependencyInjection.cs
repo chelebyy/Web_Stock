@@ -35,6 +35,8 @@ namespace Stock.Infrastructure
             services.AddScoped<IAuthService, AuthService>();
             services.AddScoped<IAuditService, AuditService>();
             services.AddScoped<IPermissionService, PermissionService>();
+            services.AddScoped<IUserPermissionService, UserPermissionService>();
+            services.AddScoped<ICurrentUserService, CurrentUserService>();
 
             return services;
         }

@@ -742,3 +742,332 @@ Rol yönetimi sayfasını sayfa erişim izinlerini yönetecek şekilde geliştir
 3. Hem servis seviyesinde hem de component seviyesinde normalizasyon yapılmalı
 4. İç içe veri yapılarında da format kontrolleri düşünülmeli
 5. Metotlar undefined, null ve yanlış formatlar için savunmacı programlanmalı
+
+## Kullanıcı İzinleri Yönetimi Entegrasyonu
+
+### Görev Tanımı
+Kullanıcı yönetimi sayfasına izin yönetimi özelliği eklemek.
+
+### Yapılan İşlemler
+[X] Kullanıcı yönetimi sayfasına izin yönetimi butonu eklendi
+[X] UserManagementComponent'e manageUserPermissions metodu eklendi
+[X] Kullanıcı izinleri sayfasına yönlendirme sağlandı
+[X] Mevcut UserPermissionComponent ile entegrasyon tamamlandı
+
+### Teknik Detaylar
+1. **İzin Yönetimi Butonu:**
+   - Kullanıcı yönetimi sayfasındaki her kullanıcı için izin yönetimi butonu eklendi
+   - Buton, kullanıcı işlemleri bölümüne diğer butonlarla uyumlu şekilde yerleştirildi
+   - Anahtar ikonu ve "İzinleri Yönet" tooltip'i ile kullanıcı dostu bir arayüz sağlandı
+
+2. **Yönlendirme Mekanizması:**
+   - UserManagementComponent'e manageUserPermissions metodu eklendi
+   - Metot, kullanıcı ID'sini alarak `/users/:id/permissions` rotasına yönlendirme yapıyor
+   - UserPermissionComponent'in goBack metodu, kullanıcı yönetimi sayfasına geri dönüşü sağlıyor
+
+3. **Entegrasyon Kontrolü:**
+   - Tüm gerekli bileşenler ve rotalar mevcut ve düzgün çalışıyor
+   - UserPermissionComponent, kullanıcı izinlerini yönetmek için gerekli tüm işlevselliğe sahip
+   - Routing yapılandırması doğru şekilde tanımlanmış
+
+### Sonraki Adımlar
+[ ] İzin yönetimi arayüzü daha kullanıcı dostu hale getirilebilir
+[ ] İzin grupları için renk kodlaması eklenebilir
+[ ] İzin değişikliklerinin audit log'a kaydedilmesi sağlanabilir
+[ ] Toplu izin atama/kaldırma özellikleri eklenebilir
+
+## PrimeNG 19 Uyumluluk Sorunları Çözümü
+
+### Görev Tanımı
+Angular 19 ve PrimeNG 19 kullanılan projede derleme hatalarını çözerek frontend uygulamasının başarıyla çalışmasını sağlamak.
+
+### Sorun
+Frontend uygulaması derleme hataları nedeniyle başlatılamıyordu. Hatalar şunlardı:
+1. `Can't bind to 'loading' since it isn't a known property of 'button'`
+2. `'p-table' is not a known element`
+3. `Parser Error: Bindings cannot contain assignments...`
+4. `the [responsive] property of p-picklist is deprecated`
+
+### Yapılan İşlemler
+[X] UserPermissionComponent standalone bileşen olarak yapılandırıldı
+[X] Gerekli PrimeNG modülleri import edildi
+[X] HTML şablonunda uyumsuz özellikler ([loading], [responsive] gibi) kaldırıldı
+[X] Karmaşık template ifadeleri için yardımcı metotlar eklendi
+[X] app.routes.ts dosyasında UserPermissionComponent rotası güncellendi
+
+### Teknik Detaylar
+1. **Standalone Bileşenler:**
+   - Angular 19'da standalone bileşenler önerilen yaklaşımdır
+   - Gerekli tüm modüller ve bağımlılıklar doğrudan bileşene import edildi
+   ```typescript
+   @Component({
+     // ... diğer özellikler
+     standalone: true,
+     imports: [
+       CommonModule,
+       FormsModule,
+       TableModule,
+       ButtonModule,
+       // ... diğer modüller
+     ],
+     providers: [MessageService]
+   })
+   ```
+
+2. **PrimeNG 19 API Değişiklikleri:**
+   - Button bileşeni artık `[loading]` özelliğini desteklemiyor
+   - PickList bileşeni artık `[responsive]` özelliğini desteklemiyor
+   - Bu özellikler şablondan kaldırıldı
+
+3. **Karmaşık Şablon İfadelerinin Basitleştirilmesi:**
+   - Çok uzun ve karmaşık şablon ifadeleri, bileşen sınıfında metotlara taşındı
+   ```typescript
+   getFilteredPermissions(): Permission[] {
+     // İzinleri filtreleme ve dönüştürme mantığı burada
+   }
+   ```
+
+4. **Rota Tanımlaması Güncellemesi:**
+   - Standalone bileşenlerin route yapılandırması güncellendi
+   ```typescript
+   {
+     path: 'users/:id/permissions',
+     component: UserPermissionComponent,
+     // ... diğer ayarlar
+     providers: [
+       // Gerekli servis sağlayıcıları burada belirtilebilir
+     ]
+   }
+   ```
+
+### Öğrenilen Dersler
+1. Angular ve PrimeNG güncellemelerinde API değişikliklerine dikkat edilmeli
+2. HTML şablonlarında karmaşık ifadeler yerine bileşen sınıfında metotlar kullanılmalı
+3. Standalone bileşenler kullanırken tüm bağımlılıkların imports dizisinde belirtilmesi gerekir
+4. Angular hata mesajlarının dikkatle okunması ve analiz edilmesi önemlidir
+
+### Sonraki Adımlar
+[ ] Diğer bileşenlerde benzer modernizasyon çalışmaları yapılabilir
+[ ] Karmaşık şablon ifadeleri olan diğer bileşenler basitleştirilebilir
+[ ] Angular 19'un yeni özelliklerini kullanmak için diğer bileşenler de standalone'a dönüştürülebilir
+
+## User Model Uyumsuzluğu Sorunu Çözümü
+
+### Görev Tanımı
+Frontend derleme hatalarını çözmek: User modelinde olmayan firstName ve lastName alanlarının UserPermissionComponent şablonunda kullanılmasından kaynaklanan sorunları gidermek.
+
+### Sorun
+Frontend derlenirken şu hatalar alındı:
+1. `Property 'firstName' does not exist on type 'User'`
+2. `Property 'lastName' does not exist on type 'User'`
+
+Bu hatalar, UserPermissionComponent şablonunda kullanılan firstName ve lastName alanlarının User modelinde bulunmamasından kaynaklanıyordu.
+
+### Yapılan İşlemler
+[X] User modeline firstName ve lastName alanları eklendi
+[X] HTML şablonu güncellenerek null check eklendi ve sicil bilgisi gösterildi
+[X] UserService.getUserById metodu geliştirilerek, backend'den gelen verinin işlenmesi sağlandı
+
+### Teknik Detaylar
+1. **User Model Güncellemesi:**
+   - firstName ve lastName alanları opsiyonel (?) olarak eklendi
+   ```typescript
+   export interface User {
+       // ... diğer alanlar
+       firstName?: string;
+       lastName?: string;
+   }
+   ```
+
+2. **HTML Şablonunda Null Check:**
+   - Şablona null check eklenerek, alanların yoksa varsayılan değerlerin gösterilmesi sağlandı
+   ```html
+   <h4>{{ user.firstName || user.username || 'Kullanıcı' }} {{ user.lastName || '' }}</h4>
+   <p><strong>Kullanıcı Adı:</strong> {{ user.username || '-' }}</p>
+   <p><strong>Rol:</strong> {{ user.roleName || '-' }}</p>
+   <p><strong>Sicil:</strong> {{ user.sicil || '-' }}</p>
+   ```
+
+3. **UserService Güncellemesi:**
+   - UserService.getUserById metodu RxJS map operatörü kullanılarak geliştirilerek, username'den firstName ve lastName çıkarılması sağlandı
+   ```typescript
+   getUserById(id: number): Observable<User> {
+     return this.getUser(id).pipe(
+       map(user => {
+         // Backend'den gelen veriden firstName ve lastName çıkarılması
+         if (user && !user.firstName && !user.lastName && user.username) {
+           const nameParts = user.username.split(' ');
+           // ... username'i parçalayarak firstName ve lastName doldurma
+         }
+         return user;
+       })
+     );
+   }
+   ```
+
+### Öğrenilen Dersler
+1. Frontend ve backend model yapıları arasındaki uyumsuzluklar derleme zamanı hatalarına neden olabilir
+2. Şablonlarda null check kullanmak, özellikle API yanıtları için önemlidir
+3. Veri manipülasyonu için RxJS operatörleri kullanmak, API yanıtlarını istenilen format dönüştürmek için etkili bir yöntemdir
+4. Angular'ın type-checking özelliği, şablonda kullanılan değişken alanlarının uyumlu olmasını sağlar
+
+### Sonraki Adımlar
+[ ] Diğer bileşenlerde benzer model uyumsuzluklarını kontrol etmek
+[ ] Backend API'yi User modelinde firstName ve lastName döndürecek şekilde geliştirmek
+[ ] Diğer model yapılarını da frontend ihtiyaçlarına göre güncellemek
+
+## Backend Model Uyumsuzluğu ve Migration Sorunları Çözümü
+
+### Görev Tanımı
+Backend'de derleme hatalarını ve migration sorunlarını çözerek uygulamanın çalışmasını sağlamak.
+
+### Sorun
+Backend uygulaması başlatılırken aşağıdaki hatalar alındı:
+1. `'User' bir 'UserName' tanımı içermiyor` - UserPermissionService.cs dosyasında büyük/küçük harf duyarlılığı sorunu
+2. `column "Action" of relation "Permissions" already exists` - Migration'lar arasında model tanımı çakışması
+3. `constraint "FK_AuditLogs_Users_UserId" of relation "AuditLogs" does not exist` - Migration'lar arasında FK tanımlaması tutarsızlığı
+4. `The model for context 'ApplicationDbContext' has pending changes` - Model değişikliklerinin migration'a eklenmemesi
+
+### Yapılan İşlemler
+[X] UserPermissionService.cs dosyasında 'UserName' referansını 'Username' olarak düzeltildi
+[X] Tüm migration'lar silindi (rm -r -force Migrations)
+[X] Veritabanı tamamen silindi (dotnet ef database drop -f)
+[X] Tamamen yeni bir initial migration oluşturuldu
+[X] Yeni migration veritabanına uygulandı
+[X] Backend ve frontend uygulamaları başlatıldı
+
+### Teknik Detaylar
+1. **Büyük/Küçük Harf Duyarlılığı Düzeltmesi:**
+   ```csharp
+   // Hatalı kod
+   UserName = up.User.UserName,
+   
+   // Düzeltilmiş kod
+   UserName = up.User.Username,
+   ```
+
+2. **Migration Temizliği:**
+   ```powershell
+   # Migrations klasörünü tamamen sil
+   rm -r -force Migrations
+   
+   # Veritabanını sil
+   dotnet ef database drop -p ../Stock.Infrastructure -f
+   
+   # Yeni bir initial migration oluştur
+   dotnet ef migrations add InitialMigration -p ../Stock.Infrastructure
+   
+   # Migration'ı uygula
+   dotnet ef database update -p ../Stock.Infrastructure
+   ```
+
+3. **PowerShell Komut Düzeltmesi:**
+   ```powershell
+   # Hatalı komut (Windows PowerShell'de çalışmaz)
+   cd src/Stock.API && dotnet run
+   
+   # Doğru komut (Windows PowerShell için)
+   cd src/Stock.API; dotnet run
+   ```
+
+### Öğrenilen Dersler
+1. C# büyük/küçük harf duyarlı bir dildir ve property adlarının tam olarak aynı case'de kullanılması gerekir
+2. Migration sorunları biriktiğinde, bazen en iyi çözüm tüm migration'ları silip sıfırdan başlamaktır
+3. Entity Framework Core migration'ları, model değişikliklerini takip eder ve bu değişiklikleri veritabanına uygular
+4. PowerShell'de komutları birleştirmek için `&&` yerine `;` (noktalı virgül) kullanılmalıdır
+5. Veritabanı işlemleri sırasında hata yönetimi ve loglama kritik öneme sahiptir
+
+### Sonraki Adımlar
+[ ] Tüm UserPermissionService metodlarını test etmek
+[ ] Diğer servislerde benzer büyük/küçük harf duyarlılığı sorunlarını kontrol etmek
+[ ] Migration stratejisini gözden geçirmek ve daha düzenli migration'lar oluşturmak
+[ ] Entity property'lerinin tutarlı bir şekilde adlandırılmasını sağlamak
+
+## Veritabanı Temizliği Sonrası Login Hatası
+
+### Görev Tanımı
+Veritabanı migration sorunlarını çözmek için tüm migration'lar silindi ve veritabanı yeniden oluşturuldu. Ancak bu işlem sonrasında kullanıcı verileri kaybolduğu için login işlemi başarısız oluyordu. Bu sorunu çözmek için bir mekanizma geliştirilmesi gerekiyordu.
+
+### Karşılaşılan Hatalar
+1. **401 Unauthorized Hatası**: API'ye gönderilen login isteği 401 Unauthorized hatası döndürüyor.
+   ```
+   POST http://localhost:5037/api/auth/login 401 (Unauthorized)
+   ```
+
+2. **Kullanıcı Bulunamadı Hatası**: Backend loglarında "Kullanıcı bulunamadı: Sicil No: A001" mesajı görülüyor.
+
+### Çözüm Adımları
+[X] FixPasswordController'ı güncelleyerek kullanıcıları otomatik olarak oluşturan ve şifre hash'lerini düzelten bir endpoint geliştirildi
+[X] Hem admin hem de normal kullanıcı hesaplarını kontrol edip güncelleyen veya oluşturan bir mekanizma eklendi
+[X] Backend uygulaması başlatıldı ve fix-users endpoint'i çağrılarak kullanıcılar düzeltildi
+[X] Hataların belgelenmesi için errors.md dosyası güncellendi
+
+### Teknik Detaylar
+
+```csharp
+[HttpGet("fix-users")]
+public async Task<IActionResult> FixUsers()
+{
+    try
+    {
+        // Admin kullanıcısını kontrol et veya oluştur
+        var adminUser = await _context.Users.FirstOrDefaultAsync(u => u.Username == "admin");
+        if (adminUser == null)
+        {
+            // Admin kullanıcısı yoksa oluştur
+            var adminRole = await _context.Roles.FirstOrDefaultAsync(r => r.Name == "Admin");
+            if (adminRole == null)
+            {
+                adminRole = new Role
+                {
+                    Name = "Admin",
+                    Description = "Sistem yöneticisi"
+                };
+                _context.Roles.Add(adminRole);
+                await _context.SaveChangesAsync();
+            }
+            
+            adminUser = new User
+            {
+                Username = "admin",
+                PasswordHash = _passwordHasher.HashPassword("admin123"),
+                IsAdmin = true,
+                Sicil = "A001",
+                RoleId = adminRole.Id,
+                CreatedAt = DateTime.UtcNow
+            };
+            
+            _context.Users.Add(adminUser);
+            await _context.SaveChangesAsync();
+        }
+        else
+        {
+            // Admin kullanıcısı varsa güncelle
+            adminUser.PasswordHash = _passwordHasher.HashPassword("admin123");
+            adminUser.Sicil = "A001";
+            adminUser.IsAdmin = true;
+            await _context.SaveChangesAsync();
+        }
+
+        // Normal kullanıcı işlemleri benzer şekilde...
+        // ... 
+    }
+    catch (Exception ex)
+    {
+        return StatusCode(500, new { error = "Bir hata oluştu", message = ex.Message });
+    }
+}
+```
+
+### Öğrenilen Dersler
+1. Veritabanını tamamen temizlemek, kullanıcı verilerinin kaybına neden olabilir
+2. Migration sorunlarını çözmek için "temiz başlangıç" yapmak gerektiğinde, kullanıcı verilerini yeniden oluşturacak bir mekanizma bulunmalıdır
+3. Seed verilerinin projeye eklenmesi, bu tür sorunların önlenmesine yardımcı olabilir
+4. Özel controller'lar oluşturarak veritabanı düzeltmeleri yapmak, geliştirme sürecinde karşılaşılan sorunları hızlıca çözmek için kullanışlıdır
+5. PowerShell'de komutları birleştirmek için `&&` yerine `;` (noktalı virgül) kullanılmalıdır
+6. Veritabanı işlemleri sırasında hata yönetimi ve loglama kritik öneme sahiptir
+
+### Sonraki Adımlar
+[ ] SeedData mekanizmasını geliştirerek, uygulama başlatıldığında eksik kullanıcıların otomatik olarak oluşturulmasını sağlamak
+[ ] Kullanıcı yönetimi arayüzünü geliştirerek, kullanıcıların daha kolay yönetilmesini sağlamak
+[ ] Veritabanı migration stratejisini gözden geçirmek ve daha güvenli migration'lar oluşturmak

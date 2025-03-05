@@ -12,6 +12,8 @@ export interface User {
     roleId?: number;
     role?: Role;
     roleName?: string;
+    firstName?: string;
+    lastName?: string;
 }
 
 export interface LoginRequest {

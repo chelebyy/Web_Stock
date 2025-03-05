@@ -20,6 +20,11 @@ Bu dosya, proje geliştirme sürecinde karşılaşılan hataları ve çözümler
 - [Frontend Rol Yönetimi Hataları](#frontend-rol-yönetimi-hataları)
 - [Login Sicil Sorunu](#login-sicil-sorunu)
 - [Login 401 Unauthorized Hatası](#login-401-unauthorized-hatası)
+- [Kullanıcı İzinleri Yönetimi Entegrasyonu](#kullanıcı-izinleri-yönetimi-entegrasyonu)
+- [PrimeNG 19 Uyumluluk Sorunları](#primeNG-19-uyumluluk-sorunları)
+- [User Model Uyumsuzluğu Hatası](#user-model-uyumsuzluğu-hatası)
+- [Backend Model Uyumsuzluğu ve Migration Hataları](#backend-model-uyumsuzluğu-ve-migration-hataları)
+- [Veritabanı Temizliği Sonrası Login Hatası](#veritabanı-temizliği-sonrası-login-hatası)
 
 ## Kullanıcı Aktivitesi Grafiği Yerine Log Kaydetme Sistemi
 
@@ -69,7 +74,7 @@ Bu dosya, proje geliştirme sürecinde karşılaşılan hataları ve çözümler
 ### Yapılan İyileştirmeler (Güncelleme)
 1. Manuel log girişi formu kaldırıldı
 2. Filtreleme özellikleri eklendi (aktivite tipi, durum, tarih aralığı, kullanıcı adı)
-3. Log detaylarını görüntülemek için dialog eklendi
+3. Log detaylarını görüntülemek için dialog eklemek
 4. Sistem tarafından otomatik log kaydı yapılması sağlandı
 5. Boş veri durumu için daha iyi görsel geri bildirim eklendi
 6. Tarih aralığı filtresi için takvim bileşeni eklendi
@@ -1054,3 +1059,157 @@ public async Task<IActionResult> FixPasswords()
 
 **Detaylı Bilgi:**
 - [Login 401 Unauthorized Hatası ve Çözümü](login_401_fix.md) 
+
+## Kullanıcı İzinleri Yönetimi Entegrasyonu
+
+### Yapılan İşlem
+Kullanıcı yönetimi sayfasına izin yönetimi butonu eklendi ve UserManagementComponent'e manageUserPermissions metodu eklendi.
+
+### Karşılaşılan Sorunlar
+1. **Sorun:** Kullanıcı izinleri sayfasına yönlendirme yapılırken doğru rota formatının belirlenmesi.
+   **Çözüm:** Router'ın navigate metodunda template literal kullanılarak dinamik rota oluşturuldu: `this.router.navigate([/users/${user.id}/permissions]);`
+
+2. **Sorun:** Kullanıcı izinleri sayfasından kullanıcı yönetimi sayfasına geri dönüş yolunun belirlenmesi.
+   **Çözüm:** UserPermissionComponent'teki goBack metodu incelendi ve doğru şekilde `/user-management` rotasına yönlendirme yaptığı doğrulandı.
+
+3. **Sorun:** İzin yönetimi butonunun kullanıcı arayüzüne uygun şekilde yerleştirilmesi.
+   **Çözüm:** Mevcut düğme stillerine uygun olarak p-button-rounded ve p-button-info sınıfları kullanıldı ve anahtar ikonu (pi pi-key) eklendi.
+
+### Öğrenilen Dersler
+1. Mevcut bileşenleri yeniden kullanmak, geliştirme sürecini hızlandırır ve kod tekrarını önler.
+2. Routing yapılandırması, bileşenler arasındaki geçişleri yönetmek için önemlidir.
+3. Kullanıcı arayüzünde tutarlı bir tasarım dili kullanmak, kullanıcı deneyimini iyileştirir.
+4. Yetkilendirme kontrollerini route seviyesinde uygulamak, güvenliği artırır.
+
+### İlgili Dosyalar
+- `frontend/src/app/components/user-management/user-management.component.html`
+- `frontend/src/app/components/user-management/user-management.component.ts`
+- `frontend/src/app/components/user-permission/user-permission.component.html`
+- `frontend/src/app/components/user-permission/user-permission.component.ts`
+- `frontend/src/app/app.routes.ts` 
+
+## PrimeNG 19 Uyumluluk Sorunları
+
+### Yapılan İşlem
+UserPermissionComponent bileşeninde PrimeNG 19 ile uyumluluk sorunları giderildi.
+
+### Karşılaşılan Sorunlar
+
+1. **Sorun:** `Can't bind to 'loading' since it isn't a known property of 'button'`
+   **Çözüm:** PrimeNG 19'da Button bileşeni artık `[loading]` özelliğini desteklemiyor. Bu özellik kaldırıldı.
+
+2. **Sorun:** `'p-table' is not a known element`
+   **Çözüm:** Bileşen standalone olarak yapılandırıldı ve TableModule import edildi.
+
+3. **Sorun:** `Parser Error: Bindings cannot contain assignments at column 60 in [allPermissionsGroups.flatMap(g => g.permissions).filter(p => !hasPermission(p.id))]`
+   **Çözüm:** Karmaşık template ifadeleri yerine yeni bir metot (getFilteredPermissions) oluşturuldu.
+
+4. **Sorun:** `the [responsive] property of p-picklist is deprecated`
+   **Çözüm:** Eski özellik kaldırıldı, çünkü PrimeNG 19'da artık desteklenmiyor.
+
+### Öğrenilen Dersler
+
+1. Angular 19 ve PrimeNG 19 geçişinde, bileşenlerin API'si değişebilir ve bazı özellikler kaldırılabilir.
+2. Karmaşık template ifadeleri yerine bileşen sınıfında metotlar kullanmak daha güvenlidir.
+3. Standalone bileşenler kullanılırken, gerekli tüm modüller doğrudan bileşene import edilmelidir.
+4. HTML şablonlarında doğrudan karmaşık dizileri ve fonksiyonları kullanmak yerine, bunları bir metot içinde kapsüllemek daha iyidir.
+
+### İlgili Dosyalar
+- `frontend/src/app/components/user-permission/user-permission.component.ts`
+- `frontend/src/app/components/user-permission/user-permission.component.html`
+- `frontend/src/app/app.routes.ts` 
+
+## User Model Uyumsuzluğu Hatası
+
+### Yapılan İşlem
+UserPermissionComponent şablonunda kullanılan firstName ve lastName alanları, User modelinde bulunmadığı için uyumsuzluk sorunu giderildi.
+
+### Karşılaşılan Sorunlar
+1. **Sorun:** `Property 'firstName' does not exist on type 'User'.`
+   **Çözüm:** User modelini güncelleyerek firstName ve lastName alanları eklendi.
+
+2. **Sorun:** `Property 'lastName' does not exist on type 'User'.`
+   **Çözüm:** Şablona null check eklenerek, bu alanlar yoksa username veya varsayılan değerlerin gösterilmesi sağlandı.
+
+3. **Sorun:** Backend API'den gelen User nesnelerinde firstName ve lastName alanları yok.
+   **Çözüm:** UserService.getUserById() metodu geliştirilerek, backend'den gelen veriyi işleyip firstName ve lastName alanlarını username alanından çıkartılarak doldurması sağlandı.
+
+### Öğrenilen Dersler
+1. Frontend ve backend model yapıları arasındaki uyumsuzluklar, runtime değil, derleme zamanı hatalarına neden olabilir.
+2. Angular'ın template type-checking özelliği, şablonda kullanılan değişken alanlarının type uyumlu olmasını sağlar.
+3. Backend'den gelen veriler, frontend'de ihtiyaç duyulan formata dönüştürülebilir.
+4. Şablonda null check kullanmak önemlidir, özellikle API yanıtlarındaki değişken yapılar için.
+5. İstemci tarafındaki veri modellemesi, API'den dönen yapıdan farklı olabilir ve RxJS operatörleri ile bu dönüşüm sağlanabilir.
+
+### İlgili Dosyalar
+- `frontend/src/app/models/user.model.ts`
+- `frontend/src/app/components/user-permission/user-permission.component.html`
+- `frontend/src/app/services/user.service.ts`
+
+## Backend Model Uyumsuzluğu ve Migration Hataları
+
+### Yapılan İşlem
+Backend'de UserPermissionService'deki hatalı alan referansı düzeltildi ve migration sorunları çözüldü.
+
+### Karşılaşılan Sorunlar
+1. **Sorun:** `C:\Users\muham\OneDrive\Masaüstü\Stock\src\Stock.Infrastructure\Services\UserPermissionService.cs(208,44): error CS1061: 'User' bir 'UserName' tanımı içermiyor`
+   **Çözüm:** UserPermissionService.cs dosyasında hatalı olan 'UserName' referansını 'Username' olarak düzelttik (büyük/küçük harf duyarlılığı).
+
+2. **Sorun:** `42701: column "Action" of relation "Permissions" already exists`
+   **Çözüm:** Migration'lar arasında model tanımları çakışıyordu. Tüm migration'ları silip yeniden başladık.
+
+3. **Sorun:** `42704: constraint "FK_AuditLogs_Users_UserId" of relation "AuditLogs" does not exist`
+   **Çözüm:** Migration'lar arasında FK tanımlamaları tutarsızdı. Tüm migrations klasörünü silip tamamen yeni bir initial migration oluşturduk.
+
+4. **Sorun:** `The model for context 'ApplicationDbContext' has pending changes.`
+   **Çözüm:** Model değişikliklerini içeren yeni bir migration ekledik.
+
+### Öğrenilen Dersler
+1. .NET projesinde büyük/küçük harf duyarlılığına dikkat etmek önemlidir. Entity property'lerinin aynı case'de kullanılması gerekir.
+2. Migration hataları birikebilir ve birbirini etkileyebilir. Bazen en iyi çözüm, tüm migration'ları silip sıfırdan başlamaktır.
+3. Veritabanı şemasında bir değişiklik yapıldığında, yeni bir migration oluşturmak gerekir.
+4. Entity Framework Core'da sık karşılaşılan hata türleri şunlardır:
+   - Property adı yanlış yazılması (büyük/küçük harf farkı)
+   - Aynı sütunun tekrar eklenmesi
+   - Var olmayan kısıtlamaların kaldırılmaya çalışılması
+   - Model ile migration'lar arasındaki tutarsızlıklar
+5. PowerShell'de komutları birleştirmek için `&&` yerine `;` (noktalı virgül) kullanılmalıdır.
+
+### İlgili Dosyalar
+- `src/Stock.Infrastructure/Services/UserPermissionService.cs`
+- `src/Stock.Infrastructure/Migrations/*`
+- `src/Stock.Domain/Entities/User.cs`
+
+## Veritabanı Temizliği Sonrası Login Hatası
+
+### Yapılan İşlem
+Veritabanı migration sorunlarını çözmek için tüm migration'lar silindi ve veritabanı yeniden oluşturuldu. Ancak bu işlem sonrasında kullanıcı verileri kaybolduğu için login işlemi başarısız oluyordu.
+
+### Karşılaşılan Sorunlar
+1. **Sorun:** `401 (Unauthorized)` - Login işlemi başarısız oluyor
+   **Hata Mesajı:** `Failed to load resource: the server responded with a status of 401 (Unauthorized)`
+   **Nedeni:** Veritabanı temizliği sonrası kullanıcı verileri kayboldu
+
+### Uygulanan Çözüm
+FixPasswordController kullanılarak kullanıcıları otomatik olarak oluşturan ve şifre hash'lerini düzelten bir endpoint oluşturuldu:
+
+1. **FixPasswordController Oluşturma/Güncelleme:**
+   - `GET /api/FixPassword/fix-users` endpoint'i oluşturuldu
+   - Bu endpoint, Admin ve User rollerini kontrol edip oluşturuyor
+   - Admin ve normal kullanıcıları kontrol edip oluşturuyor veya güncelliyor
+   - Kullanıcı şifrelerini doğru şekilde hash'liyor
+
+2. **Kullanıcı Bilgileri:**
+   - Admin: Sicil = A001, Şifre = admin123
+   - Normal Kullanıcı: Sicil = U001, Şifre = user123
+
+### Öğrenilen Dersler
+1. Veritabanını tamamen temizlemek, kullanıcı verilerinin kaybına neden olabilir
+2. Migration sorunlarını çözmek için "temiz başlangıç" yapmak gerektiğinde, kullanıcı verilerini yeniden oluşturacak bir mekanizma bulunmalıdır
+3. Seed verilerinin projeye eklenmesi, bu tür sorunların önlenmesine yardımcı olabilir
+4. FixPasswordController gibi yardımcı endpoint'ler, geliştirme sürecinde karşılaşılan sorunları hızlıca çözmek için kullanışlıdır
+
+### İlgili Dosyalar
+- `src/Stock.API/Controllers/FixPasswordController.cs`
+- `src/Stock.Domain/Entities/User.cs`
+- `src/Stock.Infrastructure/Data/ApplicationDbContext.cs`
