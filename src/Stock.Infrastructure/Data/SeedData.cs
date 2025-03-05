@@ -103,6 +103,7 @@ namespace Stock.Infrastructure.Data
                     PasswordHash = BCrypt.Net.BCrypt.HashPassword("admin123"),
                     IsAdmin = true,
                     RoleId = adminRole?.Id,
+                    Sicil = "A001",
                     CreatedAt = DateTime.UtcNow
                 },
                 new User
@@ -111,6 +112,7 @@ namespace Stock.Infrastructure.Data
                     PasswordHash = BCrypt.Net.BCrypt.HashPassword("user123"),
                     IsAdmin = false,
                     RoleId = userRole?.Id,
+                    Sicil = "U001",
                     CreatedAt = DateTime.UtcNow
                 }
             };

@@ -65,5 +65,75 @@ namespace Stock.API.Controllers
                 return StatusCode(500, "Bir hata oluştu");
             }
         }
+
+        [HttpGet("fix-users")]
+        public async Task<IActionResult> FixUsers()
+        {
+            // Admin kullanıcısına sicil numarası ekle
+            var adminUser = await _context.Users.FirstOrDefaultAsync(u => u.Username == "admin");
+            if (adminUser != null)
+            {
+                adminUser.Sicil = "A001";
+                await _context.SaveChangesAsync();
+            }
+
+            // User kullanıcısına sicil numarası ekle
+            var normalUser = await _context.Users.FirstOrDefaultAsync(u => u.Username == "user");
+            if (normalUser != null)
+            {
+                normalUser.Sicil = "U001";
+                await _context.SaveChangesAsync();
+            }
+
+            return Ok(new { message = "Kullanıcılara sicil numarası eklendi. Admin: A001, User: U001" });
+        }
+
+        [HttpGet("fix-passwords")]
+        public async Task<IActionResult> FixPasswords()
+        {
+            try
+            {
+                _logger.LogInformation("Kullanıcı şifrelerini düzeltme işlemi başlatıldı");
+                
+                // Admin kullanıcısının şifresini düzelt
+                var adminUser = await _context.Users.FirstOrDefaultAsync(u => u.Username == "admin");
+                if (adminUser != null)
+                {
+                    var adminPassword = "admin123";
+                    adminUser.PasswordHash = _passwordHasher.HashPassword(adminPassword);
+                    _logger.LogInformation($"Admin kullanıcısının şifresi güncellendi. Yeni hash: {adminUser.PasswordHash}");
+                    await _context.SaveChangesAsync();
+                }
+                else
+                {
+                    _logger.LogWarning("Admin kullanıcısı bulunamadı");
+                }
+
+                // Normal kullanıcının şifresini düzelt
+                var normalUser = await _context.Users.FirstOrDefaultAsync(u => u.Username == "user");
+                if (normalUser != null)
+                {
+                    var userPassword = "user123";
+                    normalUser.PasswordHash = _passwordHasher.HashPassword(userPassword);
+                    _logger.LogInformation($"User kullanıcısının şifresi güncellendi. Yeni hash: {normalUser.PasswordHash}");
+                    await _context.SaveChangesAsync();
+                }
+                else
+                {
+                    _logger.LogWarning("User kullanıcısı bulunamadı");
+                }
+
+                return Ok(new { 
+                    message = "Kullanıcı şifreleri başarıyla güncellendi.",
+                    adminInfo = "Kullanıcı adı: admin, Sicil: A001, Şifre: admin123",
+                    userInfo = "Kullanıcı adı: user, Sicil: U001, Şifre: user123"
+                });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError($"Şifreler güncellenirken hata oluştu: {ex.Message}");
+                return StatusCode(500, "Bir hata oluştu");
+            }
+        }
     }
 } 

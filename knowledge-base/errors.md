@@ -18,6 +18,8 @@ Bu dosya, proje geliştirme sürecinde karşılaşılan hataları ve çözümler
 - [Profil Resmi Ekleme Sorunları](#profil-resmi-ekleme-sorunları)
 - [Şifre Değiştirme Formu Sorunları](#şifre-değiştirme-formu-sorunları)
 - [Frontend Rol Yönetimi Hataları](#frontend-rol-yönetimi-hataları)
+- [Login Sicil Sorunu](#login-sicil-sorunu)
+- [Login 401 Unauthorized Hatası](#login-401-unauthorized-hatası)
 
 ## Kullanıcı Aktivitesi Grafiği Yerine Log Kaydetme Sistemi
 
@@ -899,55 +901,156 @@ getRoleById(id: number): Observable<Role> {
 2. Backend'de UserRepository'ye GetBySicilAsync metodu eklendi
 3. Login bileşeninde tüm kullanıcı adı alanları sicil alanı ile değiştirildi
 
-```typescript
-// Önceki hatalı kod
-roles: RoleWithUsers[] = [];
-this.roleForm = this.fb.group({
-  id: [null],
-  name: ['', [Validators.required]]
-});
+# Login Sicil Sorunu
 
-// Düzeltilmiş kod
-roles: Role[] = [];
-this.roleForm = this.fb.group({
-  id: [null],
-  name: ['', [Validators.required]],
-  description: ['', [Validators.required]]
-});
+## Kullanıcı Sicil Alanı Eksikliği (05.03.2025)
+
+**Hata:** 
+```
+Kullanıcı girişi başarısız. Geçersiz sicil numarası veya şifre.
 ```
 
-```typescript
-// Önceki hatalı kod
-const selectedRole = this.roleForm.get('name')?.value;
-const roleData = {
-  id: this.editMode ? selectedRole.id : null,
-  name: selectedRole.name
-};
+**Nedeni:**
+1. Login işlemi kullanıcı adı yerine sicil numarası kullanacak şekilde değiştirilmiş
+2. Ancak SeedData.cs dosyasında oluşturulan kullanıcılara (admin ve user) sicil numarası atanmamış
+3. User entity sınıfında sicil alanı `[Required]` olarak işaretlenmiş, yani zorunlu bir alan
+4. AuthService.cs içindeki login metodu, kullanıcıyı `GetBySicilAsync` metodu ile sicil numarasına göre arıyor
+5. Kullanıcılar sicil numarasına sahip olmadığı için giriş başarısız oluyor
 
-// Düzeltilmiş kod
-const roleData = {
-  id: this.roleForm.get('id')?.value,
-  name: this.roleForm.get('name')?.value,
-  description: this.roleForm.get('description')?.value
-};
+**Çözüm:**
+1. `FixPasswordController` adında özel bir controller oluşturuldu:
+```csharp
+[ApiController]
+[Route("api/[controller]")]
+public class FixPasswordController : ControllerBase
+{
+    private readonly ApplicationDbContext _context;
+
+    public FixPasswordController(ApplicationDbContext context)
+    {
+        _context = context;
+    }
+
+    [HttpGet("fix-users")]
+    public async Task<IActionResult> FixUsers()
+    {
+        // Admin kullanıcısına sicil numarası ekle
+        var adminUser = await _context.Users.FirstOrDefaultAsync(u => u.Username == "admin");
+        if (adminUser != null)
+        {
+            adminUser.Sicil = "A001";
+            await _context.SaveChangesAsync();
+        }
+
+        // User kullanıcısına sicil numarası ekle
+        var normalUser = await _context.Users.FirstOrDefaultAsync(u => u.Username == "user");
+        if (normalUser != null)
+        {
+            normalUser.Sicil = "U001";
+            await _context.SaveChangesAsync();
+        }
+
+        return Ok(new { message = "Kullanıcılara sicil numarası eklendi. Admin: A001, User: U001" });
+    }
+}
 ```
 
-```typescript
-// Önceki hatalı kod
-getRoles(): Observable<Role[]> {
-  return this.http.get<Role[]>(`${this.apiUrl}/roles`);
-}
+2. Backend API yeniden başlatıldı
+3. `http://localhost:5037/api/FixPassword/fix-users` endpoint'i çağrılarak kullanıcılara sicil numarası eklendi
+4. Frontend uygulaması başlatıldı
+5. Aşağıdaki bilgilerle giriş yapıldı:
+   - Admin: Sicil: A001, Şifre: admin123
+   - User: Sicil: U001, Şifre: user123
 
-getRoleById(id: number): Observable<Role> {
-  return this.http.get<Role>(`${this.apiUrl}/roles/${id}`);
-}
+**Öğrenilen Dersler:**
+- Entity'lere yeni zorunlu alanlar eklendiğinde, mevcut verilerin bu alanlarla güncellenmesi gerekir
+- SeedData sınıfında oluşturulan kullanıcıların tüm zorunlu alanları içermesi gerekir
+- Veritabanı şeması değiştiğinde, mevcut verilerin yeni şemaya uygun şekilde güncellenmesi gerekir
+- Özel controller'lar oluşturarak veritabanı düzeltmeleri yapmak, acil durumlarda etkili bir çözüm olabilir
 
-// Düzeltilmiş kod
-getRoles(): Observable<Role[]> {
-  return this.http.get<Role[]>(`${this.apiUrl}`);
-}
+**Detaylı Bilgi:**
+- [Login Sicil Sorunu ve Çözümü](login_sicil_fix.md)
 
-getRoleById(id: number): Observable<Role> {
-  return this.http.get<Role>(`${this.apiUrl}/${id}`);
+# Login 401 Unauthorized Hatası
+
+## Şifre Doğrulama Sorunu (05.03.2025)
+
+**Hata:**
+```
+POST http://localhost:5037/api/auth/login 401 (Unauthorized)
+```
+
+**Nedeni:**
+1. Kullanıcı sicil numarası (A001) ve şifresi (admin123) ile giriş yapmaya çalışıyor
+2. Sicil numarası veritabanında güncellenmiş, ancak şifre hash'i güncellenememiş olabilir
+3. Şifre hash'i güncellenmiş, ancak hash algoritması veya parametreleri (örneğin work factor) değişmiş olabilir
+4. AuthService sınıfındaki login metodu, şifre doğrulama işlemini doğru şekilde yapamıyor olabilir
+
+**Çözüm:**
+1. `FixPasswordController` sınıfına `fix-passwords` endpoint'i eklendi:
+```csharp
+[HttpGet("fix-passwords")]
+public async Task<IActionResult> FixPasswords()
+{
+    try
+    {
+        _logger.LogInformation("Kullanıcı şifrelerini düzeltme işlemi başlatıldı");
+        
+        // Admin kullanıcısının şifresini düzelt
+        var adminUser = await _context.Users.FirstOrDefaultAsync(u => u.Username == "admin");
+        if (adminUser != null)
+        {
+            var adminPassword = "admin123";
+            adminUser.PasswordHash = _passwordHasher.HashPassword(adminPassword);
+            _logger.LogInformation($"Admin kullanıcısının şifresi güncellendi. Yeni hash: {adminUser.PasswordHash}");
+            await _context.SaveChangesAsync();
+        }
+        else
+        {
+            _logger.LogWarning("Admin kullanıcısı bulunamadı");
+        }
+
+        // Normal kullanıcının şifresini düzelt
+        var normalUser = await _context.Users.FirstOrDefaultAsync(u => u.Username == "user");
+        if (normalUser != null)
+        {
+            var userPassword = "user123";
+            normalUser.PasswordHash = _passwordHasher.HashPassword(userPassword);
+            _logger.LogInformation($"User kullanıcısının şifresi güncellendi. Yeni hash: {normalUser.PasswordHash}");
+            await _context.SaveChangesAsync();
+        }
+        else
+        {
+            _logger.LogWarning("User kullanıcısı bulunamadı");
+        }
+
+        return Ok(new { 
+            message = "Kullanıcı şifreleri başarıyla güncellendi.",
+            adminInfo = "Kullanıcı adı: admin, Sicil: A001, Şifre: admin123",
+            userInfo = "Kullanıcı adı: user, Sicil: U001, Şifre: user123"
+        });
+    }
+    catch (Exception ex)
+    {
+        _logger.LogError($"Şifreler güncellenirken hata oluştu: {ex.Message}");
+        return StatusCode(500, "Bir hata oluştu");
+    }
 }
-``` 
+```
+
+2. Backend API yeniden başlatıldı
+3. Tarayıcıdan `http://localhost:5037/api/FixPassword/fix-passwords` adresine gidilerek kullanıcı şifreleri güncellendi
+4. Frontend uygulaması başlatıldı
+5. Aşağıdaki bilgilerle giriş yapıldı:
+   - Admin: Sicil: A001, Şifre: admin123
+   - User: Sicil: U001, Şifre: user123
+
+**Öğrenilen Dersler:**
+- Şifre hash'leme algoritması veya parametreleri değiştiğinde, mevcut şifre hash'lerinin güncellenmesi gerekir
+- Şifre doğrulama işlemi, hash algoritması ve parametreleri ile uyumlu olmalıdır
+- Kimlik doğrulama sorunlarını çözmek için, şifre hash'lerini yeniden oluşturmak etkili bir çözüm olabilir
+- PowerShell'de komut çalıştırırken && operatörü yerine ayrı ayrı komutlar kullanılmalıdır
+- API'ye bağlanırken curl komutu yerine Invoke-WebRequest komutu kullanılmalıdır
+
+**Detaylı Bilgi:**
+- [Login 401 Unauthorized Hatası ve Çözümü](login_401_fix.md) 
