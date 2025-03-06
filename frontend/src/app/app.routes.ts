@@ -5,10 +5,12 @@ import { RoleManagementComponent } from './components/role-management/role-manag
 import { LayoutComponent } from './components/layout/layout.component';
 import { ComputersComponent } from './components/inventory/computers/computers.component';
 import { AuthGuard } from './guards/auth.guard';
+import { PermissionGuard } from './guards/permission.guard';
 import { AdminDashboardComponent } from './components/admin-dashboard/admin-dashboard.component';
 import { UserDashboardComponent } from './components/user-dashboard/user-dashboard.component';
 import { RoleDetailComponent } from './components/role-management/role-detail/role-detail.component';
-import { UserPermissionComponent } from './components/user-permission/user-permission.component';
+import { PermissionManagementComponent } from './components/permission-management/permission-management.component';
+import { UserPagePermissionsComponent } from './components/user-page-permissions/user-page-permissions.component';
 
 export const routes: Routes = [
   { path: '', redirectTo: '/login', pathMatch: 'full' },
@@ -16,80 +18,80 @@ export const routes: Routes = [
   { 
     path: 'admin-dashboard', 
     component: AdminDashboardComponent,
-    canActivate: [AuthGuard],
+    canActivate: [AuthGuard, PermissionGuard],
     data: { 
       requiresAdmin: true,
-      requiredPermission: 'Pages.AdminDashboard'
+      permissions: ['Pages.AdminDashboard']
     }
   },
   { 
     path: 'user-dashboard', 
     component: UserDashboardComponent,
-    canActivate: [AuthGuard],
+    canActivate: [AuthGuard, PermissionGuard],
     data: {
-      requiredPermission: 'Pages.UserDashboard'
+      permissions: ['Pages.UserDashboard']
     }
   },
   { 
     path: 'user-management', 
     component: UserManagementComponent,
-    canActivate: [AuthGuard],
+    canActivate: [AuthGuard, PermissionGuard],
     data: { 
       requiresAdmin: true,
-      requiredPermission: 'Pages.UserManagement'
+      permissions: ['Pages.UserManagement']
     }
   },
   { 
     path: 'admin/users', 
     component: UserManagementComponent,
-    canActivate: [AuthGuard],
+    canActivate: [AuthGuard, PermissionGuard],
     data: { 
       requiresAdmin: true,
-      requiredPermission: 'Pages.UserManagement'
+      permissions: ['Pages.UserManagement']
     }
   },
   { 
     path: 'role-management', 
     component: RoleManagementComponent,
-    canActivate: [AuthGuard],
+    canActivate: [AuthGuard, PermissionGuard],
     data: { 
       requiresAdmin: true,
-      requiredPermission: 'Pages.RoleManagement'
+      permissions: ['Pages.RoleManagement']
     }
   },
   { 
     path: 'roles', 
     component: RoleManagementComponent,
-    canActivate: [AuthGuard],
+    canActivate: [AuthGuard, PermissionGuard],
     data: { 
       requiresAdmin: true,
-      requiredPermission: 'Pages.RoleManagement'
+      permissions: ['Pages.RoleManagement']
     }
   },
   { 
     path: 'admin/roles', 
     component: RoleManagementComponent,
-    canActivate: [AuthGuard],
+    canActivate: [AuthGuard, PermissionGuard],
     data: { 
       requiresAdmin: true,
-      requiredPermission: 'Pages.RoleManagement'
+      permissions: ['Pages.RoleManagement']
     }
   },
   { 
     path: 'roles/:id', 
     component: RoleDetailComponent,
-    canActivate: [AuthGuard],
+    canActivate: [AuthGuard, PermissionGuard],
     data: { 
       requiresAdmin: true,
-      requiredPermission: 'Pages.RoleManagement'
+      permissions: ['Pages.RoleManagement']
     }
   },
   {
     path: 'it',
     component: LayoutComponent,
-    canActivate: [AuthGuard],
+    canActivate: [AuthGuard, PermissionGuard],
     data: {
-      requiredPermission: 'Pages.StockManagement'
+      permissions: ['IT.Access', 'Pages.StockManagement']
     },
     children: [
       { path: '', redirectTo: 'inventory/computers', pathMatch: 'full' },
@@ -104,16 +106,35 @@ export const routes: Routes = [
       { path: 'settings/categories', component: ComputersComponent }
     ]
   },
+  {
+    path: 'access-denied',
+    component: AdminDashboardComponent,
+  },
   { 
-    path: 'users/:id/permissions', 
-    component: UserPermissionComponent,
-    canActivate: [AuthGuard],
+    path: 'roles/:roleId/permissions', 
+    component: PermissionManagementComponent,
+    canActivate: [AuthGuard, PermissionGuard],
     data: { 
       requiresAdmin: true,
-      requiredPermission: 'Pages.UserManagement'
-    },
-    providers: [
-      // Gerekli servis sağlayıcılar burada belirtilebilir
-    ]
+      permissions: ['Roles.Update']
+    }
+  },
+  { 
+    path: 'users/:userId/permissions', 
+    component: PermissionManagementComponent,
+    canActivate: [AuthGuard, PermissionGuard],
+    data: { 
+      requiresAdmin: true,
+      permissions: ['Users.Permissions.Manage']
+    }
+  },
+  { 
+    path: 'users/:userId/page-permissions', 
+    component: UserPagePermissionsComponent,
+    canActivate: [AuthGuard, PermissionGuard],
+    data: { 
+      requiresAdmin: true,
+      permissions: ['Users.Permissions.Manage']
+    }
   }
 ];

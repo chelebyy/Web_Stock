@@ -461,7 +461,7 @@ export class UserManagementComponent implements OnInit {
   }
 
   manageUserPermissions(user: any) {
-    this.router.navigate([`/users/${user.id}/permissions`]);
+    this.router.navigate([`/users/${user.id}/page-permissions`]);
   }
 
   // Tüm kullanıcıları temizleme metodu

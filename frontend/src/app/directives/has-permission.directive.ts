@@ -6,50 +6,47 @@ import { AuthService } from '../services/auth.service';
   standalone: true
 })
 export class HasPermissionDirective implements OnInit {
-  @Input('hasPermission') permissionName!: string;
-  @Input('hasPermissionElse') elseTemplate?: TemplateRef<any>;
-  
-  private hasView = false;
+  @Input() hasPermission: string | string[] = '';
 
   constructor(
     private templateRef: TemplateRef<any>,
     private viewContainer: ViewContainerRef,
     private authService: AuthService
-  ) { }
+  ) {}
 
-  ngOnInit(): void {
+  ngOnInit() {
     this.updateView();
   }
 
-  /**
-   * İzin değiştiğinde görünümü günceller
-   */
-  private updateView(): void {
-    const hasPermission = this.checkPermission();
-
-    if (hasPermission && !this.hasView) {
-      // İzin varsa template'i göster
+  private updateView() {
+    if (this.checkPermission()) {
       this.viewContainer.createEmbeddedView(this.templateRef);
-      this.hasView = true;
-    } else if (!hasPermission && this.hasView) {
-      // İzin yoksa temizle
+    } else {
       this.viewContainer.clear();
-      this.hasView = false;
-      
-      // Alternatif template varsa göster
-      if (this.elseTemplate) {
-        this.viewContainer.createEmbeddedView(this.elseTemplate);
-      }
     }
   }
-  
-  /**
-   * İzin kontrolü yapar
-   */
+
   private checkPermission(): boolean {
-    return this.authService.hasPermission(this.permissionName);
+    // Eğer izin belirtilmemişse, içeriği gösterme
+    if (!this.hasPermission) {
+      return false;
+    }
+
+    // Admin kullanıcılar her zaman tüm içeriği görebilir
+    if (this.authService.isAdmin()) {
+      return true;
+    }
+
+    // İzin bir dizi ise, herhangi birinin olması yeterli
+    if (Array.isArray(this.hasPermission)) {
+      return this.hasPermission.some(permission => 
+        this.authService.hasPermission(permission));
+    }
+
+    // Tek bir izin kontrolü
+    return this.authService.hasPermission(this.hasPermission);
   }
-  
+
   /**
    * Özel izin kontrol metodu - Sayfa erişim izni mi kontrol eder
    */

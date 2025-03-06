@@ -216,7 +216,7 @@ export class RoleManagementComponent implements OnInit {
   }
   
   managePermissions(role: Role) {
-    this.router.navigate(['/roles', role.id]);
+    this.router.navigate([`/roles/${role.id}/permissions`]);
   }
 
   filterRoles(searchText: string): void {

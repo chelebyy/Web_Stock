@@ -3,11 +3,12 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using Stock.Domain.Entities;
+using Stock.Domain.Entities.Permissions;
 using Stock.Domain.Interfaces;
 
 namespace Stock.Infrastructure.Data.Repositories
 {
-    public class PermissionRepository : GenericRepository<Permission>, IPermissionRepository
+    public class PermissionRepository : GenericRepository<Stock.Domain.Entities.Permission>, IPermissionRepository
     {
         private readonly new ApplicationDbContext _context;
 
@@ -16,13 +17,13 @@ namespace Stock.Infrastructure.Data.Repositories
             _context = context;
         }
 
-        public async Task<Permission?> GetByNameAsync(string name)
+        public async Task<Stock.Domain.Entities.Permission?> GetByNameAsync(string name)
         {
             return await _context.Permissions
                 .FirstOrDefaultAsync(p => p.Name == name);
         }
 
-        public async Task<IEnumerable<Permission>> GetPermissionsByRoleIdAsync(int roleId)
+        public async Task<IEnumerable<Stock.Domain.Entities.Permission>> GetPermissionsByRoleIdAsync(int roleId)
         {
             return await _context.RolePermissions
                 .Where(rp => rp.RoleId == roleId)
@@ -30,7 +31,7 @@ namespace Stock.Infrastructure.Data.Repositories
                 .ToListAsync();
         }
 
-        public async Task<IEnumerable<Permission>> GetPermissionsByGroupAsync(string group)
+        public async Task<IEnumerable<Stock.Domain.Entities.Permission>> GetPermissionsByGroupAsync(string group)
         {
             return await _context.Permissions
                 .Where(p => p.Group == group)

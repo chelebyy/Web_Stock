@@ -38,9 +38,27 @@ export class AuthService {
         this.currentUserSubject.next(user);
         
         // İzinleri yükle
-        this.permissions = decodedToken.Permission || [];
+        this.permissions = this.extractPermissionsFromToken(decodedToken);
       }
     }
+  }
+
+  // Token'dan izinleri çıkartır
+  private extractPermissionsFromToken(decodedToken: any): string[] {
+    const permissions: string[] = [];
+    
+    // Permission claim'lerini bul
+    if (decodedToken.Permission) {
+      if (Array.isArray(decodedToken.Permission)) {
+        // Birden fazla izin varsa
+        permissions.push(...decodedToken.Permission);
+      } else {
+        // Tek bir izin varsa
+        permissions.push(decodedToken.Permission);
+      }
+    }
+    
+    return permissions;
   }
 
   login(loginRequest: LoginRequest): Observable<LoginResponse> {
@@ -63,7 +81,7 @@ export class AuthService {
             this.currentUserSubject.next(user);
             
             // İzinleri yükle
-            this.permissions = decodedToken.Permission || [];
+            this.permissions = this.extractPermissionsFromToken(decodedToken);
             
             // Kullanıcı rolüne göre yönlendirme
             const targetRoute = user.isAdmin ? '/admin-dashboard' : '/user-dashboard';

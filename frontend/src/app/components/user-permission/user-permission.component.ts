@@ -89,7 +89,7 @@ export class UserPermissionComponent implements OnInit {
     });
     
     // Tüm izinleri yükle
-    this.permissionService.getPermissionGroups().subscribe({
+    this.permissionService.getPermissionsByGroups().subscribe({
       next: (groups) => {
         this.allPermissionsGroups = groups;
       },

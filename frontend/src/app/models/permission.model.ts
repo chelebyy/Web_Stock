@@ -2,10 +2,8 @@ export interface Permission {
     id: number;
     name: string;
     description: string;
-    group: string;
     resourceType?: string;
-    resourceName?: string;
-    action?: string;
+    group: string;
     isFromRole?: boolean;
     isCustom?: boolean;
     roleName?: string;
@@ -14,4 +12,22 @@ export interface Permission {
 export interface PermissionGroup {
     group: string;
     permissions: Permission[];
+}
+
+export interface AssignPermissionsRequest {
+    permissionIds: number[];
+}
+
+export interface UserPermission {
+    id: number;
+    userId: number;
+    permissionId: number;
+    isGranted: boolean;
+    userName?: string;
+    permissionName?: string;
+    resourceType?: string;
+    resourceName?: string;
+    action?: string;
+    description?: string;
+    group?: string;
 } 

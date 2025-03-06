@@ -1,15 +1,13 @@
 using System;
+using Stock.Domain.Entities;
 
-namespace Stock.Domain.Entities
+namespace Stock.Domain.Entities.Permissions
 {
-    public class UserPermission
+    public class UserPermission : BaseEntity
     {
-        public int Id { get; set; }
         public int UserId { get; set; }
         public int PermissionId { get; set; }
         public bool IsGranted { get; set; } = true;
-        public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
-        public DateTime? UpdatedAt { get; set; }
 
         // Navigation properties
         public User User { get; set; }

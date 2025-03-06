@@ -54,19 +54,16 @@ namespace Stock.Infrastructure.Services
                     .ToListAsync();
 
                 // Create a dictionary of all permissions from role
-                var permissionsDictionary = rolePermissions
-                    .ToDictionary(p => p.Id, p => new PermissionDto
-                    {
-                        Id = p.Id,
-                        Name = p.Name,
-                        Description = p.Description,
-                        Group = p.Group,
-                        ResourceType = p.ResourceType,
-                        ResourceName = p.ResourceName,
-                        Action = p.Action,
-                        IsFromRole = true,
-                        RoleName = user.Role.Name
-                    });
+                var permissionsDictionary = rolePermissions.Select(p => new PermissionDto
+                {
+                    Id = p.Id,
+                    Name = p.Name,
+                    Description = p.Description,
+                    Group = p.Group,
+                    ResourceType = p.ResourceType,
+                    IsFromRole = true,
+                    RoleName = user.Role.Name
+                }).ToDictionary(p => p.Id, p => p);
 
                 // Override or add custom user permissions
                 foreach (var userPermission in userPermissions)
@@ -88,8 +85,6 @@ namespace Stock.Infrastructure.Services
                         Description = permission.Description,
                         Group = permission.Group,
                         ResourceType = permission.ResourceType,
-                        ResourceName = permission.ResourceName,
-                        Action = permission.Action,
                         IsFromRole = false,
                         IsCustom = true
                     };
@@ -125,18 +120,16 @@ namespace Stock.Infrastructure.Services
                 {
                     // Update existing permission
                     existingPermission.IsGranted = isGranted;
-                    existingPermission.LastModifiedBy = _currentUserService.UserId?.ToString();
-                    existingPermission.LastModifiedAt = DateTime.UtcNow;
+                    existingPermission.UpdatedAt = DateTime.UtcNow;
                 }
                 else
                 {
                     // Create new permission entry
-                    var userPermission = new UserPermission
+                    var userPermission = new Stock.Domain.Entities.UserPermission
                     {
                         UserId = userId,
                         PermissionId = permissionId,
                         IsGranted = isGranted,
-                        CreatedBy = _currentUserService.UserId?.ToString(),
                         CreatedAt = DateTime.UtcNow
                     };
 

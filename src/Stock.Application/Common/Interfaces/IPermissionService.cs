@@ -9,7 +9,11 @@ namespace Stock.Application.Common.Interfaces
         Task<List<PermissionDto>> GetAllPermissionsAsync();
         Task<List<PermissionGroupDto>> GetPermissionsByGroupsAsync();
         Task<List<PermissionDto>> GetPermissionsByRoleIdAsync(int roleId);
+        Task<List<PermissionDto>> GetPermissionsByUserIdAsync(int userId);
         Task<bool> AssignPermissionsToRoleAsync(int roleId, List<int> permissionIds);
-        Task<bool> HasPermissionAsync(int userId, string permissionName);
+        Task<bool> AssignPermissionToUserAsync(int userId, int permissionId, bool isGranted = true);
+        Task<bool> RemoveUserPermissionAsync(int userId, int permissionId);
+        Task<bool> ResetUserToRolePermissionsAsync(int userId);
+        Task<bool> UserHasPermissionAsync(int userId, string permissionName);
     }
 } 

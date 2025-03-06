@@ -356,13 +356,27 @@ Bu sayede kullanıcılar, hatanın tam olarak ne olduğunu ve nasıl düzeltecek
 
 ### Sistem Durumu
 - Backend: http://localhost:5037 adresinde çalışıyor
-- Frontend: http://localhost:4207 adresinde çalışıyor
+- Frontend: http://localhost:4202 adresinde çalışıyor (başarıyla başlatıldı)
 - Admin kullanıcısı (admin/admin123) ile giriş başarıyla yapılabiliyor
 - JWT token doğrulama sistemi sorunsuz çalışıyor
 - Rol ve kullanıcı yönetimi sayfaları aktif
-- Http 200 OK yanıtları alınıyor
-- API yanıt formatı ReferenceHandler.Preserve kullanılıyor
-- Frontend bileşenleri ReferenceHandler.Preserve formatıyla uyumlu çalışacak şekilde güncellendi
+- HTTP 200 OK yanıtları alınıyor
+- Tüm servisler stabil çalışıyor
+- Veritabanı temizlendi ve yeniden oluşturuldu
+- Sistem başlatma rehberi oluşturuldu (knowledge-base/system_startup_guide.md)
+- Chart.js kütüphanesi başarıyla yüklendi ve PrimeNG Chart bileşeni çalışıyor
+- Frontend uygulaması 4202 portunda çalışıyor (port çakışması çözüldü)
+- Kullanıcı yönetimi sayfasında backend'den veri çekme işlemi tamamlandı
+- API endpoint'leri büyük/küçük harf duyarlılığı düzeltildi
+- Kullanıcı güncelleme sırasındaki ID uyuşmazlığı hatası çözüldü
+- Ortamlar arası geçiş sürecinde veri tutarsızlıklarını önlemek için mekanizma eklendi
+- Kullanıcı dashboard sayfası sadeleştirildi ve BİLGİ İŞLEM butonu eklendi
+- Kullanıcı dashboard sayfasında izin kontrolü sorunu çözüldü (Pages.UserDashboard izni olmayan kullanıcılar artık dahboard'a erişebiliyor)
+- Permission sınıflarındaki namespace çakışmaları çözüldü
+- UserPermission ve RolePermission için gerekli migrasyonlar oluşturuldu
+- Veritabanı başarıyla güncellendi
+
+## Clean Architecture Geçişi
 
 ## Öğrenilen Dersler
 
@@ -386,17 +400,27 @@ Bu sayede kullanıcılar, hatanın tam olarak ne olduğunu ve nasıl düzeltecek
 - API yanıtlarında farklı formatlar kontrol edilmeli
 - Tip dönüşümleri için güvenli yöntemler kullanılmalı
 
-## Yapılan Güncellemeler (10 Mart 2025)
-- API yanıt formatı sorunları çözüldü
-- Role ve User service'lerde normalizeResponse metodu iyileştirildi
-- Frontend bileşenlerinde veri bağlama sorunları giderildi
-- ToggleButton kullanımı düzeltildi
-- API endpoint tutarsızlıkları giderildi
+## Güncel Durum (6 Haziran 2025)
+- Backend API sorunsuz çalışıyor (http://localhost:5037)
+- Frontend uygulaması sorunsuz çalışıyor (http://localhost:4202)
+- Kullanıcı güncelleme sırasındaki ID uyuşmazlığı hatası çözüldü
+- Ortamlar arası geçiş sürecinde veri tutarsızlıklarını önlemek için mekanizma eklendi
+- Errors.md ve system_startup_guide.md dosyaları güncellendi
+- API isteklerinde hata mesajları daha açıklayıcı hale getirildi
+- HTTP durum kodları ve loglamalar iyileştirildi
+- Kullanıcı dashboard sayfası sadeleştirildi ve BİLGİ İŞLEM butonu eklendi
+- Kullanıcı dashboard sayfasının belgeleri knowledge-base/user_dashboard_knowledge_base.md dosyasına eklendi
+- Kullanıcıların dashboard erişim sorunu çözüldü, yeni knowledge base dosyası oluşturuldu: knowledge-base/auth_knowledge_base.md
+- Permission sınıflarındaki namespace çakışmaları çözüldü
+- İzin yönetimi ile ilgili hatalar ve çözümler belgelendi: knowledge-base/permission_cleanup.md
+- Veritabanı migrasyon sorunları çözüldü ve belgelendi
 
-## Sonraki Adımlar
-1. İzin yönetimi sayfasındaki "Sayfa Erişim İzinleri" bölümünü geliştirme 
-2. Kullanıcı oluşturma/düzenleme işlevlerini test etme
-3. Frontend ve backend entegrasyonunu daha da iyileştirme 
+## Gelecek Adımlar
+1. GitHub'a son değişiklikleri push etmek
+2. Sistem başlatma rehberini tam olarak test etmek
+3. Kullanıcı yönetimi ve rol yönetimi sayfalarının tam olarak test edilmesi
+4. Geriye kalan frontend komponentlerinin geliştirilmesi
+5. Backend'de kullanıcı rolü izinlerini güncelleyerek kalıcı çözüm sağlamak
 
 ## Kullanıcı Dashboard Yeniden Tasarımı
 
@@ -518,7 +542,58 @@ Kullanıcı dashboard bileşeni yeniden tasarlandıktan sonra, PrimeNG bileşenl
 - Konsolda hata mesajlarının görünmesini engellemek için, henüz hazır olmayan API çağrılarını devre dışı bırakmak etkili bir yöntemdir
 - Geçici çözümleri belgelemek ve yorum satırlarıyla açıklamak, gelecekte yapılacak değişiklikleri kolaylaştırır
 
-### Sonraki Adımlar
-1. Backend geliştirme ekibiyle iletişime geçerek profil resmi endpoint'inin oluşturulmasını sağlamak
-2. Endpoint oluşturulduktan sonra frontend tarafında yorum satırına alınan kodu aktif hale getirmek
-3. Profil resmi yükleme özelliği eklemek için benzer bir endpoint oluşturmak
+### Ortamlar Arası Geçiş
+- Yetkilendirme sistemi, bir uygulamanın güvenliği için kritik bir bileşendir
+- Backend ve frontend arasındaki izin kontrollerinin senkronize olması gerekir
+- İzinleri token içinde taşımak, her istekte tekrar izin sorgusu yapma ihtiyacını ortadan kaldırır
+- Kritik sayfalar için izin kontrolünü bypass etmekten kaçınmak gerekir, ancak kullanıcı deneyimi için bazen özel durumlar eklenebilir
+- İzin yapısını belgelendirmek ve düzenli olarak gözden geçirmek gerekir
+- Domain katmanında aynı entity'lerin farklı namespace'lerde bulunması, derleme ve runtime hatalarına neden olabilir
+- Permission, UserPermission ve RolePermission sınıflarının doğru namespace'de olması önemlidir
+- Konfigürasyon sınıflarında (EF Core) doğru entity tiplerinin referans edilmesi gerekir
+- Veritabanı model değişikliklerinden sonra migrasyon oluşturmak ve uygulamak şarttır
+
+## İzin Yönetimi ve Yetkilendirme
+- Yetkilendirme sistemi, bir uygulamanın güvenliği için kritik bir bileşendir
+- Backend ve frontend arasındaki izin kontrollerinin senkronize olması gerekir
+- İzinleri token içinde taşımak, her istekte tekrar izin sorgusu yapma ihtiyacını ortadan kaldırır
+- Kritik sayfalar için izin kontrolünü bypass etmekten kaçınmak gerekir, ancak kullanıcı deneyimi için bazen özel durumlar eklenebilir
+- İzin yapısını belgelendirmek ve düzenli olarak gözden geçirmek gerekir
+- Domain katmanında aynı entity'lerin farklı namespace'lerde bulunması, derleme ve runtime hatalarına neden olabilir
+- Permission, UserPermission ve RolePermission sınıflarının doğru namespace'de olması önemlidir
+- Konfigürasyon sınıflarında (EF Core) doğru entity tiplerinin referans edilmesi gerekir
+- Veritabanı model değişikliklerinden sonra migrasyon oluşturmak ve uygulamak şarttır
+
+## Zaman Çizelgesi
+- **Domain Katmanı**: Tamamlandı
+- **Application Katmanı**: Tamamlandı
+- **Infrastructure Katmanı**: Tamamlandı
+- **API Katmanı**: Tamamlandı
+- **Sistem Başlatma ve Dokümantasyon**: Tamamlandı
+- **Frontend Adaptasyonu**: Devam ediyor (3/5 gün)
+- **Test Yazımı**: 5-6 gün
+- **Dokümantasyon**: 2-3 gün
+
+**Toplam Kalan Süre**: ~10-13 gün
+
+## Güncel Durum (6 Haziran 2025)
+- Backend API sorunsuz çalışıyor (http://localhost:5037)
+- Frontend uygulaması sorunsuz çalışıyor (http://localhost:4202)
+- Kullanıcı güncelleme sırasındaki ID uyuşmazlığı hatası çözüldü
+- Ortamlar arası geçiş sürecinde veri tutarsızlıklarını önlemek için mekanizma eklendi
+- Errors.md ve system_startup_guide.md dosyaları güncellendi
+- API isteklerinde hata mesajları daha açıklayıcı hale getirildi
+- HTTP durum kodları ve loglamalar iyileştirildi
+- Kullanıcı dashboard sayfası sadeleştirildi ve BİLGİ İŞLEM butonu eklendi
+- Kullanıcı dashboard sayfasının belgeleri knowledge-base/user_dashboard_knowledge_base.md dosyasına eklendi
+- Kullanıcıların dashboard erişim sorunu çözüldü, yeni knowledge base dosyası oluşturuldu: knowledge-base/auth_knowledge_base.md
+- Permission sınıflarındaki namespace çakışmaları çözüldü
+- İzin yönetimi ile ilgili hatalar ve çözümler belgelendi: knowledge-base/permission_cleanup.md
+- Veritabanı migrasyon sorunları çözüldü ve belgelendi
+
+## Gelecek Adımlar
+1. GitHub'a son değişiklikleri push etmek
+2. Sistem başlatma rehberini tam olarak test etmek
+3. Kullanıcı yönetimi ve rol yönetimi sayfalarının tam olarak test edilmesi
+4. Geriye kalan frontend komponentlerinin geliştirilmesi
+5. Backend'de kullanıcı rolü izinlerini güncelleyerek kalıcı çözüm sağlamak

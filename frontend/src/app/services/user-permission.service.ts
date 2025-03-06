@@ -4,6 +4,7 @@ import { Observable } from 'rxjs';
 import { environment } from '../../environments/environment';
 import { Permission } from '../models/permission.model';
 import { UserPermission } from '../models/user-permission.model';
+import { map } from 'rxjs/operators';
 
 @Injectable({
   providedIn: 'root'
@@ -13,18 +14,55 @@ export class UserPermissionService {
 
   constructor(private http: HttpClient) { }
 
+  // API yanıtını normalize et
+  private normalizeResponse<T>(response: any): T[] {
+    if (!response) return [];
+    
+    // $values dizisi varsa
+    if (response.$values) {
+      return response.$values as T[];
+    } 
+    // Dizi ise doğrudan döndür
+    else if (Array.isArray(response)) {
+      return response as T[];
+    } 
+    // Başka özelliklerde veri varsa
+    else if (typeof response === 'object') {
+      // Nesne içinde dizi özelliği ara
+      const arrayProps = Object.entries(response)
+        .filter(([_, v]) => Array.isArray(v) || (v && typeof v === 'object' && '$values' in v));
+      
+      if (arrayProps.length > 0) {
+        const [_, value] = arrayProps[0];
+        
+        if (Array.isArray(value)) {
+          return value as T[];
+        } else if (value && typeof value === 'object' && '$values' in value) {
+          return (value as any).$values as T[];
+        }
+      }
+    }
+    
+    // Son çare: boş dizi döndür
+    return [];
+  }
+
   /**
    * Kullanıcının tüm izinlerini getirir (rol izinleri + özel izinler)
    */
   getUserPermissions(userId: number): Observable<Permission[]> {
-    return this.http.get<Permission[]>(`${this.apiUrl}/user/${userId}`);
+    return this.http.get<any>(`${this.apiUrl}/user/${userId}`).pipe(
+      map(response => this.normalizeResponse<Permission>(response))
+    );
   }
 
   /**
    * Kullanıcının sadece özel izinlerini getirir
    */
   getUserCustomPermissions(userId: number): Observable<UserPermission[]> {
-    return this.http.get<UserPermission[]>(`${this.apiUrl}/user/${userId}/custom`);
+    return this.http.get<any>(`${this.apiUrl}/user/${userId}/custom`).pipe(
+      map(response => this.normalizeResponse<UserPermission>(response))
+    );
   }
 
   /**

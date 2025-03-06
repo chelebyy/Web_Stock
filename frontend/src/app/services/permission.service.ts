@@ -1,8 +1,9 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable, map } from 'rxjs';
-import { Permission, PermissionGroup } from '../models/permission.model';
+import { Observable } from 'rxjs';
 import { environment } from '../../environments/environment';
+import { Permission, PermissionGroup } from '../models/permission.model';
+import { map } from 'rxjs/operators';
 
 // ReferenceHandler.Preserve formatı için interface
 interface PreserveFormat<T> {
@@ -19,16 +20,16 @@ export class PermissionService {
   constructor(private http: HttpClient) { }
 
   // API yanıtını normalize et
-  private normalizeResponse<T>(response: any): T {
-    if (!response) return [] as unknown as T;
+  private normalizeResponse<T>(response: any): T[] {
+    if (!response) return [];
     
     // $values dizisi varsa
     if (response.$values) {
-      return response.$values as T;
+      return response.$values as T[];
     } 
     // Dizi ise doğrudan döndür
     else if (Array.isArray(response)) {
-      return response as T;
+      return response as T[];
     } 
     // Başka özelliklerde veri varsa
     else if (typeof response === 'object') {
@@ -40,39 +41,99 @@ export class PermissionService {
         const [_, value] = arrayProps[0];
         
         if (Array.isArray(value)) {
-          return value as T;
+          return value as T[];
         } else if (value && typeof value === 'object' && '$values' in value) {
-          return (value as any).$values as T;
+          return (value as any).$values as T[];
         }
       }
     }
     
-    // Son çare: orijinal yanıtı döndür
-    return response as T;
+    // Son çare: boş dizi döndür
+    return [];
   }
 
+  /**
+   * Tüm izinleri getirir
+   */
   getAllPermissions(): Observable<Permission[]> {
-    return this.http.get<any>(this.apiUrl)
-      .pipe(map(response => this.normalizeResponse<Permission[]>(response)));
+    return this.http.get<any>(this.apiUrl).pipe(
+      map(response => this.normalizeResponse<Permission>(response))
+    );
   }
 
+  /**
+   * İzinleri gruplarına göre getirir
+   */
   getPermissionsByGroups(): Observable<PermissionGroup[]> {
-    return this.http.get<any>(`${this.apiUrl}/groups`)
-      .pipe(map(response => this.normalizeResponse<PermissionGroup[]>(response)));
+    return this.http.get<any>(`${this.apiUrl}/groups`).pipe(
+      map(response => this.normalizeResponse<PermissionGroup>(response))
+    );
   }
 
-  // Alias - bileşen tarafından kullanılan isim
-  getPermissionGroups(): Observable<PermissionGroup[]> {
-    return this.getPermissionsByGroups();
-  }
-
+  /**
+   * Belirli bir rolün izinlerini getirir
+   */
   getPermissionsByRoleId(roleId: number): Observable<Permission[]> {
-    return this.http.get<any>(`${this.apiUrl}/role/${roleId}`)
-      .pipe(map(response => this.normalizeResponse<Permission[]>(response)));
+    return this.http.get<any>(`${this.apiUrl}/role/${roleId}`).pipe(
+      map(response => this.normalizeResponse<Permission>(response))
+    );
   }
 
+  /**
+   * Belirli bir kullanıcının izinlerini getirir
+   */
+  getPermissionsByUserId(userId: number): Observable<Permission[]> {
+    return this.http.get<any>(`${this.apiUrl}/user/${userId}`).pipe(
+      map(response => this.normalizeResponse<Permission>(response))
+    );
+  }
+
+  /**
+   * Bir role izinler atar
+   */
   assignPermissionsToRole(roleId: number, permissionIds: number[]): Observable<boolean> {
-    return this.http.post<any>(`${this.apiUrl}/role/${roleId}/assign`, { permissionIds })
-      .pipe(map(response => response === true || response === "true" || response === "True"));
+    return this.http.post<boolean>(`${this.apiUrl}/role/${roleId}/assign`, { permissionIds });
+  }
+
+  /**
+   * Bir kullanıcıya toplu izinler atar
+   */
+  assignPermissionsToUser(userId: number, permissionIds: number[]): Observable<boolean> {
+    return this.http.post<boolean>(`${this.apiUrl}/user/${userId}/assign`, { permissionIds });
+  }
+
+  /**
+   * Bir kullanıcıya izin atar
+   */
+  assignPermissionToUser(userId: number, permissionId: number, isGranted: boolean = true): Observable<boolean> {
+    return this.http.post<boolean>(`${this.apiUrl}/user/${userId}/assign/${permissionId}?isGranted=${isGranted}`, {});
+  }
+
+  /**
+   * Bir kullanıcının belirli bir iznini kaldırır
+   */
+  removeUserPermission(userId: number, permissionId: number): Observable<boolean> {
+    return this.http.delete<boolean>(`${this.apiUrl}/user/${userId}/permission/${permissionId}`);
+  }
+
+  /**
+   * Bir kullanıcının tüm özel izinlerini kaldırır
+   */
+  resetUserPermissions(userId: number): Observable<boolean> {
+    return this.http.post<boolean>(`${this.apiUrl}/user/${userId}/reset`, {});
+  }
+
+  /**
+   * Bir kullanıcının tüm özel izinlerini kaldırarak rol izinlerine sıfırlar
+   */
+  resetUserToRolePermissions(userId: number): Observable<boolean> {
+    return this.http.post<boolean>(`${this.apiUrl}/user/${userId}/reset`, {});
+  }
+
+  /**
+   * Bir kullanıcının belirli bir izne sahip olup olmadığını kontrol eder
+   */
+  checkUserPermission(userId: number, permissionName: string): Observable<boolean> {
+    return this.http.get<boolean>(`${this.apiUrl}/user/${userId}/check/${permissionName}`);
   }
 } 

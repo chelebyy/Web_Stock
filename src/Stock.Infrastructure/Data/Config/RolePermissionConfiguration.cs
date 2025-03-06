@@ -4,38 +4,32 @@ using Stock.Domain.Entities;
 
 namespace Stock.Infrastructure.Data.Config
 {
-    public class UserPermissionConfiguration : IEntityTypeConfiguration<UserPermission>
+    public class RolePermissionConfiguration : IEntityTypeConfiguration<RolePermission>
     {
-        public void Configure(EntityTypeBuilder<UserPermission> builder)
+        public void Configure(EntityTypeBuilder<RolePermission> builder)
         {
             builder.HasKey(x => x.Id);
 
-            builder.Property(x => x.UserId)
+            builder.Property(x => x.RoleId)
                 .IsRequired();
 
             builder.Property(x => x.PermissionId)
                 .IsRequired();
 
-            builder.Property(x => x.IsGranted)
-                .IsRequired()
-                .HasDefaultValue(true);
-
             builder.Property(x => x.CreatedAt)
                 .IsRequired();
 
-            builder.Property(x => x.UpdatedAt);
-
-            builder.HasOne(x => x.User)
-                .WithMany(x => x.UserPermissions)
-                .HasForeignKey(x => x.UserId)
+            builder.HasOne(x => x.Role)
+                .WithMany(x => x.RolePermissions)
+                .HasForeignKey(x => x.RoleId)
                 .OnDelete(DeleteBehavior.Cascade);
 
             builder.HasOne(x => x.Permission)
-                .WithMany(x => x.UserPermissions)
+                .WithMany(x => x.RolePermissions)
                 .HasForeignKey(x => x.PermissionId)
                 .OnDelete(DeleteBehavior.Cascade);
 
-            builder.HasIndex(x => new { x.UserId, x.PermissionId })
+            builder.HasIndex(x => new { x.RoleId, x.PermissionId })
                 .IsUnique();
         }
     }

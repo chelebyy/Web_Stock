@@ -1103,7 +1103,7 @@ GET http://localhost:5037/api/users/6/profile-picture 404 (Not Found)
 Kullanıcı dashboard'unda profil resmi yüklenirken 404 hatası alınıyor. Bu, backend tarafında `/api/users/{userId}/profile-picture` endpoint'inin mevcut olmadığını gösteriyor.
 
 ### Geçici Çözüm
-Backend tarafında profil resmi endpoint'i oluşturulana kadar, profil resmi isteğini tamamen devre dışı bıraktık ve varsayılan profil resmini kullanıyoruz:
+Backend tarafında profil resmi endpoint'i oluşturulana kadar, profil resmi isteğini tamamen devre dışı bırakık ve varsayılan profil resmini kullanıyoruz:
 
 ```typescript
 loadUserInfo(): void {
@@ -1176,3 +1176,47 @@ public async Task<byte[]> GetProfilePictureAsync(int userId)
 2. Kullanıcı deneyimini bozmamak için, eksik backend özellikleri için frontend tarafında fallback mekanizmaları oluşturulmalı
 3. Geçici çözümleri belgelemek ve yorum satırlarıyla açıklamak, gelecekte yapılacak değişiklikleri kolaylaştırır
 4. Konsolda hata mesajlarının görünmesini engellemek için, henüz hazır olmayan API çağrılarını devre dışı bırakmak etkili bir yöntemdir
+
+## Veritabanı Hataları
+
+### Hata: Veritabanı Migrasyon Hatası - İzin Yönetimi
+**Tarih:** 2025-03-06
+**Hata Mesajı:**
+```
+System.InvalidOperationException: An error was generated for warning 'Microsoft.EntityFrameworkCore.Migrations.PendingModelChangesWarning': The model for context 'ApplicationDbContext' has pending changes. Add a new migration before updating the database.
+```
+
+**Nedeni:**
+Entity Framework Core, Permission, UserPermission ve RolePermission sınıflarında yapılan değişiklikler nedeniyle veritabanı modelinde güncelleme gerektiriyor.
+
+**Çözüm:**
+1. Yeni bir migrasyon oluşturun:
+```powershell
+dotnet ef migrations add FixPermissionEntityNamespaces --project Stock.Infrastructure --startup-project Stock.API
+```
+
+2. Veritabanını güncelleyin:
+```powershell
+dotnet ef database update --project Stock.Infrastructure --startup-project Stock.API
+```
+
+### Hata: Namespace Çakışması - Permission Sınıfları
+**Tarih:** 2025-03-06
+**Hata Mesajı:**
+```
+error CS0104: 'Permission', 'Stock.Domain.Entities.Permission' ile 'Stock.Domain.Entities.Permissions.Permission' arasında belirsiz bir başvuru
+```
+
+**Nedeni:**
+Domain katmanında aynı isimde ancak farklı namespace'lerde Permission, UserPermission ve RolePermission sınıfları tanımlanmıştı.
+
+**Çözüm:**
+1. Konfigürasyon dosyalarını doğru namespace'i kullanacak şekilde güncelleyin:
+```csharp
+// src/Stock.Infrastructure/Data/Config/UserPermissionConfiguration.cs
+using Stock.Domain.Entities;  // Permissions namespace yerine
+```
+
+2. Çakışan duplicate dosyaları kaldırın.
+
+3. Tüm servis ve repository sınıflarında tutarlı namespace kullanımı sağlayın.

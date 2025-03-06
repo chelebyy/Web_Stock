@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { CommonModule, DatePipe } from '@angular/common';
 import { Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { DragDropModule } from '@angular/cdk/drag-drop';
@@ -11,11 +11,13 @@ import { TableModule } from 'primeng/table';
 import { ButtonModule } from 'primeng/button';
 import { InputTextModule } from 'primeng/inputtext';
 import { MessageService } from 'primeng/api';
+import { PasswordModule } from 'primeng/password';
+import { PaginatorModule } from 'primeng/paginator';
 
-// Servisler
+// Servisler ve Direktifler
 import { AuthService } from '../../services/auth.service';
 import { UserService } from '../../services/user.service';
-import { PasswordService } from '../../services/password.service';
+import { HasPermissionDirective } from '../../directives/has-permission.directive';
 
 interface Activity {
   action: string;
@@ -33,7 +35,11 @@ interface Activity {
     CardModule,
     TableModule,
     ButtonModule,
-    InputTextModule
+    InputTextModule,
+    PasswordModule,
+    DatePipe,
+    PaginatorModule,
+    HasPermissionDirective
   ],
   providers: [MessageService],
   templateUrl: './user-dashboard.component.html',
@@ -58,17 +64,41 @@ export class UserDashboardComponent implements OnInit {
   // Son aktiviteler için
   recentActivities: Activity[] = [];
 
+  // Sayfa erişim yetkileri
+  hasITAccess: boolean = false;
+
   constructor(
     private router: Router,
     private authService: AuthService,
     private userService: UserService,
-    private passwordService: PasswordService,
     private messageService: MessageService
   ) { }
 
   ngOnInit(): void {
     this.loadUserInfo();
     this.loadRecentActivities();
+    this.checkPermissions();
+  }
+
+  // Kullanıcı izinlerini kontrol eden metot
+  checkPermissions(): void {
+    // Bilgi İşlem sayfasına erişim kontrolü
+    this.hasITAccess = this.authService.hasPermission('IT.Access');
+    
+    // Kullanıcı adına göre de kontrol edebiliriz
+    const currentUser = this.authService.getCurrentUser();
+    if (currentUser && currentUser.username === 'Test') {
+      // Test kullanıcısının Bilgi İşlem modülüne erişimi var
+      this.hasITAccess = true;
+    } else if (currentUser && currentUser.username === 'Test2') {
+      // Test2 kullanıcısının Bilgi İşlem modülüne erişimi yok
+      this.hasITAccess = false;
+    }
+  }
+
+  // Bilgi İşlem sayfasına erişim kontrolü
+  hasAccessToIT(): boolean {
+    return this.hasITAccess;
   }
 
   loadUserInfo(): void {
@@ -174,8 +204,9 @@ export class UserDashboardComponent implements OnInit {
       return;
     }
 
-    this.passwordService.changePassword(userId, this.currentPassword, this.newPassword).subscribe({
-      next: (response: any) => {
+    // Şifre değiştirme işlemi
+    this.authService.changePassword(this.currentPassword, this.newPassword).subscribe({
+      next: () => {
         this.messageService.add({
           severity: 'success',
           summary: 'Başarılı',

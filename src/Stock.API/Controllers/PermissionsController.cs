@@ -44,12 +44,51 @@ namespace Stock.API.Controllers
             return Ok(permissions);
         }
 
+        [HttpGet("user/{userId}")]
+        [RequirePermission("Permissions.View")]
+        public async Task<ActionResult<List<PermissionDto>>> GetByUserId(int userId)
+        {
+            var permissions = await _permissionService.GetPermissionsByUserIdAsync(userId);
+            return Ok(permissions);
+        }
+
         [HttpPost("role/{roleId}/assign")]
-        [Authorize(Roles = "Admin")]
         [RequirePermission("Roles.Update")]
         public async Task<ActionResult<bool>> AssignPermissionsToRole(int roleId, [FromBody] AssignPermissionsRequest request)
         {
             var result = await _permissionService.AssignPermissionsToRoleAsync(roleId, request.PermissionIds);
+            return Ok(result);
+        }
+
+        [HttpPost("user/{userId}/assign/{permissionId}")]
+        [RequirePermission("Users.Permissions.Assign")]
+        public async Task<ActionResult<bool>> AssignPermissionToUser(int userId, int permissionId, [FromQuery] bool isGranted = true)
+        {
+            var result = await _permissionService.AssignPermissionToUserAsync(userId, permissionId, isGranted);
+            return Ok(result);
+        }
+
+        [HttpDelete("user/{userId}/permission/{permissionId}")]
+        [RequirePermission("Users.Permissions.Remove")]
+        public async Task<ActionResult<bool>> RemoveUserPermission(int userId, int permissionId)
+        {
+            var result = await _permissionService.RemoveUserPermissionAsync(userId, permissionId);
+            return Ok(result);
+        }
+
+        [HttpPost("user/{userId}/reset")]
+        [RequirePermission("Users.Permissions.Reset")]
+        public async Task<ActionResult<bool>> ResetUserToRolePermissions(int userId)
+        {
+            var result = await _permissionService.ResetUserToRolePermissionsAsync(userId);
+            return Ok(result);
+        }
+
+        [HttpGet("user/{userId}/check/{permissionName}")]
+        [RequirePermission("Permissions.Check")]
+        public async Task<ActionResult<bool>> UserHasPermission(int userId, string permissionName)
+        {
+            var result = await _permissionService.UserHasPermissionAsync(userId, permissionName);
             return Ok(result);
         }
     }

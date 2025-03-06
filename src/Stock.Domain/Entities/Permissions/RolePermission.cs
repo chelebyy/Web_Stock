@@ -1,13 +1,12 @@
 using System;
+using Stock.Domain.Entities;
 
-namespace Stock.Domain.Entities
+namespace Stock.Domain.Entities.Permissions
 {
-    public class RolePermission
+    public class RolePermission : BaseEntity
     {
-        public int Id { get; set; }
         public int RoleId { get; set; }
         public int PermissionId { get; set; }
-        public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
         // Navigation properties
         public Role Role { get; set; }

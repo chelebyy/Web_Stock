@@ -32,23 +32,21 @@ namespace Stock.Infrastructure.Services
             {
                 new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
                 new Claim(ClaimTypes.Name, user.Username),
-                new Claim(ClaimTypes.Role, user.IsAdmin ? "Admin" : "User")
+                new Claim(ClaimTypes.Role, user.IsAdmin ? "Admin" : "User"),
+                new Claim("sicil", user.Sicil)
             };
 
             if (user.Role != null)
             {
                 claims.Add(new Claim("RoleName", user.Role.Name));
                 claims.Add(new Claim("RoleId", user.Role.Id.ToString()));
-                
-                // Kullanıcının rolüne bağlı izinleri ekle
-                if (user.RoleId.HasValue)
-                {
-                    var permissions = await _permissionService.GetPermissionsByRoleIdAsync(user.RoleId.Value);
-                    foreach (var permission in permissions)
-                    {
-                        claims.Add(new Claim("Permission", permission.Name));
-                    }
-                }
+            }
+            
+            // Kullanıcının tüm izinlerini ekle (rol izinleri + özel izinler)
+            var permissions = await _permissionService.GetPermissionsByUserIdAsync(user.Id);
+            foreach (var permission in permissions)
+            {
+                claims.Add(new Claim("Permission", permission.Name));
             }
 
             var tokenDescriptor = new SecurityTokenDescriptor

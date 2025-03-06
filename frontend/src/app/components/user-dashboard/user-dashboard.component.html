@@ -91,7 +91,7 @@
 
     <div class="main-content">
       <div class="admin-modules">
-        <div class="admin-card user-management-card" (click)="navigateToIT()">
+        <div class="admin-card user-management-card" (click)="navigateToIT()" *hasPermission="'IT.Access'">
           <div class="card-icon">
             <i class="pi pi-desktop"></i>
           </div>

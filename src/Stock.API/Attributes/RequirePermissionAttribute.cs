@@ -1,71 +1,45 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
+using Microsoft.Extensions.DependencyInjection;
 using Stock.Application.Common.Interfaces;
 using System;
-using System.Linq;
-using System.Security.Claims;
 using System.Threading.Tasks;
 
 namespace Stock.API.Attributes
 {
-    [AttributeUsage(AttributeTargets.Class | AttributeTargets.Method, AllowMultiple = true)]
-    public class RequirePermissionAttribute : TypeFilterAttribute
+    [AttributeUsage(AttributeTargets.Method | AttributeTargets.Class)]
+    public class RequirePermissionAttribute : Attribute, IAsyncActionFilter
     {
-        public RequirePermissionAttribute(string permissionName) : base(typeof(RequirePermissionFilter))
-        {
-            Arguments = new object[] { permissionName };
-        }
-    }
+        private readonly string _permission;
 
-    public class RequirePermissionFilter : IAsyncAuthorizationFilter
-    {
-        private readonly string _permissionName;
-        private readonly IPermissionService _permissionService;
-
-        public RequirePermissionFilter(string permissionName, IPermissionService permissionService)
+        public RequirePermissionAttribute(string permission)
         {
-            _permissionName = permissionName;
-            _permissionService = permissionService;
+            _permission = permission;
         }
 
-        public async Task OnAuthorizationAsync(AuthorizationFilterContext context)
+        public async Task OnActionExecutionAsync(ActionExecutingContext context, ActionExecutionDelegate next)
         {
-            // Kullanıcı kimliği doğrulanmamışsa
-            if (!context.HttpContext.User.Identity.IsAuthenticated)
+            var permissionService = context.HttpContext.RequestServices
+                .GetRequiredService<IPermissionService>();
+            var currentUserService = context.HttpContext.RequestServices
+                .GetRequiredService<ICurrentUserService>();
+
+            if (currentUserService.UserId == null)
             {
                 context.Result = new UnauthorizedResult();
                 return;
             }
 
-            // Admin rolü varsa her zaman izin ver
-            if (context.HttpContext.User.IsInRole("Admin"))
+            bool hasPermission = await permissionService.UserHasPermissionAsync(
+                currentUserService.UserId.Value, _permission);
+
+            if (!hasPermission)
             {
+                context.Result = new ForbidResult();
                 return;
             }
 
-            // Token'daki izinleri kontrol et
-            var hasPermission = context.HttpContext.User.Claims
-                .Where(c => c.Type == "Permission")
-                .Any(c => c.Value == _permissionName);
-
-            if (hasPermission)
-            {
-                return;
-            }
-
-            // Veritabanından izinleri kontrol et
-            var userIdClaim = context.HttpContext.User.FindFirst(ClaimTypes.NameIdentifier);
-            if (userIdClaim != null && int.TryParse(userIdClaim.Value, out int userId))
-            {
-                hasPermission = await _permissionService.HasPermissionAsync(userId, _permissionName);
-                if (hasPermission)
-                {
-                    return;
-                }
-            }
-
-            // İzin yoksa 403 Forbidden hatası döndür
-            context.Result = new ForbidResult();
+            await next();
         }
     }
 } 
