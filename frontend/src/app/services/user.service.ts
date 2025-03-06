@@ -144,7 +144,8 @@ export class UserService {
       username: user.username,
       password: user.password || user.passwordHash || '', // Önce password, yoksa passwordHash kullan
       sicil: user.sicil,
-      isAdmin: user.isAdmin
+      isAdmin: user.isAdmin,
+      roleId: user.roleId // Rol ID'si eklendi
     };
     
     // Veriyi göndermeden önce kontrol et

@@ -26,6 +26,7 @@ export interface CreateUserRequest {
     password: string;
     sicil: string;
     isAdmin: boolean;
+    roleId?: number;
 }
 
 export interface ChangePasswordRequest {
