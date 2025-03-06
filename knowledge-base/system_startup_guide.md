@@ -1,12 +1,12 @@
-# Sistem Başlatma Rehberi
+# Sistem Başlatma ve Durdurma Rehberi
 
-Bu rehber, stok yönetim sisteminin doğru şekilde başlatılması için adım adım talimatları içerir.
+Bu rehber, stok yönetim sisteminin Windows ortamında başlatılması ve durdurulması için basit komutları içerir.
 
 ## İçindekiler
 - [Ön Koşullar](#ön-koşullar)
 - [Veritabanı Kurulumu](#veritabanı-kurulumu)
-- [Backend Başlatma](#backend-başlatma)
-- [Frontend Başlatma](#frontend-başlatma)
+- [Servisleri Başlatma](#servisleri-başlatma)
+- [Servisleri Durdurma](#servisleri-durdurma)
 - [Sorun Giderme](#sorun-giderme)
 - [Ortamlar Arası Geçiş (Ev ve İş)](#ortamlar-arası-geçiş-ev-ve-iş)
 
@@ -34,7 +34,9 @@ dotnet ef database drop --force
 dotnet ef database update
 ```
 
-## Backend Başlatma
+## Servisleri Başlatma
+
+### Backend Başlatma
 
 ```powershell
 # Stock.API klasörüne gidin
@@ -44,16 +46,13 @@ cd src/Stock.API
 dotnet run
 ```
 
-Backend uygulama varsayılan olarak http://localhost:5037 adresinde çalışır. Swagger arayüzüne http://localhost:5037/swagger adresinden erişebilirsiniz.
+Backend uygulama varsayılan olarak http://localhost:5037 adresinde çalışır.
 
-## Frontend Başlatma
+### Frontend Başlatma
 
 ```powershell
 # Frontend klasörüne gidin
 cd frontend
-
-# Bağımlılıkları yükleyin (sadece ilk kez veya bağımlılıklar güncellendiğinde)
-npm install
 
 # Uygulamayı başlatın
 ng serve --port 4202
@@ -61,57 +60,93 @@ ng serve --port 4202
 
 Frontend uygulama http://localhost:4202 adresinde çalışır.
 
+## Servisleri Durdurma
+
+### Backend Durdurma
+
+```powershell
+# Çalışan .NET Core uygulamalarını bulmak için
+Get-Process -Name dotnet | Where-Object {$_.MainWindowTitle -like "*Stock.API*"} | Format-Table Id, ProcessName, MainWindowTitle
+
+# Belirli bir ID'ye sahip işlemi durdurmak için
+Stop-Process -Id <işlem_id>
+
+# Alternatif olarak, tüm dotnet işlemlerini durdurmak için (dikkatli kullanın)
+# Get-Process -Name dotnet | Stop-Process
+```
+
+### Frontend Durdurma
+
+```powershell
+# Çalışan Node.js işlemlerini bulmak için
+Get-Process -Name node | Format-Table Id, ProcessName
+
+# Angular CLI işlemlerini bulmak için
+Get-Process | Where-Object {$_.MainWindowTitle -like "*ng serve*"} | Format-Table Id, ProcessName, MainWindowTitle
+
+# Belirli bir ID'ye sahip işlemi durdurmak için
+Stop-Process -Id <işlem_id>
+
+# Alternatif olarak, tüm node işlemlerini durdurmak için (dikkatli kullanın)
+# Get-Process -Name node | Stop-Process
+```
+
+### Tüm Servisleri Tek Komutla Durdurma
+
+```powershell
+# Hem dotnet hem de node işlemlerini durdurmak için
+Get-Process -Name dotnet, node | Stop-Process -Force
+```
+
 ## Sorun Giderme
 
-### GitHub Senkronizasyonu Sonrası Login Sorunu
+### Port Çakışması Durumunda
 
-GitHub'dan son değişiklikleri çektikten sonra login yapılamıyorsa (401 Unauthorized hatası), kullanıcı şifreleri veya sicil alanları ile ilgili bir sorun olabilir. Bu durumda:
-
-```powershell
-# Backend'i başlatın
-cd src/Stock.API
-dotnet run
-
-# Tarayıcınızda aşağıdaki URL'i açın veya Postman ile GET isteği gönderin
-http://localhost:5037/api/FixPassword/fix-passwords
-```
-
-Bu endpoint, kullanıcı şifrelerini ve sicil alanlarını otomatik olarak düzeltecektir. İşlem tamamlandığında aşağıdaki kullanıcı bilgileriyle giriş yapabilirsiniz:
-
-- Admin Kullanıcı:
-  - Kullanıcı adı: admin
-  - Sicil: A001
-  - Şifre: admin123
-
-- Normal Kullanıcı:  
-  - Kullanıcı adı: user
-  - Sicil: U001
-  - Şifre: user123
-
-### Migration Hataları
-
-Eğer "pending changes" veya "add a new migration" şeklinde hatalar alıyorsanız:
-
-```powershell
-cd src/Stock.Infrastructure
-dotnet ef migrations add NewMigration --startup-project ../Stock.API
-cd ../Stock.API
-dotnet ef database update
-```
-
-### Backend ve Frontend Port Çakışmaları
-
-Port çakışması durumunda, backend için:
+Backend için farklı port kullanma:
 
 ```powershell
 dotnet run --urls=http://localhost:5038
 ```
 
-Frontend için:
+Frontend için farklı port kullanma:
 
 ```powershell
 ng serve --port 4203
 ```
+
+### Çalışan Portları Kontrol Etme
+
+```powershell
+# Belirli bir portu dinleyen işlemleri bulmak için
+netstat -ano | findstr :5037
+netstat -ano | findstr :4202
+
+# Bulunan PID'ye sahip işlemi görmek için
+Get-Process -Id <PID>
+```
+
+### Veritabanı Sıfırlama
+
+Veritabanı sorunları yaşıyorsanız, sıfırdan oluşturmak için:
+
+```powershell
+cd src/Stock.API
+dotnet ef database drop --force
+dotnet ef database update
+```
+
+### Kullanıcı Verilerini Düzeltme
+
+Login sorunları yaşıyorsanız, kullanıcı verilerini düzeltmek için:
+
+```powershell
+# Backend çalışırken tarayıcıda aşağıdaki URL'i açın
+http://localhost:5037/api/FixPassword/fix-passwords
+```
+
+Bu işlem sonrasında aşağıdaki bilgilerle giriş yapabilirsiniz:
+- Admin: sicil: A001, şifre: admin123
+- Kullanıcı: sicil: U001, şifre: user123
 
 ## Ortamlar Arası Geçiş (Ev ve İş)
 
@@ -153,16 +188,31 @@ Bu işlem, aşağıdaki düzeltmeleri gerçekleştirir:
    - Normal kullanıcı hesaplarını kontrol eder, yoksa oluşturur, varsa günceller
    - Rol tanımlamalarını kontrol eder, eksikse oluşturur
 
-7. Frontend'i başlatın: 
+7. **Yeni:** Eksik izinleri eklemek için aşağıdaki endpoint'i çağırın (Admin olarak giriş yaptıktan sonra):
+```
+http://localhost:5037/api/permissions/add-missing-permissions
+```
+Bu işlem, aşağıdaki izinleri kontrol eder ve eksikse ekler:
+   - Pages.Revir.View (Revir sayfasını görüntüleme izni)
+   - Pages.BilgiIslem.View (Bilgi İşlem sayfasını görüntüleme izni)
+   - Yeni eklenen diğer sayfa izinleri
+
+8. Frontend'i başlatın: 
 ```powershell
 cd frontend
 npm install  # Sadece gerekiyorsa (bağımlılıklar değiştiyse)
 ng serve --port 4202
 ```
 
-8. Tarayıcıdan uygulamaya erişin ve login olun: 
+9. Tarayıcıdan uygulamaya erişin ve login olun: 
 ```
 http://localhost:4202
 ```
 
-Bu adımlar, farklı ortamlar arasında geçiş yaparken oluşabilecek veritabanı ve kullanıcı kimlik doğrulama sorunlarını önleyecektir. 
+10. **Yeni:** Kullanıcı izinlerini güncellemek için:
+    - Admin olarak giriş yapın
+    - Kullanıcı Yönetimi > Kullanıcılar sayfasına gidin
+    - İlgili kullanıcıyı seçin ve "İzinleri Düzenle" butonuna tıklayın
+    - Kullanıcıya erişim vermek istediğiniz sayfaların izinlerini (örn. Pages.Revir.View, Pages.BilgiIslem.View) seçin ve kaydedin
+
+Bu adımlar, farklı ortamlar arasında geçiş yaparken oluşabilecek veritabanı, kullanıcı kimlik doğrulama ve izin sorunlarını önleyecektir. 
