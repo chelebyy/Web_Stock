@@ -34,6 +34,7 @@ Bu dosya, proje geliştirme sürecinde karşılaşılan hataları ve çözümler
 - [Kullanıcı Dashboard Erişim Sorunları](#kullanıcı-dashboard-erişim-sorunları)
 - [Aktivite Log Hataları (07.03.2025)](#aktivite-log-hataları-07032025)
 - [Log Senkronizasyon Hatası (08.03.2025)](#log-senkronizasyon-hatası-08032025)
+- [Kullanıcı İzinleri Kaydetme Hatası](#kullanıcı-i̇zinleri-kaydetme-hatası)
 
 ## Kullanıcı Oluşturma Hataları
 
@@ -139,6 +140,22 @@ POST http://localhost:5037/api/auth/create-user 500 (Internal Server Error)
 3. HTTP durum kodları doğru kullanılmalı (BadRequest, NotFound vs)
 4. Kullanıcılara anlamlı hata mesajları gösterilmeli
 5. Geliştirme ortamında detaylı hata mesajları, production ortamında genel hata mesajları verilmeli
+
+### Hata: Kullanıcı Oluşturma Rol Seçimi Hatası
+
+**Hata Mesajı**
+```
+Geçerli bir rol seçilmelidir
+```
+
+**Hata Detayı**
+Yeni kullanıcı oluşturma işlemi sırasında, backend'e gönderilen veride roleId değeri eksik olduğu için "Geçerli bir rol seçilmelidir" hatası alınıyordu.
+
+**Çözüm**
+1. `frontend/src/app/models/auth.model.ts` dosyasındaki CreateUserRequest arayüzüne roleId alanı eklendi.
+2. `frontend/src/app/services/user.service.ts` dosyasındaki createUser metodunda, CreateUserRequest nesnesine roleId değeri eklendi.
+
+Detaylı bilgi için: [Kullanıcı Oluşturma Rol Seçimi Hatası Çözümü](knowledge-base/user-creation-role-fix.md)
 
 ## Sınıf Belirsizliği Hataları
 
@@ -2501,3 +2518,57 @@ Bekleyen logları senkronize etme hatası: HttpErrorResponse {headers: _HttpHead
 2. Zorunlu alanlar için varsayılan değerler atamak, sistemin daha dayanıklı olmasını sağlar
 3. JSON dönüşüm hatalarını daha iyi yönetmek için try-catch blokları kullanılmalı
 4. Hata mesajları daha açıklayıcı olmalı ve kullanıcıya yardımcı olmalı
+
+## Kullanıcı İzinleri Kaydetme Hatası
+
+**Hata Mesajı:**
+```
+POST http://localhost:5037/api/permissions/user/20/assign 404 (Not Found)
+```
+
+**Hata Detayı:**
+Kullanıcı izinleri sayfasında, izinleri kaydetmeye çalışırken 404 Not Found hatası alınıyordu. Frontend uygulaması `http://localhost:5037/api/permissions/user/20/assign` endpoint'ine POST isteği gönderiyor, ancak bu endpoint backend'de tanımlanmamıştı.
+
+**Nedeni:**
+PermissionsController'da kullanıcıya birden fazla izin atamak için bir endpoint tanımlanmamıştı. Sadece tek bir izin atamak için `[HttpPost("user/{userId}/assign/{permissionId}")]` endpoint'i vardı.
+
+**Çözüm:**
+PermissionsController'a yeni bir endpoint ekledik:
+
+```csharp
+[HttpPost("user/{userId}/assign")]
+[RequirePermission("Users.Permissions.Assign")]
+public async Task<ActionResult<bool>> AssignPermissionsToUser(int userId, [FromBody] AssignPermissionsRequest request)
+{
+    try
+    {
+        _logger.LogInformation($"Kullanıcıya izinler atanıyor - Kullanıcı ID: {userId}, İzin sayısı: {request.PermissionIds.Count}");
+        
+        bool result = true;
+        foreach (var permissionId in request.PermissionIds)
+        {
+            var assignResult = await _permissionService.AssignPermissionToUserAsync(userId, permissionId, true);
+            if (!assignResult)
+            {
+                result = false;
+                _logger.LogWarning($"İzin atanamadı - Kullanıcı ID: {userId}, İzin ID: {permissionId}");
+            }
+        }
+        
+        return Ok(result);
+    }
+    catch (Exception ex)
+    {
+        _logger.LogError(ex, $"Kullanıcıya izinler atanırken hata oluştu - Kullanıcı ID: {userId}");
+        return StatusCode(500, new { error = "Kullanıcıya izinler atanırken bir hata oluştu: " + ex.Message });
+    }
+}
+```
+
+Bu endpoint, frontend'den gelen izin ID'lerini alarak her biri için `_permissionService.AssignPermissionToUserAsync` metodunu çağırıyor.
+
+**Öğrenilen Ders:**
+1. Frontend ve backend arasındaki API endpoint'lerinin uyumlu olması gerekir.
+2. Frontend'in kullandığı tüm endpoint'lerin backend'de tanımlanmış olduğundan emin olunmalı.
+3. API endpoint'lerini tasarlarken, tek bir kaynak için tekil işlemler yanında toplu işlemler için de endpoint'ler düşünülmeli.
+4. Hata durumlarında detaylı loglama yapılmalı ve anlamlı hata mesajları döndürülmeli.

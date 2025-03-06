@@ -107,6 +107,7 @@
   - [x] Kullanıcı Dashboard bileşeninin geliştirilmesi
   - [x] Kullanıcı Dashboard erişim sorunlarının çözümü
   - [ ] Diğer bileşenlerin oluşturulması
+    - [ ] Bilgi İşlem modülünün feature modülü yapısında geliştirilmesi (bilgi_islem_module_knowledge_base.md dosyasında detaylar mevcut)
   - [ ] Service'lerin implementasyonu
   - [ ] Frontend adaptasyonunu tamamlamak
 
@@ -216,3 +217,23 @@
 3. Kullanıcı yönetimi ve rol yönetimi sayfalarının tam olarak test edilmesi
 4. Geriye kalan frontend komponentlerinin geliştirilmesi
 5. Backend'de kullanıcı rolü izinlerini güncelleyerek kalıcı çözüm sağlamak
+
+## Kullanıcı Oluşturma Rol Seçimi Hatası Çözümü
+
+### Görev
+Yeni kullanıcı oluşturma işlemi sırasında "Geçerli bir rol seçilmelidir" hatasını çözmek.
+
+### Yapılan İşlemler
+[X] Hata mesajlarını analiz ederek sorunun kaynağını tespit etmek
+[X] CreateUserRequest arayüzüne roleId alanı eklemek
+[X] user.service.ts dosyasındaki createUser metoduna roleId değerini eklemek
+[X] Değişiklikleri GitHub'a push etmek
+[X] Knowledge-base ve errors.md dosyalarını güncellemek
+
+### Sonuç
+Kullanıcı oluşturma işlemi sırasında roleId değeri backend'e gönderilmeye başlandı ve "Geçerli bir rol seçilmelidir" hatası ortadan kalktı.
+
+### Öğrenilen Dersler
+- Frontend'den backend'e veri gönderirken, backend'in beklediği tüm alanların doğru şekilde gönderildiğinden emin olunmalıdır.
+- Model arayüzlerinin, backend API'sinin beklediği tüm alanları içerdiğinden emin olunmalıdır.
+- Hata mesajları, sorunun kaynağını bulmak için önemli ipuçları sağlar.

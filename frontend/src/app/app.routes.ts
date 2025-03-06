@@ -11,6 +11,8 @@ import { UserDashboardComponent } from './components/user-dashboard/user-dashboa
 import { RoleDetailComponent } from './components/role-management/role-detail/role-detail.component';
 import { PermissionManagementComponent } from './components/permission-management/permission-management.component';
 import { UserPagePermissionsComponent } from './components/user-page-permissions/user-page-permissions.component';
+import { RevirComponent } from './components/revir/revir.component';
+import { BilgiIslemComponent } from './components/bilgi-islem/bilgi-islem.component';
 
 export const routes: Routes = [
   { path: '', redirectTo: '/login', pathMatch: 'full' },
@@ -84,6 +86,22 @@ export const routes: Routes = [
     data: { 
       requiresAdmin: true,
       permissions: ['Pages.RoleManagement']
+    }
+  },
+  {
+    path: 'bilgi-islem',
+    component: BilgiIslemComponent,
+    canActivate: [AuthGuard, PermissionGuard],
+    data: {
+      permissions: ['Pages.BilgiIslem.View']
+    }
+  },
+  {
+    path: 'revir',
+    component: RevirComponent,
+    canActivate: [AuthGuard, PermissionGuard],
+    data: {
+      permissions: ['Pages.Revir.View']
     }
   },
   {

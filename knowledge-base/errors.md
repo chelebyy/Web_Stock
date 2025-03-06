@@ -29,6 +29,7 @@ Bu dosya, proje geliştirme sürecinde karşılaşılan hataları ve çözümler
 - [Profil Resmi Placeholder Hatası (06.03.2025)](#profil-resmi-placeholder-hatası-06032025)
 - [Profil Resmi ve API Endpoint Hataları (06.03.2025)](#profil-resmi-ve-api-endpoint-hataları-06032025)
 - [Profil Resmi Endpoint Hatası - Geçici Çözüm (06.03.2025)](#profil-resmi-endpoint-hatası-geçici-çözüm-06032025)
+- [Revir ve BilgiIslem İzinlerinin Görünmeme Sorunu](#revir-ve-bilgiislem-izinlerinin-görünmeme-sorunu)
 
 ## Kullanıcı Aktivitesi Grafiği Yerine Log Kaydetme Sistemi
 
@@ -1220,3 +1221,94 @@ using Stock.Domain.Entities;  // Permissions namespace yerine
 2. Çakışan duplicate dosyaları kaldırın.
 
 3. Tüm servis ve repository sınıflarında tutarlı namespace kullanımı sağlayın.
+
+## Revir ve BilgiIslem İzinlerinin Görünmeme Sorunu
+
+### Sorun
+Kullanıcı sayfa izinleri ekranında "Pages.Revir.View" ve "Pages.BilgiIslem.View" izinleri görünmüyor. SeedData.cs dosyasında bu izinler tanımlanmış olmasına rağmen, kullanıcı arayüzünde bu izinler listelenmiyordu.
+
+### Analiz
+1. SeedData.cs dosyasında izinler doğru şekilde tanımlanmış:
+   ```csharp
+   new Permission { 
+       Name = "Pages.Revir.View", 
+       Description = "Revir sayfasını görüntüleme", 
+       Group = "Sayfa Erişimi", 
+       ResourceType = "Page", 
+       ResourceName = "Revir", 
+       Action = "View", 
+       CreatedAt = DateTime.UtcNow 
+   }
+   ```
+
+2. Ancak, aynı dosyada `CleanupUnusedPermissionsAsync` metodu bu izinleri siliyor:
+   ```csharp
+   // Revir sayfası izinleri
+   var revirPermissions = await context.Permissions.Where(p => p.Name.StartsWith("Pages.Revir")).ToListAsync();
+   foreach (var permission in revirPermissions)
+   {
+       await RemovePermissionAsync(context, permission.Id, permission.Name, logger);
+   }
+
+   // BilgiIslem sayfası izinleri
+   var bilgiIslemPermissions = await context.Permissions.Where(p => p.Name.StartsWith("Pages.BilgiIslem")).ToListAsync();
+   foreach (var permission in bilgiIslemPermissions)
+   {
+       await RemovePermissionAsync(context, permission.Id, permission.Name, logger);
+   }
+   ```
+
+### Çözüm
+1. SeedData.cs dosyasındaki `CleanupUnusedPermissionsAsync` metodundan Revir ve BilgiIslem izinlerini temizleyen kodları kaldırmak gerekiyor.
+2. Veritabanını güncellemek için migration oluşturup uygulamak gerekiyor.
+3. Alternatif olarak, veritabanını manuel olarak güncellemek için SQL komutları kullanılabilir:
+   ```sql
+   -- Revir izinlerini ekle
+   INSERT INTO "Permissions" ("Name", "Description", "Group", "ResourceType", "ResourceName", "Action", "CreatedAt")
+   VALUES ('Pages.Revir.View', 'Revir sayfasını görüntüleme', 'Sayfa Erişimi', 'Page', 'Revir', 'View', CURRENT_TIMESTAMP);
+
+   -- BilgiIslem izinlerini ekle
+   INSERT INTO "Permissions" ("Name", "Description", "Group", "ResourceType", "ResourceName", "Action", "CreatedAt")
+   VALUES ('Pages.BilgiIslem.View', 'Bilgi İşlem sayfasını görüntüleme', 'Sayfa Erişimi', 'Page', 'BilgiIslem', 'View', CURRENT_TIMESTAMP);
+   ```
+
+### Sonuç
+Bu sorun, SeedData.cs dosyasındaki çelişkili kod nedeniyle oluşmuştur. İzinler önce ekleniyor, sonra temizleniyor. Bu durumda, temizleme kodunu kaldırmak veya izinleri manuel olarak eklemek gerekiyor.
+
+## Duplicate Method Error - 2023-11-15
+
+### Hata
+```
+error CS0111: 'PermissionsController' türü aynı parametre türleriyle 'ResetUserToRolePermissions' adlı bir üyeyi zaten tanımlıyor
+```
+
+### Nedeni
+PermissionsController sınıfında aynı isim ve parametre imzasına sahip iki farklı `ResetUserToRolePermissions` metodu tanımlanmıştı:
+
+1. İlk metot:
+```csharp
+[HttpPost("user/{userId}/reset")]
+[RequirePermission("Users.Permissions.Reset")]
+public async Task<ActionResult<bool>> ResetUserToRolePermissions(int userId)
+```
+
+2. İkinci metot:
+```csharp
+[HttpPost("users/{userId}/reset")]
+[Authorize(Roles = "Admin")]
+public async Task<ActionResult<bool>> ResetUserToRolePermissions(int userId)
+```
+
+### Çözüm
+İkinci metodu kaldırarak ve ilk metodun route ve yetkilendirme özelliklerini güncelleyerek sorunu çözdük:
+
+```csharp
+[HttpPost("users/{userId}/reset")]
+[Authorize(Roles = "Admin")]
+public async Task<ActionResult<bool>> ResetUserToRolePermissions(int userId)
+```
+
+### Öğrenilen Dersler
+1. Controller'larda aynı isim ve parametre imzasına sahip birden fazla metot tanımlanamaz.
+2. Yeni endpoint eklerken, mevcut endpoint'leri kontrol etmek ve çakışmaları önlemek önemlidir.
+3. Endpoint'lerin route'larında tekil/çoğul kullanımına dikkat edilmelidir (örn. "user" vs "users").

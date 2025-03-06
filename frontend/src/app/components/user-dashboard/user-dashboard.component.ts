@@ -251,6 +251,26 @@ export class UserDashboardComponent implements OnInit {
     }
   }
 
+  navigateToBilgiIslem(): void {
+    this.router.navigate(['/bilgi-islem']);
+    
+    // Aktivitelere ekle
+    this.recentActivities.unshift({ action: 'Bilgi İşlem modülüne erişildi', date: new Date() });
+    if (this.recentActivities.length > 5) {
+      this.recentActivities.pop();
+    }
+  }
+
+  navigateToRevir(): void {
+    this.router.navigate(['/revir']);
+    
+    // Aktivitelere ekle
+    this.recentActivities.unshift({ action: 'Revir modülüne erişildi', date: new Date() });
+    if (this.recentActivities.length > 5) {
+      this.recentActivities.pop();
+    }
+  }
+
   navigateToMedical(): void {
     this.router.navigate(['/medical']);
     

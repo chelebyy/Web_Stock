@@ -75,19 +75,8 @@ namespace Stock.Infrastructure.Data
                     await RemovePermissionAsync(context, permission.Id, permission.Name, logger);
                 }
 
-                // Revir sayfası izinleri
-                var revirPermissions = await context.Permissions.Where(p => p.Name.StartsWith("Pages.Revir")).ToListAsync();
-                foreach (var permission in revirPermissions)
-                {
-                    await RemovePermissionAsync(context, permission.Id, permission.Name, logger);
-                }
-
-                // BilgiIslem sayfası izinleri
-                var bilgiIslemPermissions = await context.Permissions.Where(p => p.Name.StartsWith("Pages.BilgiIslem")).ToListAsync();
-                foreach (var permission in bilgiIslemPermissions)
-                {
-                    await RemovePermissionAsync(context, permission.Id, permission.Name, logger);
-                }
+                // NOT: Revir ve BilgiIslem izinleri artık temizlenmeyecek çünkü bu sayfalar oluşturuldu
+                // Revir ve BilgiIslem sayfaları için izinler korunacak
 
                 // Eğitim sayfası izinleri
                 var egitimPermissions = await context.Permissions.Where(p => p.Name.StartsWith("Pages.Egitim")).ToListAsync();
