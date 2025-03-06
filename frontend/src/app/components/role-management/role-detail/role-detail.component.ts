@@ -332,14 +332,18 @@ export class RoleDetailComponent implements OnInit {
    */
   getGroupsExcept(excludeGroupName: string): string[] {
     if (!this.permissionGroups || !Array.isArray(this.permissionGroups)) {
-      console.warn('permissionGroups dizi değil veya tanımsız');
       return [];
     }
+
+    // Filtrelenecek grup isimleri
+    const excludedGroups = [excludeGroupName, 'Stok Yönetimi'];
     
-    return this.permissionGroups
-      .filter(g => g && g.group) // Undefined kontrolü
+    // Tüm gruplardan filtrelenecek grupları çıkar
+    const groupNames = this.permissionGroups
       .map(g => g.group)
-      .filter(groupName => groupName !== excludeGroupName);
+      .filter(g => g && !excludedGroups.includes(g));
+      
+    return [...new Set(groupNames)]; // Tekrar eden grup isimlerini temizle
   }
 
   /**
@@ -347,46 +351,41 @@ export class RoleDetailComponent implements OnInit {
    * @param category İzin kategorisi: 'Dashboard', 'Management', 'Other'
    */
   getPagePermissionsByCategory(category: string): Permission[] {
-    const allPagePermissions = this.getPermissionsByGroup('Sayfa Erişimi');
+    const pagePermissions = this.getPermissionsByGroup('Sayfa Erişimi');
     
-    if (!allPagePermissions || allPagePermissions.length === 0) {
-      return [];
-    }
+    // Platformda olmayan sayfaların izinlerini filtrele
+    const excludedPermissions = [
+      'Pages.Reports', 
+      'Pages.Settings', 
+      'Pages.StockManagement',
+      'Pages.Revir.View', 'Pages.Revir.Create', 'Pages.Revir.Edit', 'Pages.Revir.Delete',
+      'Pages.BilgiIslem.View', 'Pages.BilgiIslem.Create', 'Pages.BilgiIslem.Edit', 'Pages.BilgiIslem.Delete',
+      'Pages.Egitim.View', 'Pages.Egitim.Create', 'Pages.Egitim.Edit', 'Pages.Egitim.Delete'
+    ];
     
-    // İzinleri isimlerine göre kategorilere ayır
-    switch (category) {
-      case 'Dashboard':
-        return allPagePermissions.filter(p => 
-          p.name.includes('Dashboard') || 
-          p.name.includes('Home') || 
-          p.description.toLowerCase().includes('panel') ||
-          p.description.toLowerCase().includes('dashboard')
-        );
-        
-      case 'Management':
-        return allPagePermissions.filter(p => 
-          p.name.includes('Management') || 
-          p.name.includes('User') || 
-          p.name.includes('Role') ||
-          p.description.toLowerCase().includes('yönetim') ||
-          p.description.toLowerCase().includes('management')
-        );
-        
-      case 'Other':
-        return allPagePermissions.filter(p => 
-          !p.name.includes('Dashboard') && 
-          !p.name.includes('Home') && 
-          !p.name.includes('Management') && 
-          !p.name.includes('User') && 
-          !p.name.includes('Role') &&
-          !p.description.toLowerCase().includes('panel') &&
-          !p.description.toLowerCase().includes('dashboard') &&
-          !p.description.toLowerCase().includes('yönetim') &&
-          !p.description.toLowerCase().includes('management')
-        );
-        
-      default:
-        return [];
+    // Mevcut izinleri filtrele - hariç tutulan izinleri gösterme
+    const filteredPermissions = pagePermissions.filter(p => !excludedPermissions.includes(p.name));
+    
+    if (category === 'Dashboard') {
+      return filteredPermissions.filter(p => 
+        p.name.includes('Dashboard') || 
+        p.description.toLowerCase().includes('dashboard') || 
+        p.description.toLowerCase().includes('panel')
+      );
+    } else if (category === 'Management') {
+      return filteredPermissions.filter(p => 
+        p.name.includes('Management') || 
+        p.description.toLowerCase().includes('yönetim')
+      );
+    } else {
+      // Dashboard ve Management kategorilerinde olmayan diğer izinler
+      return filteredPermissions.filter(p => 
+        !p.name.includes('Dashboard') && 
+        !p.description.toLowerCase().includes('dashboard') && 
+        !p.description.toLowerCase().includes('panel') &&
+        !p.name.includes('Management') &&
+        !p.description.toLowerCase().includes('yönetim')
+      );
     }
   }
   

@@ -62,6 +62,9 @@ export class AuthService {
             };
             this.currentUserSubject.next(user);
             
+            // İzinleri yükle
+            this.permissions = decodedToken.Permission || [];
+            
             // Kullanıcı rolüne göre yönlendirme
             const targetRoute = user.isAdmin ? '/admin-dashboard' : '/user-dashboard';
             console.log('Yönlendiriliyor:', targetRoute);

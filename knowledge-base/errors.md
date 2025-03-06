@@ -25,6 +25,10 @@ Bu dosya, proje geliştirme sürecinde karşılaşılan hataları ve çözümler
 - [User Model Uyumsuzluğu Hatası](#user-model-uyumsuzluğu-hatası)
 - [Backend Model Uyumsuzluğu ve Migration Hataları](#backend-model-uyumsuzluğu-ve-migration-hataları)
 - [Veritabanı Temizliği Sonrası Login Hatası](#veritabanı-temizliği-sonrası-login-hatası)
+- [Kullanıcı Dashboard Yeniden Tasarımı Hataları](#kullanıcı-dashboard-yeniden-tasarımı-hataları)
+- [Profil Resmi Placeholder Hatası (06.03.2025)](#profil-resmi-placeholder-hatası-06032025)
+- [Profil Resmi ve API Endpoint Hataları (06.03.2025)](#profil-resmi-ve-api-endpoint-hataları-06032025)
+- [Profil Resmi Endpoint Hatası - Geçici Çözüm (06.03.2025)](#profil-resmi-endpoint-hatası-geçici-çözüm-06032025)
 
 ## Kullanıcı Aktivitesi Grafiği Yerine Log Kaydetme Sistemi
 
@@ -1088,128 +1092,87 @@ Kullanıcı yönetimi sayfasına izin yönetimi butonu eklendi ve UserManagement
 - `frontend/src/app/components/user-permission/user-permission.component.ts`
 - `frontend/src/app/app.routes.ts` 
 
-## PrimeNG 19 Uyumluluk Sorunları
+## Profil Resmi Endpoint Hatası - Geçici Çözüm (06.03.2025)
 
-### Yapılan İşlem
-UserPermissionComponent bileşeninde PrimeNG 19 ile uyumluluk sorunları giderildi.
+### Hata
+```
+GET http://localhost:5037/api/users/6/profile-picture 404 (Not Found)
+```
 
-### Karşılaşılan Sorunlar
+### Sorun
+Kullanıcı dashboard'unda profil resmi yüklenirken 404 hatası alınıyor. Bu, backend tarafında `/api/users/{userId}/profile-picture` endpoint'inin mevcut olmadığını gösteriyor.
 
-1. **Sorun:** `Can't bind to 'loading' since it isn't a known property of 'button'`
-   **Çözüm:** PrimeNG 19'da Button bileşeni artık `[loading]` özelliğini desteklemiyor. Bu özellik kaldırıldı.
+### Geçici Çözüm
+Backend tarafında profil resmi endpoint'i oluşturulana kadar, profil resmi isteğini tamamen devre dışı bıraktık ve varsayılan profil resmini kullanıyoruz:
 
-2. **Sorun:** `'p-table' is not a known element`
-   **Çözüm:** Bileşen standalone olarak yapılandırıldı ve TableModule import edildi.
+```typescript
+loadUserInfo(): void {
+  const currentUser = this.authService.getCurrentUser();
+  if (currentUser) {
+    this.username = currentUser.username;
+    
+    // Profil resmi için varsayılan resmi kullan
+    // Backend'de profil resmi endpoint'i oluşturulana kadar API çağrısı yapma
+    this.profileImageUrl = 'assets/images/default-avatar.png';
+    
+    // Backend'de profil resmi endpoint'i oluşturulduğunda aşağıdaki kodu aktif et
+    /*
+    this.userService.getUserProfilePicture(currentUser.id).subscribe({
+      next: (data: Blob) => {
+        if (data && data.size > 0) {
+          const objectURL = URL.createObjectURL(data);
+          this.profileImageUrl = objectURL;
+        } else {
+          console.log('Profil resmi bulunamadı veya boş, varsayılan resim kullanılıyor.');
+        }
+      },
+      error: (error: any) => {
+        console.error('Profil resmi yüklenirken hata oluştu:', error);
+        // Hata detaylarını logla
+        if (error.status === 404) {
+          console.log('Profil resmi endpoint bulunamadı. Backend API endpoint kontrolü gerekiyor.');
+        }
+      }
+    });
+    */
+  }
+}
+```
 
-3. **Sorun:** `Parser Error: Bindings cannot contain assignments at column 60 in [allPermissionsGroups.flatMap(g => g.permissions).filter(p => !hasPermission(p.id))]`
-   **Çözüm:** Karmaşık template ifadeleri yerine yeni bir metot (getFilteredPermissions) oluşturuldu.
+### Kalıcı Çözüm İçin Yapılması Gerekenler
+1. Backend tarafında `UsersController` içinde profil resmi endpoint'i oluşturulmalı
+```csharp
+[HttpGet("{userId}/profile-picture")]
+public async Task<IActionResult> GetProfilePicture(int userId)
+{
+    var profilePicture = await _userService.GetProfilePictureAsync(userId);
+    if (profilePicture == null)
+    {
+        return NotFound();
+    }
+    
+    return File(profilePicture, "image/jpeg"); // veya uygun MIME tipi
+}
+```
 
-4. **Sorun:** `the [responsive] property of p-picklist is deprecated`
-   **Çözüm:** Eski özellik kaldırıldı, çünkü PrimeNG 19'da artık desteklenmiyor.
+2. Backend tarafında `UserService` içinde profil resmi işlemleri için metotlar eklenmeli
+```csharp
+public async Task<byte[]> GetProfilePictureAsync(int userId)
+{
+    var user = await _userRepository.GetByIdAsync(userId);
+    if (user == null || user.ProfilePicture == null)
+    {
+        return null;
+    }
+    
+    return user.ProfilePicture;
+}
+```
 
-### Öğrenilen Dersler
-
-1. Angular 19 ve PrimeNG 19 geçişinde, bileşenlerin API'si değişebilir ve bazı özellikler kaldırılabilir.
-2. Karmaşık template ifadeleri yerine bileşen sınıfında metotlar kullanmak daha güvenlidir.
-3. Standalone bileşenler kullanılırken, gerekli tüm modüller doğrudan bileşene import edilmelidir.
-4. HTML şablonlarında doğrudan karmaşık dizileri ve fonksiyonları kullanmak yerine, bunları bir metot içinde kapsüllemek daha iyidir.
-
-### İlgili Dosyalar
-- `frontend/src/app/components/user-permission/user-permission.component.ts`
-- `frontend/src/app/components/user-permission/user-permission.component.html`
-- `frontend/src/app/app.routes.ts` 
-
-## User Model Uyumsuzluğu Hatası
-
-### Yapılan İşlem
-UserPermissionComponent şablonunda kullanılan firstName ve lastName alanları, User modelinde bulunmadığı için uyumsuzluk sorunu giderildi.
-
-### Karşılaşılan Sorunlar
-1. **Sorun:** `Property 'firstName' does not exist on type 'User'.`
-   **Çözüm:** User modelini güncelleyerek firstName ve lastName alanları eklendi.
-
-2. **Sorun:** `Property 'lastName' does not exist on type 'User'.`
-   **Çözüm:** Şablona null check eklenerek, bu alanlar yoksa username veya varsayılan değerlerin gösterilmesi sağlandı.
-
-3. **Sorun:** Backend API'den gelen User nesnelerinde firstName ve lastName alanları yok.
-   **Çözüm:** UserService.getUserById() metodu geliştirilerek, backend'den gelen veriyi işleyip firstName ve lastName alanlarını username alanından çıkartılarak doldurması sağlandı.
-
-### Öğrenilen Dersler
-1. Frontend ve backend model yapıları arasındaki uyumsuzluklar, runtime değil, derleme zamanı hatalarına neden olabilir.
-2. Angular'ın template type-checking özelliği, şablonda kullanılan değişken alanlarının type uyumlu olmasını sağlar.
-3. Backend'den gelen veriler, frontend'de ihtiyaç duyulan formata dönüştürülebilir.
-4. Şablonda null check kullanmak önemlidir, özellikle API yanıtlarındaki değişken yapılar için.
-5. İstemci tarafındaki veri modellemesi, API'den dönen yapıdan farklı olabilir ve RxJS operatörleri ile bu dönüşüm sağlanabilir.
-
-### İlgili Dosyalar
-- `frontend/src/app/models/user.model.ts`
-- `frontend/src/app/components/user-permission/user-permission.component.html`
-- `frontend/src/app/services/user.service.ts`
-
-## Backend Model Uyumsuzluğu ve Migration Hataları
-
-### Yapılan İşlem
-Backend'de UserPermissionService'deki hatalı alan referansı düzeltildi ve migration sorunları çözüldü.
-
-### Karşılaşılan Sorunlar
-1. **Sorun:** `C:\Users\muham\OneDrive\Masaüstü\Stock\src\Stock.Infrastructure\Services\UserPermissionService.cs(208,44): error CS1061: 'User' bir 'UserName' tanımı içermiyor`
-   **Çözüm:** UserPermissionService.cs dosyasında hatalı olan 'UserName' referansını 'Username' olarak düzelttik (büyük/küçük harf duyarlılığı).
-
-2. **Sorun:** `42701: column "Action" of relation "Permissions" already exists`
-   **Çözüm:** Migration'lar arasında model tanımları çakışıyordu. Tüm migration'ları silip yeniden başladık.
-
-3. **Sorun:** `42704: constraint "FK_AuditLogs_Users_UserId" of relation "AuditLogs" does not exist`
-   **Çözüm:** Migration'lar arasında FK tanımlamaları tutarsızdı. Tüm migrations klasörünü silip tamamen yeni bir initial migration oluşturduk.
-
-4. **Sorun:** `The model for context 'ApplicationDbContext' has pending changes.`
-   **Çözüm:** Model değişikliklerini içeren yeni bir migration ekledik.
-
-### Öğrenilen Dersler
-1. .NET projesinde büyük/küçük harf duyarlılığına dikkat etmek önemlidir. Entity property'lerinin aynı case'de kullanılması gerekir.
-2. Migration hataları birikebilir ve birbirini etkileyebilir. Bazen en iyi çözüm, tüm migration'ları silip sıfırdan başlamaktır.
-3. Veritabanı şemasında bir değişiklik yapıldığında, yeni bir migration oluşturmak gerekir.
-4. Entity Framework Core'da sık karşılaşılan hata türleri şunlardır:
-   - Property adı yanlış yazılması (büyük/küçük harf farkı)
-   - Aynı sütunun tekrar eklenmesi
-   - Var olmayan kısıtlamaların kaldırılmaya çalışılması
-   - Model ile migration'lar arasındaki tutarsızlıklar
-5. PowerShell'de komutları birleştirmek için `&&` yerine `;` (noktalı virgül) kullanılmalıdır.
-
-### İlgili Dosyalar
-- `src/Stock.Infrastructure/Services/UserPermissionService.cs`
-- `src/Stock.Infrastructure/Migrations/*`
-- `src/Stock.Domain/Entities/User.cs`
-
-## Veritabanı Temizliği Sonrası Login Hatası
-
-### Yapılan İşlem
-Veritabanı migration sorunlarını çözmek için tüm migration'lar silindi ve veritabanı yeniden oluşturuldu. Ancak bu işlem sonrasında kullanıcı verileri kaybolduğu için login işlemi başarısız oluyordu.
-
-### Karşılaşılan Sorunlar
-1. **Sorun:** `401 (Unauthorized)` - Login işlemi başarısız oluyor
-   **Hata Mesajı:** `Failed to load resource: the server responded with a status of 401 (Unauthorized)`
-   **Nedeni:** Veritabanı temizliği sonrası kullanıcı verileri kayboldu
-
-### Uygulanan Çözüm
-FixPasswordController kullanılarak kullanıcıları otomatik olarak oluşturan ve şifre hash'lerini düzelten bir endpoint oluşturuldu:
-
-1. **FixPasswordController Oluşturma/Güncelleme:**
-   - `GET /api/FixPassword/fix-users` endpoint'i oluşturuldu
-   - Bu endpoint, Admin ve User rollerini kontrol edip oluşturuyor
-   - Admin ve normal kullanıcıları kontrol edip oluşturuyor veya güncelliyor
-   - Kullanıcı şifrelerini doğru şekilde hash'liyor
-
-2. **Kullanıcı Bilgileri:**
-   - Admin: Sicil = A001, Şifre = admin123
-   - Normal Kullanıcı: Sicil = U001, Şifre = user123
+3. Profil resmi endpoint'i oluşturulduktan sonra, frontend tarafında yorum satırına alınan kodu aktif hale getirmek
 
 ### Öğrenilen Dersler
-1. Veritabanını tamamen temizlemek, kullanıcı verilerinin kaybına neden olabilir
-2. Migration sorunlarını çözmek için "temiz başlangıç" yapmak gerektiğinde, kullanıcı verilerini yeniden oluşturacak bir mekanizma bulunmalıdır
-3. Seed verilerinin projeye eklenmesi, bu tür sorunların önlenmesine yardımcı olabilir
-4. FixPasswordController gibi yardımcı endpoint'ler, geliştirme sürecinde karşılaşılan sorunları hızlıca çözmek için kullanışlıdır
-
-### İlgili Dosyalar
-- `src/Stock.API/Controllers/FixPasswordController.cs`
-- `src/Stock.Domain/Entities/User.cs`
-- `src/Stock.Infrastructure/Data/ApplicationDbContext.cs`
+1. Backend ve frontend geliştirme süreçleri eş zamanlı ilerlemeyebilir, bu durumda geçici çözümler uygulanabilir
+2. Kullanıcı deneyimini bozmamak için, eksik backend özellikleri için frontend tarafında fallback mekanizmaları oluşturulmalı
+3. Geçici çözümleri belgelemek ve yorum satırlarıyla açıklamak, gelecekte yapılacak değişiklikleri kolaylaştırır
+4. Konsolda hata mesajlarının görünmesini engellemek için, henüz hazır olmayan API çağrılarını devre dışı bırakmak etkili bir yöntemdir

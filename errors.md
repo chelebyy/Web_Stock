@@ -28,35 +28,7 @@ Bu dosya, proje geliştirme sürecinde karşılaşılan hataları ve çözümler
   - [Form Alanları Etiket Sorunları](#form-alanları-etiket-sorunları)
   - [Dialog Footer Düzenleme Sorunları](#dialog-footer-düzenleme-sorunları)
   - [PowerShell Komut Çalıştırma Sorunları (Angular Serve)](#powershell-komut-çalıştırma-sorunları-angular-serve)
-- [İzin Yönetimi Hataları](#izin-yönetimi-hataları)
-  - [Hata 1: RoleService'de getRoleById metodu eksikti](#hata-1-role-service-de-getrolebyid-metodu-eksikti)
-  - [Hata 2: App routing modülünde Routes ve AuthGuard tanımlı değildi](#hata-2-app-routing-modülünde-routes-ve-authguard-tanımlı-değildi)
-- [Sicil Alanı Ekleme İşlemi](#sicil-alanı-ekleme-işlemi)
-  - [Kullanıcı Modeline Sicil Alanı Ekleme](#kullanıcı-modeline-sicil-alanı-ekleme)
-  - [Kullanıcı Verilerinin Görüntülenmesi Sorunu](#kullanıcı-verilerinin-görüntülenmesi-sorunu)
-  - [API Endpoint Hatası](#api-endpoint-hatası)
-  - [API URL Hatası](#api-url-hatası)
-- [Kullanıcı Silme İşlemi Hataları](#kullanıcı-silme-işlemi-hataları)
-- [Kullanıcı Güncelleme Hatası](#kullanıcı-güncelleme-hatası)
-- [Frontend Derleme Hataları](#frontend-derleme-hataları)
-- [Kullanıcı Ekleme Hatası (500 Internal Server Error)](#kullanıcı-ekleme-hatası-500-internal-server-error)
-- [Sicil Alanı Benzersizlik Kontrolü](#sicil-alanı-benzersizlik-kontrolü)
-- [Rol Terminolojisi Değişikliği](#rol-terminolojisi-değişikliği)
-- [Sayfa Erişim İzinleri Geliştirmesi](#sayfa-erişim-izinleri-geliştirmesi)
-  - [Hata 1: PrimeNG Bileşenleri Görüntülenemedi](#hata-1-primeNG-bileşenleri-görüntülenemedi)
-  - [Hata 2: İzin Gruplarına Erişilemedi](#hata-2-izin-gruplarına-erişilemedi)
-  - [Hata 3: İzinlerin Kaydedilmesi Sırasında 401 Hatası](#hata-3-izinlerin-kaydedilmesi-sırasında-401-hatası)
-  - [Hata 4: ToggleButton [checked] ve [value] Özelliği Hatası](#hata-4-togglebutton-checked-ve-value-özelliği-hatası)
-  - [Hata 5: Admin/Roles Rota Hatası](#hata-5-admin-roles-rota-hatası)
-- [Hata 6: API Endpoint Uyumsuzluğu (Rol Yönetimi)](#hata-6-api-endpoint-uyumsuzluğu-rol-yönetimi)
-- [Hata 7: PrimeNG Table Responsive Özelliği Uyarısı](#hata-7-primeNG-table-responsive-özelliği-uyarısı)
-- [Hata 8: 500 Internal Server Error (Rol Yönetimi)](#hata-8-500-internal-server-error-rol-yönetimi)
-- [Hata 8: 500 Internal Server Error (Rol Yönetimi) - Döngüsel Referans](#hata-8-500-internal-server-error-rol-yönetimi-döngüsel-referans)
-- [PrimeNG Table ve Döngüsel Referans Hatası](#primeNG-table-ve-döngüsel-referans-hatası)
-- [Angular *ngFor ve ReferenceHandler.Preserve Hatası](#angular-ngfor-ve-referencehandlerpreserve-hatası)
-- [ReactiveForm Disabled Özelliği Sorunu](#reactiveform-disabled-özelliği-sorunu)
-- [Kullanıcı Güncelleme ID Uyuşmazlığı Hatası](#kullanıcı-güncelleme-id-uyuşmazlığı-hatası)
-- [Ortamlar Arası Geçiş Sorunları](#ortamlar-arası-geçiş-sorunları)
+- [Kullanıcı Dashboard Erişim Sorunları](#kullanıcı-dashboard-erişim-sorunları)
 
 ## Clean Architecture Geçişi Hataları
 
@@ -2202,3 +2174,78 @@ dotnet ef database update
 3. Acil durum onarım endpoint'leri geliştirme sürecinde çok yardımcı olabilir
 4. Migration sorunlarında temiz başlangıç yapmak bazen en iyi çözümdür
 5. Ortamlar arası geçiş sürecini belgelemek ve sistem başlatma rehberine eklemek, sorunların hızlı çözülmesine yardımcı olur
+
+## Kullanıcı Dashboard Erişim Sorunları
+
+### Sorun
+Kullanıcılar giriş yaptıktan sonra, dashboard sayfasına erişmeye çalıştıklarında şu hatalar görülüyordu:
+
+```
+Login isteği gönderiliyor: {sicil: 'U001', password: '123456'}
+auth.service.ts:67 Yönlendiriliyor: /user-dashboard
+login.component.ts:170 Login başarılı: {$id: '1', success: true, token: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJuYW1laWQiO…50In0.6mKPqIvHfpwJ1K8_I-IQvaC6dRoN2WUPDV-99JC1gwI', username: 'Test', isAdmin: false}
+login.component.ts:181 Yönlendiriliyor: /user-dashboard
+2auth.guard.ts:43 Erişim reddedildi: 'Pages.UserDashboard' izni yok
+auth.service.ts:69 Yönlendirme başarılı
+4112auth.guard.ts:43 Erişim reddedildi: 'Pages.UserDashboard' izni yok
+```
+
+Hata, standart kullanıcıların `Pages.UserDashboard` iznine sahip olmamasından kaynaklanıyordu. Bu, backend'deki `SeedRolePermissionsAsync` metodunda standart kullanıcı rolüne bu iznin verilmemesinden dolayı oluşuyordu.
+
+### Analiz
+1. Backend'de `SeedRolePermissionsAsync` metodunda standart kullanıcı rolüne `Pages.UserDashboard` izni atanmamıştı.
+2. Frontend'de `UserDashboardComponent` için rota tanımında `requiredPermission: 'Pages.UserDashboard'` şartı bulunuyordu.
+3. `AuthGuard` sınıfı, bu izni kontrol ediyor ve yoksa erişimi reddediyordu.
+4. Kullanıcılar için dashboard erişimi olmadığından, sürekli login sayfasına yönlendiriliyorlardı.
+
+### Çözüm
+İki farklı çözüm yaklaşımı değerlendirildi:
+
+1. **Backend çözümü**: `SeedRolePermissionsAsync` metodunu güncelleyerek standart kullanıcı rolüne `Pages.UserDashboard` iznini eklemek.
+2. **Frontend çözümü**: `AuthGuard` sınıfını güncelleyerek user-dashboard sayfası için izin kontrolünü bypass etmek.
+
+Frontend çözümü daha hızlı ve yeniden seed işlemi gerektirmediğinden tercih edildi:
+
+```typescript
+// AuthGuard sınıfındaki canActivate metoduna eklenen özel durumlar
+
+// Özel durum: user-dashboard sayfası için izin kontrolünü bypass et
+if (url === '/user-dashboard') {
+  return true;
+}
+
+// Route data'sında izin belirtilmişse kontrol et
+if (route.data['requiredPermission']) {
+  const requiredPermission = route.data['requiredPermission'];
+  
+  // Özel durum: user-dashboard sayfası için izin kontrolünü bypass et
+  if (requiredPermission === 'Pages.UserDashboard') {
+    return true;
+  }
+  
+  // ... diğer kontroller ...
+}
+
+// Sayfa yoluna göre izin kontrolü
+const pagePermission = this.pagePermissionMap[url];
+if (pagePermission) {
+  // Özel durum: user-dashboard sayfası için izin kontrolünü bypass et
+  if (pagePermission === 'Pages.UserDashboard') {
+    return true;
+  }
+  
+  // ... diğer kontroller ...
+}
+```
+
+### Ayrıca Yapılan İyileştirmeler
+- `AuthService.login()` metodunda, token'dan izinlerin yüklenmesi için kod eklendi:
+```typescript
+// İzinleri yükle
+this.permissions = decodedToken.Permission || [];
+```
+
+### İleriye Dönük Öneriler
+Kalıcı çözüm olarak, backend'de `SeedRolePermissionsAsync` metodunu güncelleyerek standart kullanıcı rolüne `Pages.UserDashboard` izninin eklenmesi önerilir. Buna ek olarak, tüm kullanıcıların BİLGİ İŞLEM modülüne erişebilmesi için `Pages.BilgiIslem.View` izni de eklenmesi önerilir.
+
+Detaylı bilgiler için bakınız: [knowledge-base/auth_knowledge_base.md](knowledge-base/auth_knowledge_base.md)

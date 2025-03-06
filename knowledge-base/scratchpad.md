@@ -397,3 +397,128 @@ Bu sayede kullanıcılar, hatanın tam olarak ne olduğunu ve nasıl düzeltecek
 1. İzin yönetimi sayfasındaki "Sayfa Erişim İzinleri" bölümünü geliştirme 
 2. Kullanıcı oluşturma/düzenleme işlevlerini test etme
 3. Frontend ve backend entegrasyonunu daha da iyileştirme 
+
+## Kullanıcı Dashboard Yeniden Tasarımı
+
+### Yapılan İşlemler
+- [X] Admin dashboard HTML ve CSS yapısı incelendi
+- [X] Kullanıcı dashboard HTML yapısı admin dashboard'una benzer şekilde güncellendi
+- [X] Kullanıcı dashboard CSS stilleri admin dashboard'una benzer şekilde güncellendi
+- [X] İki sütunlu düzen uygulandı (sol: modüller, sağ: hızlı erişim ve aktiviteler)
+- [X] Şifre değiştirme formu tasarımı iyileştirildi
+- [X] Eksik servisler oluşturuldu (PasswordService)
+- [X] UserService'e profil resmi işlemleri için metodlar eklendi
+- [X] TypeScript kodunda gerekli güncellemeler yapıldı
+- [X] Knowledge base dosyaları güncellendi
+
+### Öğrenilen Dersler
+- Tutarlı bir kullanıcı arayüzü için admin ve kullanıcı dashboard'larının benzer tasarım prensiplerini takip etmesi önemlidir
+- Servis dosyalarının modüler ve tek sorumluluk prensibine uygun olarak tasarlanması gerekir (PasswordService gibi)
+- Import yollarında relative path kullanımı daha taşınabilir kod sağlar
+- Tip güvenliği için interface'lerin kullanılması önemlidir (Activity interface'i gibi)
+
+### Gelecek İyileştirmeler
+- Gerçek API entegrasyonu ile son aktivitelerin dinamik olarak yüklenmesi
+- Kullanıcı profil resmi yükleme özelliğinin eklenmesi
+- Daha fazla modül ve işlevsellik eklenmesi
+- Tema seçenekleri ve kişiselleştirme özellikleri
+
+## Kullanıcı Dashboard Modül Yapılandırması
+
+### Sorun
+Kullanıcı dashboard bileşeni yeniden tasarlandıktan sonra, PrimeNG bileşenleri ve Angular direktifleri tanınmadığı için uygulama çalışmıyordu. Hata mesajları şu şekildeydi:
+- 'p-toast' is not a known element
+- 'p-card' is not a known element
+- 'p-table' is not a known element
+- Can't bind to 'ngClass' since it isn't a known property of 'i'
+- Can't bind to 'ngModel' since it isn't a known property of 'input'
+- No pipe found with name 'date'
+
+### Çözüm
+- [X] Bileşen standalone olarak yapılandırıldı
+- [X] Gerekli Angular modülleri import edildi (CommonModule, FormsModule)
+- [X] Gerekli PrimeNG modülleri import edildi (ToastModule, CardModule, TableModule, ButtonModule, InputTextModule)
+- [X] DragDropModule import edildi (sürüklenebilir şifre değiştirme formu için)
+- [X] MessageService provider olarak eklendi
+- [X] Knowledge base dosyaları güncellendi
+
+### Öğrenilen Dersler
+- Angular 19'da standalone bileşenler, NgModule kullanımını azaltarak daha modüler bir yapı sağlar
+- Her bileşenin kendi bağımlılıklarını içe aktarması, bileşenin bağımsız olarak çalışmasını sağlar
+- PrimeNG bileşenlerinin kullanılabilmesi için ilgili modüllerin açıkça import edilmesi gerekir
+- Angular CDK gibi ek kütüphanelerin kullanımı için ilgili modüllerin import edilmesi gerekir
+- Servis sağlayıcıların bileşen seviyesinde tanımlanması, servisin sadece o bileşen ve alt bileşenlerinde kullanılabilir olmasını sağlar
+
+## Kullanıcı Dashboard Güncellemeleri (06.03.2025)
+
+### İlk Güncelleme
+- [X] Hızlı Erişim kartı kaldırıldı
+- [X] Sağ sütunun genişliği %50'den %60'a çıkarıldı
+- [X] Sol sütunun genişliği %50'den %40'a düşürüldü
+- [X] Knowledge base dosyaları güncellendi
+
+### İkinci Güncelleme
+- [X] ~~Bilgi İşlem modülü tamamen kaldırıldı~~
+- [X] ~~İki sütunlu düzen kaldırıldı~~
+- [X] ~~Son İşlemler tablosu tam genişlikte gösterildi~~
+- [X] Son İşlemler tablosu tamamen kaldırıldı
+- [X] Bilgi İşlem modülü kartı korundu
+- [X] İlgili CSS stilleri güncellendi
+- [X] Knowledge base dosyaları güncellendi
+
+### Gerekçe
+- Kullanıcı dashboard'u sadeleştirildi
+- Bilgi İşlem modülüne doğrudan erişim sağlanması önceliklendirildi
+- Son İşlemler tablosu kaldırılarak daha odaklanmış bir arayüz oluşturuldu
+- Kullanıcıların en çok kullandığı modüle (Bilgi İşlem) doğrudan erişim sağlandı
+
+### Sonraki Adımlar
+- Bilgi İşlem modülü içeriğinin zenginleştirilmesi
+- Kullanıcı profil resmi yükleme özelliği eklenebilir
+- Bilgi İşlem modülü içinde son işlemler görüntülenebilir
+
+## Kullanıcı Dashboard Hata Düzeltmeleri (06.03.2025)
+
+### Yapılan İşlemler
+- [X] API URL'indeki "api" kelimesinin tekrarlanması sorunu çözüldü
+- [X] Varsayılan profil resmi yolu düzeltildi
+- [X] Eksik olan PasswordService dosyası oluşturuldu
+- [X] Knowledge base dosyaları güncellendi
+- [X] Profil resmi yükleme işlemi iyileştirildi (varsayılan resim önce atanıyor)
+- [X] Boş blob kontrolü eklendi
+- [X] Hata durumunda daha detaylı loglama eklendi
+- [X] Profil resmi API çağrısı geçici olarak devre dışı bırakıldı (konsolda hata mesajlarını engellemek için)
+
+### Düzeltilen Hatalar
+1. **API URL Hatası**: UserService içindeki `getUserProfilePicture` metodunda, API URL'i oluşturulurken `apiUrl` değişkeni zaten `/api` içerdiği halde, URL'e tekrar `/api` eklenmiş. Bu durum `http://localhost:5037/api/api/users/6/profile-picture` gibi hatalı bir URL'e neden oluyordu.
+
+2. **Varsayılan Profil Resmi Hatası**: UserDashboardComponent içinde, profil resmi yüklenemediğinde kullanılan varsayılan resim dosyasının yolu yanlış belirtilmişti. Dosya `assets/images/default-avatar.png` konumunda olmasına rağmen, kod `assets/default-profile.png` konumunu arıyordu.
+
+3. **Eksik Servis Dosyası**: UserDashboardComponent, PasswordService'i import ediyordu ancak bu servis dosyası mevcut değildi. Bu nedenle TypeScript derleyicisi hata veriyordu.
+
+4. **Profil Resmi Endpoint Hatası**: Backend tarafında `/api/users/{userId}/profile-picture` endpoint'i mevcut değil veya doğru çalışmıyor. Bu nedenle profil resmi yüklenirken 404 hatası alınıyor.
+
+### Yapılan İyileştirmeler
+1. **Kullanıcı Deneyimi İyileştirmesi**: Profil resmi yükleme işlemi iyileştirildi. Varsayılan profil resmi, API çağrısından önce atanarak hata durumunda kullanıcı deneyiminin bozulması engellendi.
+
+2. **Veri Kontrolü İyileştirmesi**: Boş blob kontrolü eklenerek, sunucudan boş veri dönmesi durumunda da varsayılan resim kullanılması sağlandı.
+
+3. **Hata Yönetimi İyileştirmesi**: Hata durumunda daha detaylı loglama eklendi. Özellikle 404 hatası durumunda, backend API endpoint kontrolü gerektiği belirtiliyor.
+
+4. **Geçici Çözüm**: Backend tarafında profil resmi endpoint'i oluşturulana kadar, profil resmi isteğini tamamen devre dışı bıraktık ve varsayılan profil resmini kullanıyoruz. Bu sayede konsolda hata mesajları görünmüyor.
+
+### Öğrenilen Dersler
+- API URL'lerini oluştururken, temel URL'in zaten belirli bir yolu içerip içermediğine dikkat edilmeli
+- Statik dosyaların (resimler, CSS, JS) doğru konumda olduğundan ve doğru yollarla referans verildiğinden emin olunmalı
+- Bileşenlerin bağımlı olduğu tüm servis dosyalarının mevcut olduğundan emin olunmalı
+- Hata mesajlarını dikkatlice incelemek, sorunun kaynağını hızlı bir şekilde tespit etmeye yardımcı olur
+- API endpoint'lerini kullanmadan önce, backend tarafında bu endpoint'lerin mevcut olduğundan emin olunmalı
+- Frontend tarafında, API çağrıları başarısız olsa bile kullanıcı deneyiminin bozulmaması için fallback mekanizmaları oluşturulmalı
+- Boş veya geçersiz veri kontrolü yapılması, beklenmeyen durumlarda uygulamanın çökmesini engeller
+- Konsolda hata mesajlarının görünmesini engellemek için, henüz hazır olmayan API çağrılarını devre dışı bırakmak etkili bir yöntemdir
+- Geçici çözümleri belgelemek ve yorum satırlarıyla açıklamak, gelecekte yapılacak değişiklikleri kolaylaştırır
+
+### Sonraki Adımlar
+1. Backend geliştirme ekibiyle iletişime geçerek profil resmi endpoint'inin oluşturulmasını sağlamak
+2. Endpoint oluşturulduktan sonra frontend tarafında yorum satırına alınan kodu aktif hale getirmek
+3. Profil resmi yükleme özelliği eklemek için benzer bir endpoint oluşturmak

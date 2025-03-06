@@ -23,6 +23,9 @@ namespace Stock.Infrastructure.Data
                 var context = services.GetRequiredService<ApplicationDbContext>();
                 await context.Database.MigrateAsync();
                 
+                // Kullanılmayan izinleri temizle
+                await CleanupUnusedPermissionsAsync(context, services.GetRequiredService<ILogger<ApplicationDbContext>>());
+                
                 await SeedPermissionsAsync(context);
                 await SeedRolesAsync(context);
                 await SeedUsersAsync(context, services);
@@ -35,6 +38,106 @@ namespace Stock.Infrastructure.Data
                 logger.LogError(ex, "Seed data oluşturulurken bir hata oluştu.");
                 throw;
             }
+        }
+
+        // Kullanılmayan izinleri temizleyen metot
+        private static async Task CleanupUnusedPermissionsAsync(ApplicationDbContext context, ILogger logger)
+        {
+            try
+            {
+                logger.LogInformation("Kullanılmayan sayfa izinleri temizleniyor...");
+
+                // Reports sayfası izinleri
+                var reportsPermission = await context.Permissions.FirstOrDefaultAsync(p => p.Name == "Pages.Reports");
+                if (reportsPermission != null)
+                {
+                    await RemovePermissionAsync(context, reportsPermission.Id, "Pages.Reports", logger);
+                }
+
+                // Settings sayfası izinleri
+                var settingsPermission = await context.Permissions.FirstOrDefaultAsync(p => p.Name == "Pages.Settings");
+                if (settingsPermission != null)
+                {
+                    await RemovePermissionAsync(context, settingsPermission.Id, "Pages.Settings", logger);
+                }
+
+                // StockManagement sayfası izinleri
+                var stockManagementPermission = await context.Permissions.FirstOrDefaultAsync(p => p.Name == "Pages.StockManagement");
+                if (stockManagementPermission != null)
+                {
+                    await RemovePermissionAsync(context, stockManagementPermission.Id, "Pages.StockManagement", logger);
+                }
+
+                // Stok Yönetimi grubundaki tüm izinler
+                var stockPermissions = await context.Permissions.Where(p => p.Group == "Stok Yönetimi").ToListAsync();
+                foreach (var permission in stockPermissions)
+                {
+                    await RemovePermissionAsync(context, permission.Id, permission.Name, logger);
+                }
+
+                // Revir sayfası izinleri
+                var revirPermissions = await context.Permissions.Where(p => p.Name.StartsWith("Pages.Revir")).ToListAsync();
+                foreach (var permission in revirPermissions)
+                {
+                    await RemovePermissionAsync(context, permission.Id, permission.Name, logger);
+                }
+
+                // BilgiIslem sayfası izinleri
+                var bilgiIslemPermissions = await context.Permissions.Where(p => p.Name.StartsWith("Pages.BilgiIslem")).ToListAsync();
+                foreach (var permission in bilgiIslemPermissions)
+                {
+                    await RemovePermissionAsync(context, permission.Id, permission.Name, logger);
+                }
+
+                // Eğitim sayfası izinleri
+                var egitimPermissions = await context.Permissions.Where(p => p.Name.StartsWith("Pages.Egitim")).ToListAsync();
+                foreach (var permission in egitimPermissions)
+                {
+                    await RemovePermissionAsync(context, permission.Id, permission.Name, logger);
+                }
+
+                logger.LogInformation("Kullanılmayan sayfa izinleri başarıyla temizlendi.");
+            }
+            catch (Exception ex)
+            {
+                logger.LogError(ex, "İzinler temizlenirken bir hata oluştu");
+                throw;
+            }
+        }
+
+        private static async Task RemovePermissionAsync(ApplicationDbContext context, int permissionId, string permissionName, ILogger logger)
+        {
+            // Kullanıcı izinlerini temizle
+            var userPermissions = await context.Set<Domain.Entities.UserPermission>()
+                .Where(up => up.PermissionId == permissionId)
+                .ToListAsync();
+            
+            if (userPermissions.Any())
+            {
+                context.RemoveRange(userPermissions);
+                logger.LogInformation($"'{permissionName}' ile ilişkili {userPermissions.Count} kullanıcı izni kaldırıldı.");
+            }
+
+            // Rol izinlerini temizle
+            var rolePermissions = await context.Set<Domain.Entities.RolePermission>()
+                .Where(rp => rp.PermissionId == permissionId)
+                .ToListAsync();
+            
+            if (rolePermissions.Any())
+            {
+                context.RemoveRange(rolePermissions);
+                logger.LogInformation($"'{permissionName}' ile ilişkili {rolePermissions.Count} rol izni kaldırıldı.");
+            }
+
+            // İzni sil
+            var permission = await context.Permissions.FindAsync(permissionId);
+            if (permission != null)
+            {
+                context.Permissions.Remove(permission);
+                logger.LogInformation($"'{permissionName}' izni kaldırıldı.");
+            }
+
+            await context.SaveChangesAsync();
         }
 
         private static async Task SeedPermissionsAsync(ApplicationDbContext context)

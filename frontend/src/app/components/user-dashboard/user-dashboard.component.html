@@ -12,28 +12,39 @@
   <div class="glass-card">
     <div class="header">
       <div class="header-title">
-        <h1>Merhaba, {{ username }}</h1>
+        <h1>Kullanıcı Paneli</h1>
+        <p class="welcome-text">Hoş geldiniz, <span class="username">{{ username }}</span></p>
       </div>
-      <div class="header-buttons">
-        <p-button 
-          label="Şifre Değiştir"
-          icon="pi pi-key"
-          (onClick)="togglePasswordChange()"
-          [styleClass]="showPasswordChange ? 'p-button-text p-button-warning' : 'p-button-text p-button-help'">
-        </p-button>
-        <p-button 
-          label="Çıkış Yap"
-          icon="pi pi-sign-out"
-          styleClass="p-button-text p-button-danger"
-          (onClick)="logout()">
-        </p-button>
+      <div class="admin-dropdown">
+        <div class="admin-button" (click)="toggleAdminMenu($event)">
+          <img [src]="profileImageUrl" alt="Profil" class="admin-avatar" onerror="this.src='assets/images/default-avatar.png'">
+          <span class="admin-name">{{ username }}</span>
+          <i class="pi" [ngClass]="{'pi-chevron-down': !showAdminMenu, 'pi-chevron-up': showAdminMenu}"></i>
+        </div>
+        <div class="admin-menu" *ngIf="showAdminMenu">
+          <div class="menu-header">
+            <img [src]="profileImageUrl" alt="Profil" class="menu-avatar" onerror="this.src='assets/images/default-avatar.png'">
+            <div class="menu-user-info">
+              <span class="menu-username">{{ username }}</span>
+              <span class="menu-role">Kullanıcı</span>
+            </div>
+          </div>
+          <div class="menu-item" (click)="showPasswordChange = true; showAdminMenu = false;">
+            <i class="pi pi-key"></i>
+            <span>Şifre Değiştir</span>
+          </div>
+          <div class="menu-item logout" (click)="logout()">
+            <i class="pi pi-sign-out"></i>
+            <span>Çıkış</span>
+          </div>
+        </div>
       </div>
     </div>
 
-    <div class="password-change-form" *ngIf="showPasswordChange">
-      <div class="password-form-header">
+    <div class="password-change-form" *ngIf="showPasswordChange" cdkDrag cdkDragBoundary=".dashboard-container">
+      <div class="password-form-header" cdkDragHandle>
         <h2>Şifre Değiştir</h2>
-        <button class="close-button" (click)="togglePasswordChange()">
+        <button class="close-button" (click)="showPasswordChange = false">
           <i class="pi pi-times"></i>
         </button>
       </div>
@@ -73,64 +84,20 @@
         </div>
         <div class="password-actions">
           <button pButton class="p-button-sm p-button-primary change-button" label="Değiştir" icon="pi pi-check" (click)="changePassword()"></button>
-          <button pButton class="p-button-sm p-button-outlined p-button-secondary cancel-button" label="İptal" icon="pi pi-times" (click)="togglePasswordChange()"></button>
+          <button pButton class="p-button-sm p-button-outlined p-button-secondary cancel-button" label="İptal" icon="pi pi-times" (click)="showPasswordChange = false"></button>
         </div>
       </div>
     </div>
 
-    <div class="grid">
-      <div class="col-12 md:col-6 lg:col-3">
-        <div class="surface-card shadow-2 p-3 border-round cursor-pointer" (click)="navigateToInventory()">
-          <div class="flex justify-content-between mb-3">
-            <div>
-              <span class="block text-500 font-medium mb-3">Envanter</span>
-              <div class="text-900 font-medium text-xl">Bilgisayarlar</div>
-            </div>
-            <div class="flex align-items-center justify-content-center bg-blue-100 border-round" style="width:2.5rem;height:2.5rem">
-              <i class="pi pi-desktop text-blue-500 text-xl"></i>
-            </div>
+    <div class="main-content">
+      <div class="admin-modules">
+        <div class="admin-card user-management-card" (click)="navigateToIT()">
+          <div class="card-icon">
+            <i class="pi pi-desktop"></i>
           </div>
-        </div>
-      </div>
-
-      <div class="col-12 md:col-6 lg:col-3">
-        <div class="surface-card shadow-2 p-3 border-round cursor-pointer" (click)="navigateToConsumables()">
-          <div class="flex justify-content-between mb-3">
-            <div>
-              <span class="block text-500 font-medium mb-3">Stok</span>
-              <div class="text-900 font-medium text-xl">Sarf Malzemeleri</div>
-            </div>
-            <div class="flex align-items-center justify-content-center bg-green-100 border-round" style="width:2.5rem;height:2.5rem">
-              <i class="pi pi-box text-green-500 text-xl"></i>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div class="col-12 md:col-6 lg:col-3">
-        <div class="surface-card shadow-2 p-3 border-round cursor-pointer" (click)="navigateToTasks()">
-          <div class="flex justify-content-between mb-3">
-            <div>
-              <span class="block text-500 font-medium mb-3">Görevler</span>
-              <div class="text-900 font-medium text-xl">Aktif Görevler</div>
-            </div>
-            <div class="flex align-items-center justify-content-center bg-orange-100 border-round" style="width:2.5rem;height:2.5rem">
-              <i class="pi pi-check-square text-orange-500 text-xl"></i>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div class="col-12 md:col-6 lg:col-3">
-        <div class="surface-card shadow-2 p-3 border-round cursor-pointer">
-          <div class="flex justify-content-between mb-3">
-            <div>
-              <span class="block text-500 font-medium mb-3">Yardım</span>
-              <div class="text-900 font-medium text-xl">Destek</div>
-            </div>
-            <div class="flex align-items-center justify-content-center bg-purple-100 border-round" style="width:2.5rem;height:2.5rem">
-              <i class="pi pi-question-circle text-purple-500 text-xl"></i>
-            </div>
+          <div class="card-content">
+            <h3>BİLGİ İŞLEM</h3>
+            <p>Bilgi işlem modülüne erişim sağlayın</p>
           </div>
         </div>
       </div>

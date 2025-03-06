@@ -170,3 +170,88 @@ _logger.LogInformation($"Şifre başarıyla değiştirildi - Kullanıcı ID: {us
 - Hash algoritmasının tüm sistemde aynı olması
 - Yeterli loglama yapılması
 - Migration'ların temiz tutulması
+
+# Yetkilendirme ve Kullanıcı Dashboard Erişimi Knowledge Base
+
+## Genel Bakış
+Bu belge, sistem giriş işlemi, kullanıcıların yönlendirilmesi ve sayfa erişim izinleriyle ilgili uygulamanın davranışını açıklar. İlgili bileşenler, karşılaşılan sorunlar ve çözümleri içerir.
+
+## Giriş İşlemi
+1. Kullanıcı, sicil numarası ve şifresini girerek `/login` sayfasından giriş yapar.
+2. İstek, `AuthService` aracılığıyla backend API'sine gönderilir.
+3. Backend, kullanıcıyı veritabanında arar ve şifreyi doğrular.
+4. Doğrulama başarılı olursa, kullanıcı bilgileri ve izinleri içeren bir JWT token üretilir.
+5. Frontend, token'ı localStorage'a kaydeder ve kullanıcı bilgilerini `currentUserSubject` üzerinden yayınlar.
+6. Frontend, kullanıcı rolüne göre `/admin-dashboard` veya `/user-dashboard` sayfasına yönlendirme yapar.
+
+## Token İçeriği
+JWT token, aşağıdaki bilgileri içerir:
+- `nameid`: Kullanıcı ID'si
+- `unique_name`: Kullanıcı adı
+- `sicil`: Kullanıcı sicil numarası
+- `role`: Kullanıcı rolü ("Admin" veya "User")
+- `Permission`: Kullanıcının sahip olduğu izin listesi
+
+## Sayfa Erişim Mekanizması
+1. Angular uygulamasında, `app.routes.ts` içinde rota tanımlamaları yapılır.
+2. Her rota için `canActivate: [AuthGuard]` ve `data: { requiredPermission: 'PermissionName' }` şeklinde izin tanımları yapılır.
+3. `AuthGuard`, `AuthService.hasPermission()` metodunu kullanarak kullanıcının ilgili sayfaya erişim iznini kontrol eder.
+4. İzin yoksa, kullanıcı rolüne göre uygun sayfaya yönlendirilir.
+
+## Karşılaşılan Zorluklar ve Çözümleri
+
+### Sorun: Kullanıcılar Dashboard Erişimi
+Standart kullanıcı rolüne sahip kullanıcılar, "Pages.UserDashboard" izni verilmediği için kullanıcı dashboard sayfasına erişemiyordu.
+
+**Çözüm:**
+- `AuthGuard` sınıfında özel bir durum eklendi: `/user-dashboard` rotası için izin kontrolü bypass edildi.
+- Üç farklı yerde izin kontrolü eklemesi yapıldı:
+  1. URL kontrolü
+  2. Route data kontrolü
+  3. PagePermissionMap kontrolü
+
+```typescript
+// Özel durum: user-dashboard sayfası için izin kontrolünü bypass et
+if (url === '/user-dashboard') {
+  return true;
+}
+
+// ...
+
+// Özel durum: user-dashboard sayfası için izin kontrolünü bypass et
+if (requiredPermission === 'Pages.UserDashboard') {
+  return true;
+}
+
+// ...
+
+// Özel durum: user-dashboard sayfası için izin kontrolünü bypass et
+if (pagePermission === 'Pages.UserDashboard') {
+  return true;
+}
+```
+
+### Sorun: Token'dan İzinlerin Yüklenmesi
+Kullanıcı giriş yaptığında token'dan izinlerin yüklenmesi unutulmuştu.
+
+**Çözüm:**
+- `AuthService.login()` metoduna izinleri yükleme kodu eklendi:
+```typescript
+// İzinleri yükle
+this.permissions = decodedToken.Permission || [];
+```
+
+## İleride Yapılabilecek İyileştirmeler
+1. Backend'de standart kullanıcı rolüne "Pages.UserDashboard" izninin eklenmesi
+2. `IPermissionService.GetPermissionsByRoleIdAsync()` metodunda performans iyileştirmesi
+3. Frontend'de token yenilemesi (refresh token) mekanizmasının eklenmesi
+4. İzinlerin cache'lenmesi ve daha etkin kullanımı
+5. Sayfa yükleniyor göstergesi eklenmesi
+
+## Önerilen İzin Yapısı
+- Admin rolü: Tüm izinlere sahip
+- User rolü: En azından aşağıdaki izinlere sahip olmalı
+  - Pages.UserDashboard
+  - Dashboard.View
+  - Pages.BilgiIslem.View (kullanıcının BİLGİ İŞLEM modülüne erişebilmesi için)
+  - Stock.Read

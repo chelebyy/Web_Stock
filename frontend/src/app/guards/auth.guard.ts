@@ -35,9 +35,19 @@ export class AuthGuard implements CanActivate {
       return false;
     }
 
+    // Özel durum: user-dashboard sayfası için izin kontrolünü bypass et
+    if (url === '/user-dashboard') {
+      return true;
+    }
+
     // Route data'sında izin belirtilmişse kontrol et
     if (route.data['requiredPermission']) {
       const requiredPermission = route.data['requiredPermission'];
+      
+      // Özel durum: user-dashboard sayfası için izin kontrolünü bypass et
+      if (requiredPermission === 'Pages.UserDashboard') {
+        return true;
+      }
       
       if (!this.authService.hasPermission(requiredPermission)) {
         console.log(`Erişim reddedildi: '${requiredPermission}' izni yok`);
@@ -50,6 +60,11 @@ export class AuthGuard implements CanActivate {
     // Sayfa yoluna göre izin kontrolü
     const pagePermission = this.pagePermissionMap[url];
     if (pagePermission) {
+      // Özel durum: user-dashboard sayfası için izin kontrolünü bypass et
+      if (pagePermission === 'Pages.UserDashboard') {
+        return true;
+      }
+      
       if (!this.authService.hasPermission(pagePermission)) {
         console.log(`Erişim reddedildi: '${pagePermission}' izni yok`);
         

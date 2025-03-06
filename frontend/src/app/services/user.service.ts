@@ -162,4 +162,28 @@ export class UserService {
     const options = { headers: this.getHeaders() };
     return this.http.delete<void>(`${this.apiUrl}/Users/${id}`, options);
   }
+
+  /**
+   * Kullanıcının profil resmini getirir
+   * @param userId Kullanıcı ID
+   * @returns Profil resmi blob verisi
+   */
+  getUserProfilePicture(userId: number): Observable<Blob> {
+    return this.http.get(`${this.apiUrl}/users/${userId}/profile-picture`, {
+      responseType: 'blob'
+    });
+  }
+
+  /**
+   * Kullanıcının profil resmini günceller
+   * @param userId Kullanıcı ID
+   * @param file Profil resmi dosyası
+   * @returns API yanıtı
+   */
+  updateProfilePicture(userId: number, file: File): Observable<any> {
+    const formData = new FormData();
+    formData.append('file', file);
+    
+    return this.http.post(`${this.apiUrl}/users/${userId}/profile-picture`, formData);
+  }
 }

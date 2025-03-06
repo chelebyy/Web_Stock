@@ -26,6 +26,8 @@
 - API endpoint'leri büyük/küçük harf duyarlılığı düzeltildi
 - Kullanıcı güncelleme sırasındaki ID uyuşmazlığı hatası çözüldü
 - Ortamlar arası geçiş sürecinde veri tutarsızlıklarını önlemek için mekanizma eklendi
+- Kullanıcı dashboard sayfası sadeleştirildi ve BİLGİ İŞLEM butonu eklendi
+- Kullanıcı dashboard sayfasında izin kontrolü sorunu çözüldü (Pages.UserDashboard izni olmayan kullanıcılar artık dahboard'a erişebiliyor)
 
 ## Clean Architecture Geçişi
 
@@ -101,8 +103,9 @@
   - [x] Frontend başlatma sorunları çözüldü
 
 ### Planlanan Görevler
-- [ ] **Frontend Geliştirmesinin Devamı**
-  - [ ] Kullanıcı Dashboard bileşeninin geliştirilmesi
+- [x] **Frontend Geliştirmesinin Devamı**
+  - [x] Kullanıcı Dashboard bileşeninin geliştirilmesi
+  - [x] Kullanıcı Dashboard erişim sorunlarının çözümü
   - [ ] Diğer bileşenlerin oluşturulması
   - [ ] Service'lerin implementasyonu
   - [ ] Frontend adaptasyonunu tamamlamak
@@ -154,6 +157,8 @@
 - Kullanıcı rolüne göre farklı dashboard'ların yönetilmesi
 - PowerShell'de komutları birleştirmek için ; (noktalı virgül) kullanılmalı
 - Port çakışması durumunda farklı bir port kullanılabilir
+- Kullanıcı dashboard sayfasını sadeleştirirken mevcut şifre değiştirme ve çıkış özelliklerini korumak önemli
+- İzin kontrolü ve yetkilendirme sistemi, kullanıcı deneyimini doğrudan etkileyen kritik bir bileşendir
 
 ### Hata Yönetimi
 - Konsol loglarının detaylı tutulması hata tespitini kolaylaştırıyor
@@ -174,6 +179,13 @@
 - Veritabanı durumunu uyumlu tutmak için görev listesi oluşturmak gereklidir
 - Migration sorunlarında temiz başlangıç yapmak bazen en iyi çözümdür
 
+### İzin Yönetimi ve Yetkilendirme
+- Yetkilendirme sistemi, bir uygulamanın güvenliği için kritik bir bileşendir
+- Backend ve frontend arasındaki izin kontrollerinin senkronize olması gerekir
+- İzinleri token içinde taşımak, her istekte tekrar izin sorgusu yapma ihtiyacını ortadan kaldırır
+- Kritik sayfalar için izin kontrolünü bypass etmekten kaçınmak gerekir, ancak kullanıcı deneyimi için bazen özel durumlar eklenebilir
+- İzin yapısını belgelendirmek ve düzenli olarak gözden geçirmek gerekir
+
 ## Zaman Çizelgesi
 - **Domain Katmanı**: Tamamlandı
 - **Application Katmanı**: Tamamlandı
@@ -186,7 +198,7 @@
 
 **Toplam Kalan Süre**: ~11-14 gün
 
-## Güncel Durum (3 Haziran 2025)
+## Güncel Durum (6 Haziran 2025)
 - Backend API sorunsuz çalışıyor (http://localhost:5037)
 - Frontend uygulaması sorunsuz çalışıyor (http://localhost:4202)
 - Kullanıcı güncelleme sırasındaki ID uyuşmazlığı hatası çözüldü
@@ -194,9 +206,13 @@
 - Errors.md ve system_startup_guide.md dosyaları güncellendi
 - API isteklerinde hata mesajları daha açıklayıcı hale getirildi
 - HTTP durum kodları ve loglamalar iyileştirildi
+- Kullanıcı dashboard sayfası sadeleştirildi ve BİLGİ İŞLEM butonu eklendi
+- Kullanıcı dashboard sayfasının belgeleri knowledge-base/user_dashboard_knowledge_base.md dosyasına eklendi
+- Kullanıcıların dashboard erişim sorunu çözüldü, yeni knowledge base dosyası oluşturuldu: knowledge-base/auth_knowledge_base.md
 
 ## Gelecek Adımlar
 1. GitHub'a son değişiklikleri push etmek
 2. Sistem başlatma rehberini tam olarak test etmek
 3. Kullanıcı yönetimi ve rol yönetimi sayfalarının tam olarak test edilmesi
 4. Geriye kalan frontend komponentlerinin geliştirilmesi
+5. Backend'de kullanıcı rolü izinlerini güncelleyerek kalıcı çözüm sağlamak
