@@ -91,13 +91,23 @@
 
     <div class="main-content">
       <div class="admin-modules">
-        <div class="admin-card user-management-card" (click)="navigateToIT()" *hasPermission="'IT.Access'">
+        <div class="admin-card" (click)="navigateToIT()">
           <div class="card-icon">
             <i class="pi pi-desktop"></i>
           </div>
           <div class="card-content">
             <h3>BİLGİ İŞLEM</h3>
             <p>Bilgi işlem modülüne erişim sağlayın</p>
+          </div>
+        </div>
+
+        <div class="admin-card" (click)="navigateToMedical()">
+          <div class="card-icon medical-icon">
+            <i class="pi pi-heart"></i>
+          </div>
+          <div class="card-content">
+            <h3>REVİR</h3>
+            <p>Revir modülüne erişim sağlayın</p>
           </div>
         </div>
       </div>

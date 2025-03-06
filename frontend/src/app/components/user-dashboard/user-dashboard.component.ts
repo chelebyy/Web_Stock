@@ -251,6 +251,16 @@ export class UserDashboardComponent implements OnInit {
     }
   }
 
+  navigateToMedical(): void {
+    this.router.navigate(['/medical']);
+    
+    // Aktivitelere ekle
+    this.recentActivities.unshift({ action: 'Revir modülüne erişildi', date: new Date() });
+    if (this.recentActivities.length > 5) {
+      this.recentActivities.pop();
+    }
+  }
+
   logout(): void {
     this.authService.logout();
     this.router.navigate(['/login']);
