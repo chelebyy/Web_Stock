@@ -109,17 +109,21 @@ namespace Stock.Infrastructure.Services
                 var passwordHash = _passwordHasher.HashPassword(registerDto.Password);
                 _logger.LogInformation($"Şifre hash'lendi: {registerDto.Username}, Hash: {passwordHash}");
 
+                // IsAdmin değerini sadece RoleId=1 (Admin rolü) olduğunda true yap
+                bool isAdmin = registerDto.RoleId.HasValue && registerDto.RoleId.Value == 1;
+                _logger.LogInformation($"Kullanıcı admin durumu: {isAdmin}, RoleId: {registerDto.RoleId}");
+
                 var user = new User
                 {
                     Username = registerDto.Username,
                     PasswordHash = passwordHash,
-                    IsAdmin = false,
+                    IsAdmin = isAdmin, // Hesaplanmış isAdmin değerini kullan
                     RoleId = registerDto.RoleId
                 };
 
                 await _unitOfWork.Users.AddAsync(user);
                 await _unitOfWork.SaveChangesAsync();
-                _logger.LogInformation($"Kullanıcı kaydedildi: {registerDto.Username}, ID: {user.Id}");
+                _logger.LogInformation($"Kullanıcı kaydedildi: {registerDto.Username}, ID: {user.Id}, IsAdmin: {user.IsAdmin}");
 
                 var token = _tokenGenerator.GenerateToken(user);
                 _logger.LogInformation($"Token üretildi: {registerDto.Username}");

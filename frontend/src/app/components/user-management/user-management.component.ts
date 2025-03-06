@@ -316,18 +316,10 @@ export class UserManagementComponent implements OnInit {
         },
         error: (error) => {
           console.error('Kullanıcı güncellenirken hata oluştu:', error);
-          let errorMessage = this.editMode 
-            ? 'Kullanıcı güncellenirken bir hata oluştu' 
-            : 'Kullanıcı oluşturulurken bir hata oluştu';
-          
-          if (error.error && error.error.error) {
-            errorMessage = `Hata: ${error.error.error}`;
-          }
-          
           this.messageService.add({
             severity: 'error',
             summary: 'Hata',
-            detail: errorMessage,
+            detail: error.message || 'Kullanıcı güncellenirken bir hata oluştu',
             life: 5000
           });
         }
@@ -353,19 +345,13 @@ export class UserManagementComponent implements OnInit {
         },
         error: (error) => {
           console.error('Kullanıcı işlemi sırasında hata oluştu:', error);
-          let errorMessage = this.editMode 
-            ? 'Kullanıcı güncellenirken bir hata oluştu' 
-            : 'Kullanıcı oluşturulurken bir hata oluştu';
           
-          if (error.error && error.error.error) {
-            errorMessage = `Hata: ${error.error.error}`;
-          }
-          
+          // Hata mesajını göster (throwError ile oluşturulan Error nesnesinin message özelliği)
           this.messageService.add({
             severity: 'error',
             summary: 'Hata',
-            detail: errorMessage,
-            life: 5000
+            detail: error.message || (this.editMode ? 'Kullanıcı güncellenirken bir hata oluştu' : 'Kullanıcı oluşturulurken bir hata oluştu'),
+            life: 7000
           });
         }
       });

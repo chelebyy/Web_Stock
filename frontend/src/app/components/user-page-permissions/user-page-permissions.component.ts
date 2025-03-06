@@ -50,41 +50,59 @@ interface PermissionGroup {
   ],
   providers: [MessageService],
   template: `
-    <div class="card">
-      <div class="card-header">
-        <div class="d-flex justify-content-between align-items-center">
-          <h2>Kullanıcı Sayfa İzinleri</h2>
-          <button pButton pRipple icon="pi pi-arrow-left" label="Geri Dön" 
-                  class="p-button-outlined" (click)="goBack()"></button>
+    <div class="page-container">
+      <div class="page-header">
+        <div class="title-container">
+          <h1 class="page-title">Kullanıcı Sayfa İzinleri</h1>
+          <p class="text-muted user-info" *ngIf="userName">
+            <span class="user-label">Kullanıcı:</span> 
+            <span class="user-name">{{ userName }}</span>
+          </p>
         </div>
-        <p class="text-muted" *ngIf="userName">Kullanıcı: {{ userName }}</p>
+        <button pButton pRipple icon="pi pi-arrow-left" label="Geri Dön" 
+                class="p-button-outlined back-button" (click)="goBack()"></button>
       </div>
       
-      <div class="card-body">
-        <p-progressSpinner *ngIf="loading" styleClass="w-4rem h-4rem" 
-                          strokeWidth="8" fill="var(--surface-ground)" 
+      <div class="content-card">
+        <div class="loading-container" *ngIf="loading">
+          <p-progressSpinner strokeWidth="4" 
+                          fill="var(--surface-ground)" 
                           animationDuration=".5s"></p-progressSpinner>
+          <p class="loading-text">İzinler yükleniyor...</p>
+        </div>
         
-        <div *ngIf="!loading">
-          <p-accordion [multiple]="true">
-            <p-accordionTab *ngFor="let group of permissionGroups" [header]="group.group">
+        <div class="permissions-container" *ngIf="!loading">
+          <div class="info-panel">
+            <div class="info-icon">
+              <i class="pi pi-info-circle"></i>
+            </div>
+            <div class="info-text">
+              Bu sayfada kullanıcının erişebileceği sayfaları belirleyebilirsiniz. İzin vermek istediğiniz sayfaları işaretleyip "Kaydet" butonuna tıklayınız.
+            </div>
+          </div>
+
+          <p-accordion [multiple]="true" styleClass="custom-accordion">
+            <p-accordionTab *ngFor="let group of permissionGroups" [header]="group.group" styleClass="permission-group">
               <div class="permission-list">
                 <div class="permission-item" *ngFor="let permission of group.permissions">
-                  <p-checkbox [(ngModel)]="permission.isGranted" 
-                              [binary]="true" 
-                              [label]="permission.description || permission.name">
-                  </p-checkbox>
-                  <small class="permission-name">{{ permission.name }}</small>
+                  <div class="permission-content">
+                    <p-checkbox [(ngModel)]="permission.isGranted" 
+                                [binary]="true" 
+                                [label]="permission.description || permission.name"
+                                styleClass="custom-checkbox">
+                    </p-checkbox>
+                    <small class="permission-name">{{ permission.name }}</small>
+                  </div>
                 </div>
               </div>
             </p-accordionTab>
           </p-accordion>
           
-          <div class="button-container mt-4">
+          <div class="action-buttons">
             <button pButton pRipple label="Kaydet" icon="pi pi-check" 
-                    class="p-button-success" (click)="savePermissions()"></button>
+                    class="p-button-success save-button" (click)="savePermissions()"></button>
             <button pButton pRipple label="Rol İzinlerine Sıfırla" icon="pi pi-refresh" 
-                    class="p-button-secondary ml-2" (click)="resetToRolePermissions()"></button>
+                    class="p-button-secondary reset-button" (click)="resetToRolePermissions()"></button>
           </div>
         </div>
       </div>
@@ -93,6 +111,159 @@ interface PermissionGroup {
     <p-toast position="top-right"></p-toast>
   `,
   styles: [`
+    .page-container {
+      padding: 2rem;
+      background-color: var(--surface-ground);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      gap: 1.5rem;
+    }
+    
+    .page-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1rem;
+    }
+    
+    .title-container {
+      display: flex;
+      flex-direction: column;
+    }
+    
+    .page-title {
+      font-size: 2rem;
+      font-weight: 700;
+      color: #1e3a8a;
+      margin: 0;
+      margin-bottom: 0.5rem;
+      position: relative;
+    }
+    
+    .page-title::after {
+      content: '';
+      position: absolute;
+      bottom: -10px;
+      left: 0;
+      width: 60px;
+      height: 4px;
+      background: linear-gradient(90deg, #3B82F6, #60a5fa);
+      border-radius: 4px;
+    }
+    
+    .user-info {
+      margin-top: 1.25rem;
+      font-size: 1.1rem;
+      color: #64748b;
+    }
+    
+    .user-label {
+      font-weight: 600;
+    }
+    
+    .user-name {
+      font-weight: 500;
+      color: #334155;
+    }
+    
+    .back-button {
+      transition: all 0.2s ease;
+      border-radius: 8px;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+      border: 1px solid #e2e8f0;
+    }
+    
+    .back-button:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+      background-color: #f8fafc;
+    }
+    
+    .content-card {
+      background-color: white;
+      border-radius: 12px;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+      padding: 2rem;
+      transition: all 0.3s ease;
+    }
+    
+    .content-card:hover {
+      box-shadow: 0 8px 15px rgba(0, 0, 0, 0.08);
+    }
+    
+    .loading-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 3rem;
+    }
+    
+    .loading-text {
+      margin-top: 1rem;
+      color: #64748b;
+      font-size: 1.1rem;
+    }
+    
+    .info-panel {
+      display: flex;
+      gap: 1rem;
+      padding: 1rem;
+      background-color: #eff6ff;
+      border-left: 4px solid #3b82f6;
+      border-radius: 8px;
+      margin-bottom: 1.5rem;
+      align-items: center;
+    }
+    
+    .info-icon {
+      font-size: 1.5rem;
+      color: #3b82f6;
+    }
+    
+    .info-text {
+      color: #334155;
+      font-size: 0.95rem;
+      line-height: 1.5;
+    }
+    
+    .permissions-container {
+      display: flex;
+      flex-direction: column;
+      gap: 1.5rem;
+    }
+    
+    :host ::ng-deep .custom-accordion .p-accordion-header a {
+      background-color: #f8fafc;
+      color: #1e3a8a;
+      font-weight: 600;
+      padding: 1.25rem;
+      border-radius: 8px;
+      transition: all 0.2s ease;
+    }
+    
+    :host ::ng-deep .custom-accordion .p-accordion-header:not(.p-disabled).p-highlight a {
+      background-color: #eff6ff;
+      border-color: #bfdbfe;
+    }
+    
+    :host ::ng-deep .custom-accordion .p-accordion-header:not(.p-disabled) a:hover {
+      background-color: #eff6ff;
+    }
+    
+    :host ::ng-deep .custom-accordion .p-accordion-header-icon {
+      color: #3b82f6;
+    }
+    
+    :host ::ng-deep .custom-accordion .p-accordion-content {
+      background-color: #ffffff;
+      border: 1px solid #e2e8f0;
+      border-top: none;
+      border-radius: 0 0 8px 8px;
+      padding: 1.5rem;
+    }
+    
     .permission-list {
       display: flex;
       flex-wrap: wrap;
@@ -101,32 +272,114 @@ interface PermissionGroup {
     
     .permission-item {
       flex: 1 1 300px;
-      padding: 0.5rem;
-      border: 1px solid #f0f0f0;
-      border-radius: 4px;
-      background-color: #fafafa;
+      padding: 1rem;
+      border: 1px solid #e2e8f0;
+      border-radius: 8px;
+      background-color: #f8fafc;
+      transition: all 0.2s ease;
+    }
+    
+    .permission-item:hover {
+      background-color: #eff6ff;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+    }
+    
+    .permission-content {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+    
+    :host ::ng-deep .custom-checkbox .p-checkbox-box {
+      border: 2px solid #cbd5e1;
+    }
+    
+    :host ::ng-deep .custom-checkbox .p-checkbox-box.p-highlight {
+      background-color: #3b82f6;
+      border-color: #3b82f6;
     }
     
     .permission-name {
       display: block;
-      color: #666;
-      margin-top: 0.25rem;
+      color: #64748b;
       font-size: 0.8rem;
+      padding-left: 1.75rem;
     }
     
-    .button-container {
-      margin-top: 1rem;
+    .action-buttons {
       display: flex;
       justify-content: flex-end;
-      gap: 0.5rem;
+      gap: 1rem;
+      margin-top: 2rem;
+      padding-top: 1.5rem;
+      border-top: 1px solid #f1f5f9;
     }
     
-    .ml-2 {
-      margin-left: 0.5rem;
+    .save-button {
+      background: linear-gradient(135deg, #22c55e, #16a34a);
+      border: none;
+      box-shadow: 0 4px 6px rgba(22, 163, 74, 0.2);
+      border-radius: 8px;
+      font-weight: 600;
+      padding: 0.75rem 1.5rem;
+      transition: all 0.3s ease;
     }
     
-    .mt-4 {
-      margin-top: 1rem;
+    .save-button:hover {
+      background: linear-gradient(135deg, #16a34a, #15803d);
+      transform: translateY(-2px);
+      box-shadow: 0 6px 10px rgba(22, 163, 74, 0.25);
+    }
+    
+    .reset-button {
+      background-color: #f8fafc;
+      color: #64748b;
+      border: 1px solid #e2e8f0;
+      border-radius: 8px;
+      font-weight: 600;
+      padding: 0.75rem 1.5rem;
+      transition: all 0.3s ease;
+    }
+    
+    .reset-button:hover {
+      background-color: #f1f5f9;
+      color: #475569;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+    }
+    
+    @media (max-width: 768px) {
+      .page-container {
+        padding: 1rem;
+      }
+      
+      .page-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 1rem;
+      }
+      
+      .back-button {
+        align-self: flex-start;
+      }
+      
+      .content-card {
+        padding: 1rem;
+      }
+      
+      .permission-item {
+        flex: 1 1 100%;
+      }
+      
+      .action-buttons {
+        flex-direction: column;
+        gap: 1rem;
+      }
+      
+      .save-button, .reset-button {
+        width: 100%;
+      }
     }
   `]
 })

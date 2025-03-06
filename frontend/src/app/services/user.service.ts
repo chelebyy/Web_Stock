@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
-import { Observable, of } from 'rxjs';
+import { Observable, of, throwError } from 'rxjs';
 import { catchError, map } from 'rxjs/operators';
 import { User } from '../models/user.model';
 import { CreateUserRequest } from '../models/auth.model';
@@ -139,6 +139,7 @@ export class UserService {
   }
 
   createUser(user: User): Observable<any> {
+    // Gönderilecek veriyi hazırla
     const createUserRequest: CreateUserRequest = {
       username: user.username,
       password: user.password || user.passwordHash || '', // Önce password, yoksa passwordHash kullan
@@ -146,11 +147,68 @@ export class UserService {
       isAdmin: user.isAdmin
     };
     
+    // Veriyi göndermeden önce kontrol et
+    // Temel doğrulamalar
+    if (!createUserRequest.username || createUserRequest.username.trim() === '') {
+      return throwError(() => new Error('Kullanıcı adı boş olamaz'));
+    }
+    
+    if (!createUserRequest.password || createUserRequest.password.trim() === '') {
+      return throwError(() => new Error('Şifre boş olamaz'));
+    }
+    
+    if (!createUserRequest.sicil || createUserRequest.sicil.trim() === '') {
+      return throwError(() => new Error('Sicil numarası boş olamaz'));
+    }
+    
     // Kontrol amaçlı log
     console.log('Gönderilen kullanıcı verisi:', createUserRequest);
     
     const options = { headers: this.getHeaders() };
-    return this.http.post<any>(`${this.apiUrl}/auth/create-user`, createUserRequest, options);
+    return this.http.post<any>(`${this.apiUrl}/auth/create-user`, createUserRequest, options)
+      .pipe(
+        catchError(error => {
+          console.error('Kullanıcı oluşturma hatası:', error);
+          
+          // Hata mesajını düzenle
+          let errorMessage = 'Kullanıcı oluşturulurken bir hata oluştu';
+          let errorField = '';
+          
+          if (error.error) {
+            // API'den gelen hata mesajını kullan
+            if (error.error.error) {
+              errorMessage = error.error.error;
+            }
+            
+            // Alan bilgisi varsa kaydet
+            if (error.error.field) {
+              errorField = error.error.field;
+            }
+            
+            // Sicil numarası çakışma hatası için özel mesaj
+            if (error.error.code === 'DuplicateSicil') {
+              errorMessage = `Sicil numarası '${user.sicil}' zaten kullanımda. Lütfen farklı bir sicil numarası girin.`;
+              errorField = 'sicil';
+            }
+          }
+          
+          // HTTP durum kodu kontrolü
+          if (error.status === 401) {
+            errorMessage = 'Oturum süresi dolmuş veya yetkiniz yok. Lütfen tekrar giriş yapın.';
+          } else if (error.status === 403) {
+            errorMessage = 'Bu işlemi gerçekleştirmek için yetkiniz yok.';
+          } else if (error.status === 404) {
+            errorMessage = 'İstek yapılan kaynak bulunamadı.';
+          }
+          
+          // Özel hata nesnesi döndür
+          const customError = new Error(errorMessage);
+          (customError as any).field = errorField;
+          
+          // Observable olarak hata mesajını döndür
+          return throwError(() => customError);
+        })
+      );
   }
 
   updateUser(id: number, user: User): Observable<void> {

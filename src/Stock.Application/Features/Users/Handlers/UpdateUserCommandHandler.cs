@@ -38,8 +38,15 @@ namespace Stock.Application.Features.Users.Handlers
                 }
             }
 
+            // IsAdmin değerini sadece RoleId=1 (Admin rolü) olduğunda true yap
+            // Bu şekilde frontend'den gönderilen isAdmin değeri görmezden gelinir
+            bool isAdmin = request.RoleId.HasValue && request.RoleId.Value == 1;
+            
+            // Log bilgisi ekleyelim
+            Console.WriteLine($"Kullanıcı güncelleniyor: {request.Username}, ID: {request.Id}, Sicil: {request.Sicil}, RoleId: {request.RoleId}, IsAdmin: {isAdmin}");
+
             user.Username = request.Username;
-            user.IsAdmin = request.IsAdmin;
+            user.IsAdmin = isAdmin; // Hesaplanmış isAdmin değerini kullan
             user.RoleId = request.RoleId;
             user.Sicil = request.Sicil;
 

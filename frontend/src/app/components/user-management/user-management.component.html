@@ -39,7 +39,7 @@
         <div class="header-cell name-cell">Ad Soyad</div>
         <div class="header-cell sicil-cell">Sicil</div>
         <div class="header-cell permissions-cell">İzinler</div>
-        <div class="header-cell actions-cell">İşlemler</div>
+        <div class="header-cell actions-cell" style="text-align: right;">İşlemler</div>
       </div>
       
       <!-- Kullanıcı Satırları -->
@@ -72,8 +72,10 @@
               (click)="editUser(user)" pTooltip="Düzenle"></button>
             <button pButton pRipple icon="pi pi-trash" class="p-button-rounded p-button-text p-button-danger" 
               (click)="deleteUser(user)" pTooltip="Sil"></button>
-            <button pButton pRipple icon="pi pi-key" class="p-button-rounded p-button-text p-button-success" 
-              (click)="manageUserPermissions(user)" pTooltip="İzinleri Yönet" style="display: inline-flex !important;"></button>
+            <button pButton pRipple icon="pi pi-key" class="p-button-rounded p-button-text p-button-success permission-button" 
+              (click)="manageUserPermissions(user)" pTooltip="İzinleri Yönet">
+              <span class="permission-icon-text">İzinler</span>
+            </button>
           </div>
         </div>
       </div>

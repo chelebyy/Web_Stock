@@ -55,6 +55,33 @@ namespace Stock.API.Controllers
             try
             {
                 _logger.LogInformation("Yeni kullanıcı oluşturma isteği alındı: {Username}, Sicil: {Sicil}", command.Username, command.Sicil);
+                
+                // Parametre doğrulamalarını kontrol et
+                if (string.IsNullOrWhiteSpace(command.Username))
+                {
+                    _logger.LogWarning("Eksik parametre: Username boş");
+                    return BadRequest(new { error = "Kullanıcı adı boş olamaz", field = "username" });
+                }
+                
+                if (string.IsNullOrWhiteSpace(command.Password))
+                {
+                    _logger.LogWarning("Eksik parametre: Password boş");
+                    return BadRequest(new { error = "Şifre boş olamaz", field = "password" });
+                }
+                
+                if (string.IsNullOrWhiteSpace(command.Sicil))
+                {
+                    _logger.LogWarning("Eksik parametre: Sicil boş");
+                    return BadRequest(new { error = "Sicil numarası boş olamaz", field = "sicil" });
+                }
+                
+                // RoleId kontrol et
+                if (!command.RoleId.HasValue || command.RoleId <= 0)
+                {
+                    _logger.LogWarning("Geçersiz Rol ID: {RoleId}", command.RoleId);
+                    return BadRequest(new { error = "Geçerli bir rol seçilmelidir", field = "roleId" });
+                }
+
                 var result = await _mediator.Send(command);
                 _logger.LogInformation("Kullanıcı başarıyla oluşturuldu: {Username}, ID: {Id}", result.Username, result.Id);
                 return CreatedAtAction(nameof(CreateUser), new { id = result.Id }, result);
@@ -68,15 +95,32 @@ namespace Stock.API.Controllers
                 // Özel olarak sicil numarası hatası için kontrol et
                 if (errorMessage.Contains("sicil numarası zaten kullanılmaktadır"))
                 {
-                    return BadRequest(new { error = errorMessage });
+                    return BadRequest(new { 
+                        error = $"Sicil numarası çakışması: {errorMessage}",
+                        code = "DuplicateSicil",
+                        field = "sicil"
+                    });
                 }
                 
                 return BadRequest(new { error = errorMessage });
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Kullanıcı oluşturma sırasında bir hata meydana geldi");
-                return StatusCode(500, new { error = "Kullanıcı oluşturulurken bir hata oluştu" });
+                _logger.LogError(ex, "Kullanıcı oluşturma sırasında bir hata meydana geldi: {Message}", ex.Message);
+                
+                // Daha detaylı hata bilgisi
+                if (ex.InnerException != null)
+                {
+                    _logger.LogError("İç hata: {InnerMessage}", ex.InnerException.Message);
+                }
+                
+                // Hata detaylarını ekleyerek daha açıklayıcı bir yanıt döndür
+                return StatusCode(500, new { 
+                    error = "Kullanıcı oluşturulurken bir hata oluştu", 
+                    details = ex.Message,
+                    innerException = ex.InnerException?.Message,
+                    stackTrace = ex.StackTrace
+                });
             }
         }
 

@@ -51,7 +51,7 @@ namespace Stock.Infrastructure.Data.Repositories
         {
             foreach (var permissionId in permissionIds)
             {
-                var rolePermission = new RolePermission
+                var rolePermission = new Stock.Domain.Entities.RolePermission
                 {
                     RoleId = roleId,
                     PermissionId = permissionId

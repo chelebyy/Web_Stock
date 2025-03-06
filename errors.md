@@ -3,6 +3,9 @@
 Bu dosya, proje geliştirme sürecinde karşılaşılan hataları ve çözümlerini içermektedir.
 
 ## İçindekiler
+- [Kullanıcı Oluşturma Hataları](#kullanıcı-oluşturma-hataları)
+- [Sınıf Belirsizliği Hataları](#sınıf-belirsizliği-hataları)
+- [Kullanıcı Admin Yetkisi Sorunları](#kullanıcı-admin-yetkisi-sorunları)
 - [Clean Architecture Geçişi Hataları](#clean-architecture-geçişi-hataları)
 - [Infrastructure Katmanı Hataları](#infrastructure-katmanı-hataları)
 - [API Katmanı Hataları](#api-katmanı-hataları)
@@ -29,6 +32,170 @@ Bu dosya, proje geliştirme sürecinde karşılaşılan hataları ve çözümler
   - [Dialog Footer Düzenleme Sorunları](#dialog-footer-düzenleme-sorunları)
   - [PowerShell Komut Çalıştırma Sorunları (Angular Serve)](#powershell-komut-çalıştırma-sorunları-angular-serve)
 - [Kullanıcı Dashboard Erişim Sorunları](#kullanıcı-dashboard-erişim-sorunları)
+- [Aktivite Log Hataları (07.03.2025)](#aktivite-log-hataları-07032025)
+- [Log Senkronizasyon Hatası (08.03.2025)](#log-senkronizasyon-hatası-08032025)
+
+## Kullanıcı Oluşturma Hataları
+
+### Hata: Sicil Numarası Çakışması
+
+**Hata Mesajı:**
+```
+500 (Internal Server Error)
+```
+
+**Nedeni:**
+Kullanıcı oluşturulurken, sistemde zaten var olan bir sicil numarası kullanılmaya çalışılıyor. SeedData sınıfında "U001" sicil numarasıyla oluşturulan bir kullanıcı bulunduğu için, aynı sicil numarasıyla yeni bir kullanıcı oluşturulamıyor.
+
+**Çözüm:**
+1. Farklı bir sicil numarası kullanılarak yeni kullanıcı oluşturulabilir.
+2. Hata mesajlarının daha açıklayıcı olması için API ve frontend tarafında aşağıdaki değişiklikler yapıldı:
+
+AuthController.cs dosyasında:
+```csharp
+if (errorMessage.Contains("sicil numarası zaten kullanılmaktadır"))
+{
+    return BadRequest(new { error = $"Sicil numarası çakışması: {errorMessage}", code = "DuplicateSicil" });
+}
+```
+
+UserService.ts dosyasında:
+```typescript
+if (error.error.code === 'DuplicateSicil') {
+  errorMessage = `Sicil numarası '${user.sicil}' zaten kullanımda. Lütfen farklı bir sicil numarası girin.`;
+}
+```
+
+**Öğrenilen Ders:**
+1. Kullanıcı dostu hata mesajları oluşturmak için hem backend hem de frontend tarafında uygun hata işleme mekanizmaları kurulmalı.
+2. Benzersiz olması gereken alanlar (sicil numarası gibi) için kullanıcı arayüzünde ön kontrol yapılmalı.
+3. HTTP 500 hataları yerine uygun HTTP durum kodları ile anlamlı hata mesajları döndürülmeli.
+
+### Hata: Kullanıcı Oluşturma API Hatası 
+
+**Hata Mesajı:**
+```
+POST http://localhost:5037/api/auth/create-user 500 (Internal Server Error)
+```
+
+**Nedeni:**
+1. Kullanıcı oluşturma API'si gelen isteği yeterince kontrol etmiyor
+2. Sicil numarası çakışması hatası dışındaki hata durumları için yeterli loglama yok
+3. API'nin çıktısı yeterince detaylı değil, hata mesajları yeterince açıklayıcı değil
+
+**Çözüm:**
+1. CreateUserCommandHandler sınıfında daha kapsamlı hata işleme ve loglama eklendi:
+   ```csharp
+   try
+   {
+       _logger.LogInformation("Kullanıcı oluşturma işlemi başlatıldı: {Username}, Sicil: {Sicil}", request.Username, request.Sicil);
+       // ... İşlem kodları ...
+   }
+   catch (Exception ex)
+   {
+       _logger.LogError(ex, "Kullanıcı oluşturma işlemi sırasında hata oluştu: {ErrorMessage}", ex.Message);
+       throw;
+   }
+   ```
+
+2. API endpoint'i olan AuthController.CreateUser metodunda daha iyi bir hata işleme mekanizması kuruldu:
+   ```csharp
+   try
+   {
+       // ... İşlem kodları ...
+   }
+   catch (InvalidOperationException ex)
+   {
+       // ... Doğrulama hataları ...
+   }
+   catch (Exception ex)
+   {
+       _logger.LogError(ex, "Kullanıcı oluşturma sırasında bir hata meydana geldi: {Message}", ex.Message);
+       return StatusCode(500, new { 
+           error = "Kullanıcı oluşturulurken bir hata oluştu", 
+           details = ex.Message,
+           innerException = ex.InnerException?.Message,
+           stackTrace = ex.StackTrace
+       });
+   }
+   ```
+
+3. Frontend tarafında daha iyi hata işleme:
+   ```typescript
+   createUser(user: User): Observable<any> {
+     // ... İşlem kodları ...
+     return this.http.post<any>(`${this.apiUrl}/auth/create-user`, createUserRequest, options)
+       .pipe(
+         catchError(error => {
+           // ... Hata işleme kodları ...
+         })
+       );
+   }
+   ```
+
+**Öğrenilen Ders:**
+1. API'lerde her zaman yeterli doğrulama, loglama ve hata işleme olmalı
+2. Frontend ve backend arasında tutarlı bir hata iletişim stratejisi olmalı
+3. HTTP durum kodları doğru kullanılmalı (BadRequest, NotFound vs)
+4. Kullanıcılara anlamlı hata mesajları gösterilmeli
+5. Geliştirme ortamında detaylı hata mesajları, production ortamında genel hata mesajları verilmeli
+
+## Sınıf Belirsizliği Hataları
+
+**Hata:** Stock.Infrastructure projesinde derleme hatası: 'RolePermission', 'Stock.Domain.Entities.RolePermission' ile 'Stock.Domain.Entities.Permissions.RolePermission' arasında belirsiz bir başvuru.
+
+**Hata Mesajı:**
+```
+error CS0104: 'RolePermission', 'Stock.Domain.Entities.RolePermission' ile 'Stock.Domain.Entities.Permissions.RolePermission' arasında belirsiz bir başvuru
+```
+
+**Nedeni:**
+Projede aynı isimli sınıf (RolePermission) iki farklı namespace'te (`Stock.Domain.Entities` ve `Stock.Domain.Entities.Permissions`) tanımlanmış. Derleyici, kodda sadece sınıf adı kullanıldığında hangisini kullanacağını bilemiyor.
+
+**Çözüm:**
+Sınıfı kullanırken tam nitelikli adını (fully qualified name) kullanmak. İlgili dosyada (`src/Stock.Infrastructure/Data/Repositories/PermissionRepository.cs`) RolePermission sınıfını şu şekilde kullandık:
+
+```csharp
+// Önceki kod:
+var rolePermission = new RolePermission { ... };
+
+// Düzeltilmiş kod:
+var rolePermission = new Stock.Domain.Entities.RolePermission { ... };
+```
+
+**Alternatif Çözümler:**
+1. Using direktifi ile birini özellikle belirtmek:
+```csharp
+using RolePermission = Stock.Domain.Entities.RolePermission;
+```
+
+2. Namespace yeniden düzenlemesi yaparak sınıf çakışmalarını önlemek.
+
+**Öğrenilen Ders:**
+Aynı isimli sınıflar farklı namespace'lerde olduğunda tam nitelikli ad kullanmak gerekir. Uzun vadede, sınıf isim çakışmalarını önlemek için proje yapısını düzenlemek daha iyi bir çözümdür.
+
+## Kullanıcı Admin Yetkisi Sorunları
+
+**Hata:** Yeni oluşturulan kullanıcı (U003 sicil numaralı Test3) admin paneline yönlendirildi. Bu, kullanıcının isAdmin değerinin yanlışlıkla true olarak ayarlandığını gösteriyordu.
+
+**Nedeni:**
+1. `CreateUserCommandHandler` sınıfında frontend'den gelen isAdmin değeri doğrudan kullanıcıya atanıyordu
+2. `UpdateUserCommandHandler` ve `AuthService.RegisterAsync` metodunda da benzer sorunlar vardı
+3. Frontend'den gönderilen isAdmin değeri güvenilir değildi ve manipüle edilebilirdi
+
+**Çözüm:**
+1. Kullanıcı oluşturma ve güncelleme işlemlerinde isAdmin değerini RoleId'ye göre belirledik:
+```csharp
+// IsAdmin değerini sadece RoleId=1 (Admin rolü) olduğunda true yap
+bool isAdmin = request.RoleId.HasValue && request.RoleId.Value == 1;
+```
+
+2. `CreateUserCommandHandler`, `UpdateUserCommandHandler` ve `AuthService.RegisterAsync` metodlarını güncelledik
+3. IsAdmin değeri artık frontend'den gönderilen değere bakılmaksızın, RoleId'ye göre otomatik belirleniyor
+4. Daha detaylı loglama ekledik
+
+**Öğrenilen Ders:**
+Frontend'den gelen güvenlik ile ilgili parametreleri asla doğrudan kullanmamalıyız. Güvenlik ile ilgili tüm değerler sunucu tarafında kontrol edilmeli ve atanmalıdır.
 
 ## Clean Architecture Geçişi Hataları
 
@@ -2249,3 +2416,88 @@ this.permissions = decodedToken.Permission || [];
 Kalıcı çözüm olarak, backend'de `SeedRolePermissionsAsync` metodunu güncelleyerek standart kullanıcı rolüne `Pages.UserDashboard` izninin eklenmesi önerilir. Buna ek olarak, tüm kullanıcıların BİLGİ İŞLEM modülüne erişebilmesi için `Pages.BilgiIslem.View` izni de eklenmesi önerilir.
 
 Detaylı bilgiler için bakınız: [knowledge-base/auth_knowledge_base.md](knowledge-base/auth_knowledge_base.md)
+
+### Aktivite Log Hataları (07.03.2025)
+
+#### Hata: Toplu Aktivite Logları Kaydederken 500 Internal Server Error
+**Tarih:** 2025-03-07
+**Hata Mesajı:** 
+```
+POST http://localhost:5037/api/logs/bulk-activity 500 (Internal Server Error)
+Bekleyen logları senkronize etme hatası: [...] "Toplu aktivite logları kaydedilirken bir hata oluştu."
+```
+
+**Nedeni:**
+1. Frontend'den gönderilen model yapısı (UserActivityLog) ile backend'de beklenen model yapısı (ActivityLog) arasında uyumsuzluk vardı
+2. Frontend'den gönderilen bazı alanlar (status, details, ipAddress) backend modelinde bulunmamaktaydı
+3. JSON deserializasyon hatası oluşuyordu çünkü backend doğrudan ActivityLog tipine dönüştürmeye çalışıyordu
+
+**Çözüm:**
+1. ActivityLogController'daki metotları güncellendi:
+   - Önce object tipinde veri alacak şekilde parametre değiştirildi
+   - JSON'ı manuel olarak çözümleyen ve doğru şekilde ActivityLog'a dönüştüren kod eklendi
+   - Frontend'den gelen fazla alanlar (status, details, ipAddress) AdditionalInfo alanında JSON olarak saklandı
+2. Hata yönetimi ve loglama geliştirildi:
+   - Daha detaylı hata mesajlarıyla loglama eklendi
+   - Geliştirme ortamında daha açıklayıcı hata yanıtları döndürüldü
+
+**Öğrenilen Dersler:**
+1. Frontend ve backend model yapılarının farklı olduğu durumlarda, ya modelleri birbirine uyumlu hale getirmeli ya da manuel dönüştürme işlemleri yapılmalıdır
+2. API'lerde her zaman detaylı hata loglaması yapılmalıdır (InnerException ve StackTrace dahil)
+3. API yanıtlarında açıklayıcı hata mesajları verilmeli, ancak bunlar sadece geliştirme ortamında detaylı olmalıdır
+
+### ILogger Paketi Eksiklik Hatası (08.03.2025)
+
+#### Hata: Microsoft.Extensions.Logging Referans Eksikliği
+**Tarih:** 2025-03-08
+**Hata Mesajı:** 
+```
+Stock.Application 3 hata ile başarısız oldu (1,2sn)
+C:\Users\muham\OneDrive\Masaüstü\Stock\src\Stock.Application\Features\Users\Handlers\CreateUserCommandHandler.cs(11,28): error CS0234: 'Logging' tür veya ad alanı adı 'Microsoft.Extensions' ad alanında yok (bir derleme başvurunuz mu eksik?)
+C:\Users\muham\OneDrive\Masaüstü\Stock\src\Stock.Application\Features\Users\Handlers\CreateUserCommandHandler.cs(20,26): error CS0246: 'ILogger<>' türü veya ad alanı adı bulunamadı (bir using yönergeniz veya derleme başvurunuz mu eksik?)
+C:\Users\muham\OneDrive\Masaüstü\Stock\src\Stock.Application\Features\Users\Handlers\CreateUserCommandHandler.cs(26,13): error CS0246: 'ILogger<>' türü veya ad alanı adı bulunamadı (bir using yönergeniz veya derleme başvurunuz mu eksik?)
+```
+
+**Nedeni:**
+1. Stock.Application projesine gerekli Microsoft.Extensions.Logging paket referansı eklenmeden ILogger kullanılmaya çalışıldı
+2. Farklı projelerde paket referansları eklenmediğinde derleme sırasında assembly bulunamama hataları oluşabilir
+
+**Çözüm:**
+1. Stock.Application projesine Microsoft.Extensions.Logging NuGet paketi eklendi:
+```
+cd src/Stock.Application
+dotnet add package Microsoft.Extensions.Logging
+```
+
+**Öğrenilen Dersler:**
+1. Kod yeni bir dependency (bağımlılık) kullandığında ilgili projeye NuGet paketini eklemeyi unutmayın
+2. Visual Studio IDE kullanıyorsanız, eksik referanslar için otomatik öneriler sunar, ancak komut satırında manuel olarak paketlerin eklenmesi gerekir
+3. Her bir projenin kendi .csproj dosyasında kendi paket referanslarını içermesi gerektiğini unutmayın
+
+### Log Senkronizasyon Hatası (08.03.2025)
+
+#### Hata: Aktivite Logları Senkronizasyon Hatası
+**Tarih:** 2025-03-08
+**Hata Mesajı:** 
+```
+POST http://localhost:5037/api/logs/bulk-activity 400 (Bad Request)
+Bekleyen logları senkronize etme hatası: HttpErrorResponse {headers: _HttpHeaders, status: 400, statusText: 'Bad Request', url: 'http://localhost:5037/api/logs/bulk-activity', ok: false, …}error: "İşlenebilecek log bulunamadı. Gönderilen veriler geçersiz format içeriyor olabilir."
+```
+
+**Nedeni:**
+1. Frontend'den gönderilen log verilerinin formatı ile backend'de beklenen format arasında uyumsuzluk vardı
+2. Frontend'de `userId` alanı opsiyonel olarak tanımlanmışken, backend'de zorunlu alan olarak tanımlanmıştı
+3. JSON dönüşüm hataları yeterince iyi yönetilmiyordu
+
+**Çözüm:**
+1. ActivityLogController'daki `CreateBulkActivityLogs` ve `CreateActivityLog` metotları güncellendi:
+   - `userId` alanı eksik veya null olduğunda varsayılan değer (1) atanacak şekilde düzenlendi
+   - JSON dönüşüm hataları daha iyi yönetildi
+   - Tarih dönüşüm hataları için try-catch blokları eklendi
+   - Eksik alanlar için varsayılan değerler atandı
+
+**Öğrenilen Dersler:**
+1. Frontend ve backend arasındaki model uyumsuzluklarını daha esnek bir şekilde yönetmek gerekiyor
+2. Zorunlu alanlar için varsayılan değerler atamak, sistemin daha dayanıklı olmasını sağlar
+3. JSON dönüşüm hatalarını daha iyi yönetmek için try-catch blokları kullanılmalı
+4. Hata mesajları daha açıklayıcı olmalı ve kullanıcıya yardımcı olmalı
