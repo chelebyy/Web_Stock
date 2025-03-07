@@ -33,23 +33,22 @@ interface PermissionGroup {
 }
 
 @Component({
-  selector: 'app-user-page-permissions',
-  standalone: true,
-  imports: [
-    CommonModule,
-    FormsModule,
-    TableModule,
-    ButtonModule,
-    CheckboxModule,
-    ToastModule,
-    ToolbarModule,
-    CardModule,
-    ProgressSpinnerModule,
-    AccordionModule,
-    DividerModule
-  ],
-  providers: [MessageService],
-  template: `
+    selector: 'app-user-page-permissions',
+    imports: [
+        CommonModule,
+        FormsModule,
+        TableModule,
+        ButtonModule,
+        CheckboxModule,
+        ToastModule,
+        ToolbarModule,
+        CardModule,
+        ProgressSpinnerModule,
+        AccordionModule,
+        DividerModule
+    ],
+    providers: [MessageService],
+    template: `
     <div class="page-container">
       <div class="page-header">
         <div class="title-container">
@@ -110,7 +109,7 @@ interface PermissionGroup {
     
     <p-toast position="top-right"></p-toast>
   `,
-  styles: [`
+    styles: [`
     .page-container {
       padding: 2rem;
       background-color: var(--surface-ground);

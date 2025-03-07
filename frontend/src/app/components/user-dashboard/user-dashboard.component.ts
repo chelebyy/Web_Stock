@@ -25,25 +25,24 @@ interface Activity {
 }
 
 @Component({
-  selector: 'app-user-dashboard',
-  standalone: true,
-  imports: [
-    CommonModule,
-    FormsModule,
-    DragDropModule,
-    ToastModule,
-    CardModule,
-    TableModule,
-    ButtonModule,
-    InputTextModule,
-    PasswordModule,
-    DatePipe,
-    PaginatorModule,
-    HasPermissionDirective
-  ],
-  providers: [MessageService],
-  templateUrl: './user-dashboard.component.html',
-  styleUrls: ['./user-dashboard.component.scss']
+    selector: 'app-user-dashboard',
+    imports: [
+        CommonModule,
+        FormsModule,
+        DragDropModule,
+        ToastModule,
+        CardModule,
+        TableModule,
+        ButtonModule,
+        InputTextModule,
+        PasswordModule,
+        DatePipe,
+        PaginatorModule,
+        HasPermissionDirective
+    ],
+    providers: [MessageService],
+    templateUrl: './user-dashboard.component.html',
+    styleUrls: ['./user-dashboard.component.scss']
 })
 export class UserDashboardComponent implements OnInit {
   username: string = '';

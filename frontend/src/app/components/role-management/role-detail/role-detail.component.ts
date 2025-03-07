@@ -22,20 +22,19 @@ interface PreserveFormat<T> {
 }
 
 @Component({
-  selector: 'app-role-detail',
-  templateUrl: './role-detail.component.html',
-  styleUrls: ['./role-detail.component.scss'],
-  standalone: true,
-  imports: [
-    CommonModule,
-    FormsModule,
-    AccordionModule,
-    ToggleButtonModule,
-    CheckboxModule,
-    ButtonModule,
-    ProgressSpinnerModule,
-    ToastModule
-  ]
+    selector: 'app-role-detail',
+    templateUrl: './role-detail.component.html',
+    styleUrls: ['./role-detail.component.scss'],
+    imports: [
+        CommonModule,
+        FormsModule,
+        AccordionModule,
+        ToggleButtonModule,
+        CheckboxModule,
+        ButtonModule,
+        ProgressSpinnerModule,
+        ToastModule
+    ]
 })
 export class RoleDetailComponent implements OnInit {
   roleId: number = 0;

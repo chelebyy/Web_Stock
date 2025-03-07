@@ -8,17 +8,16 @@ import { ToolbarModule } from 'primeng/toolbar';
 import { AuthService } from '../../services/auth.service';
 
 @Component({
-  selector: 'app-layout',
-  standalone: true,
-  imports: [
-    CommonModule,
-    RouterModule,
-    MenuModule,
-    SidebarModule,
-    ButtonModule,
-    ToolbarModule
-  ],
-  template: `
+    selector: 'app-layout',
+    imports: [
+        CommonModule,
+        RouterModule,
+        MenuModule,
+        SidebarModule,
+        ButtonModule,
+        ToolbarModule
+    ],
+    template: `
     <div class="layout-container">
       <!-- Sol Menü -->
       <div class="layout-menu" [class.layout-menu-active]="sidebarVisible">
@@ -94,7 +93,7 @@ import { AuthService } from '../../services/auth.service';
       </div>
     </div>
   `,
-  styles: [`
+    styles: [`
     .layout-container {
       display: flex;
       min-height: 100vh;

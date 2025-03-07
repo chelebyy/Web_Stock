@@ -21,27 +21,26 @@ import { Router } from '@angular/router';
 import { AuthService } from '../../services/auth.service';
 
 @Component({
-  selector: 'app-user-management',
-  templateUrl: './user-management.component.html',
-  styleUrls: ['./user-management.component.scss'],
-  standalone: true,
-  imports: [
-    CommonModule,
-    FormsModule,
-    ReactiveFormsModule,
-    ButtonModule,
-    CheckboxModule,
-    ConfirmDialogModule,
-    DialogModule,
-    InputTextModule,
-    PasswordModule,
-    TableModule,
-    ToastModule,
-    ToolbarModule,
-    DropdownModule,
-    TooltipModule
-  ],
-  providers: [ConfirmationService, MessageService]
+    selector: 'app-user-management',
+    templateUrl: './user-management.component.html',
+    styleUrls: ['./user-management.component.scss'],
+    imports: [
+        CommonModule,
+        FormsModule,
+        ReactiveFormsModule,
+        ButtonModule,
+        CheckboxModule,
+        ConfirmDialogModule,
+        DialogModule,
+        InputTextModule,
+        PasswordModule,
+        TableModule,
+        ToastModule,
+        ToolbarModule,
+        DropdownModule,
+        TooltipModule
+    ],
+    providers: [ConfirmationService, MessageService]
 })
 export class UserManagementComponent implements OnInit {
   users: any[] = [];

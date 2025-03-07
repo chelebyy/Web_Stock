@@ -14,21 +14,20 @@ import { PasswordModule } from 'primeng/password';
 import { ToastModule } from 'primeng/toast';
 
 @Component({
-  selector: 'app-login',
-  templateUrl: './login.component.html',
-  styleUrls: ['./login.component.scss'],
-  standalone: true,
-  imports: [
-    CommonModule,
-    FormsModule,
-    ReactiveFormsModule,
-    ButtonModule,
-    CardModule,
-    CheckboxModule,
-    InputTextModule,
-    PasswordModule,
-    ToastModule
-  ]
+    selector: 'app-login',
+    templateUrl: './login.component.html',
+    styleUrls: ['./login.component.scss'],
+    imports: [
+        CommonModule,
+        FormsModule,
+        ReactiveFormsModule,
+        ButtonModule,
+        CardModule,
+        CheckboxModule,
+        InputTextModule,
+        PasswordModule,
+        ToastModule
+    ]
 })
 export class LoginComponent implements OnInit, AfterViewInit {
   @ViewChild('matrixCanvas') matrixCanvas!: ElementRef<HTMLCanvasElement>;

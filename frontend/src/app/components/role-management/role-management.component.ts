@@ -19,28 +19,27 @@ import { Role, RoleWithUsers } from '../../models/role.model';
 import { Router } from '@angular/router';
 
 @Component({
-  selector: 'app-role-management',
-  templateUrl: './role-management.component.html',
-  styleUrls: ['./role-management.component.scss'],
-  standalone: true,
-  imports: [
-    CommonModule,
-    FormsModule,
-    ReactiveFormsModule,
-    ButtonModule,
-    ConfirmDialogModule,
-    DialogModule,
-    InputTextModule,
-    TableModule,
-    ToastModule,
-    ToolbarModule,
-    DropdownModule,
-    InputTextareaModule,
-    TooltipModule,
-    CardModule,
-    RippleModule
-  ],
-  providers: [ConfirmationService, MessageService]
+    selector: 'app-role-management',
+    templateUrl: './role-management.component.html',
+    styleUrls: ['./role-management.component.scss'],
+    imports: [
+        CommonModule,
+        FormsModule,
+        ReactiveFormsModule,
+        ButtonModule,
+        ConfirmDialogModule,
+        DialogModule,
+        InputTextModule,
+        TableModule,
+        ToastModule,
+        ToolbarModule,
+        DropdownModule,
+        InputTextareaModule,
+        TooltipModule,
+        CardModule,
+        RippleModule
+    ],
+    providers: [ConfirmationService, MessageService]
 })
 export class RoleManagementComponent implements OnInit {
   roles: Role[] = [];

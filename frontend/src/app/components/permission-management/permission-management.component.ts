@@ -34,23 +34,22 @@ interface PermissionGroup {
 }
 
 @Component({
-  selector: 'app-permission-management',
-  standalone: true,
-  imports: [
-    CommonModule,
-    FormsModule,
-    TableModule,
-    ButtonModule,
-    CheckboxModule,
-    ToastModule,
-    ToolbarModule,
-    CardModule,
-    ProgressSpinnerModule,
-    AccordionModule,
-    DividerModule
-  ],
-  providers: [MessageService],
-  template: `
+    selector: 'app-permission-management',
+    imports: [
+        CommonModule,
+        FormsModule,
+        TableModule,
+        ButtonModule,
+        CheckboxModule,
+        ToastModule,
+        ToolbarModule,
+        CardModule,
+        ProgressSpinnerModule,
+        AccordionModule,
+        DividerModule
+    ],
+    providers: [MessageService],
+    template: `
     <div class="permission-management-container">
       <p-toast></p-toast>
       
@@ -106,7 +105,7 @@ interface PermissionGroup {
       </div>
     </div>
   `,
-  styles: [`
+    styles: [`
     .permission-management-container {
       padding: 1rem;
     }

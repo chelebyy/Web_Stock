@@ -25,29 +25,28 @@ import { DragDropModule } from '@angular/cdk/drag-drop';
 type TagSeverity = 'success' | 'info' | 'warning' | 'danger' | 'secondary' | 'contrast' | undefined;
 
 @Component({
-  selector: 'app-admin-dashboard',
-  standalone: true,
-  imports: [
-    CommonModule, 
-    CardModule, 
-    ButtonModule, 
-    FormsModule, 
-    InputTextModule, 
-    PasswordModule,
-    ToastModule,
-    ChartModule,
-    TableModule,
-    ProgressBarModule,
-    TagModule,
-    PaginatorModule,
-    DropdownModule,
-    CalendarModule,
-    DialogModule,
-    DragDropModule
-  ],
-  providers: [MessageService],
-  templateUrl: './admin-dashboard.component.html',
-  styleUrls: ['./admin-dashboard.component.scss']
+    selector: 'app-admin-dashboard',
+    imports: [
+        CommonModule,
+        CardModule,
+        ButtonModule,
+        FormsModule,
+        InputTextModule,
+        PasswordModule,
+        ToastModule,
+        ChartModule,
+        TableModule,
+        ProgressBarModule,
+        TagModule,
+        PaginatorModule,
+        DropdownModule,
+        CalendarModule,
+        DialogModule,
+        DragDropModule
+    ],
+    providers: [MessageService],
+    templateUrl: './admin-dashboard.component.html',
+    styleUrls: ['./admin-dashboard.component.scss']
 })
 export class AdminDashboardComponent implements OnInit {
   username: string = '';
