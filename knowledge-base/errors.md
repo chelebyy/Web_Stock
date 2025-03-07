@@ -30,6 +30,7 @@ Bu dosya, proje geliştirme sürecinde karşılaşılan hataları ve çözümler
 - [Profil Resmi ve API Endpoint Hataları (06.03.2025)](#profil-resmi-ve-api-endpoint-hataları-06032025)
 - [Profil Resmi Endpoint Hatası - Geçici Çözüm (06.03.2025)](#profil-resmi-endpoint-hatası-geçici-çözüm-06032025)
 - [Revir ve BilgiIslem İzinlerinin Görünmeme Sorunu](#revir-ve-bilgiislem-izinlerinin-görünmeme-sorunu)
+- [Angular 19 Geçiş Süreci Hataları ve Çözümleri](#angular-19-geçiş-süreci-hataları-ve-çözümleri)
 
 ## Kullanıcı Aktivitesi Grafiği Yerine Log Kaydetme Sistemi
 
@@ -1312,3 +1313,68 @@ public async Task<ActionResult<bool>> ResetUserToRolePermissions(int userId)
 1. Controller'larda aynı isim ve parametre imzasına sahip birden fazla metot tanımlanamaz.
 2. Yeni endpoint eklerken, mevcut endpoint'leri kontrol etmek ve çakışmaları önlemek önemlidir.
 3. Endpoint'lerin route'larında tekil/çoğul kullanımına dikkat edilmelidir (örn. "user" vs "users").
+
+# Angular 19 Geçiş Süreci Hataları ve Çözümleri
+
+## Hata: Birden Fazla Major Sürüm Güncellemesi Desteklenmiyor
+
+**Hata Mesajı:**
+```
+Updating multiple major versions of '@angular/core' at once is not supported. Please migrate each major version individually.
+Run 'ng update @angular/core@18' in your workspace directory to update to latest '18.x' version of '@angular/core'.
+```
+
+**Çözüm:**
+Angular, birden fazla major sürüm güncellemesini aynı anda desteklemiyor. Bu nedenle, Angular 17'den doğrudan Angular 19'a geçiş yapılamaz. Önce Angular 18'e geçiş yapılmalı, ardından Angular 19'a geçiş yapılmalıdır.
+
+**Uygulanan Adımlar:**
+1. Önce Angular 18'e güncelleme yapıldı:
+   ```bash
+   ng update @angular/core@18 @angular/cli@18
+   ```
+2. Güncelleme sonrası bağımlılıklar yüklendi:
+   ```bash
+   npm install
+   ```
+3. Angular 18 ile build işlemi başarıyla tamamlandı.
+
+**Sonuç:**
+Angular 17'den Angular 18'e geçiş başarıyla tamamlandı. Bir sonraki adımda Angular 19'a geçiş yapılacak.
+
+## Uyarı: @angular/cdk Sürümü Güncellenmedi
+
+**Uyarı:**
+Angular 18'e güncelleme sonrası `ng version` komutu çalıştırıldığında, @angular/cdk paketinin hala 17.1.0 sürümünde kaldığı görüldü.
+
+**Çözüm:**
+@angular/cdk paketini manuel olarak güncellemek gerekiyor:
+```bash
+ng update @angular/cdk
+```
+
+## Uyarı: PrimeNG Sürümü Güncellenmedi
+
+**Uyarı:**
+Angular 18'e güncelleme sonrası PrimeNG paketi otomatik olarak güncellenmedi.
+
+**Çözüm:**
+PrimeNG paketini manuel olarak güncellemek gerekiyor:
+```bash
+npm install primeng@18
+```
+
+## Uyarı: Build Sırasında Bütçe Aşımı
+
+**Uyarı Mesajı:**
+```
+[WARNING] bundle initial exceeded maximum budget. Budget 1.05 MB was not met by 553.35 kB with a total of 1.60 MB.
+```
+
+**Çözüm:**
+Bu bir kritik hata değil, sadece bir uyarı. Angular uygulamasının boyutu, belirlenen bütçeyi aşıyor. Bu sorunu çözmek için:
+
+1. angular.json dosyasındaki bütçe değerlerini artırabilirsiniz.
+2. Uygulamanın boyutunu azaltmak için lazy loading uygulayabilirsiniz.
+3. Kullanılmayan bağımlılıkları kaldırabilirsiniz.
+
+Geçiş planının 5. aşamasında (Lazy Loading Uygulaması) bu sorun ele alınacak.
