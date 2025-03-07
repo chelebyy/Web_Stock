@@ -36,6 +36,12 @@ Bu belge, projenin Angular 18'den Angular 19'a ve PrimeNG 18'den PrimeNG 19'a g�
    git commit -m "Angular 19 ve PrimeNG 19 güncellemesi"
    ```
 
+5. PrimeNG 19 uyumluluğu için stil ve bileşen güncellemeleri:
+   ```bash
+   git add src/styles.scss src/app/components/role-management/role-management.component.ts
+   git commit -m "PrimeNG 19 uyumluluğu için stil ve bileşen güncellemeleri"
+   ```
+
 ## Karşılaşılan Sorunlar ve Çözümleri
 
 ### 1. PrimeNG Tema ve CSS Dosya Yolları
@@ -43,14 +49,16 @@ Bu belge, projenin Angular 18'den Angular 19'a ve PrimeNG 18'den PrimeNG 19'a g�
 
 **Çözüm:** `styles.scss` dosyasındaki import yolları güncellendi:
 ```scss
-// Eski
-@import "primeng/resources/themes/lara-light-blue/theme.css";
-@import "primeng/resources/primeng.css";
-
-// Yeni
+// Eski (hatalı)
 @import "node_modules/primeng/resources/themes/lara-light-blue/theme.css";
 @import "node_modules/primeng/resources/primeng.min.css";
+
+// Yeni (doğru)
+@import "primeng/resources/themes/lara-light-blue/theme.css";
+@import "primeng/resources/primeng.min.css";
 ```
+
+**Not:** PrimeNG 19'da, import yollarında "node_modules/" öneki kullanılmamalıdır. Doğrudan "primeng/" ile başlayan yollar kullanılmalıdır.
 
 ### 2. PrimeNG Bileşen Modülleri
 **Sorun:** Bazı PrimeNG bileşen modüllerinin isimleri değişmiştir.
@@ -99,6 +107,18 @@ import { CommonModule, DatePipe } from '@angular/common';
 
 // Yeni
 import { CommonModule } from '@angular/common';
+```
+
+### 6. PowerShell'de && Operatörü Sorunu
+**Sorun:** PowerShell'de && operatörü çalışmıyor.
+
+**Çözüm:** PowerShell'de komutları birleştirmek için ; (noktalı virgül) kullanılmalı:
+```powershell
+# Hatalı
+cd frontend && git status
+
+# Doğru
+cd frontend; git status
 ```
 
 ## Dikkat Edilmesi Gereken Noktalar
