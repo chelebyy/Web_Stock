@@ -1,5 +1,40 @@
 # Scratchpad
 
+## Görev: Angular 19 ve PrimeNG 19 Güncellemesi
+
+### Görev Tanımı
+Angular ve PrimeNG kütüphanelerini en son sürümlere (Angular 19 ve PrimeNG 19) güncellemek.
+
+### İlerleme
+[X] Güncellenecek paketler belirlendi
+[X] Paketler güncellendi
+[X] Git işlemleri yapıldı
+[X] Bilgi dosyası oluşturuldu
+
+### Yapılan Değişiklikler
+1. Aşağıdaki paketler güncellendi:
+   - `@angular/compiler` 18.2.13 -> 19.2.1
+   - `@angular/core` 18.2.13 -> 19.2.1
+   - `@angular/platform-browser` 18.2.13 -> 19.2.1
+   - `@angular/platform-browser-dynamic` 18.2.13 -> 19.2.1
+   - `@angular/router` 18.2.13 -> 19.2.1
+   - `primeng` 18.0.2 -> 19.0.9
+   - `zone.js` 0.14.10 -> 0.15.0
+
+2. Git işlemleri yapıldı:
+   - `node_modules` klasörü Git'in izleme listesinden çıkarıldı
+   - Sadece `package.json` ve `package-lock.json` dosyaları commit edildi
+
+3. Bilgi dosyası oluşturuldu:
+   - `knowledge-base/angular19_primeng19_update.md` dosyası oluşturuldu
+   - Güncelleme süreci, dikkat edilmesi gereken noktalar ve olası sorunlar belgelendi
+
+### Sonraki Adımlar
+- Uygulamanın tüm bölümlerinin test edilmesi
+- Konsol hatalarının kontrol edilmesi
+- Stil sorunlarının giderilmesi
+- Performans iyileştirmelerinin değerlendirilmesi
+
 ## Görev: Kullanıcı Aktivitesi Grafiğini Log Kaydetme Sistemine Dönüştürme
 
 ### Görev Tanımı
