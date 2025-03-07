@@ -38,7 +38,7 @@ Bu belge, projenin Angular 18'den Angular 19'a ve PrimeNG 18'den PrimeNG 19'a g�
 
 5. PrimeNG 19 uyumluluğu için stil ve bileşen güncellemeleri:
    ```bash
-   git add src/styles.scss src/app/components/role-management/role-management.component.ts
+   git add src/styles.scss src/app/components/role-management/role-management.component.ts angular.json
    git commit -m "PrimeNG 19 uyumluluğu için stil ve bileşen güncellemeleri"
    ```
 
@@ -47,18 +47,20 @@ Bu belge, projenin Angular 18'den Angular 19'a ve PrimeNG 18'den PrimeNG 19'a g�
 ### 1. PrimeNG Tema ve CSS Dosya Yolları
 **Sorun:** PrimeNG 19'da tema ve CSS dosya yolları değişmiştir.
 
-**Çözüm:** `styles.scss` dosyasındaki import yolları güncellendi:
+**Çözüm:** `styles.scss` ve `angular.json` dosyalarındaki import yolları güncellendi:
 ```scss
 // Eski (hatalı)
 @import "node_modules/primeng/resources/themes/lara-light-blue/theme.css";
 @import "node_modules/primeng/resources/primeng.min.css";
-
-// Yeni (doğru)
+// veya
 @import "primeng/resources/themes/lara-light-blue/theme.css";
 @import "primeng/resources/primeng.min.css";
+
+// Yeni (doğru)
+@import "@primeng/themes/lara-light-blue/theme.css";
 ```
 
-**Not:** PrimeNG 19'da, import yollarında "node_modules/" öneki kullanılmamalıdır. Doğrudan "primeng/" ile başlayan yollar kullanılmalıdır.
+**Not:** PrimeNG 19'da tema import yolları tamamen değişmiştir. Artık `@primeng/themes/[tema-adı]/theme.css` şeklinde import edilmeli ve `primeng.min.css` dosyası ayrıca import edilmemelidir.
 
 ### 2. PrimeNG Bileşen Modülleri
 **Sorun:** Bazı PrimeNG bileşen modüllerinin isimleri değişmiştir.
@@ -126,6 +128,7 @@ cd frontend; git status
 2. Angular 19, daha sıkı tip kontrolü yapmaktadır. Tip hatalarına dikkat edilmelidir.
 3. Stil dosyalarında özelleştirmeler yapıldıysa, PrimeNG 19'daki CSS sınıf değişiklikleri kontrol edilmelidir.
 4. Zone.js sürümü Angular 19 ile uyumlu olmalıdır.
+5. PrimeNG 19'da tema sistemi tamamen değişmiştir, artık `@primeng/themes/[tema-adı]/theme.css` şeklinde import edilmelidir.
 
 ## Test Süreci
 1. Uygulamanın tüm bölümleri test edilmelidir.

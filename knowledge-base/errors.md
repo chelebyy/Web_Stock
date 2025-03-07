@@ -1317,22 +1317,102 @@ public async Task<ActionResult<bool>> ResetUserToRolePermissions(int userId)
 
 # Angular 19 ve PrimeNG 19 Güncelleme Hataları
 
-## PrimeNG Bileşen API Değişiklikleri
+## PrimeNG Tema ve CSS Dosyaları Bulunamadı
 
 ### Hata
 ```
-ERROR Error: NG0304: The component [ComponentName] is using the deprecated property [propertyName]. Support for [propertyName] will be removed in the next major release.
+X [ERROR] Could not resolve "primeng/resources/themes/lara-light-blue/theme.css"
+X [ERROR] Could not resolve "primeng/resources/primeng.css"
 ```
 
-### Çözüm
-PrimeNG 19'da bazı bileşenlerin API'leri değişmiş olabilir. Hata mesajında belirtilen bileşenin güncel API'sini PrimeNG dokümantasyonundan kontrol edin ve eski özellikleri yenileriyle değiştirin.
+**Nedeni:**
+- PrimeNG 19'da tema sistemi ve dosya yapısı tamamen değiştirilmiştir.
+- Eski stil dosya yolları artık geçerli değil.
+- PrimeNG 19'da artık klasik tema import yapısı değişmiştir.
 
+**Çözüm:**
+1. `styles.scss` dosyasını güncelleyin:
+```scss
+// Eski
+@import "primeng/resources/themes/lara-light-blue/theme.css";
+@import "primeng/resources/primeng.min.css";
+
+// Yeni
+@import "@primeng/themes/lara-light-blue/theme.css";
+```
+
+2. `angular.json` dosyasını güncelleyin:
+```json
+"styles": [
+  "@angular/material/prebuilt-themes/indigo-pink.css",
+  "@primeng/themes/lara-light-blue/theme.css", 
+  "primeicons/primeicons.css",
+  "src/styles.scss"
+]
+```
+
+**Önemli Notlar:**
+- PrimeNG 19'da tema yolu başına `@` işareti eklenir.
+- `resources` klasörü kaldırılmıştır.
+- `primeng.min.css` dosyası artık ayrıca import edilmemelidir.
+- Tema dosyası (`theme.css`) artık tüm gerekli stilleri içermektedir.
+
+### Bileşen API Değişiklikleri
+**Hata Mesajı:**
+```
+Error: src/app/components/user-page-permissions/user-page-permissions.component.html:15:109 - error TS2339: Property 'label' does not exist on type 'Checkbox'.
+```
+
+**Nedeni:**
+- PrimeNG 19'da bazı bileşenlerin API'leri değişmiştir.
+- Checkbox bileşeninde `label` özelliği kaldırılmıştır.
+
+**Çözüm:**
+```html
+<!-- Eski -->
+<p-checkbox [(ngModel)]="permission.isGranted" [binary]="true" [label]="permission.description"></p-checkbox>
+
+<!-- Yeni -->
+<p-checkbox [(ngModel)]="permission.isGranted" [binary]="true" [inputId]="'perm_' + permission.id"></p-checkbox>
+<label [for]="'perm_' + permission.id">
+  {{ permission.description }}
+</label>
+```
+
+### Import Değişiklikleri Hataları
+**Hata Mesajı:**
+```
+Error: Module not found: Error: Can't resolve 'primeng/inputtextarea' in '/app/src/components'
+```
+
+**Nedeni:**
+- PrimeNG 19'da bazı bileşen modüllerinin isimleri değişmiştir.
+
+**Çözüm:**
 ```typescript
-// Eski kullanım
-<p-component [deprecatedProperty]="value"></p-component>
+// Eski
+import { InputTextareaModule } from 'primeng/inputtextarea';
 
-// Yeni kullanım
-<p-component [newProperty]="value"></p-component>
+// Yeni
+import { InputTextarea } from 'primeng/inputtextarea';
+```
+
+### ToggleButton Boş Etiket Hataları
+**Hata Mesajı:**
+```
+Error: src/app/components/role-management/role-detail/role-detail.component.html:20:21 - error TS2322: Type 'string' is not assignable to type 'boolean'.
+```
+
+**Nedeni:**
+- PrimeNG 19'da ToggleButton bileşeninin `onLabel` ve `offLabel` özellikleri boş string değerlerini kabul etmiyor.
+
+**Çözüm:**
+```html
+<!-- Eski -->
+<p-toggleButton [onLabel]="''" [offLabel]="''"></p-toggleButton>
+
+<!-- Yeni -->
+<p-toggleButton onLabel="Evet" offLabel="Hayır"></p-toggleButton>
 ```
 
 ## Stil Sorunları
