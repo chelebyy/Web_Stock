@@ -10,6 +10,7 @@ Angular ve PrimeNG kütüphanelerini en son sürümlere (Angular 19 ve PrimeNG 1
 [X] Paketler güncellendi
 [X] Git işlemleri yapıldı
 [X] Bilgi dosyası oluşturuldu
+[X] Güncelleme sonrası hataları çözdük
 
 ### Yapılan Değişiklikler
 1. Aşağıdaki paketler güncellendi:
@@ -29,11 +30,37 @@ Angular ve PrimeNG kütüphanelerini en son sürümlere (Angular 19 ve PrimeNG 1
    - `knowledge-base/angular19_primeng19_update.md` dosyası oluşturuldu
    - Güncelleme süreci, dikkat edilmesi gereken noktalar ve olası sorunlar belgelendi
 
+4. Güncelleme sonrası hataları çözdük:
+   - PrimeNG tema ve CSS dosya yolları güncellendi
+   - PrimeNG bileşen modül isimleri güncellendi (InputTextareaModule -> InputTextarea)
+   - ToggleButton bileşeninin onLabel ve offLabel özellikleri için geçerli değerler atandı
+   - Checkbox bileşeninin label özelliği yerine HTML label elementi kullanıldı
+   - Kullanılmayan DatePipe imports listesinden kaldırıldı
+   - Errors.md dosyası güncellendi
+
 ### Sonraki Adımlar
 - Uygulamanın tüm bölümlerinin test edilmesi
 - Konsol hatalarının kontrol edilmesi
 - Stil sorunlarının giderilmesi
 - Performans iyileştirmelerinin değerlendirilmesi
+
+### Öğrenilen Dersler
+1. PrimeNG 19'da bazı bileşenlerin API'leri değişmiş:
+   - Checkbox'ın label özelliği kaldırılmış
+   - ToggleButton'ın onLabel ve offLabel özellikleri boş string kabul etmiyor
+   - InputTextareaModule yerine InputTextarea kullanılıyor
+
+2. PrimeNG 19'da tema ve CSS dosya yolları değişmiş:
+   - Doğru yollar: node_modules/primeng/resources/themes/lara-light-blue/theme.css
+   - Doğru yollar: node_modules/primeng/resources/primeng.min.css
+
+3. Angular 19'da kullanılmayan modülleri imports listesinden kaldırmak önemli
+
+4. Güncelleme sonrası hataları sistematik olarak çözmek için:
+   - Önce tema ve CSS dosya yolları sorunlarını çöz
+   - Sonra bileşen modül isimlerini güncelle
+   - Sonra bileşen API değişikliklerini güncelle
+   - Son olarak kullanılmayan modülleri kaldır
 
 ## Görev: Kullanıcı Aktivitesi Grafiğini Log Kaydetme Sistemine Dönüştürme
 

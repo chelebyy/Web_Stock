@@ -1,79 +1,120 @@
 # Angular 19 ve PrimeNG 19 Güncellemesi
 
-## Güncelleme Tarihi
-Mart 2024
+## Güncelleme Özeti
+Bu belge, projenin Angular 18'den Angular 19'a ve PrimeNG 18'den PrimeNG 19'a güncellenmesi sürecini ve karşılaşılan sorunları belgelemektedir.
 
 ## Güncellenen Paketler
-- `@angular/compiler` 18.2.13 -> 19.2.1
-- `@angular/core` 18.2.13 -> 19.2.1
-- `@angular/platform-browser` 18.2.13 -> 19.2.1
-- `@angular/platform-browser-dynamic` 18.2.13 -> 19.2.1
-- `@angular/router` 18.2.13 -> 19.2.1
-- `primeng` 18.0.2 -> 19.0.9
-- `zone.js` 0.14.10 -> 0.15.0
+- `@angular/compiler`: 18.2.13 -> 19.2.1
+- `@angular/core`: 18.2.13 -> 19.2.1
+- `@angular/platform-browser`: 18.2.13 -> 19.2.1
+- `@angular/platform-browser-dynamic`: 18.2.13 -> 19.2.1
+- `@angular/router`: 18.2.13 -> 19.2.1
+- `primeng`: 18.0.2 -> 19.0.9
+- `zone.js`: 0.14.10 -> 0.15.0
 
 ## Güncelleme Süreci
+1. Paketlerin güncellenmesi:
+   ```bash
+   npm install @angular/compiler@19.2.1 @angular/core@19.2.1 @angular/platform-browser@19.2.1 @angular/platform-browser-dynamic@19.2.1 @angular/router@19.2.1 primeng@19.0.9 zone.js@0.15.0
+   ```
 
-### 1. Paketlerin Güncellenmesi
-```bash
-npm install @angular/compiler@19.2.1 @angular/core@19.2.1 @angular/platform-browser@19.2.1 @angular/platform-browser-dynamic@19.2.1 @angular/router@19.2.1 primeng@19.0.9 zone.js@0.15.0
+2. Bağımlılıkların yüklenmesi:
+   ```bash
+   npm install
+   ```
+
+3. Git işlemleri:
+   - `node_modules` klasörünün Git'in izleme listesinden çıkarılması:
+     ```bash
+     git rm --cached -r node_modules
+     ```
+   - `.git/info/exclude` dosyasına `node_modules/` eklenmesi
+
+4. Değişikliklerin commit edilmesi:
+   ```bash
+   git add package.json package-lock.json
+   git commit -m "Angular 19 ve PrimeNG 19 güncellemesi"
+   ```
+
+## Karşılaşılan Sorunlar ve Çözümleri
+
+### 1. PrimeNG Tema ve CSS Dosya Yolları
+**Sorun:** PrimeNG 19'da tema ve CSS dosya yolları değişmiştir.
+
+**Çözüm:** `styles.scss` dosyasındaki import yolları güncellendi:
+```scss
+// Eski
+@import "primeng/resources/themes/lara-light-blue/theme.css";
+@import "primeng/resources/primeng.css";
+
+// Yeni
+@import "node_modules/primeng/resources/themes/lara-light-blue/theme.css";
+@import "node_modules/primeng/resources/primeng.min.css";
 ```
 
-### 2. Git İşlemleri
-Node modüllerinin Git tarafından izlenmemesi için aşağıdaki adımlar uygulandı:
+### 2. PrimeNG Bileşen Modülleri
+**Sorun:** Bazı PrimeNG bileşen modüllerinin isimleri değişmiştir.
 
-1. `node_modules` klasörünü Git'in izleme listesinden çıkarmak için:
-```bash
-git rm --cached -r node_modules
+**Çözüm:** Değişen modül isimleri güncellendi:
+```typescript
+// Eski
+import { InputTextareaModule } from 'primeng/inputtextarea';
+
+// Yeni
+import { InputTextarea } from 'primeng/inputtextarea';
 ```
 
-2. Sadece `package.json` ve `package-lock.json` dosyalarını commit etmek için:
-```bash
-git add package.json package-lock.json
-git commit -m "PrimeNG ve Angular 19 güncellemesi"
+### 3. ToggleButton Özellikleri
+**Sorun:** ToggleButton bileşeninin `onLabel` ve `offLabel` özellikleri boş string değerlerini kabul etmiyor.
+
+**Çözüm:** Boş string yerine geçerli değerler atandı:
+```html
+<!-- Eski -->
+<p-toggleButton [onLabel]="''" [offLabel]="''"></p-toggleButton>
+
+<!-- Yeni -->
+<p-toggleButton onLabel="Evet" offLabel="Hayır"></p-toggleButton>
+```
+
+### 4. Checkbox Label Sorunu
+**Sorun:** PrimeNG 19'da Checkbox bileşeninin `label` özelliği kaldırılmıştır.
+
+**Çözüm:** Label özelliği yerine HTML label elementi kullanıldı:
+```html
+<!-- Eski -->
+<p-checkbox [(ngModel)]="permission.isGranted" [binary]="true" [label]="permission.description"></p-checkbox>
+
+<!-- Yeni -->
+<p-checkbox [(ngModel)]="permission.isGranted" [binary]="true" [inputId]="'perm_' + permission.id"></p-checkbox>
+<label [for]="'perm_' + permission.id">{{ permission.description }}</label>
+```
+
+### 5. Kullanılmayan İmportlar
+**Sorun:** Angular 19, kullanılmayan importları daha sıkı bir şekilde kontrol ediyor.
+
+**Çözüm:** Kullanılmayan importlar (örneğin DatePipe) kaldırıldı:
+```typescript
+// Eski
+import { CommonModule, DatePipe } from '@angular/common';
+
+// Yeni
+import { CommonModule } from '@angular/common';
 ```
 
 ## Dikkat Edilmesi Gereken Noktalar
-
-### Angular 19 Değişiklikleri
-- Angular 19, performans iyileştirmeleri ve yeni özellikler içerir.
-- Bazı API'ler değişmiş olabilir, bu nedenle uygulamanın tüm bölümlerinin test edilmesi önemlidir.
-- Daha fazla bilgi için [Angular 19 Değişiklik Günlüğü](https://github.com/angular/angular/blob/main/CHANGELOG.md) incelenebilir.
-
-### PrimeNG 19 Değişiklikleri
-- PrimeNG 19, yeni bileşenler ve mevcut bileşenlerde iyileştirmeler içerir.
-- Bazı bileşenlerin API'leri değişmiş olabilir.
-- Daha fazla bilgi için [PrimeNG 19 Değişiklik Günlüğü](https://github.com/primefaces/primeng/blob/master/CHANGELOG.md) incelenebilir.
-
-## Olası Sorunlar ve Çözümleri
-
-### Stil Sorunları
-- PrimeNG güncellemesi ile bazı bileşenlerin stilleri değişmiş olabilir.
-- Özel stil tanımlamaları gözden geçirilmeli ve gerekirse güncellenmelidir.
-
-### Bileşen API Değişiklikleri
-- Bazı bileşenlerin API'leri değişmiş olabilir, bu nedenle konsol hataları kontrol edilmelidir.
-- Değişen API'ler için PrimeNG dokümantasyonu incelenmelidir.
-
-### Performans İyileştirmeleri
-- Angular 19 ve PrimeNG 19, performans iyileştirmeleri içerir.
-- Uygulamanın performansı izlenmeli ve gerekirse ek optimizasyonlar yapılmalıdır.
+1. PrimeNG 19'da birçok bileşenin API'si değişmiştir. Bileşenlerin güncel kullanımı için [PrimeNG dokümantasyonu](https://primeng.org/documentation) kontrol edilmelidir.
+2. Angular 19, daha sıkı tip kontrolü yapmaktadır. Tip hatalarına dikkat edilmelidir.
+3. Stil dosyalarında özelleştirmeler yapıldıysa, PrimeNG 19'daki CSS sınıf değişiklikleri kontrol edilmelidir.
+4. Zone.js sürümü Angular 19 ile uyumlu olmalıdır.
 
 ## Test Süreci
-- Tüm sayfalar ve bileşenler manuel olarak test edilmelidir.
-- Özellikle karmaşık formlar ve tablolar gibi bileşenler dikkatle kontrol edilmelidir.
-- Konsol hataları ve uyarıları izlenmelidir.
+1. Uygulamanın tüm bölümleri test edilmelidir.
+2. Konsol hataları kontrol edilmelidir.
+3. Stil sorunları giderilmelidir.
+4. Performans iyileştirmeleri değerlendirilmelidir.
 
-## Geri Alma Planı
-Eğer güncelleme sonrası kritik sorunlar yaşanırsa, aşağıdaki adımlar izlenebilir:
-
-1. Önceki sürümlere geri dönmek için:
-```bash
-npm install @angular/compiler@18.2.13 @angular/core@18.2.13 @angular/platform-browser@18.2.13 @angular/platform-browser-dynamic@18.2.13 @angular/router@18.2.13 primeng@18.0.2 zone.js@0.14.10
-```
-
-2. Değişiklikleri commit etmek için:
-```bash
-git add package.json package-lock.json
-git commit -m "Angular ve PrimeNG sürümlerini geri alma"
-``` 
+## Kaynaklar
+- [Angular Güncelleme Kılavuzu](https://update.angular.io/)
+- [PrimeNG Dokümantasyonu](https://primeng.org/documentation)
+- [Angular 19 Sürüm Notları](https://blog.angular.io/angular-v19-is-now-available-18fb5f560d1e)
+- [PrimeNG 19 Sürüm Notları](https://primeng.org/installation) 
