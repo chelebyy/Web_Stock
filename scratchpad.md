@@ -6,7 +6,7 @@
 - Backend: .NET Core 9
 - Veritabanı: PostgreSQL 17.3 (Local)
 - Frontend: Angular 19.1.2
-- UI Kütüphanesi: PrimeNG 19.0.6
+- UI Kütüphanesi: PrimeNG 19.0.9
 - CSS Framework: Tailwind CSS 3.4.1
 - Geliştirme Araçları: npm, ESLint
 
@@ -28,6 +28,9 @@
 - Ortamlar arası geçiş sürecinde veri tutarsızlıklarını önlemek için mekanizma eklendi
 - Kullanıcı dashboard sayfası sadeleştirildi ve BİLGİ İŞLEM butonu eklendi
 - Kullanıcı dashboard sayfasında izin kontrolü sorunu çözüldü (Pages.UserDashboard izni olmayan kullanıcılar artık dahboard'a erişebiliyor)
+- Angular 19 ve PrimeNG 19 güncellemesi tamamlandı
+- Login sayfası tasarım sorunları çözüldü (PrimeNG bileşenleri yerine saf HTML/CSS kullanıldı)
+- Hata mesajları için renk kodları düzeltildi (kırmızı: hata, yeşil: başarı)
 
 ## Clean Architecture Geçişi
 
@@ -111,6 +114,14 @@
   - [ ] Service'lerin implementasyonu
   - [ ] Frontend adaptasyonunu tamamlamak
 
+- [x] **Angular 19 ve PrimeNG 19 Geçişi**
+  - [x] Angular 19'a güncelleme
+  - [x] PrimeNG 19'a güncelleme
+  - [x] Tema sistemini güncelleme
+  - [x] Login sayfası tasarım sorunlarını çözme
+  - [x] Hata mesajları için renk kodlarını düzeltme
+  - [ ] Diğer sayfaların uyumluluğunu kontrol etme ve düzeltme
+
 - [ ] **Test Katmanı**
   - [ ] Unit testlerin yazılması
   - [ ] Integration testlerin yazılması
@@ -149,6 +160,8 @@
 - System.IdentityModel.Tokens.Jwt paketi sürüm uyumsuzluğu sorunları çıkarabilir
 - PrimeNG Chart bileşeni için chart.js kütüphanesi gereklidir
 - Eksik bağımlılıklar, uygulamanın çalışmasını engelleyebilir
+- PrimeNG 19'da tema sistemi tamamen değiştirildi, eski tema import yolları artık çalışmıyor
+- Angular 19 ve PrimeNG 19 arasında uyumluluk sorunları olabilir
 
 ### Frontend Geliştirme
 - Angular routing yapılandırmasında her rotanın açıkça tanımlanması gerekiyor
@@ -160,6 +173,10 @@
 - Port çakışması durumunda farklı bir port kullanılabilir
 - Kullanıcı dashboard sayfasını sadeleştirirken mevcut şifre değiştirme ve çıkış özelliklerini korumak önemli
 - İzin kontrolü ve yetkilendirme sistemi, kullanıcı deneyimini doğrudan etkileyen kritik bir bileşendir
+- Kritik bileşenlerde (login gibi) saf HTML/CSS kullanmak daha güvenli olabilir
+- Standalone component yaklaşımı daha temiz ve bakımı kolay kod sağlar
+- Tema değişiklikleri için PrimeNG dokümantasyonu dikkatle takip edilmeli
+- Hata mesajları için uygun renk kodları kullanılmalı (kırmızı: hata, yeşil: başarı)
 
 ### Hata Yönetimi
 - Konsol loglarının detaylı tutulması hata tespitini kolaylaştırıyor
@@ -187,19 +204,30 @@
 - Kritik sayfalar için izin kontrolünü bypass etmekten kaçınmak gerekir, ancak kullanıcı deneyimi için bazen özel durumlar eklenebilir
 - İzin yapısını belgelendirmek ve düzenli olarak gözden geçirmek gerekir
 
+### Angular 19 ve PrimeNG 19 Geçişi
+- PrimeNG 19'da tema sistemi tamamen değiştirildi, eski tema import yolları artık çalışmıyor
+- Angular 19 ve PrimeNG 19 arasında uyumluluk sorunları olabilir
+- Kritik bileşenlerde (login gibi) saf HTML/CSS kullanmak daha güvenli olabilir
+- Standalone component yaklaşımı daha temiz ve bakımı kolay kod sağlar
+- Tema değişiklikleri için PrimeNG dokümantasyonu dikkatle takip edilmeli
+- Hata mesajları için uygun renk kodları kullanılmalı (kırmızı: hata, yeşil: başarı)
+- Kullanıcı deneyimini iyileştirmek için animasyonlar ve görsel geri bildirimler eklenmelidir
+- Responsive tasarım için medya sorguları kullanılmalıdır
+
 ## Zaman Çizelgesi
 - **Domain Katmanı**: Tamamlandı
 - **Application Katmanı**: Tamamlandı
 - **Infrastructure Katmanı**: Tamamlandı
 - **API Katmanı**: Tamamlandı
 - **Sistem Başlatma ve Dokümantasyon**: Tamamlandı
+- **Angular 19 ve PrimeNG 19 Geçişi**: Tamamlandı
 - **Frontend Adaptasyonu**: 4-5 gün
 - **Test Yazımı**: 5-6 gün
 - **Dokümantasyon**: 2-3 gün
 
 **Toplam Kalan Süre**: ~11-14 gün
 
-## Güncel Durum (6 Haziran 2025)
+## Güncel Durum (7 Haziran 2025)
 - Backend API sorunsuz çalışıyor (http://localhost:5037)
 - Frontend uygulaması sorunsuz çalışıyor (http://localhost:4202)
 - Kullanıcı güncelleme sırasındaki ID uyuşmazlığı hatası çözüldü
@@ -210,6 +238,10 @@
 - Kullanıcı dashboard sayfası sadeleştirildi ve BİLGİ İŞLEM butonu eklendi
 - Kullanıcı dashboard sayfasının belgeleri knowledge-base/user_dashboard_knowledge_base.md dosyasına eklendi
 - Kullanıcıların dashboard erişim sorunu çözüldü, yeni knowledge base dosyası oluşturuldu: knowledge-base/auth_knowledge_base.md
+- Angular 19 ve PrimeNG 19 güncellemesi tamamlandı
+- Login sayfası tasarım sorunları çözüldü (PrimeNG bileşenleri yerine saf HTML/CSS kullanıldı)
+- Hata mesajları için renk kodları düzeltildi (kırmızı: hata, yeşil: başarı)
+- Angular 19 geçiş planı knowledge-base/angular19_migration_plan.md dosyasına eklendi
 
 ## Gelecek Adımlar
 1. GitHub'a son değişiklikleri push etmek
@@ -217,6 +249,7 @@
 3. Kullanıcı yönetimi ve rol yönetimi sayfalarının tam olarak test edilmesi
 4. Geriye kalan frontend komponentlerinin geliştirilmesi
 5. Backend'de kullanıcı rolü izinlerini güncelleyerek kalıcı çözüm sağlamak
+6. Diğer sayfaların Angular 19 ve PrimeNG 19 uyumluluğunu kontrol etmek ve düzeltmek
 
 ## Kullanıcı Oluşturma Rol Seçimi Hatası Çözümü
 
@@ -237,3 +270,30 @@ Kullanıcı oluşturma işlemi sırasında roleId değeri backend'e gönderilmey
 - Frontend'den backend'e veri gönderirken, backend'in beklediği tüm alanların doğru şekilde gönderildiğinden emin olunmalıdır.
 - Model arayüzlerinin, backend API'sinin beklediği tüm alanları içerdiğinden emin olunmalıdır.
 - Hata mesajları, sorunun kaynağını bulmak için önemli ipuçları sağlar.
+
+## Angular 19 ve PrimeNG 19 Geçişi
+
+### Görev
+Angular 17'den Angular 19'a ve PrimeNG 17'den PrimeNG 19'a geçiş yapmak.
+
+### Yapılan İşlemler
+[X] Angular CLI'ı global olarak güncellemek
+[X] Proje bağımlılıklarını güncellemek
+[X] PrimeNG tema sistemini güncellemek
+[X] Login sayfası tasarım sorunlarını çözmek
+[X] Hata mesajları için renk kodlarını düzeltmek
+[X] Angular 19 geçiş planını oluşturmak ve belgelemek
+[X] Knowledge-base ve errors.md dosyalarını güncellemek
+
+### Sonuç
+Angular 19 ve PrimeNG 19 güncellemesi başarıyla tamamlandı. Login sayfası tasarım sorunları çözüldü ve hata mesajları için renk kodları düzeltildi.
+
+### Öğrenilen Dersler
+- PrimeNG 19'da tema sistemi tamamen değiştirildi, eski tema import yolları artık çalışmıyor
+- Angular 19 ve PrimeNG 19 arasında uyumluluk sorunları olabilir
+- Kritik bileşenlerde (login gibi) saf HTML/CSS kullanmak daha güvenli olabilir
+- Standalone component yaklaşımı daha temiz ve bakımı kolay kod sağlar
+- Tema değişiklikleri için PrimeNG dokümantasyonu dikkatle takip edilmeli
+- Hata mesajları için uygun renk kodları kullanılmalı (kırmızı: hata, yeşil: başarı)
+- Kullanıcı deneyimini iyileştirmek için animasyonlar ve görsel geri bildirimler eklenmelidir
+- Responsive tasarım için medya sorguları kullanılmalıdır
