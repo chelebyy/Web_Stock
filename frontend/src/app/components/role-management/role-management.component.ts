@@ -10,7 +10,7 @@ import { TableModule } from 'primeng/table';
 import { ToastModule } from 'primeng/toast';
 import { ToolbarModule } from 'primeng/toolbar';
 import { DropdownModule } from 'primeng/dropdown';
-import { InputTextareaModule } from 'primeng/inputtextarea';
+import { InputTextarea } from 'primeng/inputtextarea';
 import { TooltipModule } from 'primeng/tooltip';
 import { CardModule } from 'primeng/card';
 import { RippleModule } from 'primeng/ripple';
@@ -34,7 +34,7 @@ import { Router } from '@angular/router';
         ToastModule,
         ToolbarModule,
         DropdownModule,
-        InputTextareaModule,
+        InputTextarea,
         TooltipModule,
         CardModule,
         RippleModule
