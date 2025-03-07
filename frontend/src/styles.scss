@@ -1,6 +1,16 @@
 @import "@angular/material/prebuilt-themes/indigo-pink.css";
 @import "primeicons/primeicons.css";
 
+/* Glass Effect sınıfını düzelteceğim */
+.glass-effect {
+  background: rgba(255, 255, 255, 0.1) !important;
+  backdrop-filter: blur(10px) !important;
+  -webkit-backdrop-filter: blur(10px) !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  border-radius: 20px !important;
+  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37) !important;
+}
+
 /* Global Styles */
 :root {
   --surface-ground: #f8f9fa;
@@ -235,4 +245,35 @@ html, body {
   100% {
     box-shadow: 0 0 5px rgba(74, 158, 255, 0.2);
   }
+}
+
+/* Özel Gradient Buton Stili */
+.custom-gradient-button {
+  background: linear-gradient(45deg, #4a9eff, #6d18ff) !important; 
+  border: none !important; 
+  color: white !important; 
+  width: 100% !important; 
+  height: 45px !important; 
+  border-radius: 8px !important; 
+  font-size: 1rem !important; 
+  font-weight: 600 !important; 
+  letter-spacing: 0.5px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  cursor: pointer !important;
+}
+
+.custom-gradient-button:hover {
+  background: linear-gradient(45deg, #3a8eff, #5d08ff) !important;
+  box-shadow: 0 0 20px rgba(74, 158, 255, 0.4) !important;
+  transform: translateY(-2px) !important;
+}
+
+.custom-gradient-button:active {
+  transform: translateY(0) !important;
+}
+
+.custom-gradient-button i {
+  margin-right: 8px !important;
 }

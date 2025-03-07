@@ -206,7 +206,27 @@ export class LoginComponent implements OnInit, AfterViewInit {
   }
 
   ngOnInit(): void {
-    // Initialize component
+    // Buton stilini doğrudan uygula
+    setTimeout(() => {
+      const loginButton = document.querySelector('button[type="submit"]');
+      if (loginButton) {
+        loginButton.setAttribute('style', `
+          background: linear-gradient(45deg, #4a9eff, #6d18ff) !important; 
+          border: none !important; 
+          color: white !important; 
+          width: 100% !important; 
+          height: 45px !important; 
+          border-radius: 8px !important; 
+          font-size: 1rem !important; 
+          font-weight: 600 !important; 
+          letter-spacing: 0.5px !important;
+          display: flex !important;
+          align-items: center !important;
+          justify-content: center !important;
+          cursor: pointer !important;
+        `);
+      }
+    }, 100);
   }
 }
 
