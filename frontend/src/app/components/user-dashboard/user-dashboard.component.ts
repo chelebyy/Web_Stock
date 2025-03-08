@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { CommonModule, DatePipe } from '@angular/common';
+import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { DragDropModule } from '@angular/cdk/drag-drop';
@@ -15,9 +15,9 @@ import { PasswordModule } from 'primeng/password';
 import { PaginatorModule } from 'primeng/paginator';
 
 // Servisler ve Direktifler
-import { AuthService } from '../../services/auth.service';
+import { AuthService } from '../../core/authentication/auth.service';
 import { UserService } from '../../services/user.service';
-import { HasPermissionDirective } from '../../directives/has-permission.directive';
+import { HasPermissionDirective } from '../../shared/directives/has-permission.directive';
 
 interface Activity {
   action: string;
@@ -36,7 +36,6 @@ interface Activity {
         ButtonModule,
         InputTextModule,
         PasswordModule,
-        DatePipe,
         PaginatorModule,
         HasPermissionDirective
     ],

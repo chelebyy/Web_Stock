@@ -1,5 +1,6 @@
 {
   "dependencies": {
-    "@angular/cdk": "^19.2.1"
+    "@angular/cdk": "^19.2.1",
+    "@primeng/themes": "^19.0.9"
   }
 }

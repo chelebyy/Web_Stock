@@ -4,8 +4,8 @@ import { UserManagementComponent } from './components/user-management/user-manag
 import { RoleManagementComponent } from './components/role-management/role-management.component';
 import { LayoutComponent } from './components/layout/layout.component';
 import { ComputersComponent } from './components/inventory/computers/computers.component';
-import { AuthGuard } from './guards/auth.guard';
-import { PermissionGuard } from './guards/permission.guard';
+import { AuthGuard } from './core/guards/auth.guard';
+import { PermissionGuard } from './core/guards/permission.guard';
 import { AdminDashboardComponent } from './components/admin-dashboard/admin-dashboard.component';
 import { UserDashboardComponent } from './components/user-dashboard/user-dashboard.component';
 import { RoleDetailComponent } from './components/role-management/role-detail/role-detail.component';

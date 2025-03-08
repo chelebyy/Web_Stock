@@ -18,7 +18,7 @@ import { RoleService } from '../../services/role.service';
 import { User } from '../../models/user.model';
 import { Role, RoleWithUsers } from '../../models/role.model';
 import { Router } from '@angular/router';
-import { AuthService } from '../../services/auth.service';
+import { AuthService } from '../../core/authentication/auth.service';
 
 @Component({
     selector: 'app-user-management',

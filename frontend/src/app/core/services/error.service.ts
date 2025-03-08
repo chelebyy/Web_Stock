@@ -80,4 +80,4 @@ export class ErrorService {
       life: 4000
     });
   }
-}
+} 

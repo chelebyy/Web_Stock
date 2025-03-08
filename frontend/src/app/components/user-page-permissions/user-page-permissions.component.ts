@@ -87,9 +87,12 @@ interface PermissionGroup {
                   <div class="permission-content">
                     <p-checkbox [(ngModel)]="permission.isGranted" 
                                 [binary]="true" 
-                                [label]="permission.description || permission.name"
+                                [inputId]="'perm_' + permission.id"
                                 styleClass="custom-checkbox">
                     </p-checkbox>
+                    <label [for]="'perm_' + permission.id" class="permission-label">
+                      {{ permission.description || permission.name }}
+                    </label>
                     <small class="permission-name">{{ permission.name }}</small>
                   </div>
                 </div>

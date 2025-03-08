@@ -5,7 +5,7 @@ import { MenuModule } from 'primeng/menu';
 import { SidebarModule } from 'primeng/sidebar';
 import { ButtonModule } from 'primeng/button';
 import { ToolbarModule } from 'primeng/toolbar';
-import { AuthService } from '../../services/auth.service';
+import { AuthService } from '../../core/authentication/auth.service';
 
 @Component({
     selector: 'app-layout',

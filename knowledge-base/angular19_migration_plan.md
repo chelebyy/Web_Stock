@@ -162,21 +162,21 @@ Geçiş aşamalı olarak gerçekleştirilecektir:
 ### 3. Mimari Yeniden Yapılandırma (5 Gün)
 
 #### 3.1 Core Modülü Oluşturma
-- [ ] src/app/core klasörünü oluşturma
-- [ ] CoreModule oluşturma (eğer standalone kullanılmıyorsa)
-- [ ] Temel servislerin core klasörüne taşınması:
-  - [ ] AuthService
-  - [ ] LogService
-  - [ ] ErrorService
-- [ ] HTTP Interceptor'ların taşınması
-- [ ] Guard'ların taşınması
-- [ ] Singleton servisler için provideIn: 'root' kullanımını sağlama
+- [X] src/app/core klasörünü oluşturma
+- [X] CoreModule oluşturma (eğer standalone kullanılmıyorsa)
+- [X] Temel servislerin core klasörüne taşınması:
+  - [X] AuthService
+  - [X] LogService
+  - [X] ErrorService
+- [X] HTTP Interceptor'ların taşınması
+- [X] Guard'ların taşınması
+- [X] Singleton servisler için provideIn: 'root' kullanımını sağlama
 
 #### 3.2 Shared Modülü Oluşturma
-- [ ] src/app/shared klasörünü oluşturma
-- [ ] SharedModule oluşturma (eğer standalone kullanılmıyorsa)
-- [ ] Paylaşılan bileşenleri shared klasörüne taşıma
-- [ ] Direktifleri shared klasörüne taşıma
+- [X] src/app/shared klasörünü oluşturma
+- [X] SharedModule oluşturma (eğer standalone kullanılmıyorsa)
+- [X] Paylaşılan bileşenleri shared klasörüne taşıma
+- [X] Direktifleri shared klasörüne taşıma
 - [ ] Pipe'ları shared klasörüne taşıma
 - [ ] UI bileşenlerini oluşturma ve paylaşılan UI elementlerini taşıma
 

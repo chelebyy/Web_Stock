@@ -1,17 +1,8 @@
 import { Component, OnInit, ViewChild, ElementRef, AfterViewInit, HostListener } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
-import { MessageService } from 'primeng/api';
-import { AuthService } from '../../services/auth.service';
-
-// PrimeNG Modülleri
-import { ButtonModule } from 'primeng/button';
-import { CardModule } from 'primeng/card';
-import { CheckboxModule } from 'primeng/checkbox';
-import { InputTextModule } from 'primeng/inputtext';
-import { PasswordModule } from 'primeng/password';
-import { ToastModule } from 'primeng/toast';
+import { AuthService } from '../../core/authentication/auth.service';
 
 @Component({
     selector: 'app-login',
@@ -19,15 +10,9 @@ import { ToastModule } from 'primeng/toast';
     styleUrls: ['./login.component.scss'],
     imports: [
         CommonModule,
-        FormsModule,
-        ReactiveFormsModule,
-        ButtonModule,
-        CardModule,
-        CheckboxModule,
-        InputTextModule,
-        PasswordModule,
-        ToastModule
-    ]
+        FormsModule
+    ],
+    standalone: true
 })
 export class LoginComponent implements OnInit, AfterViewInit {
   @ViewChild('matrixCanvas') matrixCanvas!: ElementRef<HTMLCanvasElement>;
@@ -45,10 +30,13 @@ export class LoginComponent implements OnInit, AfterViewInit {
   sicil: string = '';
   password: string = '';
   rememberMe: boolean = false;
+  showPassword: boolean = false;
+  toastMessage: string = '';
+  toastTimeout: any;
+  toastType: 'success' | 'error' = 'success';
 
   constructor(
     private router: Router,
-    private messageService: MessageService,
     private authService: AuthService
   ) {}
 
@@ -149,16 +137,36 @@ export class LoginComponent implements OnInit, AfterViewInit {
     if (this.animationFrameId) {
       cancelAnimationFrame(this.animationFrameId);
     }
+    if (this.toastTimeout) {
+      clearTimeout(this.toastTimeout);
+    }
+  }
+
+  togglePassword() {
+    this.showPassword = !this.showPassword;
+  }
+
+  showToast(message: string, type: 'success' | 'error' = 'success', duration: number = 3000) {
+    this.toastMessage = message;
+    this.toastType = type;
+    if (this.toastTimeout) {
+      clearTimeout(this.toastTimeout);
+    }
+    this.toastTimeout = setTimeout(() => {
+      this.closeToast();
+    }, duration);
+  }
+
+  closeToast() {
+    this.toastMessage = '';
+    if (this.toastTimeout) {
+      clearTimeout(this.toastTimeout);
+    }
   }
 
   onSubmit(): void {
     if (!this.sicil || !this.password) {
-      this.messageService.add({
-        severity: 'error',
-        summary: 'Hata',
-        detail: 'Sicil numarası ve şifre gereklidir!',
-        life: 3000
-      });
+      this.showToast('Sicil numarası ve şifre gereklidir!', 'error');
       return;
     }
 
@@ -167,12 +175,7 @@ export class LoginComponent implements OnInit, AfterViewInit {
     this.authService.login({ sicil: this.sicil, password: this.password }).subscribe({
       next: (response) => {
         console.log('Login başarılı:', response);
-        this.messageService.add({
-          severity: 'success',
-          summary: 'Başarılı',
-          detail: 'Giriş başarılı!',
-          life: 3000
-        });
+        this.showToast('Giriş başarılı!', 'success');
         
         // Kullanıcı rolüne göre yönlendirme
         const user = this.authService.getCurrentUser();
@@ -195,38 +198,13 @@ export class LoginComponent implements OnInit, AfterViewInit {
           errorMessage = 'Sicil numarası veya şifre hatalı!';
         }
 
-        this.messageService.add({
-          severity: 'error',
-          summary: 'Hata',
-          detail: errorMessage,
-          life: 3000
-        });
+        this.showToast(errorMessage, 'error');
       }
     });
   }
 
   ngOnInit(): void {
-    // Buton stilini doğrudan uygula
-    setTimeout(() => {
-      const loginButton = document.querySelector('button[type="submit"]');
-      if (loginButton) {
-        loginButton.setAttribute('style', `
-          background: linear-gradient(45deg, #4a9eff, #6d18ff) !important; 
-          border: none !important; 
-          color: white !important; 
-          width: 100% !important; 
-          height: 45px !important; 
-          border-radius: 8px !important; 
-          font-size: 1rem !important; 
-          font-weight: 600 !important; 
-          letter-spacing: 0.5px !important;
-          display: flex !important;
-          align-items: center !important;
-          justify-content: center !important;
-          cursor: pointer !important;
-        `);
-      }
-    }, 100);
+    // Initialize component
   }
 }
 

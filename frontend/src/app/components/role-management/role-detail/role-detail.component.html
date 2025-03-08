@@ -50,8 +50,8 @@
                   <div class="permission-header">
                     <span class="permission-name">{{ permission.name.split('.')[1] || permission.name }}</span>
                     <p-toggleButton 
-                      [onLabel]="" 
-                      [offLabel]=""
+                      onLabel="Açık" 
+                      offLabel="Kapalı"
                       [onIcon]="'pi pi-lock-open'" 
                       [offIcon]="'pi pi-lock'"
                       styleClass="permission-toggle"
@@ -82,8 +82,8 @@
                   <div class="permission-header">
                     <span class="permission-name">{{ permission.name.split('.')[1] || permission.name }}</span>
                     <p-toggleButton 
-                      [onLabel]="" 
-                      [offLabel]=""
+                      onLabel="Açık" 
+                      offLabel="Kapalı"
                       [onIcon]="'pi pi-lock-open'" 
                       [offIcon]="'pi pi-lock'"
                       styleClass="permission-toggle"
@@ -114,8 +114,8 @@
                   <div class="permission-header">
                     <span class="permission-name">{{ permission.name.split('.')[1] || permission.name }}</span>
                     <p-toggleButton 
-                      [onLabel]="" 
-                      [offLabel]=""
+                      onLabel="Açık" 
+                      offLabel="Kapalı"
                       [onIcon]="'pi pi-lock-open'" 
                       [offIcon]="'pi pi-lock'"
                       styleClass="permission-toggle"
@@ -164,11 +164,13 @@
               <div *ngFor="let permission of getPermissionsByGroup(group)" class="permission-checkbox-item">
                 <p-checkbox 
                   [value]="permission.id" 
-                  [label]="permission.name.split('.')[1] || permission.name" 
                   [(ngModel)]="selectedPermissions" 
                   [inputId]="'permission_' + permission.id"
                   styleClass="custom-checkbox">
                 </p-checkbox>
+                <label [for]="'permission_' + permission.id" class="checkbox-label">
+                  {{ permission.name.split('.')[1] || permission.name }}
+                </label>
                 <div class="permission-description">{{ permission.description }}</div>
               </div>
             </div>

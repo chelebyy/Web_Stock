@@ -2,7 +2,7 @@ import { HttpInterceptorFn, HttpRequest, HttpHandlerFn, HttpEvent, HttpErrorResp
 import { inject } from '@angular/core';
 import { Observable, throwError } from 'rxjs';
 import { catchError } from 'rxjs/operators';
-import { AuthService } from '../services/auth.service';
+import { AuthService } from '../authentication/auth.service';
 import { Router } from '@angular/router';
 
 export const AuthInterceptor: HttpInterceptorFn = (req: HttpRequest<unknown>, next: HttpHandlerFn) => {
@@ -28,4 +28,4 @@ export const AuthInterceptor: HttpInterceptorFn = (req: HttpRequest<unknown>, ne
       return throwError(() => error);
     })
   );
-};
+}; 

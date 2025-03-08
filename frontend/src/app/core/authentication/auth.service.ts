@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { BehaviorSubject, Observable, tap, catchError, throwError } from 'rxjs';
-import { LoginRequest, LoginResponse, User, CreateUserRequest } from '../models/auth.model';
+import { LoginRequest, LoginResponse, User, CreateUserRequest } from './auth.model';
 import { JwtHelperService } from '@auth0/angular-jwt';
 import { Router } from '@angular/router';
 
@@ -177,4 +177,4 @@ export class AuthService {
     // Token'dan izinleri kontrol et
     return this.permissions.includes(permissionName);
   }
-}
+} 
