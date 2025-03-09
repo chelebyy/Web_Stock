@@ -249,6 +249,8 @@
 - "İzinleri Yönet" butonundaki metin kayma sorunu çözüldü
 - "İzinleri Yönet" butonunda sadece anahtar ikonunun görünmesi sağlandı
 - Tooltip'ler için global stiller eklendi ve pozisyonları düzeltildi
+- Rol filtreleme dropdown'ındaki çift "Tümü" seçeneği sorunu çözüldü
+- Rol filtreleme işlevselliği düzeltildi (string/number dönüşüm sorunu)
 
 ## Gelecek Adımlar
 1. GitHub'a son değişiklikleri push etmek
@@ -268,6 +270,12 @@
 - [X] "İzinleri Yönet" butonundaki metin kayma sorunu çözüldü
 - [X] "İzinleri Yönet" butonunda sadece anahtar ikonunun görünmesi sağlandı
 - [X] Tooltip'ler için global stiller eklendi ve pozisyonları düzeltildi
+- [X] Kullanıcı rolü dropdown menüsünün genişlik ve arka plan rengi düzeltildi
+- [X] appendTo="body" sorununa çözüm için CSS değişkenleri kullanıldı
+- [X] Dropdown panel için özel stil sınıfı eklendi (user-role-dropdown-panel)
+- [X] Global stil dosyasına yüksek öncelikli selektörler eklendi
+- [X] Rol filtreleme dropdown'ındaki çift "Tümü" seçeneği sorunu çözüldü
+- [X] Rol filtreleme işlevselliği düzeltildi (string/number dönüşüm sorunu)
 
 ### Planlanan İyileştirmeler
 - [ ] Kullanıcı tablosunun responsive tasarımının iyileştirilmesi
@@ -287,6 +295,11 @@
 - `overflow: hidden` özelliği, taşan içeriği gizlemek için kullanılabilir
 - Tooltip pozisyonunu belirlemek, kullanıcı deneyimini iyileştirir
 - Global tooltip stilleri, tüm uygulamada tutarlı bir görünüm sağlar
+- PrimeNG'nin 'appendTo="body"' özelliği, dropdown menüsünün component dışında render edilmesine neden olur
+- Component-scoped CSS'ler, body'e eklenmiş elemanları etkilemez
+- CSS değişkenleri (--dropdown-width gibi), farklı DOM konumları arasında veri paylaşımı sağlayabilir
+- PrimeNG bileşenlerinin DOM yapısını anlamak, doğru stil hedeflemesi için önemlidir
+- Angular'da stil değişikliği sorunlarında, uygulamayı yeniden derlemek veya önbelleği temizlemek gerekebilir
 
 ## Belge Referansları
 - [Hata Kayıtları ve Çözümleri](errors.md)

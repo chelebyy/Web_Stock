@@ -33,6 +33,7 @@ Bu dosya, proje geliştirme sürecinde karşılaşılan hataları ve çözümler
 - [Angular 19 Geçiş Süreci Hataları ve Çözümleri](#angular-19-geçiş-süreci-hataları-ve-çözümleri)
 - [Angular 19 ve PrimeNG 19 Güncelleme Hataları](#angular-19-ve-primeNG-19-güncelleme-hataları)
 - [Login Sayfası Tasarım Sorunları ve Çözümleri](#login-sayfası-tasarım-sorunları-ve-çözümleri)
+- [Kullanıcı Yönetimi Rol Filtreleme Sorunu](#kullanıcı-yönetimi-rol-filtreleme-sorunu)
 
 ## Kullanıcı Oluşturma Hataları
 
@@ -1930,7 +1931,7 @@ Table bileşeninden `[responsive]="true"` özelliğini kaldır:
 **Öğrenilen Dersler:**
 - Kütüphane güncellemeleriyle bazı özellikler kullanımdan kaldırılabilir
 - Konsol uyarılarını düzenli olarak kontrol etmek ve çözmek önemli
-- PrimeNG gibi UI kütüphanelerinin dokümantasyonunu takip etmek gerekli
+- PrimeNG gibi UI kütüphanelerin dokümantasyonunu takip etmek gerekli
 
 ### Hata 8: 500 Internal Server Error (Rol Yönetimi) - Döngüsel Referans
 
@@ -3579,3 +3580,264 @@ Kullanıcı yönetimi sayfasında "İzinleri Yönet" butonunda iki sorun vardı:
 3. `overflow: hidden` özelliği, taşan içeriği gizlemek için kullanılabilir
 4. Tooltip pozisyonunu belirlemek, kullanıcı deneyimini iyileştirir
 5. Global tooltip stilleri, tüm uygulamada tutarlı bir görünüm sağlar
+
+### PrimeNG Dropdown Menüsü Stil Sorunları
+
+### Hata: Dropdown Menüsü Genişlik ve Arka Plan Sorunu
+**Tarih:** 2025-06-08
+**Hata Mesajı:** 
+Kullanıcı yönetimi sayfasında "Kullanıcı Rolü Seçin" dropdown menüsünde stilsel sorunlar:
+1. Dropdown menü öğeleri, dropdown bileşeninin genişliğine uymuyor
+2. Dropdown menü öğelerinin arka planı siyah renk olarak görünüyor
+
+**Nedeni:**
+1. PrimeNG dropdown bileşeni, `appendTo="body"` özelliği kullanıldığında dropdown menüsünü doğrudan body elementine ekler
+2. Bu durumda dropdown menüsü, component-scoped CSS stillerinden etkilenmez
+3. PrimeNG 19'da dropdown bileşeninin stillerine, body'ye eklenen elemanlarda doğrudan erişilemez
+4. Dropdown paneli ve dropdown bileşeni arasında genişlik senkronizasyonu olmaz
+
+**Çözüm:**
+1. Global stil dosyasına (styles.scss) dropdown paneli için özel stil tanımları eklendi:
+```scss
+.p-dropdown-panel {
+  background-color: #ffffff !important;
+  color: #333333 !important;
+  border: 1px solid rgba(0, 0, 0, 0.2) !important;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15) !important;
+  border-radius: 4px !important;
+  min-width: max-content !important;
+  width: auto !important;
+
+  .p-dropdown-items {
+    padding: 0 !important;
+    margin: 0 !important;
+    
+    .p-dropdown-item {
+      width: 100% !important;
+      padding: 0.75rem 1rem !important;
+      color: #333333 !important;
+      background-color: #ffffff !important;
+      font-weight: 500 !important;
+      font-size: 0.9rem !important;
+      transition: all 0.2s ease !important;
+      
+      &:hover {
+        background-color: #f8f9fa !important;
+        color: #000000 !important;
+      }
+      
+      &.p-highlight {
+        background-color: rgba(59, 130, 246, 0.1) !important;
+        color: #2563eb !important;
+      }
+    }
+  }
+}
+
+.user-role-dropdown-panel {
+  min-width: var(--dropdown-width, 100%) !important;
+  width: var(--dropdown-width, auto) !important;
+  background-color: #ffffff !important;
+  border: 1px solid rgba(0, 0, 0, 0.2) !important;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15) !important;
+  border-radius: 4px !important;
+
+  .p-dropdown-items {
+    padding: 0 !important;
+    
+    .p-dropdown-item {
+      color: #333333 !important;
+      background-color: #ffffff !important;
+      font-weight: 500 !important;
+      font-size: 0.9rem !important;
+      padding: 0.75rem 1rem !important;
+      
+      &:hover {
+        background-color: #f8f9fa !important;
+        color: #000000 !important;
+      }
+      
+      &.p-highlight {
+        background-color: rgba(59, 130, 246, 0.1) !important;
+        color: #2563eb !important;
+      }
+    }
+  }
+}
+```
+
+2. HTML'de dropdown bileşenine CSS değişkeni ve panel sınıfı eklendi:
+```html
+<p-dropdown id="roleId" [options]="roles" formControlName="roleId" 
+            placeholder="Kullanıcı Rolü Seçin" optionLabel="label" optionValue="value"
+            [style]="{'width':'100%', 'height':'50px', 'border-radius':'8px', 'background-color':'#ffffff', 'color':'#333333', 'font-size':'1rem', 'padding-left':'42px', 'border':'1px solid #ced4da', '--dropdown-width': '100%'}"
+            styleClass="modern-dropdown user-role-dropdown" appendTo="body" 
+            panelStyleClass="user-role-dropdown-panel" [autoDisplayFirst]="false">
+</p-dropdown>
+```
+
+**Teknik Açıklama:**
+1. Bu sorun, PrimeNG'nin Angular 19'daki davranışından kaynaklanıyor. `appendTo="body"` kullanıldığında, dropdown menüsü (panel) DOM'da farklı bir yere (body'e) render ediliyor ve component-scoped CSS'leri bu elemana uygulanmıyor.
+2. Çözüm, CSS değişkenleri (`--dropdown-width`) kullanarak dropdown genişliğini panel genişliğine yansıtmayı ve global stil dosyasında (`styles.scss`) panele özel seçicilerle yüksek öncelikli stiller tanımlamayı içeriyor.
+3. Ek olarak, `panelStyleClass` özelliği kullanılarak özel bir sınıf (`user-role-dropdown-panel`) atanıyor ve bu sınıf için özel stiller tanımlanıyor.
+4. `autoDisplayFirst="false"` özelliği, dropdown'un otomatik olarak ilk elemanı seçmesini engelliyor.
+
+**Öğrenilen Dersler:**
+1. PrimeNG'nin `appendTo="body"` özelliği, dropdown'un absolute veya fixed positionlı container'larda overlap sorununu çözer ancak stil uygulamayı zorlaştırır.
+2. CSS değişkenleri, farklı DOM konumlarındaki elemanlar arasında stil senkronizasyonu sağlamak için kullanılabilir.
+3. Global CSS dosyalarında yüksek özgüllüğe sahip seçiciler (`!important` ile) kullanmak, PrimeNG'nin kendi stillerini geçersiz kılmak için bazen gereklidir.
+4. PrimeNG bileşenlerinin CSS sınıf yapısını anlamak, doğru stil hedeflemesi için önemlidir.
+5. Kompleks UI bileşenlerinde, tarayıcı geliştirici araçları kullanılarak elemanların DOM yapısı ve uygulanan stiller incelenmelidir.
+
+### Tarayıcı Önbelleği Sorunu
+**Tarih:** 2025-06-08
+**Sorun:** Stil değişiklikleri yapıldıktan sonra değişiklikler tarayıcıda görünmüyor
+
+**Nedeni:**
+1. Tarayıcı, CSS dosyalarını önbelleğe alır ve değişiklikler olduğunda bazen bu değişiklikleri görmez
+2. Angular'ın JIT (Just-In-Time) derlemesinde stil değişiklikleri her zaman anında uygulanmayabilir
+
+**Çözüm:**
+1. Tarayıcıyı zorla yenileme (Hard Refresh): 
+   - Windows: Ctrl+F5
+   - Mac: Cmd+Shift+R
+2. Tarayıcı önbelleğini temizleme:
+   - Chrome: Geliştirici araçları açıkken "Disable cache" seçeneğini işaretleme
+   - Tarayıcı ayarlarından önbelleği temizleme
+3. Angular uygulamasını yeniden derleme ve başlatma:
+   ```
+   ng build
+   ng serve --port=4202
+   ```
+
+**Öğrenilen Dersler:**
+1. Stil değişiklikleri yapıldığında, değişikliklerin görünmemesi durumunda tarayıcı önbelleğini temizlemek gerekebilir
+2. Geliştirme sırasında tarayıcı geliştirici araçlarında "Disable cache" seçeneğini etkinleştirmek faydalıdır
+3. Angular uygulamalarını geliştirirken, stil değişikliklerinin etkisini görmek için bazen uygulamayı yeniden derlemek gerekebilir
+4. CSS stil değişikliklerini belirli aralıklarla commit etmek ve yaptığınız değişiklikleri takip etmek önemlidir
+
+### Hata: Dropdown Placeholder Metni Hizalama Sorunu
+**Tarih:** 2025-06-08
+**Hata Mesajı:**
+Kullanıcı yönetimi formunda, "Kullanıcı Rolü Seçin" placeholder metni diğer form alanları (Ad Soyad, Sicil Numarası, Şifre) ile aynı hizada değil, daha sağda görünüyor.
+
+**Nedeni:**
+1. PrimeNG dropdown bileşeni için `padding-left` değeri, diğer form alanlarından farklı olarak uygulanıyor
+2. Dropdown içindeki metin dikey olarak tam ortalanmıyor
+3. İkon pozisyonu ile metin arasındaki boşluk tutarsız
+
+**Çözüm:**
+1. Dropdown için özel bir stil sınıfı tanımlandı:
+```css
+/* Kullanıcı Rol Dropdown Placeholder Metni Stili */
+.user-role-dropdown .p-dropdown-label,
+body .user-role-dropdown .p-dropdown-label,
+html body .user-role-dropdown .p-dropdown-label {
+  padding-top: 0 !important;
+  padding-bottom: 0 !important;
+  padding-left: 42px !important;
+  display: flex !important;
+  align-items: center !important;
+  color: #333333 !important;
+  font-size: 1rem !important;
+}
+```
+
+## Kullanıcı Yönetimi Rol Filtreleme Sorunu
+
+**Tarih:** 2025-06-08
+
+**Hata Açıklaması:**
+Kullanıcı yönetimi sayfasında rol filtreleme dropdown'ında iki adet "Tümü" seçeneği görünüyordu ve filtreleme işlemi düzgün çalışmıyordu. Kullanıcılar bir rol seçtiğinde, filtreleme işlemi gerçekleşmiyordu.
+
+**Nedeni:**
+1. HTML dosyasında statik bir "Tümü" seçeneği ve ayrıca `roleFilterOptions` dizisinde de bir "Tümü" seçeneği bulunuyordu, bu da dropdown'da iki adet "Tümü" seçeneğinin görünmesine neden oluyordu.
+2. `onRoleFilterChange` metodu, seçilen değeri string olarak karşılaştırıyordu, ancak `roleFilterOptions` dizisindeki değerler sayı veya null olarak tanımlanmıştı.
+3. Boş string değeri ile null değeri arasında uyumsuzluk vardı.
+
+**Çözüm:**
+1. HTML dosyasından statik "Tümü" seçeneği kaldırıldı:
+```html
+<!-- Kaldırılan kod -->
+<option value="" selected>Tümü</option>
+```
+
+2. `onRoleFilterChange` metodu güncellendi, boş string değerini null olarak işleyecek ve sayısal değerleri doğru şekilde dönüştürecek şekilde:
+```typescript
+onRoleFilterChange(event: Event): void {
+  const value = (event.target as HTMLSelectElement).value;
+  
+  // Boş string ise null olarak işle, aksi takdirde sayıya dönüştür
+  const roleValue = value === '' ? null : Number(value);
+  
+  // Seçilen rolü bul
+  this.selectedRole = this.roleFilterOptions.find(role => role.value === roleValue) || null;
+  
+  console.log('Seçilen rol:', this.selectedRole);
+  
+  // Sayfa numarasını sıfırla ve filtreleri uygula
+  this.currentPage = 1;
+  this.applyFilters();
+}
+```
+
+3. `applyFilters` ve `applyRoleFilter` metotları güncellendi:
+```typescript
+applyFilters() {
+  // ... mevcut kod ...
+  
+  // Rol filtresini uygula
+  if (this.selectedRole && this.selectedRole.value !== null) {
+    this.applyRoleFilter(this.selectedRole.value);
+  }
+  
+  // ... mevcut kod ...
+}
+
+applyRoleFilter(roleId: number) {
+  console.log('Rol filtresi uygulanıyor:', roleId);
+  
+  // Tüm kullanıcıları filtrele
+  this.filteredUsers = this.filteredUsers.filter(user => {
+    // Admin rolü (1) için özel kontrol
+    if (roleId === 1) {
+      return user.isAdmin === true;
+    }
+    // Diğer roller için roleId kontrolü
+    return user.roleId === roleId;
+  });
+  
+  console.log('Filtrelenmiş kullanıcılar:', this.filteredUsers);
+  this.updatePagination();
+}
+```
+
+4. `loadRoles` metoduna log ifadeleri eklendi:
+```typescript
+loadRoles() {
+  this.roleService.getRoles().subscribe({
+    next: (roles) => {
+      this.roles = roles;
+      console.log('Yüklenen roller:', roles);
+      console.log('Rol filtre seçenekleri:', this.roleFilterOptions);
+    },
+    error: (error) => {
+      console.error('Roller yüklenirken hata oluştu:', error);
+      // Hata durumunda varsayılan roller
+      this.roles = [
+        { value: 1, label: 'Yönetici' },
+        { value: 2, label: 'Kullanıcı' }
+      ];
+      console.log('Varsayılan roller:', this.roles);
+      console.log('Rol filtre seçenekleri:', this.roleFilterOptions);
+    }
+  });
+}
+```
+
+**Öğrenilen Dersler:**
+1. Dropdown menülerde statik ve dinamik seçeneklerin karışmamasına dikkat edilmelidir.
+2. Veri tipleri arasındaki dönüşümlerde (string, number, null) dikkatli olunmalıdır.
+3. Filtreleme işlemlerinde, seçilen değerin doğru şekilde işlenmesi ve karşılaştırılması önemlidir.
+4. Hata ayıklama için console.log ifadeleri eklemek, sorunun kaynağını bulmada yardımcı olur.
+5. HTML ve TypeScript kodları arasındaki veri akışının tutarlı olması gerekir.
