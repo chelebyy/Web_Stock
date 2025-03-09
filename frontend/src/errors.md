@@ -282,4 +282,70 @@ body .p-dropdown-panel .p-dropdown-items .p-dropdown-empty-message {
 2. Overlay bileşenleri için stil tanımlarını global stil dosyasına eklemek daha etkili olabilir.
 3. Stil tanımlarının spesifikliğini artırmak için `body` seçicisini kullanmak ve `!important` eklemek gerekebilir.
 4. PrimeNG 19'da CSS değişken isimlerinin `--p-` öneki ile kullanıldığını göz önünde bulundurmak gerekir.
-5. Dinamik olarak oluşturulan bileşenlerin stillerini kontrol etmek için, bileşenin DOM'da nerede oluşturulduğunu anlamak önemlidir. 
+5. Dinamik olarak oluşturulan bileşenlerin stillerini kontrol etmek için, bileşenin DOM'da nerede oluşturulduğunu anlamak önemlidir.
+
+## Angular 19 Geçişi Sonrası Dropdown Menü Yazı Görünürlüğü Sorunu
+
+### Sorun
+Angular 19 ve PrimeNG 19'a geçiş sonrasında Kullanıcı Yönetimi sayfasındaki dropdown menüsünün (rol filtreleme) arka plan rengi beyaz olarak düzeltildi, ancak bu sefer içindeki yazılar ("Tümü", "Admin", "User") çok soluk veya görünmez hale geldi.
+
+### Nedeni
+1. Dropdown öğelerinin yazı rengi yeterince koyu değildi veya opaklığı düşüktü.
+2. PrimeNG 19'da CSS değişken değerleri değişmiş olabilir.
+3. Dropdown öğelerinin padding ve diğer stil özellikleri yeterince belirgin değildi.
+
+### Çözüm
+Global stil dosyasında (styles.scss) dropdown öğelerinin stillerini daha belirgin hale getirdik:
+
+```scss
+/* Dropdown Panel Düzeltmeleri */
+body .p-dropdown-panel {
+  background: var(--p-surface-overlay, #ffffff) !important;
+  border: 1px solid rgba(0, 0, 0, 0.2) !important; /* Daha belirgin kenarlık */
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15) !important; /* Daha belirgin gölge */
+  border-radius: 6px !important; /* Köşeleri yuvarlatma */
+  overflow: hidden !important; /* Taşan içeriği gizleme */
+}
+
+body .p-dropdown-panel .p-dropdown-items .p-dropdown-item {
+  color: #333333 !important; /* Daha koyu renk */
+  background: var(--p-surface-overlay, #ffffff) !important;
+  font-weight: 500 !important; /* Daha kalın yazı */
+  font-size: 1rem !important; /* Daha büyük yazı */
+  opacity: 1 !important; /* Tam opaklık */
+  padding: 0.75rem 1rem !important; /* Daha fazla padding */
+  border-bottom: 1px solid rgba(0, 0, 0, 0.05) !important; /* Öğeler arasında ince çizgi */
+}
+
+body .p-dropdown-panel .p-dropdown-items .p-dropdown-item * {
+  color: inherit !important; /* Üst elementin rengini miras al */
+  font-weight: inherit !important; /* Üst elementin yazı ağırlığını miras al */
+  opacity: 1 !important; /* Tam opaklık */
+}
+
+body .p-dropdown-panel .p-dropdown-items .p-dropdown-item:hover {
+  background: var(--p-surface-hover, #f8f9fa) !important;
+  color: #000000 !important; /* Hover durumunda daha koyu renk */
+}
+
+body .p-dropdown-panel .p-dropdown-items .p-dropdown-item.p-highlight {
+  background: rgba(59, 130, 246, 0.1) !important;
+  color: #2563eb !important; /* Daha koyu mavi */
+  font-weight: 600 !important; /* Daha kalın yazı */
+}
+
+body .p-dropdown-panel .p-dropdown-items .p-dropdown-empty-message {
+  color: #666666 !important; /* Orta tonda gri */
+  font-style: italic !important; /* İtalik yazı */
+  padding: 0.75rem 1rem !important; /* Padding */
+  text-align: center !important; /* Ortalanmış metin */
+}
+```
+
+### Öğrenilen Dersler
+1. Beyaz arka plan üzerinde yazıların görünürlüğünü sağlamak için yeterince koyu renk kullanılmalıdır.
+2. CSS değişkenleri yerine doğrudan renk değerleri kullanmak, tarayıcı ve tema farklılıklarından kaynaklanan sorunları önleyebilir.
+3. Yazı ağırlığı (font-weight) ve boyutu (font-size) gibi özellikler, yazıların görünürlüğünü artırmada önemli rol oynar.
+4. Dropdown öğeleri arasına ince çizgiler eklemek, öğelerin birbirinden ayrılmasını ve daha iyi görünmesini sağlar.
+5. Dropdown panelinin kendisi için de belirgin kenarlık ve gölge eklemek, kullanıcı deneyimini iyileştirir.
+6. İç içe geçmiş elementlerin stillerini kontrol etmek için, üst elementin stillerini alt elementlere miras bırakmak (`color: inherit` gibi) etkili bir yöntemdir. 
