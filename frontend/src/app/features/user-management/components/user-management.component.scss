@@ -751,6 +751,8 @@
       
       .p-dropdown-panel {
         background-color: var(--surface-card, #ffffff) !important;
+        border: 1px solid var(--surface-border, #ced4da) !important;
+        box-shadow: 0 2px 12px rgba(0, 0, 0, 0.1) !important;
         
         .p-dropdown-items {
           background-color: var(--surface-card, #ffffff) !important;
@@ -763,9 +765,14 @@
             }
             
             &.p-highlight {
-              background-color: var(--surface-hover, #e9ecef) !important;
+              background-color: rgba(59, 130, 246, 0.1) !important;
               color: var(--primary-color, #3B82F6) !important;
+              font-weight: 500 !important;
             }
+          }
+          
+          .p-dropdown-empty-message {
+            color: var(--text-color-secondary, #6c757d) !important;
           }
         }
       }
