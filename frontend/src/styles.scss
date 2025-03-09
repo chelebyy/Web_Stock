@@ -1,6 +1,12 @@
 @import "@angular/material/prebuilt-themes/indigo-pink.css";
 @import "primeicons/primeicons.css";
 
+/* PrimeNG 19 Tema Ayarları */
+:root {
+  font-size: 14px;
+  --p-font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+}
+
 /* Glass Effect sınıfını düzelteceğim */
 .glass-effect {
   background: rgba(255, 255, 255, 0.1) !important;
@@ -12,19 +18,10 @@
 }
 
 /* Global Styles */
-:root {
-  --surface-ground: #f8f9fa;
-  --surface-card: #ffffff;
-  --primary-color: #3B82F6;
-  --text-color: #495057;
-  --text-color-secondary: #6c757d;
-  --font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-}
-
 body {
   margin: 0;
   padding: 0;
-  font-family: var(--font-family);
+  font-family: var(--p-font-family);
   background: linear-gradient(135deg, #ffffff 0%, #f0f4f8 100%);
   min-height: 100vh;
   overflow-x: hidden;
@@ -39,28 +36,131 @@ html, body {
   box-sizing: border-box;
 }
 
-/* PrimeNG Component Styles */
-.p-component {
-  font-family: var(--font-family);
+/* PrimeNG Bileşen Düzeltmeleri */
+/* Dialog Düzeltmeleri */
+.p-dialog .p-dialog-header,
+.p-dialog .p-dialog-content,
+.p-dialog .p-dialog-footer {
+  background: var(--p-surface-overlay, #ffffff);
+  color: var(--p-text-color, #495057);
 }
 
-.p-card {
-  background: #ffffff;
-  border-radius: 12px;
-  padding: 1.5rem;
-  margin-bottom: 1rem;
+.p-dialog .p-dialog-header {
+  padding: 1.25rem 1.5rem;
+  border-top-right-radius: var(--p-border-radius, 6px);
+  border-top-left-radius: var(--p-border-radius, 6px);
+  border-bottom: 1px solid var(--p-surface-border, #dee2e6);
+}
+
+.p-dialog .p-dialog-content {
+  padding: 1.25rem 1.5rem;
+}
+
+.p-dialog .p-dialog-footer {
+  padding: 1.25rem 1.5rem;
+  border-bottom-right-radius: var(--p-border-radius, 6px);
+  border-bottom-left-radius: var(--p-border-radius, 6px);
+  border-top: 1px solid var(--p-surface-border, #dee2e6);
+}
+
+/* Tablo Düzeltmeleri */
+.p-datatable .p-datatable-header,
+.p-datatable .p-datatable-thead > tr > th,
+.p-datatable .p-datatable-tbody > tr > td,
+.p-datatable .p-datatable-footer {
+  background: var(--p-surface-card, #ffffff);
+  color: var(--p-text-color, #495057);
+}
+
+.p-datatable .p-datatable-thead > tr > th {
+  font-weight: 600;
+  padding: 1rem 1rem;
+  border-color: var(--p-surface-border, #dee2e6);
+}
+
+.p-datatable .p-datatable-tbody > tr {
+  transition: background-color 0.2s, box-shadow 0.2s;
+}
+
+.p-datatable .p-datatable-tbody > tr:hover {
+  background: var(--p-surface-hover, #f6f9fc);
+}
+
+.p-datatable .p-datatable-tbody > tr > td {
+  padding: 1rem 1rem;
+  border-color: var(--p-surface-border, #dee2e6);
+}
+
+/* Form Bileşenleri Düzeltmeleri */
+.p-inputtext,
+.p-dropdown,
+.p-multiselect,
+.p-password input {
+  padding: 0.5rem 0.75rem;
+  background: var(--p-surface-overlay, #ffffff);
+  color: var(--p-text-color, #495057);
+  border: 1px solid var(--p-surface-border, #ced4da);
+  border-radius: var(--p-border-radius, 6px);
+  transition: background-color 0.2s, color 0.2s, border-color 0.2s, box-shadow 0.2s;
+}
+
+.p-inputtext:enabled:hover,
+.p-dropdown:not(.p-disabled):hover,
+.p-multiselect:not(.p-disabled):hover {
+  border-color: var(--p-primary-color, #3B82F6);
+}
+
+.p-inputtext:enabled:focus,
+.p-dropdown:not(.p-disabled).p-focus,
+.p-multiselect:not(.p-disabled).p-focus,
+.p-password input:focus {
+  outline: 0 none;
+  outline-offset: 0;
+  box-shadow: 0 0 0 0.2rem var(--p-primary-shade-100, rgba(59, 130, 246, 0.2));
+  border-color: var(--p-primary-color, #3B82F6);
+}
+
+/* Buton Düzeltmeleri */
+.p-button {
+  color: var(--p-primary-color-text, #ffffff);
+  background: var(--p-primary-color, #3B82F6);
+  border: 1px solid var(--p-primary-color, #3B82F6);
+  padding: 0.5rem 1rem;
+  font-size: 1rem;
+  transition: background-color 0.2s, color 0.2s, border-color 0.2s, box-shadow 0.2s;
+  border-radius: var(--p-border-radius, 6px);
+}
+
+.p-button:enabled:hover {
+  background: var(--p-primary-shade-400, #2563eb);
+  color: var(--p-primary-color-text, #ffffff);
+  border-color: var(--p-primary-shade-400, #2563eb);
+}
+
+.p-button.p-button-outlined {
+  background-color: transparent;
+  color: var(--p-primary-color, #3B82F6);
+  border: 1px solid var(--p-primary-color, #3B82F6);
+}
+
+.p-button.p-button-outlined:enabled:hover {
+  background: rgba(59, 130, 246, 0.04);
+  color: var(--p-primary-color, #3B82F6);
+  border: 1px solid var(--p-primary-color, #3B82F6);
+}
+
+/* Card Düzeltmeleri */
+.p-card, .card {
+  background: var(--p-surface-card, #ffffff);
+  border-radius: var(--p-border-radius, 6px);
   box-shadow: rgba(17, 17, 26, 0.1) 0px 4px 16px, 
               rgba(17, 17, 26, 0.05) 0px 8px 32px;
-  border: 1px solid rgba(0,0,0,0.1);
   transition: transform 0.2s ease, box-shadow 0.2s ease;
-
-  &:hover {
-    transform: translateY(-2px);
-    box-shadow: rgba(17, 17, 26, 0.15) 0px 8px 24px, 
-                rgba(17, 17, 26, 0.1) 0px 16px 48px;
-  }
 }
 
+/* Diğer stil düzeltmeleri burada devam edecek... */
+
+/* Mevcut kodun geri kalanını koruyorum */
 /* Form stilleri */
 .form-container {
   display: flex;
@@ -132,7 +232,7 @@ html, body {
 html, body {
   height: 100%;
   margin: 0;
-  font-family: var(--font-family);
+  font-family: var(--p-font-family);
 }
 
 .user-management-container {
@@ -160,12 +260,6 @@ html, body {
     align-items: center;
     gap: 0.5rem;
   }
-}
-
-.p-dialog .p-dialog-footer {
-  text-align: right;
-  padding-top: 1rem;
-  border-top: 1px solid var(--surface-border);
 }
 
 /* Scrollbar Styles */

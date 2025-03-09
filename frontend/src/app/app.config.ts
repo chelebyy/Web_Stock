@@ -7,6 +7,7 @@ import { AuthInterceptor } from './core/http/auth.interceptor';
 import { MessageService } from 'primeng/api';
 import { ToastModule } from 'primeng/toast';
 import { providePrimeNG } from 'primeng/config';
+import Aura from '@primeng/themes/aura';
 
 export const appConfig: ApplicationConfig = {
   providers: [
@@ -15,6 +16,10 @@ export const appConfig: ApplicationConfig = {
     provideHttpClient(withInterceptors([AuthInterceptor])),
     MessageService,
     importProvidersFrom(ToastModule),
-    providePrimeNG()
+    providePrimeNG({
+      theme: {
+        preset: Aura
+      }
+    })
   ]
 };
