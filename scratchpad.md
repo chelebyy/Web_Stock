@@ -248,9 +248,7 @@
 - Tüm dropdown'lar ve butonlar için tutarlı yükseklik (36px) ve stil uygulandı
 - "İzinleri Yönet" butonundaki metin kayma sorunu çözüldü
 - "İzinleri Yönet" butonunda sadece anahtar ikonunun görünmesi sağlandı
-- Tooltip'ler için global stiller eklendi ve pozisyonları düzeltildi
-- Rol filtreleme dropdown'ındaki çift "Tümü" seçeneği sorunu çözüldü
-- Rol filtreleme işlevselliği düzeltildi (string/number dönüşüm sorunu)
+- Login sayfasındaki şifre alanı arka plan sorunu çözüldü (beyaz arka plan üzerinde beyaz metin görünmüyordu)
 
 ## Gelecek Adımlar
 1. GitHub'a son değişiklikleri push etmek
