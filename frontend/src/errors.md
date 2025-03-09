@@ -120,4 +120,65 @@ Angular 19 ve PrimeNG 19'a geçiş sonrasında şifre değiştirme formunun tasa
 4. Tasarım değişikliklerinde, tüm bileşenlerin birbiriyle uyumlu olduğundan emin olunmalıdır.
 5. Farklı işlevlere sahip butonları (onay/iptal) farklı renklerle ayırt etmek kullanıcı deneyimini iyileştirir.
 6. Butonların tutarlı bir görsel stile sahip olması, kullanıcı arayüzünün profesyonel görünmesini sağlar.
-7. Yeşil renk genellikle onay ve olumlu eylemleri, kırmızı renk ise iptal ve olumsuz eylemleri temsil eder, bu renk kodlaması kullanıcıların arayüzü daha sezgisel bir şekilde kullanmalarını sağlar. 
+7. Yeşil renk genellikle onay ve olumlu eylemleri, kırmızı renk ise iptal ve olumsuz eylemleri temsil eder, bu renk kodlaması kullanıcıların arayüzü daha sezgisel bir şekilde kullanmalarını sağlar.
+
+## Angular 19 Geçişi Sonrası Hata Mesajları Okunabilirlik Sorunu
+
+### Sorun
+Angular 19 ve PrimeNG 19'a geçiş sonrasında hata mesajlarının (Toast bileşeni) arka plan rengi çok açık olduğu için içindeki yazılar yeterince okunabilir değildi. Özellikle "Şifre en az 6 karakter olmalıdır!" gibi hata mesajları pembe/açık kırmızı arka plan üzerinde yeterince kontrast oluşturmuyordu.
+
+### Çözüm
+Global stil dosyasında (styles.scss) Toast bileşenlerinin stillerini daha koyu ve okunabilir hale getirdik:
+
+```scss
+/* Toast Mesajları Stilleri */
+.p-toast {
+  .p-toast-message {
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    
+    &.p-toast-message-error {
+      background: #b91c1c !important; /* Daha koyu kırmızı */
+      border: 1px solid rgba(220, 38, 38, 0.3) !important;
+      color: #ffffff !important;
+      
+      .p-toast-message-content {
+        .p-toast-message-text {
+          .p-toast-summary {
+            font-weight: 600 !important;
+          }
+          .p-toast-detail {
+            font-weight: 400 !important;
+            opacity: 0.95 !important;
+          }
+        }
+      }
+    }
+    
+    &.p-toast-message-success {
+      background: #15803d !important; /* Daha koyu yeşil */
+      border: 1px solid rgba(34, 197, 94, 0.3) !important;
+      color: #ffffff !important;
+    }
+    
+    &.p-toast-message-info {
+      background: #0369a1 !important; /* Daha koyu mavi */
+      border: 1px solid rgba(14, 165, 233, 0.3) !important;
+      color: #ffffff !important;
+    }
+    
+    &.p-toast-message-warn {
+      background: #b45309 !important; /* Daha koyu turuncu */
+      border: 1px solid rgba(234, 88, 12, 0.3) !important;
+      color: #ffffff !important;
+    }
+  }
+}
+```
+
+### Öğrenilen Dersler
+1. Hata mesajları gibi kritik bildirimler için yeterli kontrast oranı sağlanmalıdır.
+2. Yazı ve arka plan rengi arasında en az 4.5:1 kontrast oranı olmalıdır (WCAG 2.0 AA standardı).
+3. Bildirim türlerine göre renk kodlaması yaparken (hata: kırmızı, başarı: yeşil, vb.) renklerin yeterince koyu olduğundan emin olunmalıdır.
+4. Global stil dosyasında yapılan değişiklikler, tüm uygulamadaki bileşenleri etkileyeceği için dikkatli olunmalıdır.
+5. PrimeNG sürüm güncellemelerinde, bileşenlerin varsayılan stillerinin değişebileceği göz önünde bulundurulmalıdır. 

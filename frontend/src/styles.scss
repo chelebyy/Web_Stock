@@ -371,3 +371,56 @@ html, body {
 .custom-gradient-button i {
   margin-right: 8px !important;
 }
+
+/* Toast Mesajları Stilleri */
+.p-toast {
+  .p-toast-message {
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    
+    &.p-toast-message-error {
+      background: #b91c1c !important; /* Daha koyu kırmızı */
+      border: 1px solid rgba(220, 38, 38, 0.3) !important;
+      color: #ffffff !important;
+      
+      .p-toast-message-content {
+        .p-toast-message-text {
+          .p-toast-summary {
+            font-weight: 600 !important;
+          }
+          .p-toast-detail {
+            font-weight: 400 !important;
+            opacity: 0.95 !important;
+          }
+        }
+      }
+      
+      .p-toast-icon-close {
+        color: rgba(255, 255, 255, 0.8) !important;
+        
+        &:hover {
+          color: #ffffff !important;
+          background-color: rgba(255, 255, 255, 0.2) !important;
+        }
+      }
+    }
+    
+    &.p-toast-message-success {
+      background: #15803d !important; /* Daha koyu yeşil */
+      border: 1px solid rgba(34, 197, 94, 0.3) !important;
+      color: #ffffff !important;
+    }
+    
+    &.p-toast-message-info {
+      background: #0369a1 !important; /* Daha koyu mavi */
+      border: 1px solid rgba(14, 165, 233, 0.3) !important;
+      color: #ffffff !important;
+    }
+    
+    &.p-toast-message-warn {
+      background: #b45309 !important; /* Daha koyu turuncu */
+      border: 1px solid rgba(234, 88, 12, 0.3) !important;
+      color: #ffffff !important;
+    }
+  }
+}
