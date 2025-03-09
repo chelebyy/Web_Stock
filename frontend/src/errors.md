@@ -232,53 +232,54 @@ Kullanıcı Yönetimi bileşeninin SCSS dosyasında checkbox stillerini düzenle
 4. Bileşenlerin görsel tutarlılığını sağlamak için, tüm bileşenlerin aynı tema ve renk şemasını kullanmasına dikkat edilmelidir.
 5. Sürüm geçişlerinde, özellikle UI bileşenlerinin görünümünü kontrol etmek ve gerektiğinde düzeltmeler yapmak önemlidir.
 
-## Angular 19 Geçişi Sonrası Dropdown Menü Tasarım Sorunları
+## Angular 19 Geçişi Sonrası Dropdown Menü Tasarım Sorunları (Güncelleme)
 
 ### Sorun
-Angular 19 ve PrimeNG 19'a geçiş sonrasında Kullanıcı Yönetimi sayfasındaki dropdown menüsü (rol filtreleme) siyah arka plana sahip oldu. Bu durum, içindeki yazıların ("Tümü", "Admin", "User") görünürlüğünü azalttı ve kullanıcı deneyimini olumsuz etkiledi.
+Angular 19 ve PrimeNG 19'a geçiş sonrasında Kullanıcı Yönetimi sayfasındaki dropdown menüsü (rol filtreleme) siyah arka plana sahip oldu. Bileşen SCSS dosyasında yapılan düzeltmeler yeterli olmadı ve dropdown menüsü hala siyah arka plana sahipti.
 
 ### Nedeni
-1. PrimeNG 19'da tema yapılandırması değişti ve CSS değişken isimleri `--p-` öneki ile kullanılmaya başlandı.
-2. Angular 19'un yeni kontrol akış sözdizimi DOM yapısını değiştirdi.
-3. PrimeNG 19'da dropdown bileşeninin varsayılan arka plan rengi değişti.
+1. PrimeNG 19'da dropdown panel, DOM'a doğrudan eklenmek yerine, bir overlay olarak body'ye ekleniyor.
+2. Bileşen SCSS dosyasındaki `::ng-deep` içindeki stil tanımları, overlay'e uygulanmıyor.
+3. PrimeNG 19'da CSS değişken isimleri `--p-` öneki ile kullanılmaya başlandı.
 
 ### Çözüm
-Kullanıcı Yönetimi bileşeninin SCSS dosyasında dropdown panel stillerini düzenledik:
+Global stil dosyasına (styles.scss) dropdown panel stillerini ekledik:
 
 ```scss
-// Dropdown panel düzeltmeleri
-.p-dropdown-panel {
-  background-color: var(--surface-card, #ffffff) !important;
-  border: 1px solid var(--surface-border, #ced4da) !important;
+/* Dropdown Panel Düzeltmeleri */
+body .p-dropdown-panel {
+  background: var(--p-surface-overlay, #ffffff) !important;
+  border: 1px solid var(--p-surface-border, #ced4da) !important;
   box-shadow: 0 2px 12px rgba(0, 0, 0, 0.1) !important;
-  
-  .p-dropdown-items {
-    background-color: var(--surface-card, #ffffff) !important;
-    
-    .p-dropdown-item {
-      color: var(--text-color, #495057) !important;
-      
-      &:hover {
-        background-color: var(--surface-hover, #f8f9fa) !important;
-      }
-      
-      &.p-highlight {
-        background-color: rgba(59, 130, 246, 0.1) !important;
-        color: var(--primary-color, #3B82F6) !important;
-        font-weight: 500 !important;
-      }
-    }
-    
-    .p-dropdown-empty-message {
-      color: var(--text-color-secondary, #6c757d) !important;
-    }
-  }
+}
+
+body .p-dropdown-panel .p-dropdown-items {
+  background: var(--p-surface-overlay, #ffffff) !important;
+}
+
+body .p-dropdown-panel .p-dropdown-items .p-dropdown-item {
+  color: var(--p-text-color, #495057) !important;
+  background: var(--p-surface-overlay, #ffffff) !important;
+}
+
+body .p-dropdown-panel .p-dropdown-items .p-dropdown-item:hover {
+  background: var(--p-surface-hover, #f8f9fa) !important;
+}
+
+body .p-dropdown-panel .p-dropdown-items .p-dropdown-item.p-highlight {
+  background: rgba(59, 130, 246, 0.1) !important;
+  color: var(--p-primary-color, #3B82F6) !important;
+  font-weight: 500 !important;
+}
+
+body .p-dropdown-panel .p-dropdown-items .p-dropdown-empty-message {
+  color: var(--p-text-color-secondary, #6c757d) !important;
 }
 ```
 
 ### Öğrenilen Dersler
-1. Angular ve PrimeNG sürüm geçişlerinde bileşenlerin varsayılan stillerinin değişebileceğini göz önünde bulundurmak gerekir.
-2. Özellikle dropdown, modal, tooltip gibi dinamik olarak oluşturulan bileşenlerin stillerini kontrol etmek önemlidir.
-3. Koyu arka plan üzerinde açık renkli yazılar veya açık arka plan üzerinde koyu renkli yazılar kullanarak yeterli kontrast sağlanmalıdır.
-4. CSS değişkenlerini kullanarak tema değişikliklerinde tutarlılık sağlanabilir.
-5. Bileşenlerin görsel tutarlılığını sağlamak için, tüm bileşenlerin aynı tema ve renk şemasını kullanmasına dikkat edilmelidir. 
+1. PrimeNG 19'da, dropdown panel gibi bazı bileşenler overlay olarak body'ye ekleniyor. Bu nedenle, bileşen SCSS dosyasındaki stil tanımları yeterli olmayabilir.
+2. Overlay bileşenleri için stil tanımlarını global stil dosyasına eklemek daha etkili olabilir.
+3. Stil tanımlarının spesifikliğini artırmak için `body` seçicisini kullanmak ve `!important` eklemek gerekebilir.
+4. PrimeNG 19'da CSS değişken isimlerinin `--p-` öneki ile kullanıldığını göz önünde bulundurmak gerekir.
+5. Dinamik olarak oluşturulan bileşenlerin stillerini kontrol etmek için, bileşenin DOM'da nerede oluşturulduğunu anlamak önemlidir. 

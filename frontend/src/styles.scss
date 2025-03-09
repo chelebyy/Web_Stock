@@ -45,6 +45,36 @@ html, body {
   color: var(--p-text-color, #495057);
 }
 
+/* Dropdown Panel Düzeltmeleri */
+body .p-dropdown-panel {
+  background: var(--p-surface-overlay, #ffffff) !important;
+  border: 1px solid var(--p-surface-border, #ced4da) !important;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.1) !important;
+}
+
+body .p-dropdown-panel .p-dropdown-items {
+  background: var(--p-surface-overlay, #ffffff) !important;
+}
+
+body .p-dropdown-panel .p-dropdown-items .p-dropdown-item {
+  color: var(--p-text-color, #495057) !important;
+  background: var(--p-surface-overlay, #ffffff) !important;
+}
+
+body .p-dropdown-panel .p-dropdown-items .p-dropdown-item:hover {
+  background: var(--p-surface-hover, #f8f9fa) !important;
+}
+
+body .p-dropdown-panel .p-dropdown-items .p-dropdown-item.p-highlight {
+  background: rgba(59, 130, 246, 0.1) !important;
+  color: var(--p-primary-color, #3B82F6) !important;
+  font-weight: 500 !important;
+}
+
+body .p-dropdown-panel .p-dropdown-items .p-dropdown-empty-message {
+  color: var(--p-text-color-secondary, #6c757d) !important;
+}
+
 .p-dialog .p-dialog-header {
   padding: 1.25rem 1.5rem;
   border-top-right-radius: var(--p-border-radius, 6px);
