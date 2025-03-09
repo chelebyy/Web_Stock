@@ -1,0 +1,373 @@
+.role-management-container {
+  padding: 2rem;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  background-color: var(--surface-ground);
+}
+
+// Sayfa başlığı
+.page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 1.5rem;
+  
+  .page-title-container {
+    .page-title {
+      font-size: 2.25rem;
+      font-weight: 700;
+      color: #1e3a8a; // Koyu mavi başlık (beyaz tema için)
+      margin: 0;
+      margin-bottom: 0.5rem;
+      position: relative;
+      letter-spacing: -0.5px;
+      
+      &::after {
+        content: '';
+        position: absolute;
+        bottom: -10px;
+        left: 0;
+        width: 60px;
+        height: 4px;
+        background: linear-gradient(90deg, #3B82F6, #60a5fa);
+        border-radius: 4px;
+      }
+    }
+    
+    .page-subtitle {
+      color: #64748b; // Slate 500
+      font-size: 1.1rem;
+      margin: 1.25rem 0 0 0;
+      font-weight: 400;
+    }
+  }
+  
+  .back-button {
+    transition: all 0.2s ease;
+    align-self: flex-start;
+    margin-top: 0.5rem;
+    
+    &:hover {
+      transform: translateX(-5px);
+    }
+  }
+}
+
+// Ana kart
+.main-card {
+  background-color: var(--surface-card);
+  border-radius: 12px;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  overflow: hidden;
+  margin-bottom: 2rem;
+  
+  .card-header {
+    padding: 1.25rem 1.5rem;
+    border-bottom: 1px solid var(--surface-border);
+    
+    .card-header-content {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      
+      .search-container {
+        flex: 1;
+        max-width: 400px;
+        
+        input {
+          width: 100%;
+          padding: 0.75rem 0.75rem 0.75rem 2.5rem;
+          border-radius: 8px;
+          font-size: 1rem;
+          
+          &:focus {
+            box-shadow: 0 0 0 2px #bfdbfe;
+          }
+        }
+        
+        i {
+          left: 0.75rem;
+          color: #64748b;
+        }
+      }
+      
+      .create-button {
+        transition: all 0.2s ease;
+        
+        &:hover {
+          transform: translateY(-2px);
+          box-shadow: 0 4px 6px -1px rgba(59, 130, 246, 0.5);
+        }
+      }
+    }
+  }
+}
+
+// Tablo stilleri
+:host ::ng-deep {
+  .p-datatable {
+    .p-datatable-header {
+      background-color: transparent;
+      border: none;
+      padding: 1rem 1.5rem;
+    }
+    
+    .p-datatable-thead > tr > th {
+      background-color: var(--surface-section);
+      color: var(--text-color);
+      padding: 1rem 1.5rem;
+      font-weight: 600;
+      border-color: var(--surface-border);
+    }
+    
+    .p-datatable-tbody > tr {
+      background-color: var(--surface-card);
+      transition: all 0.2s ease;
+      
+      &:hover {
+        background-color: var(--surface-hover);
+      }
+      
+      > td {
+        padding: 1rem 1.5rem;
+        border-color: var(--surface-border);
+        
+        .id-badge {
+          background-color: #e0e7ff;
+          color: #4f46e5;
+          padding: 0.25rem 0.5rem;
+          border-radius: 4px;
+          font-weight: 600;
+          font-size: 0.875rem;
+        }
+        
+        .role-name {
+          font-weight: 600;
+          color: var(--text-color);
+          font-size: 1rem;
+        }
+        
+        .role-description {
+          color: var(--text-color-secondary);
+          font-size: 0.875rem;
+          max-width: 400px;
+          white-space: nowrap;
+          overflow: hidden;
+          text-overflow: ellipsis;
+        }
+      }
+    }
+    
+    .p-paginator {
+      padding: 1rem 1.5rem;
+      background-color: transparent;
+      border-color: var(--surface-border);
+      
+      .p-paginator-current {
+        color: var(--text-color-secondary);
+      }
+    }
+  }
+  
+  .action-column {
+    width: 150px;
+    text-align: center;
+  }
+  
+  .action-buttons {
+    display: flex;
+    justify-content: center;
+    gap: 0.5rem;
+    
+    .p-button {
+      width: 2.5rem;
+      height: 2.5rem;
+      
+      &.p-button-info {
+        color: #0ea5e9;
+      }
+      
+      &.p-button-danger {
+        color: #ef4444;
+      }
+      
+      &.p-button-success {
+        color: #10b981;
+      }
+      
+      &:hover {
+        background-color: var(--surface-hover);
+      }
+    }
+  }
+  
+  // Boş durum mesajı
+  .empty-message {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 3rem 1rem;
+    text-align: center;
+    
+    .empty-icon {
+      font-size: 3rem;
+      color: #cbd5e1;
+      margin-bottom: 1rem;
+    }
+    
+    p {
+      color: #64748b;
+      font-size: 1.1rem;
+      margin-bottom: 1.5rem;
+    }
+  }
+  
+  // Tablo özeti
+  .table-summary {
+    color: var(--text-color-secondary);
+    font-size: 0.875rem;
+  }
+}
+
+// Dialog stilleri
+:host ::ng-deep {
+  .role-dialog {
+    .p-dialog-header {
+      padding: 1.5rem;
+      border-bottom: 1px solid var(--surface-border);
+    }
+    
+    .p-dialog-content {
+      padding: 1.5rem;
+    }
+    
+    .p-dialog-footer {
+      padding: 1.25rem 1.5rem;
+      border-top: 1px solid var(--surface-border);
+    }
+  }
+  
+  .modern-dialog {
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+    
+    .p-dialog-header-icon {
+      width: 2.5rem;
+      height: 2.5rem;
+      border-radius: 50%;
+      transition: all 0.2s ease;
+      
+      &:hover {
+        background-color: var(--surface-hover);
+      }
+    }
+  }
+  
+  .modern-confirm-dialog {
+    border-radius: 12px;
+    overflow: hidden;
+    
+    .p-dialog-content {
+      padding: 2rem 1.5rem 1.5rem 1.5rem;
+      
+      .p-confirm-dialog-icon {
+        font-size: 2rem;
+        color: #f59e0b;
+        margin-bottom: 1rem;
+      }
+      
+      .p-confirm-dialog-message {
+        font-size: 1.1rem;
+        line-height: 1.5;
+        color: var(--text-color);
+      }
+    }
+  }
+  
+  .modern-toast {
+    .p-toast-message {
+      border-radius: 8px;
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+      
+      &.p-toast-message-success {
+        background-color: #ecfdf5;
+        border-color: #10b981;
+        color: #064e3b;
+        
+        .p-toast-icon-close {
+          color: #064e3b;
+        }
+      }
+      
+      &.p-toast-message-error {
+        background-color: #fef2f2;
+        border-color: #ef4444;
+        color: #7f1d1d;
+        
+        .p-toast-icon-close {
+          color: #7f1d1d;
+        }
+      }
+    }
+  }
+}
+
+// Form stilleri
+.dialog-content {
+  .role-form {
+    .field {
+      margin-bottom: 1.5rem;
+      
+      &:last-child {
+        margin-bottom: 0;
+      }
+      
+      .form-label {
+        display: block;
+        margin-bottom: 0.5rem;
+        font-weight: 500;
+        color: var(--text-color);
+      }
+      
+      input, textarea {
+        width: 100%;
+        padding: 0.75rem;
+        border-radius: 8px;
+        transition: all 0.2s ease;
+        
+        &:focus {
+          box-shadow: 0 0 0 2px #bfdbfe;
+        }
+      }
+      
+      .p-error {
+        margin-top: 0.25rem;
+        font-size: 0.875rem;
+      }
+    }
+  }
+}
+
+.dialog-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.75rem;
+  
+  .cancel-button, .save-button {
+    transition: all 0.2s ease;
+    
+    &:hover {
+      transform: translateY(-2px);
+    }
+  }
+  
+  .save-button {
+    &:not(:disabled):hover {
+      box-shadow: 0 4px 6px -1px rgba(59, 130, 246, 0.5);
+    }
+  }
+} 

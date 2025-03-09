@@ -1,0 +1,176 @@
+<div class="role-management-container">
+  <div class="page-header">
+    <div class="page-title-container">
+      <h1 class="page-title">Rol Yönetimi</h1>
+      <p class="page-subtitle">Sistem kullanıcı rollerini yönetin ve gerekli izinleri atayın</p>
+    </div>
+    <button pButton pRipple icon="pi pi-arrow-left" label="Geri Dön" class="p-button-outlined back-button" (click)="goBack()"></button>
+  </div>
+
+  <div class="card main-card">
+    <div class="card-header">
+      <div class="card-header-content">
+        <div class="search-container">
+          <span class="p-input-icon-left">
+            <i class="pi pi-search"></i>
+            <input type="text" pInputText placeholder="Rol ara..." #searchInput (input)="filterRoles(searchInput.value)" />
+          </span>
+        </div>
+        <button pButton pRipple icon="pi pi-plus" label="Yeni Rol" class="p-button-primary create-button" (click)="openDialog()"></button>
+      </div>
+    </div>
+
+    <p-table [value]="filteredRoles()" [paginator]="true" [rows]="10" [loading]="roleService.loading()" 
+             styleClass="p-datatable-responsive p-datatable-striped"
+             [rowHover]="true" responsiveLayout="scroll">
+      <ng-template pTemplate="header">
+        <tr>
+          <th style="width: 80px">ID</th>
+          <th>Rol Adı</th>
+          <th>Açıklama</th>
+          <th class="action-column">İşlemler</th>
+        </tr>
+      </ng-template>
+      <ng-template pTemplate="body" let-role>
+        <tr class="role-row">
+          <td><span class="id-badge">{{role.id}}</span></td>
+          <td><span class="role-name">{{role.name}}</span></td>
+          <td><div class="role-description">{{role.description}}</div></td>
+          <td>
+            <div class="action-buttons">
+              <button pButton pRipple icon="pi pi-pencil" class="p-button-rounded p-button-text p-button-info" 
+                      (click)="openDialog(role)" pTooltip="Düzenle"></button>
+              <button pButton pRipple icon="pi pi-trash" class="p-button-rounded p-button-text p-button-danger" 
+                      (click)="deleteRole(role)" pTooltip="Sil"></button>
+              <button pButton pRipple icon="pi pi-key" class="p-button-rounded p-button-text p-button-success" 
+                      (click)="managePermissions(role)" pTooltip="İzinleri Yönet"></button>
+            </div>
+          </td>
+        </tr>
+      </ng-template>
+      <ng-template pTemplate="emptymessage">
+        <tr>
+          <td colspan="4">
+            <div class="empty-message">
+              @if (roleService.loading()) {
+                <div class="loading-state">
+                  <i class="pi pi-spin pi-spinner loading-icon"></i>
+                  <p>Roller yükleniyor...</p>
+                </div>
+              } @else if (roleService.error()) {
+                <div class="error-state">
+                  <i class="pi pi-times-circle error-icon"></i>
+                  <p>{{ roleService.error() }}</p>
+                  <button pButton pRipple label="Yeniden Dene" icon="pi pi-refresh" 
+                          (click)="roleService.loadRoles()"></button>
+                </div>
+              } @else {
+                <i class="pi pi-inbox empty-icon"></i>
+                <p>Henüz hiç rol oluşturulmadı</p>
+                <button pButton pRipple label="İlk Rolü Oluştur" icon="pi pi-plus" (click)="openDialog()"></button>
+              }
+            </div>
+          </td>
+        </tr>
+      </ng-template>
+      <ng-template pTemplate="paginatorleft">
+        @if (roleService.roles().length > 0) {
+          <div class="table-summary">Toplam {{roleService.roles().length}} rol</div>
+        }
+      </ng-template>
+    </p-table>
+  </div>
+
+  <!-- Alternatif görünüm: @for kullanımı örneği -->
+  <div class="card alternative-view mt-4" *ngIf="false"> <!-- Geçici olarak devre dışı bırakıldı -->
+    <h3>Alternatif Görünüm (&#64;for direktifi örneği)</h3>
+    <div class="roles-list">
+      @for (role of filteredRoles(); track role.id) {
+        <div class="role-item p-3 border-bottom-1 surface-border flex align-items-center justify-content-between">
+          <div>
+            <h4 class="m-0 mb-1">{{role.name}}</h4>
+            <p class="m-0 text-sm text-gray-600">{{role.description}}</p>
+          </div>
+          <div class="role-status">
+            @switch (role.id % 3) {
+              @case (0) {
+                <span class="role-status-badge role-active">Aktif</span>
+              }
+              @case (1) {
+                <span class="role-status-badge role-pending">Onay Bekliyor</span>
+              }
+              @default {
+                <span class="role-status-badge role-review">İnceleniyor</span>
+              }
+            }
+          </div>
+          <div class="role-actions flex gap-2">
+            <button pButton pRipple icon="pi pi-pencil" class="p-button-rounded p-button-sm p-button-outlined" 
+                    (click)="openDialog(role)"></button>
+            <button pButton pRipple icon="pi pi-trash" class="p-button-rounded p-button-sm p-button-outlined p-button-danger" 
+                    (click)="deleteRole(role)"></button>
+          </div>
+        </div>
+      } @empty {
+        <div class="no-roles text-center p-5">
+          <i class="pi pi-inbox text-5xl text-gray-400 mb-3"></i>
+          <p class="m-0">Henüz hiç rol bulunamadı</p>
+        </div>
+      }
+    </div>
+  </div>
+</div>
+
+<!-- Rol Dialog -->
+@defer (on interaction) {
+  <p-dialog [visible]="roleDialog()" (visibleChange)="roleDialog.set($event)" [style]="{width: '450px'}" [header]="editMode() ? 'Rolü Düzenle' : 'Yeni Rol Ekle'" 
+            [modal]="true" [draggable]="false" [resizable]="false" styleClass="role-dialog modern-dialog" 
+            [closeOnEscape]="true" [dismissableMask]="true">
+    <div class="dialog-content">
+      <form [formGroup]="roleForm" class="role-form">
+        <div class="field">
+          <label for="name" class="form-label">Rol Adı</label>
+          <input type="text" pInputText id="name" formControlName="name" autocomplete="off" />
+          @if (roleForm.get('name')?.errors?.['required'] && roleForm.get('name')?.touched) {
+            <small class="p-error">Rol adı gereklidir.</small>
+          }
+        </div>
+        
+        <div class="field">
+          <label for="description" class="form-label">Açıklama</label>
+          <textarea pInputTextarea id="description" formControlName="description" rows="3" autoResize="true"></textarea>
+          @if (roleForm.get('description')?.errors?.['required'] && roleForm.get('description')?.touched) {
+            <small class="p-error">Açıklama gereklidir.</small>
+          }
+        </div>
+      </form>
+    </div>
+
+    <ng-template pTemplate="footer">
+      <div class="dialog-footer">
+        <button pButton pRipple type="button" label="İptal" icon="pi pi-times" 
+                class="p-button-outlined p-button-secondary cancel-button" (click)="hideDialog()"></button>
+        <button pButton pRipple type="button" [label]="editMode() ? 'Güncelle' : 'Kaydet'" icon="pi pi-check" 
+                class="p-button-primary save-button" (click)="saveRole()" 
+                [disabled]="roleForm.invalid || roleForm.pristine"></button>
+      </div>
+    </ng-template>
+  </p-dialog>
+} @loading {
+  <!-- Dialog yüklenirken gösterilecek içerik -->
+  <div class="dialog-loading"></div>
+} @placeholder {
+  <!-- Dialog için placeholder -->
+  <div class="dialog-placeholder"></div>
+}
+
+<!-- Onay Diyaloğu ve Toast -->
+@defer {
+  <p-confirmDialog [style]="{width: '450px'}" styleClass="modern-confirm-dialog" 
+                rejectButtonStyleClass="p-button-outlined p-button-secondary" 
+                acceptButtonStyleClass="p-button-danger"></p-confirmDialog>
+}
+
+@defer {              
+  <p-toast position="top-right" styleClass="modern-toast"></p-toast> 
+} 

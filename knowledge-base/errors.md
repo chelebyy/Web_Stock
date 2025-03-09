@@ -1481,3 +1481,218 @@ observable.pipe(map(data => data));
 import { map } from 'rxjs';
 observable.pipe(map(data => data));
 ```
+
+## Angular 19 Geçiş Süreci Hataları ve Çözümleri
+
+### Signal API Entegrasyonu Hataları
+
+#### 1. Signal Dönüşümünde Boş Veri Sorunu
+**Tarih:** 10.03.2025
+**Hata Mesajı:**
+```
+Error: NG0100: ExpressionChangedAfterItHasBeenCheckedError: Expression has changed after it was checked. Previous value: 'null'. Current value: '[...]'
+```
+
+**Nedeni:**
+1. Signal'lara dönüşüm sırasında başlangıç değerlerinin doğru atanmaması
+2. Angular'ın change detection mekanizmasıyla uyumsuzluk
+
+**Çözüm:**
+1. Signal'lara anlamlı başlangıç değerleri atamak:
+```typescript
+// Hatalı kullanım
+roles = signal<Role[]>(null!); // Null assertion
+
+// Doğru kullanım
+roles = signal<Role[]>([]); // Boş array başlangıç değeri
+```
+
+2. Component lifecycle kancalarını doğru kullanmak:
+```typescript
+constructor(private roleService: RoleService) {
+  // Constructor içinde değil
+}
+
+ngOnInit() {
+  // OnInit içinde API çağrısını yapmak
+  this.loadRoles();
+}
+
+loadRoles() {
+  this.loading.set(true);
+  this.roleService.getRoles().subscribe({
+    next: (data) => {
+      this.roles.set(data);
+      this.loading.set(false);
+    },
+    error: (err) => {
+      console.error('Error loading roles', err);
+      this.loading.set(false);
+    }
+  });
+}
+```
+
+3. Effect API'yi doğru kullanmak:
+```typescript
+constructor(private roleService: RoleService) {
+  // Effect API kullanımı
+  effect(() => {
+    // Signal değeri değiştiğinde çalışacak kod
+    console.log('Roles updated:', this.roles());
+  });
+}
+```
+
+#### 2. Template İçinde Signal Erişim Hatası
+**Tarih:** 10.03.2025
+**Hata Mesajı:**
+```
+ERROR Error: NG0950: The @defer block and its placeholder/loading components cannot use the same component type.
+```
+
+**Nedeni:**
+1. @defer bloğu içinde ve placeholder/loading template'lerde aynı bileşen tipinin kullanılması
+
+**Çözüm:**
+1. Placeholder ve loading template'lerde farklı bileşenler kullanmak:
+```html
+@defer {
+  <app-heavy-component></app-heavy-component>
+} @loading {
+  <div class="loading-spinner">Yükleniyor...</div>
+} @placeholder {
+  <div class="placeholder">İçerik yüklenecek</div>
+}
+```
+
+2. @defer bloğunu doğru kullanmak için temel kuralları izlemek:
+```html
+<!-- Basit kullanım -->
+@defer {
+  <p-dialog [header]="'Role Detayları'" [(visible)]="displayDialog">
+    <!-- Dialog içeriği -->
+  </p-dialog>
+}
+
+<!-- Koşullu kullanım -->
+@defer (when isVisible()) {
+  <app-heavy-component></app-heavy-component>
+}
+
+<!-- Tetikleyici ile kullanım -->
+@defer (on viewport) {
+  <app-heavy-component></app-heavy-component>
+}
+```
+
+#### 3. NgFor ve NgIf Yerine @for ve @if Geçiş Sorunları
+**Tarih:** 10.03.2025
+**Hata Mesajı:**
+```
+Error: NG0304: The @for block must contain exactly one template.
+```
+
+**Nedeni:**
+1. @for bloğunun yapısının yanlış kullanılması
+2. Track by fonksiyonunun eksik olması
+
+**Çözüm:**
+1. @for bloğunu doğru yapıda kullanmak:
+```html
+<!-- Hatalı -->
+@for (role of roles(); role) {
+  <tr>
+    <td>{{ role.name }}</td>
+  </tr>
+}
+
+<!-- Doğru -->
+@for (role of roles(); track role.id) {
+  <tr>
+    <td>{{ role.name }}</td>
+  </tr>
+}
+```
+
+2. İç içe kontrol akış direktiflerinde doğru yapıyı kullanmak:
+```html
+@for (role of roles(); track role.id) {
+  <tr>
+    @if (role.isActive) {
+      <td class="active-role">{{ role.name }}</td>
+    } @else {
+      <td class="inactive-role">{{ role.name }}</td>
+    }
+  </tr>
+}
+```
+
+3. @switch direktifini doğru kullanmak:
+```html
+@switch (role.status) {
+  @case ('active') {
+    <span class="badge bg-success">Aktif</span>
+  }
+  @case ('pending') {
+    <span class="badge bg-warning">Beklemede</span>
+  }
+  @default {
+    <span class="badge bg-secondary">Pasif</span>
+  }
+}
+```
+
+### Boilerplate Kod ve Template Güncellemeleri için Best Practices
+
+1. **Boilerplate Koddan Kaçınma**: Signal API kullanırken kod tekrarını azaltmak için utility fonksiyonları kullanın:
+```typescript
+// Utility fonksiyon
+function createHttpSignal<T>(
+  httpCall: () => Observable<T>,
+  initialValue: T
+): [Signal<T>, Signal<boolean>, () => void] {
+  const data = signal<T>(initialValue);
+  const loading = signal<boolean>(false);
+  
+  const load = () => {
+    loading.set(true);
+    httpCall().subscribe({
+      next: (result) => {
+        data.set(result);
+        loading.set(false);
+      },
+      error: (err) => {
+        console.error(err);
+        loading.set(false);
+      }
+    });
+  };
+  
+  return [data, loading, load];
+}
+
+// Kullanım
+const [roles, loading, loadRoles] = createHttpSignal(
+  () => this.roleService.getRoles(),
+  [] as Role[]
+);
+```
+
+2. **Eski ve Yeni Syntax Birlikte Kullanımı**: Geçiş sürecinde eski ve yeni syntax'ı birlikte kullanırken dikkat edilmesi gerekenler:
+```html
+<!-- Eski Control Flow (valid) -->
+<div *ngIf="hasPermission">
+  <p>You have permission</p>
+</div>
+
+<!-- Yeni Control Flow (valid) -->
+@if (hasPermission()) {
+  <p>You have permission</p>
+}
+
+<!-- KAÇINILMASI GEREKEN: Eski ve yeni syntax'ı karıştırmak -->
+<div *ngIf="hasPermission()"> <!-- Yanlış: Signal parantez ile eski direktif -->
+  <p>This is wrong</p>
+</div>
+```
