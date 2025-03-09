@@ -45,7 +45,63 @@ html, body {
   color: var(--p-text-color, #495057);
 }
 
-/* Dropdown Panel Düzeltmeleri */
+/* Dropdown Panel Düzeltmeleri - Koyu Tema Geçersiz Kılma */
+html body .p-dropdown-panel,
+html body .p-dropdown-panel.p-component,
+html body .p-dropdown-panel.p-component.p-dropdown-panel-overlay,
+html body div.p-dropdown-panel,
+html body div.p-dropdown-panel.p-component,
+html body div.p-dropdown-panel.p-component.p-dropdown-panel-overlay {
+  background-color: #ffffff !important;
+  background: #ffffff !important;
+  border: 1px solid rgba(0, 0, 0, 0.2) !important;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15) !important;
+  border-radius: 6px !important;
+  overflow: hidden !important;
+  color: #333333 !important;
+}
+
+html body .p-dropdown-panel .p-dropdown-items,
+html body div.p-dropdown-panel .p-dropdown-items {
+  background-color: #ffffff !important;
+  background: #ffffff !important;
+}
+
+html body .p-dropdown-panel .p-dropdown-items .p-dropdown-item,
+html body div.p-dropdown-panel .p-dropdown-items .p-dropdown-item {
+  color: #333333 !important;
+  background-color: #ffffff !important;
+  background: #ffffff !important;
+  font-weight: 500 !important;
+  font-size: 1rem !important;
+  opacity: 1 !important;
+  padding: 0.75rem 1rem !important;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.05) !important;
+}
+
+html body .p-dropdown-panel .p-dropdown-items .p-dropdown-item *,
+html body div.p-dropdown-panel .p-dropdown-items .p-dropdown-item * {
+  color: #333333 !important;
+  font-weight: inherit !important;
+  opacity: 1 !important;
+}
+
+html body .p-dropdown-panel .p-dropdown-items .p-dropdown-item:hover,
+html body div.p-dropdown-panel .p-dropdown-items .p-dropdown-item:hover {
+  background-color: #f8f9fa !important;
+  background: #f8f9fa !important;
+  color: #000000 !important;
+}
+
+html body .p-dropdown-panel .p-dropdown-items .p-dropdown-item.p-highlight,
+html body div.p-dropdown-panel .p-dropdown-items .p-dropdown-item.p-highlight {
+  background-color: rgba(59, 130, 246, 0.1) !important;
+  background: rgba(59, 130, 246, 0.1) !important;
+  color: #2563eb !important;
+  font-weight: 600 !important;
+}
+
+/* Eski dropdown panel düzeltmeleri - bunları tutuyorum ancak yeni seçiciler daha spesifik */
 body .p-dropdown-panel {
   background: var(--p-surface-overlay, #ffffff) !important;
   border: 1px solid rgba(0, 0, 0, 0.2) !important;

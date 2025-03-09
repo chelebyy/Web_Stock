@@ -348,4 +348,84 @@ body .p-dropdown-panel .p-dropdown-items .p-dropdown-empty-message {
 3. Yazı ağırlığı (font-weight) ve boyutu (font-size) gibi özellikler, yazıların görünürlüğünü artırmada önemli rol oynar.
 4. Dropdown öğeleri arasına ince çizgiler eklemek, öğelerin birbirinden ayrılmasını ve daha iyi görünmesini sağlar.
 5. Dropdown panelinin kendisi için de belirgin kenarlık ve gölge eklemek, kullanıcı deneyimini iyileştirir.
-6. İç içe geçmiş elementlerin stillerini kontrol etmek için, üst elementin stillerini alt elementlere miras bırakmak (`color: inherit` gibi) etkili bir yöntemdir. 
+6. İç içe geçmiş elementlerin stillerini kontrol etmek için, üst elementin stillerini alt elementlere miras bırakmak (`color: inherit` gibi) etkili bir yöntemdir.
+
+## Angular 19 Geçişi Sonrası Dropdown Menü Koyu Tema Sorunu
+
+### Sorun
+Angular 19 ve PrimeNG 19'a geçiş sonrasında Kullanıcı Yönetimi sayfasındaki dropdown menüsü (rol filtreleme) koyu yeşil/siyah bir arka plana sahip oldu ve içindeki yazılar ("Tümü", "Admin", "User") beyaz renkte görünüyordu. Daha önce yapılan düzeltmeler yeterli olmadı.
+
+### Nedeni
+1. PrimeNG 19'da tema yapılandırması değişti ve bazı bileşenler koyu tema kullanıyor olabilir.
+2. CSS seçicilerinin spesifikliği yeterli değildi ve başka stil tanımları bizim stillerimizi geçersiz kılıyordu.
+3. Tema değişkenleri (`--p-surface-overlay` gibi) koyu tema değerlerine sahip olabilir.
+4. Dropdown panel, DOM'a overlay olarak eklendiğinde farklı stil kurallarına tabi olabilir.
+
+### Çözüm
+Global stil dosyasında (styles.scss) dropdown öğelerinin stillerini daha spesifik ve güçlü CSS seçicileri kullanarak düzenledik:
+
+```scss
+/* Dropdown Panel Düzeltmeleri - Koyu Tema Geçersiz Kılma */
+html body .p-dropdown-panel,
+html body .p-dropdown-panel.p-component,
+html body .p-dropdown-panel.p-component.p-dropdown-panel-overlay,
+html body div.p-dropdown-panel,
+html body div.p-dropdown-panel.p-component,
+html body div.p-dropdown-panel.p-component.p-dropdown-panel-overlay {
+  background-color: #ffffff !important;
+  background: #ffffff !important;
+  border: 1px solid rgba(0, 0, 0, 0.2) !important;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15) !important;
+  border-radius: 6px !important;
+  overflow: hidden !important;
+  color: #333333 !important;
+}
+
+html body .p-dropdown-panel .p-dropdown-items,
+html body div.p-dropdown-panel .p-dropdown-items {
+  background-color: #ffffff !important;
+  background: #ffffff !important;
+}
+
+html body .p-dropdown-panel .p-dropdown-items .p-dropdown-item,
+html body div.p-dropdown-panel .p-dropdown-items .p-dropdown-item {
+  color: #333333 !important;
+  background-color: #ffffff !important;
+  background: #ffffff !important;
+  font-weight: 500 !important;
+  font-size: 1rem !important;
+  opacity: 1 !important;
+  padding: 0.75rem 1rem !important;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.05) !important;
+}
+
+html body .p-dropdown-panel .p-dropdown-items .p-dropdown-item *,
+html body div.p-dropdown-panel .p-dropdown-items .p-dropdown-item * {
+  color: #333333 !important;
+  font-weight: inherit !important;
+  opacity: 1 !important;
+}
+
+html body .p-dropdown-panel .p-dropdown-items .p-dropdown-item:hover,
+html body div.p-dropdown-panel .p-dropdown-items .p-dropdown-item:hover {
+  background-color: #f8f9fa !important;
+  background: #f8f9fa !important;
+  color: #000000 !important;
+}
+
+html body .p-dropdown-panel .p-dropdown-items .p-dropdown-item.p-highlight,
+html body div.p-dropdown-panel .p-dropdown-items .p-dropdown-item.p-highlight {
+  background-color: rgba(59, 130, 246, 0.1) !important;
+  background: rgba(59, 130, 246, 0.1) !important;
+  color: #2563eb !important;
+  font-weight: 600 !important;
+}
+```
+
+### Öğrenilen Dersler
+1. CSS seçicilerinin spesifikliğini artırmak, başka stil tanımlarını geçersiz kılmak için önemlidir.
+2. Tema değişkenleri yerine doğrudan renk değerleri kullanmak, tema farklılıklarından kaynaklanan sorunları önleyebilir.
+3. `background-color` ve `background` gibi özellikleri ayrı ayrı tanımlamak, inline stilleri geçersiz kılmak için faydalı olabilir.
+4. `html body` gibi üst seçicileri eklemek, CSS seçicilerinin spesifikliğini artırır.
+5. Koyu tema kullanılan uygulamalarda, açık tema için özel stil tanımları eklemek gerekebilir.
+6. PrimeNG 19'da, overlay bileşenleri için stil tanımlarını daha spesifik yapmak önemlidir. 
