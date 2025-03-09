@@ -731,6 +731,177 @@
         }
       }
     }
+
+    // Angular 19 geçişi sonrası tasarım düzeltmeleri
+    // Dropdown düzeltmeleri
+    .p-dropdown {
+      background-color: var(--surface-card, #ffffff) !important;
+      color: var(--text-color, #495057) !important;
+      border: 1px solid var(--surface-border, #ced4da) !important;
+      
+      .p-dropdown-label {
+        color: var(--text-color, #495057) !important;
+        background-color: transparent !important;
+      }
+      
+      .p-dropdown-trigger {
+        background-color: transparent !important;
+        color: var(--text-color, #495057) !important;
+      }
+      
+      .p-dropdown-panel {
+        background-color: var(--surface-card, #ffffff) !important;
+        
+        .p-dropdown-items {
+          background-color: var(--surface-card, #ffffff) !important;
+          
+          .p-dropdown-item {
+            color: var(--text-color, #495057) !important;
+            
+            &:hover {
+              background-color: var(--surface-hover, #f8f9fa) !important;
+            }
+            
+            &.p-highlight {
+              background-color: var(--surface-hover, #e9ecef) !important;
+              color: var(--primary-color, #3B82F6) !important;
+            }
+          }
+        }
+      }
+    }
+    
+    // Pagination düzeltmeleri
+    .pagination-container {
+      .pagination-controls {
+        .p-button {
+          background-color: var(--surface-card, #ffffff) !important;
+          color: var(--text-color, #495057) !important;
+          border: 1px solid var(--surface-border, #ced4da) !important;
+          
+          &:hover {
+            background-color: var(--surface-hover, #f8f9fa) !important;
+          }
+          
+          &.p-button-primary {
+            background-color: var(--primary-color, #3B82F6) !important;
+            color: var(--primary-color-text, #ffffff) !important;
+            border: 1px solid var(--primary-color, #3B82F6) !important;
+          }
+          
+          &:disabled {
+            background-color: var(--surface-hover, #e9ecef) !important;
+            color: var(--text-color-secondary, #6c757d) !important;
+            border: 1px solid var(--surface-border, #ced4da) !important;
+            opacity: 0.6;
+          }
+        }
+      }
+      
+      .rows-selector {
+        .p-dropdown {
+          background-color: var(--surface-card, #ffffff) !important;
+          
+          .p-dropdown-label {
+            color: var(--text-color, #495057) !important;
+          }
+          
+          .p-dropdown-trigger {
+            color: var(--text-color, #495057) !important;
+          }
+        }
+      }
+    }
+    
+    // Buton düzeltmeleri
+    .p-button {
+      &.p-button-text {
+        background-color: transparent !important;
+        
+        &:hover {
+          background-color: var(--surface-hover, #f8f9fa) !important;
+        }
+      }
+    }
+    
+    // Tablo başlık düzeltmeleri
+    .table-header {
+      background-color: var(--surface-section, #f8f9fa) !important;
+    }
+    
+    // Dialog düzeltmeleri
+    .p-dialog {
+      .p-dialog-header, 
+      .p-dialog-content, 
+      .p-dialog-footer {
+        background-color: var(--surface-card, #ffffff) !important;
+        color: var(--text-color, #495057) !important;
+      }
+    }
+    
+    // Confirm dialog düzeltmeleri
+    .p-confirm-dialog {
+      .p-dialog-content, 
+      .p-dialog-footer {
+        background-color: var(--surface-card, #ffffff) !important;
+      }
+    }
+    
+    // Toast düzeltmeleri
+    .p-toast {
+      .p-toast-message {
+        &.p-toast-message-error {
+          background-color: #b91c1c !important;
+          border-left: 4px solid #ef4444 !important;
+          color: #ffffff !important;
+        }
+        
+        &.p-toast-message-success {
+          background-color: #15803d !important;
+          border-left: 4px solid #22c55e !important;
+          color: #ffffff !important;
+        }
+        
+        &.p-toast-message-info {
+          background-color: #0369a1 !important;
+          border-left: 4px solid #3b82f6 !important;
+          color: #ffffff !important;
+        }
+        
+        &.p-toast-message-warn {
+          background-color: #b45309 !important;
+          border-left: 4px solid #f59e0b !important;
+          color: #ffffff !important;
+        }
+      }
+    }
+
+    // Checkbox düzeltmeleri
+    .p-checkbox {
+      .p-checkbox-box {
+        background-color: var(--surface-card, #ffffff) !important;
+        border: 1px solid var(--surface-border, #ced4da) !important;
+        border-radius: 4px !important;
+        
+        &:hover {
+          border-color: var(--primary-color, #3B82F6) !important;
+        }
+        
+        &.p-highlight {
+          background-color: var(--primary-color, #3B82F6) !important;
+          border-color: var(--primary-color, #3B82F6) !important;
+          
+          .p-checkbox-icon {
+            color: var(--primary-color-text, #ffffff) !important;
+          }
+        }
+        
+        .p-checkbox-icon {
+          color: var(--primary-color-text, #ffffff) !important;
+          font-size: 14px !important;
+        }
+      }
+    }
   }
 }
 

@@ -181,4 +181,53 @@ Global stil dosyasında (styles.scss) Toast bileşenlerinin stillerini daha koyu
 2. Yazı ve arka plan rengi arasında en az 4.5:1 kontrast oranı olmalıdır (WCAG 2.0 AA standardı).
 3. Bildirim türlerine göre renk kodlaması yaparken (hata: kırmızı, başarı: yeşil, vb.) renklerin yeterince koyu olduğundan emin olunmalıdır.
 4. Global stil dosyasında yapılan değişiklikler, tüm uygulamadaki bileşenleri etkileyeceği için dikkatli olunmalıdır.
-5. PrimeNG sürüm güncellemelerinde, bileşenlerin varsayılan stillerinin değişebileceği göz önünde bulundurulmalıdır. 
+5. PrimeNG sürüm güncellemelerinde, bileşenlerin varsayılan stillerinin değişebileceği göz önünde bulundurulmalıdır.
+
+## Angular 19 Geçişi Sonrası Checkbox Tasarım Sorunları
+
+### Sorun
+Angular 19 ve PrimeNG 19'a geçiş sonrasında Kullanıcı Yönetimi sayfasındaki checkbox'lar siyah arka plana sahip oldu. Bu durum, sayfa tasarımını bozdu ve kullanıcı deneyimini olumsuz etkiledi.
+
+### Nedeni
+1. PrimeNG 19'da tema yapılandırması değişti ve CSS değişken isimleri `--p-` öneki ile kullanılmaya başlandı.
+2. Angular 19'un yeni kontrol akış sözdizimi DOM yapısını değiştirdi.
+3. PrimeNG 19'da checkbox bileşeninin varsayılan arka plan rengi değişti.
+
+### Çözüm
+Kullanıcı Yönetimi bileşeninin SCSS dosyasında checkbox stillerini düzenledik:
+
+```scss
+// Checkbox düzeltmeleri
+.p-checkbox {
+  .p-checkbox-box {
+    background-color: var(--surface-card, #ffffff) !important;
+    border: 1px solid var(--surface-border, #ced4da) !important;
+    border-radius: 4px !important;
+    
+    &:hover {
+      border-color: var(--primary-color, #3B82F6) !important;
+    }
+    
+    &.p-highlight {
+      background-color: var(--primary-color, #3B82F6) !important;
+      border-color: var(--primary-color, #3B82F6) !important;
+      
+      .p-checkbox-icon {
+        color: var(--primary-color-text, #ffffff) !important;
+      }
+    }
+    
+    .p-checkbox-icon {
+      color: var(--primary-color-text, #ffffff) !important;
+      font-size: 14px !important;
+    }
+  }
+}
+```
+
+### Öğrenilen Dersler
+1. Angular ve PrimeNG sürüm geçişlerinde bileşenlerin varsayılan stillerinin değişebileceğini göz önünde bulundurmak gerekir.
+2. CSS değişkenlerini (CSS variables) kullanarak renkleri tanımlamak, tema değişikliklerinde daha tutarlı sonuçlar elde etmeyi sağlar.
+3. `!important` kullanarak stil önceliğini artırmak, PrimeNG gibi UI kütüphanelerinin kendi stillerini geçersiz kılmak için gerekli olabilir.
+4. Bileşenlerin görsel tutarlılığını sağlamak için, tüm bileşenlerin aynı tema ve renk şemasını kullanmasına dikkat edilmelidir.
+5. Sürüm geçişlerinde, özellikle UI bileşenlerinin görünümünü kontrol etmek ve gerektiğinde düzeltmeler yapmak önemlidir. 
