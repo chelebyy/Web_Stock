@@ -2,6 +2,8 @@
 
 ## Proje Bilgileri
 
+
+
 ### Teknoloji Stack
 - Backend: .NET Core 9
 - Veritabanı: PostgreSQL 17.3 (Local)
@@ -152,7 +154,7 @@
 - Null referans tipleri için projenin başında bir strateji belirlemek ve tutarlı şekilde uygulamak gerekli
 - Paket sürümlerini projenin tamamında tutarlı tutmak önemli
 - Hata mesajlarını dikkatlice okumak ve adım adım çözmek gerekli
-- Veritabanı işlemlerinde hata alındığında, veritabanını temizleyip yeniden oluşturmak etkili bir çözüm olabilir
+- Veritabanı işlemlerinde hata alındığında, veritabanını temizleyip yeniden oluşturmak etkili bir çözümdür
 - Her servis için ayrı terminal penceresi kullanmak gerekli
 
 ### Paket ve Kütüphane Kullanımı
@@ -227,9 +229,9 @@
 
 **Toplam Kalan Süre**: ~11-14 gün
 
-## Güncel Durum (7 Haziran 2025)
+## Güncel Durum (8 Haziran 2025)
 - Backend API sorunsuz çalışıyor (http://localhost:5037)
-- Frontend uygulaması sorunsuz çalışıyor (http://localhost:4202)
+- Frontend uygulaması sorunsuz çalışıyor (http://localhost:4200)
 - Kullanıcı güncelleme sırasındaki ID uyuşmazlığı hatası çözüldü
 - Ortamlar arası geçiş sürecinde veri tutarsızlıklarını önlemek için mekanizma eklendi
 - Errors.md ve system_startup_guide.md dosyaları güncellendi
@@ -242,58 +244,57 @@
 - Login sayfası tasarım sorunları çözüldü (PrimeNG bileşenleri yerine saf HTML/CSS kullanıldı)
 - Hata mesajları için renk kodları düzeltildi (kırmızı: hata, yeşil: başarı)
 - Angular 19 geçiş planı knowledge-base/angular19_migration_plan.md dosyasına eklendi
+- Kullanıcı yönetimi arayüzündeki dropdown ve buton hizalama sorunları çözüldü
+- Tüm dropdown'lar ve butonlar için tutarlı yükseklik (36px) ve stil uygulandı
+- "İzinleri Yönet" butonundaki metin kayma sorunu çözüldü
+- "İzinleri Yönet" butonunda sadece anahtar ikonunun görünmesi sağlandı
+- Tooltip'ler için global stiller eklendi ve pozisyonları düzeltildi
 
 ## Gelecek Adımlar
 1. GitHub'a son değişiklikleri push etmek
 2. Sistem başlatma rehberini tam olarak test etmek
-3. Kullanıcı yönetimi ve rol yönetimi sayfalarının tam olarak test edilmesi
-4. Geriye kalan frontend komponentlerinin geliştirilmesi
-5. Backend'de kullanıcı rolü izinlerini güncelleyerek kalıcı çözüm sağlamak
-6. Diğer sayfaların Angular 19 ve PrimeNG 19 uyumluluğunu kontrol etmek ve düzeltmek
+3. Kullanıcı yönetimi sayfasındaki diğer UI iyileştirmelerini tamamlamak
+4. Bilgi İşlem modülünün feature modülü yapısında geliştirilmesine başlamak
+5. Diğer sayfaların Angular 19 ve PrimeNG 19 uyumluluğunu kontrol etmek ve düzeltmek
+6. Test katmanının geliştirilmesine başlamak
 
-## Kullanıcı Oluşturma Rol Seçimi Hatası Çözümü
+## Kullanıcı Yönetimi Arayüzü İyileştirmeleri
 
-### Görev
-Yeni kullanıcı oluşturma işlemi sırasında "Geçerli bir rol seçilmelidir" hatasını çözmek.
+### Tamamlanan İyileştirmeler
+- [X] Dropdown'lar ve butonlar için tutarlı yükseklik (36px) belirlendi
+- [X] Rol dropdown'ı basit HTML `<select>` elementine dönüştürüldü
+- [X] Satır sayısı dropdown'ı basit HTML `<select>` elementine dönüştürüldü
+- [X] Global stil dosyasına (styles.scss) yüksek öncelikli seçiciler eklendi
+- [X] "İzinleri Yönet" butonundaki metin kayma sorunu çözüldü
+- [X] "İzinleri Yönet" butonunda sadece anahtar ikonunun görünmesi sağlandı
+- [X] Tooltip'ler için global stiller eklendi ve pozisyonları düzeltildi
 
-### Yapılan İşlemler
-[X] Hata mesajlarını analiz ederek sorunun kaynağını tespit etmek
-[X] CreateUserRequest arayüzüne roleId alanı eklemek
-[X] user.service.ts dosyasındaki createUser metoduna roleId değerini eklemek
-[X] Değişiklikleri GitHub'a push etmek
-[X] Knowledge-base ve errors.md dosyalarını güncellemek
-
-### Sonuç
-Kullanıcı oluşturma işlemi sırasında roleId değeri backend'e gönderilmeye başlandı ve "Geçerli bir rol seçilmelidir" hatası ortadan kalktı.
-
-### Öğrenilen Dersler
-- Frontend'den backend'e veri gönderirken, backend'in beklediği tüm alanların doğru şekilde gönderildiğinden emin olunmalıdır.
-- Model arayüzlerinin, backend API'sinin beklediği tüm alanları içerdiğinden emin olunmalıdır.
-- Hata mesajları, sorunun kaynağını bulmak için önemli ipuçları sağlar.
-
-## Angular 19 ve PrimeNG 19 Geçişi
-
-### Görev
-Angular 17'den Angular 19'a ve PrimeNG 17'den PrimeNG 19'a geçiş yapmak.
-
-### Yapılan İşlemler
-[X] Angular CLI'ı global olarak güncellemek
-[X] Proje bağımlılıklarını güncellemek
-[X] PrimeNG tema sistemini güncellemek
-[X] Login sayfası tasarım sorunlarını çözmek
-[X] Hata mesajları için renk kodlarını düzeltmek
-[X] Angular 19 geçiş planını oluşturmak ve belgelemek
-[X] Knowledge-base ve errors.md dosyalarını güncellemek
-
-### Sonuç
-Angular 19 ve PrimeNG 19 güncellemesi başarıyla tamamlandı. Login sayfası tasarım sorunları çözüldü ve hata mesajları için renk kodları düzeltildi.
+### Planlanan İyileştirmeler
+- [ ] Kullanıcı tablosunun responsive tasarımının iyileştirilmesi
+- [ ] Kullanıcı formunun doğrulama mesajlarının iyileştirilmesi
+- [ ] Kullanıcı izinleri yönetimi arayüzünün iyileştirilmesi
+- [ ] Arama kutusunun geliştirilmesi (anlık arama, filtreleme seçenekleri)
+- [ ] Kullanıcı listesinin performansının iyileştirilmesi (lazy loading, sanal kaydırma)
 
 ### Öğrenilen Dersler
-- PrimeNG 19'da tema sistemi tamamen değiştirildi, eski tema import yolları artık çalışmıyor
-- Angular 19 ve PrimeNG 19 arasında uyumluluk sorunları olabilir
-- Kritik bileşenlerde (login gibi) saf HTML/CSS kullanmak daha güvenli olabilir
-- Standalone component yaklaşımı daha temiz ve bakımı kolay kod sağlar
-- Tema değişiklikleri için PrimeNG dokümantasyonu dikkatle takip edilmeli
-- Hata mesajları için uygun renk kodları kullanılmalı (kırmızı: hata, yeşil: başarı)
-- Kullanıcı deneyimini iyileştirmek için animasyonlar ve görsel geri bildirimler eklenmelidir
-- Responsive tasarım için medya sorguları kullanılmalıdır
+- Tarayıcı önbelleğini temizlemek (Ctrl+F5 veya Cmd+Shift+R) stil değişikliklerinin görünmesini sağlayabilir
+- Karmaşık UI bileşenleri yerine basit HTML elementleri kullanmak bazen daha iyi sonuç verebilir
+- Inline stiller, CSS seçici özgüllük sorunlarını aşmak için kullanılabilir
+- Tutarlı bir UI için tüm benzer elementlerin aynı yüksekliğe sahip olması önemlidir
+- !important kullanımı genellikle kaçınılması gereken bir pratik olsa da, üçüncü taraf kütüphanelerin stillerini geçersiz kılmak için bazen gereklidir
+- Butonlar için sabit boyutlar belirlemek, içerik değiştiğinde düzenin bozulmasını önler
+- Tooltip'ler, buton üzerinde gösterilemeyen metinler için iyi bir alternatiftir
+- `overflow: hidden` özelliği, taşan içeriği gizlemek için kullanılabilir
+- Tooltip pozisyonunu belirlemek, kullanıcı deneyimini iyileştirir
+- Global tooltip stilleri, tüm uygulamada tutarlı bir görünüm sağlar
+
+## Belge Referansları
+- [Hata Kayıtları ve Çözümleri](errors.md)
+- [Sistem Başlatma Rehberi](knowledge-base/system_startup_guide.md)
+- [Angular 19 Migrasyon Planı](knowledge-base/angular-19-migration/angular19_migration.md)
+- [Rol Yönetimi Modülü](knowledge-base/feature_modules/role_management_module.md)
+- [Kullanıcı Yönetimi Modülü](knowledge-base/feature_modules/user_management_module.md)
+- [Bilgi İşlem Modülü (Planlanan)](knowledge-base/feature_modules/bilgi_islem_module.md)
+- [Revir Modülü (Planlanan)](knowledge-base/feature_modules/revir_module.md)
+
+

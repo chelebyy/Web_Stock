@@ -3362,976 +3362,220 @@ setTimeout(() => {
 - **Sorun**: Mevcut UserManagementComponent'in admin dashboard ile entegrasyonu gerekiyordu.
 - **Çözüm**: Admin dashboard içerisinde Kullanıcı Yönetimi bölümüne erişim sağlandı ve ilgili rota yapılandırması yapıldı.
 
-# Login Hataları
+# Belge Organizasyonu ve Modül Planlaması
 
-## BCrypt Şifre Doğrulama Hatası (03.03.2025)
+## Belge Yapısında İyileştirmeler
 
-**Hata:** 
-```
-401 Unauthorized - Login işleminde şifre doğrulama hatası
-```
-
-**Nedeni:**
-1. BCrypt hash'i ile şifre doğrulama işlemi başarısız
-2. Veritabanındaki hash değeri ile girilen şifrenin hash'i uyuşmuyor
+**Sorun:**
+Proje büyüdükçe belge organizasyonu zorlaşıyor, bilgiler dağınık hale geliyor ve tekrarlar oluşuyor.
 
 **Çözüm:**
-1. `FixPasswordController` endpoint'i kullanılarak admin şifresi yeniden ayarlandı:
-```
-GET /api/FixPassword/fix-admin
-```
-
-2. Yeni hash değeri:
-```
-$2a$11$jLGT8mYtwgJ/U6VpQPhxFuLfnVAMm7qLsnfim33OehCyeieqVms8q
-```
-
-**Önemli Notlar:**
-- BCrypt work factor: 11
-- Hash uzunluğu: 60 karakter
-- Hash formatı: BCrypt ($2a$ prefix)
-- Şifre: Admin123
-
-**Log Kayıtları:**
-```
-info: Stock.Infrastructure.Services.AuthService[0]
-      Kullanıcı bulundu: admin, ID: 1, IsAdmin: True
-info: Stock.Infrastructure.Services.PasswordHasher[0]
-      Şifre doğrulama sonucu: True
-info: Stock.Infrastructure.Services.AuthService[0]
-      Başarılı giriş: admin, Token üretildi
-```
-
-### Şifre Değiştirme Endpoint Hatası (04.03.2025)
-
-**Hata:**
-```
-POST http://localhost:5037/api/auth/change-password 404 (Not Found)
-```
-
-**Nedeni:**
-1. Clean Architecture geçişi sırasında şifre değiştirme endpoint'i uygulanmamış
-2. IAuthService arayüzünde şifre değiştirme metodu eksik
-3. AuthController'da şifre değiştirme endpoint'i eksik
-4. ChangePasswordDto sınıfı oluşturulmamış
-
-**Çözüm:**
-1. IAuthService arayüzüne ChangePasswordAsync metodu ekle:
-```csharp
-Task<AuthResponseDto> ChangePasswordAsync(ChangePasswordDto changePasswordDto, int userId);
-```
-
-2. ChangePasswordDto sınıfını oluştur:
-```csharp
-public class ChangePasswordDto
-{
-    [Required(ErrorMessage = "Mevcut şifre gereklidir")]
-    public string CurrentPassword { get; set; } = string.Empty;
-
-    [Required(ErrorMessage = "Yeni şifre gereklidir")]
-    [MinLength(6, ErrorMessage = "Yeni şifre en az 6 karakter olmalıdır")]
-    public string NewPassword { get; set; } = string.Empty;
-}
-```
-
-3. AuthResponseDto sınıfına Message özelliği ekle:
-```csharp
-public string? Message { get; set; }
-```
-
-4. AuthService sınıfına ChangePasswordAsync metodunu uygula:
-```csharp
-public async Task<AuthResponseDto> ChangePasswordAsync(ChangePasswordDto changePasswordDto, int userId)
-{
-    _logger.LogInformation($"Şifre değiştirme isteği - Kullanıcı ID: {userId}");
-    
-    var user = await _unitOfWork.Users.GetByIdAsync(userId);
-    if (user == null)
-    {
-        _logger.LogWarning($"Kullanıcı bulunamadı - ID: {userId}");
-        return new AuthResponseDto
-        {
-            Success = false,
-            ErrorMessage = "Kullanıcı bulunamadı"
-        };
-    }
-
-    bool isCurrentPasswordValid = _passwordHasher.VerifyPassword(changePasswordDto.CurrentPassword, user.PasswordHash);
-    _logger.LogInformation($"Mevcut şifre doğrulama sonucu: {isCurrentPasswordValid}");
-
-    if (!isCurrentPasswordValid)
-    {
-        _logger.LogWarning($"Mevcut şifre hatalı - Kullanıcı ID: {userId}");
-        return new AuthResponseDto
-        {
-            Success = false,
-            ErrorMessage = "Mevcut şifre hatalı"
-        };
-    }
-
-    try
-    {
-        user.PasswordHash = _passwordHasher.HashPassword(changePasswordDto.NewPassword);
-        await _unitOfWork.SaveChangesAsync();
-        
-        _logger.LogInformation($"Şifre başarıyla değiştirildi - Kullanıcı ID: {userId}");
-        return new AuthResponseDto
-        {
-            Success = true,
-            Message = "Şifre başarıyla değiştirildi"
-        };
-    }
-    catch (Exception ex)
-    {
-        _logger.LogError($"Şifre değiştirme hatası: {ex.Message}");
-        return new AuthResponseDto
-        {
-            Success = false,
-            ErrorMessage = $"Şifre değiştirme hatası: {ex.Message}"
-        };
-    }
-}
-```
-
-5. AuthController'a şifre değiştirme endpoint'ini ekle:
-```csharp
-[Authorize]
-[HttpPost("change-password")]
-public async Task<IActionResult> ChangePassword([FromBody] ChangePasswordDto changePasswordDto)
-{
-    _logger.LogInformation("Şifre değiştirme isteği başlatılıyor...");
-    
-    var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier);
-    if (userIdClaim == null || !int.TryParse(userIdClaim.Value, out int userId))
-    {
-        _logger.LogWarning("Token'da kullanıcı ID'si bulunamadı veya geçersiz");
-        return Unauthorized(new { message = "Geçersiz kullanıcı kimliği" });
-    }
-
-    _logger.LogInformation($"Şifre değiştirme isteği - Kullanıcı ID: {userId}");
-    
-    var result = await _authService.ChangePasswordAsync(changePasswordDto, userId);
-    
-    if (!result.Success)
-    {
-        _logger.LogWarning($"Şifre değiştirme başarısız - Kullanıcı ID: {userId}, Hata: {result.ErrorMessage}");
-        return BadRequest(result);
-    }
-    
-    _logger.LogInformation($"Şifre başarıyla değiştirildi - Kullanıcı ID: {userId}");
-    return Ok(result);
-}
-```
-
-**Önemli Notlar:**
-- Şifre değiştirme işlemi için her zaman mevcut şifre doğrulaması yapılmalıdır
-- Yeni şifre ve şifre tekrarı alanları eşleşmelidir
-- Şifre değiştirme işlemi başarılı olduğunda kullanıcıya bildirim gösterilmelidir
-- Hata durumlarında kullanıcıya anlamlı hata mesajları gösterilmelidir
-
-## Şifre Değiştirme Formu Güncellemesi
-
-### Şifre Değiştirme Formu Tasarım Güncellemesi
-
-**Yapılan Değişiklikler:**
-1. Şifre değiştirme formunun arka plan rengi ve stilini güncelledik
-2. Input alanlarını daha modern bir görünüme kavuşturduk
-3. Şifre göster/gizle işlevselliği ekledik
-4. Butonların tasarımını iyileştirdik
-
-**Olası Hatalar ve Çözümleri:**
-
-1. **Şifre göster/gizle işlevselliği çalışmıyor**
-   - **Neden:** Angular'da event binding sorunları olabilir
-   - **Çözüm:** HTML'de (click) event binding'in doğru şekilde uygulandığından emin olun
-
-2. **Şifre değiştirme API çağrısı başarısız oluyor**
-   - **Neden:** Backend API endpoint'i değişmiş olabilir veya token doğrulama sorunu olabilir
-   - **Çözüm:** Network isteklerini kontrol edin, API endpoint'in doğru olduğundan emin olun ve token'ın geçerli olduğunu doğrulayın
-
-3. **Form stillerinde bozulmalar**
-   - **Neden:** CSS override sorunları veya PrimeNG bileşenleriyle çakışmalar
-   - **Çözüm:** CSS seçicilerinin özgüllüğünü artırın veya !important kullanın
-
-4. **Şifre değiştirme işlemi sonrası form kapanmıyor**
-   - **Neden:** togglePasswordChange() metodu çağrılmamış olabilir
-   - **Çözüm:** API çağrısı başarılı olduğunda togglePasswordChange() metodunun çağrıldığından emin olun
-
-**Genel Notlar:**
-- Şifre değiştirme işlemi için her zaman mevcut şifre doğrulaması yapılmalıdır
-- Yeni şifre ve şifre tekrarı alanları eşleşmelidir
-- Şifre değiştirme işlemi başarılı olduğunda kullanıcıya bildirim gösterilmelidir
-- Hata durumlarında kullanıcıya anlamlı hata mesajları gösterilmelidir
-
-## Kullanıcı Silme İşlemi Hataları
-
-### Hata 1: DeleteUserCommandHandler'da Remove Metodu Hatası
-
-**Tarih:** 2025-03-08
-
-**Hata Mesajı:** DeleteUserCommandHandler.cs dosyasında derleme hatası: Remove metodu için gerekli argüman eksik.
-
-**Nedeni:** DeleteUserCommandHandler içinde `_unitOfWork.Users.Remove(user)` şeklinde bir metot çağrısı yapılıyor.
-
-**Çözüm:**
-```csharp
-// Hatalı kod
-_unitOfWork.Users.Remove(user);
-
-// Düzeltilmiş kod
-await _unitOfWork.Users.DeleteAsync(user);
-```
-
-**Önemli Notlar:**
-- Repository arayüzlerinde metot isimleri tutarlı olmalı
-- Asenkron metotlar için await kullanılmalı
-- Metot isimleri ve imzaları arayüz ile uyumlu olmalı
-
-### Hata 2: API Endpoint Tutarsızlıkları ve Karışıklık
-
-**Tarih:** 2025-03-08
-
-**Sorun:** Hem UserController (tekil) hem de UsersController (çoğul) olması, API endpoint'lerinde tutarsızlıklara ve frontend uygulamasında karışıklığa neden oldu.
-
-**Nedeni:**
-1. Clean Architecture'a geçiş sırasında eski yapı tamamen kaldırılmamış
-2. Frontend hala eski endpoint'i referans alıyordu
-3. Tekil (User) ve çoğul (Users) controller'lar arasında karışıklık vardı
-
-**Çözüm:**
-1. Eski proje dosyalarını yedekleyip kaldırdık:
-   - Stock.API
-   - Stock.Infrastructure
-   - UserController.cs
-2. Yeni UsersController.cs dosyasında Delete metodu oluşturduk
-3. Frontend'deki UserService içindeki endpoint'leri düzelttik:
-   ```typescript
-   // Hatalı
-   return this.http.delete<void>(`${this.apiUrl}/User/${id}`);
-   
-   // Düzeltilmiş
-   return this.http.delete<void>(`${this.apiUrl}/Users/${id}`);
-   ```
-
-**Önemli Notlar:**
-- Clean Architecture'da çoğul isimlendirme tercih edilmeli (UsersController)
-- Frontend ve backend arasındaki API endpoint'leri tutarlı olmalı
-- Yapısal değişiklikler sırasında eski kod tamamen kaldırılmalı veya açıkça işaretlenmeli
-
-### Hata 3: Çoklu Command Sınıfları Çakışması
-
-**Tarih:** 2025-03-08
-
-**Hata Mesajı:** CS0104: 'DeleteUserCommand' adı iki farklı ad alanında bulundu.
-
-**Nedeni:** Projede iki farklı namespace'te DeleteUserCommand sınıfı tanımlanmıştı:
-1. `Stock.Application.Features.Users.Commands.DeleteUserCommand`
-2. `Stock.Application.Features.Users.Commands.DeleteUser.DeleteUserCommand`
-
-Aynı şekilde, CreateUserCommand ve UpdateUserCommand için de benzer çakışmalar vardı.
-
-**Çözüm:**
-UsersController.cs dosyasında tam nitelikli tip adları kullanıldı:
-
-```csharp
-// Hatalı kod
-using Stock.Application.Features.Users.Commands.DeleteUser;
-
-// Düzeltilmiş kod
-using Stock.Application.Features.Users.Commands;
-```
-
-**Önemli Notlar:**
-- Namespace'lerde tutarlı bir yapı kullanılmalı
-- Aynı isimli sınıflar farklı namespace'lerde olmamalı
-- Çakışma durumunda tam nitelikli tip adları kullanılabilir
-- Uzun vadede, proje yapısı düzenlenerek çakışmalar giderilmeli
-
-## Kullanıcı Güncelleme Hatası
-
-**Hata:**
-```
-System.InvalidOperationException: No service for type 'MediatR.IRequestHandler`2[Stock.Application.Features.Users.Commands.UpdateUserCommand,Stock.Application.Models.DTOs.UserDto]' has been registered.
-```
-
-**Nedeni:**
-1. UpdateUserCommand için bir handler sınıfı (UpdateUserCommandHandler) oluşturulmamış
-2. MediatR, UpdateUserCommand için bir handler bulamıyor
-
-**Çözüm:**
-1. UpdateUserCommandHandler sınıfını oluştur:
-```csharp
-using AutoMapper;
-using MediatR;
-using Stock.Application.Features.Users.Commands;
-using Stock.Application.Models.DTOs;
-using Stock.Domain.Interfaces;
-using System.Threading;
-using System.Threading.Tasks;
-
-namespace Stock.Application.Features.Users.Handlers
-{
-    public class UpdateUserCommandHandler : IRequestHandler<UpdateUserCommand, UserDto>
-    {
-        private readonly IUnitOfWork _unitOfWork;
-        private readonly IMapper _mapper;
-
-        public UpdateUserCommandHandler(IUnitOfWork unitOfWork, IMapper mapper)
-        {
-            _unitOfWork = unitOfWork;
-            _mapper = mapper;
-        }
-
-        public async Task<UserDto> Handle(UpdateUserCommand request, CancellationToken cancellationToken)
-        {
-            var user = await _unitOfWork.Users.GetByIdAsync(request.Id);
-            
-            if (user == null)
-                return null;
-
-            user.Username = request.Username;
-            user.IsAdmin = request.IsAdmin;
-            user.RoleId = request.RoleId;
-            user.Sicil = request.Sicil;
-
-            await _unitOfWork.Users.UpdateAsync(user);
-            await _unitOfWork.SaveChangesAsync();
-
-            var updatedUser = await _unitOfWork.Users.GetByIdAsync(user.Id);
-            return _mapper.Map<UserDto>(updatedUser);
-        }
-    }
-}
-```
-
-2. Ayrıca CreateUserCommandHandler sınıfını da oluştur (eksikse):
-```csharp
-using AutoMapper;
-using MediatR;
-using Stock.Application.Features.Users.Commands;
-using Stock.Application.Models.DTOs;
-using Stock.Domain.Entities;
-using Stock.Domain.Interfaces;
-using System.Threading;
-using System.Threading.Tasks;
-
-namespace Stock.Application.Features.Users.Handlers
-{
-    public class CreateUserCommandHandler : IRequestHandler<CreateUserCommand, UserDto>
-    {
-        private readonly IUnitOfWork _unitOfWork;
-        private readonly IMapper _mapper;
-        private readonly IPasswordHasher _passwordHasher;
-
-        public CreateUserCommandHandler(IUnitOfWork unitOfWork, IMapper mapper, IPasswordHasher passwordHasher)
-        {
-            _unitOfWork = unitOfWork;
-            _mapper = mapper;
-            _passwordHasher = passwordHasher;
-        }
-
-        public async Task<UserDto> Handle(CreateUserCommand command, CancellationToken cancellationToken)
-        {
-            var user = new User
-            {
-                Username = command.Username,
-                PasswordHash = _passwordHasher.HashPassword(command.Password),
-                IsAdmin = command.IsAdmin,
-                RoleId = command.RoleId,
-                Sicil = command.Sicil
-            };
-
-            await _unitOfWork.Users.AddAsync(user);
-            await _unitOfWork.SaveChangesAsync();
-
-            return _mapper.Map<UserDto>(user);
-        }
-    }
-}
-```
-
-3. UpdateUserCommand'e sicil alanını ekledik:
-```csharp
-public class UpdateUserCommand : IRequest<UserDto>
-{
-    public int Id { get; set; }
-    public string Username { get; set; } = string.Empty;
-    public bool IsAdmin { get; set; }
-    public int? RoleId { get; set; }
-    public string Sicil { get; set; } = string.Empty;
-}
-```
-
-4. User entity'sine sicil alanını ekle:
-```csharp
-[StringLength(50)]
-public string Sicil { get; set; } = string.Empty;
-```
-
-5. UserDto'ya sicil alanını ekledik:
-```csharp
-public class UserDto
-{
-    public int Id { get; set; }
-    public string Username { get; set; } = string.Empty;
-    public bool IsAdmin { get; set; }
-    public int? RoleId { get; set; }
-    public string? RoleName { get; set; }
-    public string Sicil { get; set; } = string.Empty;
-}
-```
-
-6. Veritabanı şemasını güncellemek için migration oluşturduk ve uyguladık:
-```bash
-dotnet ef migrations add AddSicilFieldToUser
-dotnet ef database update
-```
-
-### Clean Architecture Perspektifinden Değerlendirme
-Bu hata, Clean Architecture'ın temel prensiplerinden biri olan "iç katmanlar dış katmanlara bağımlı olmamalıdır" ilkesini vurgulamaktadır. Frontend (dış katman) tarafından beklenen bir alan (sicil), Domain ve Application katmanlarında (iç katmanlar) tanımlanmamıştı.
-
-Çözüm süreci, Clean Architecture'ın aşağıdaki katmanlarında değişiklik gerektirdi:
-- **Domain Layer**: User entity'sinin güncellenmesi
-- **Application Layer**: Command ve DTO modellerinin güncellenmesi
-- **Infrastructure Layer**: Veritabanı şemasının güncellenmesi
-- **API Layer**: Controller'ın düzgün yapılandırılması
-
-Bu çözüm, tüm katmanların uyumlu çalışmasını sağlayarak Clean Architecture prensiplerini korumaktadır.
-
-### Öğrenilen Dersler
-1. Veritabanı kısıtlamaları eklemeden önce mevcut verilerin bu kısıtlamalara uygun olup olmadığı kontrol edilmelidir.
-2. Mevcut veriler kısıtlamalara uymuyorsa, önce veri temizliği yapılmalı veya uygulama seviyesinde kontrollerle ilerlenmelidir.
-3. Hata durumlarını kullanıcıya net ve anlaşılır mesajlarla iletmek, kullanıcı memnuniyetini artırır.
-4. Farklı katmanlar arasında hata mesajlarının iletimi, iyi tasarlanmış bir API sözleşmesi ile sağlanmalıdır.
-5. Frontend uygulamasında API hata mesajlarını doğrudan göstermek, sorunların hızlı teşhisine olanak tanır.
-6. Loglama stratejisi, hem geliştirme hem de canlı ortamlarda sorunların tespit edilmesine yardımcı olur.
-
-## Kullanıcı Ekleme Hatası (500 Internal Server Error)
-
-**Hata:** Kullanıcı ekleme işlemi sırasında 500 Internal Server Error alınıyor.
-
-**Nedeni:**
-1. Frontend'den gönderilen istekte `passwordHash` parametresi kullanılıyordu, ancak backend `password` parametresi bekliyordu.
-2. `userToCreate` nesnesi frontend'de `passwordHash` alanına sahipti, backend'de ise bu alan `password` olarak tanımlanmıştı.
-3. `CreateUserCommand` sınıfında `password` alanı varken, frontend'den `passwordHash` gönderiliyordu.
-
-**Çözüm:**
-1. `user-management.component.ts` dosyasında `passwordHash` alanı `password` olarak değiştirildi.
-2. `user.service.ts` dosyasında `createUser` metodu değiştirildi:
-```typescript
-password: user.password || user.passwordHash || '', // Önce password, yoksa passwordHash kullan
-```
-
-3. Form değerleri konsola yazdırılarak hata ayıklama yapıldı.
-
-**Önemli Notlar:**
-- Frontend ve backend arasındaki model uyumsuzlukları API hatalarına neden olabilir
-- Veri modeli değişikliklerinde hem frontend hem de backend güncellenmelidir
-- Şifre gibi hassas bilgilerin üretim ortamında loglanmasından kaçınılmalıdır
-- HTTP durum kodları (500, 400 vb.) sorunların kaynağını belirlemeye yardımcı olur
-
-## Sicil Alanı Benzersizlik Kontrolü
-
-**Hata:** Sicil alanı için benzersizlik kontrolü uygulanırken veritabanı güncelleme hatası alındı.
-
-**Nedeni:**
-1. Entity Framework Core migrasyonu, sicil alanı için veritabanında benzersiz indeks oluşturmaya çalışıyordu.
-2. Veritabanında zaten aynı sicil numarasına sahip kullanıcılar olduğu için bu işlem başarısız oldu.
-3. Bu durum, "The model for context 'ApplicationDbContext' has pending changes. Add a new migration before updating the database." hatası ile sonuçlandı.
-
-**Çözüm:**
-1. `src/Stock.Infrastructure/Data/Configurations/UserConfiguration.cs` dosyasından `Sicil` alanı için tanımlanmış benzersizlik indeksi kaldırıldı:
-   ```csharp
-   // Kaldırılan kod
-   builder.HasIndex(u => u.Sicil)
-       .IsUnique();
-   ```
-
-2. Yeni bir "RemoveSicilUniquenessConstraint" migrasyonu oluşturuldu.
-3. Veritabanı güncellendi.
-4. Benzersizlik kontrolü, uygulama seviyesinde (Command Handler sınıflarında) uygulandı:
-   ```csharp
-   // Eklenen veya Güncellenen kullanıcının sicil numarası kontrolü
-   var existingUsers = await _unitOfWork.Users.FindAsync(u => u.Sicil == request.Sicil && u.Id != request.Id);
-   if (existingUsers.Any())
-   {
-       throw new InvalidOperationException($"'{request.Sicil}' sicil numarası zaten başka bir kullanıcı tarafından kullanılmaktadır. Her kullanıcının benzersiz bir sicil numarası olmalıdır.");
-   }
-   ```
-
-5. Controller sınıflarında hata yönetimi iyileştirildi:
-   ```csharp
-   catch (InvalidOperationException ex)
-   {
-       // Sicil benzersizlik hatası veya diğer doğrulama hataları
-       string errorMessage = ex.Message;
-       _logger.LogWarning("Kullanıcı işlemi sırasında doğrulama hatası: {Message}", errorMessage);
-       
-       // Özel olarak sicil numarası hatası için kontrol et
-       if (errorMessage.Contains("sicil numarası zaten"))
-       {
-           return BadRequest(new { error = errorMessage });
-       }
-       
-       return BadRequest(new { error = errorMessage });
-   }
-   ```
-
-6. Frontend bileşenlerinde API'dan dönen hata mesajları doğrudan kullanıcıya gösterildi:
-   ```typescript
-   error: (error) => {
-     console.error('Kullanıcı ekleme hatası:', error);
-     
-     // API'dan dönen hata mesajını göster (varsa)
-     const errorMessage = error.error?.error || 'Kullanıcı eklenirken bir hata oluştu.';
-     
-     this.messageService.add({
-       severity: 'error',
-       summary: 'Hata',
-       detail: errorMessage,
-       life: 5000
-     });
-   }
-   ```
-
-**Kullanıcı Deneyimi İyileştirmeleri:**
-1. Hata mesajları daha açıklayıcı ve kullanıcı dostu hale getirildi.
-2. Spesifik hata durumlarına göre özelleştirilmiş mesajlar sunuldu.
-3. Sicil benzersizlik hatası için özel kontrol eklenip kullanıcıya net bir mesaj gösterildi.
-4. Hata mesajları daha uzun süre ekranda tutuldu (5 saniye).
-5. Loglama iyileştirildi ve hata ayıklama bilgileri zenginleştirildi.
+1. Proje belgelerini yeniden organize ettik:
+   - `knowledge-base/feature_modules/` dizini oluşturuldu
+   - Her feature modülü için ayrı belgeler oluşturuldu
+   - Ana `README.md` dosyası eklendi
+   - `scratchpad.md` dosyası basitleştirildi ancak otomasyon için korundu
+
+**Teknik Detaylar:**
+- Feature modülü belgeleri: `knowledge-base/feature_modules/`
+- Migrasyon belgeleri: `knowledge-base/angular-19-migration/`
+- Her modülün kullanımı, yapısı ve API detayları kendi belgesinde tanımlandı
+- README.md tüm belgelere referanslar içeriyor
+- `scratchpad-accept.mdc` kuralı otomasyon için korundu
 
 **Öğrenilen Dersler:**
-1. Veritabanı kısıtlamaları eklemeden önce mevcut verilerin bu kısıtlamalara uygun olup olmadığı kontrol edilmelidir.
-2. Mevcut veriler kısıtlamalara uymuyorsa, önce veri temizliği yapılmalı veya uygulama seviyesinde kontrollerle ilerlenmelidir.
-3. Hata durumlarını kullanıcıya net ve anlaşılır mesajlarla iletmek, kullanıcı memnuniyetini artırır.
-4. Farklı katmanlar arasında hata mesajlarının iletimi, iyi tasarlanmış bir API sözleşmesi ile sağlanmalıdır.
-5. Frontend uygulamasında API hata mesajlarını doğrudan göstermek, sorunların hızlı teşhisine olanak tanır.
-6. Loglama stratejisi, hem geliştirme hem de canlı ortamlarda sorunların tespit edilmesine yardımcı olur.
+- Mevcut otomasyonu bozmadan belge yapısını iyileştirmek mümkün
+- Modüler bir belge yapısı, büyüyen projelerde bilgiye erişimi kolaylaştırır
+- Feature modülleri için standardize edilmiş belgeler bakımı kolaylaştırır
 
-## GitHub Senkronizasyonu ve Kullanıcı Şifre/Sicil Sorunları
+## Bilgi İşlem ve Revir Modülleri Planlaması
 
-**Hata:** GitHub'dan son değişiklikleri çektikten sonra kullanıcı girişi yapılamıyor. Veritabanında sadece admin kullanıcısı kalıyor ve sicil alanı boş oluyor.
+**Not:**
+Bilgi İşlem ve Revir (Sağlık Ünitesi) modülleri, Angular 19 geçişi tamamlandıktan sonra geliştirilecektir. Bu yaklaşımın sebepleri:
 
-**Tarih:** 2025-03-05
+1. Önce temel mimari yapının tamamlanması ve kararlı hale getirilmesi hedefleniyor
+2. Angular 19'un yeni özelliklerinin (Signal API, yeni Control Flow) öncelikle entegre edilmesi
+3. Bu modüller greenfield geliştirme olacağından, modern yaklaşımlarla sıfırdan tasarlanabilecek
 
-**Nedeni:**
-1. Son migration'lar veritabanında kritik değişiklikler yapıyor:
-   - Normal kullanıcı (user) siliniyor
-   - User rolü siliniyor
-   - Admin kullanıcısının şifresi değişiyor ve sicil alanı boşaltılıyor
-2. SeedData mekanizması, veritabanında zaten bir admin kullanıcısı olduğu için çalışmıyor ve yeni kullanıcıları eklemiyor.
-3. Farklı ortamlarda (ev ve iş) aynı GitHub repo kullanıldığında, her ortamda migration'lar farklı durumda olabiliyor.
-
-**İncelenen Migration'lar:**
-```sql
--- 20250305173319_PendingChanges migration'ından
-DELETE FROM "Users" WHERE "Id" = 2;
-DELETE FROM "Roles" WHERE "Id" = 2;
-UPDATE "Users" SET "PasswordHash" = '...', "Sicil" = '' WHERE "Id" = 1;
-```
-
-**Çözüm:**
-1. FixPasswordController adında yeni bir controller oluşturuldu:
-   ```csharp
-   [HttpGet("fix-passwords")]
-   public async Task<IActionResult> FixPasswords()
-   {
-       // Admin kullanıcısının şifresini ve sicil alanını düzelt
-       var adminUser = await _context.Users.FirstOrDefaultAsync(u => u.Username == "admin");
-       if (adminUser != null)
-       {
-           adminUser.PasswordHash = _passwordHasher.HashPassword("admin123");
-           adminUser.Sicil = "A001";
-           await _context.SaveChangesAsync();
-       }
-       
-       // Normal kullanıcı yoksa oluştur veya güncelle
-       var normalUser = await _context.Users.FirstOrDefaultAsync(u => u.Username == "user");
-       if (normalUser == null)
-       {
-           // User kullanıcısı yoksa oluştur
-           var userRole = await _context.Roles.FirstOrDefaultAsync(r => r.Name == "User");
-           if (userRole == null)
-           {
-               // User rolü yoksa oluştur
-               userRole = new Role { Name = "User", Description = "Normal kullanıcı" };
-               await _context.Roles.AddAsync(userRole);
-               await _context.SaveChangesAsync();
-           }
-           
-           var newUser = new User
-           {
-               Username = "user",
-               PasswordHash = _passwordHasher.HashPassword("user123"),
-               IsAdmin = false,
-               RoleId = userRole.Id,
-               Sicil = "U001"
-           };
-           
-           await _context.Users.AddAsync(newUser);
-           await _context.SaveChangesAsync();
-       }
-       else
-       {
-           normalUser.PasswordHash = _passwordHasher.HashPassword("user123");
-           normalUser.Sicil = "U001";
-           await _context.SaveChangesAsync();
-       }
-   }
-   ```
-
-2. SeedData mekanizması güncellendi, artık kullanıcılar varsa da güncelleniyor:
-   ```csharp
-   private static async Task SeedUsersAsync(ApplicationDbContext context, IServiceProvider services)
-   {
-       var passwordHasher = services.GetRequiredService<IPasswordHasher>();
-       
-       // Admin kullanıcısını kontrol et ve güncelle
-       var adminUser = await context.Users.FirstOrDefaultAsync(u => u.Username == "admin");
-       if (adminUser == null)
-       {
-           // Admin kullanıcısı yoksa oluştur
-           adminUser = new User
-           {
-               Username = "admin",
-               PasswordHash = passwordHasher.HashPassword("admin123"),
-               IsAdmin = true,
-               Sicil = "A001"
-           };
-           
-           await context.Users.AddAsync(adminUser);
-       }
-       else
-       {
-           // Admin kullanıcısı varsa kontrol et ve güncelle
-           if (string.IsNullOrEmpty(adminUser.Sicil))
-           {
-               adminUser.Sicil = "A001";
-           }
-           
-           adminUser.PasswordHash = passwordHasher.HashPassword("admin123");
-           context.Users.Update(adminUser);
-       }
-       
-       // Normal kullanıcı için benzer kontroller ve güncellemeler...
-   }
-   ```
-
-**Kullanımı:**
-GitHub'dan son değişiklikleri çektikten sonra, eğer kullanıcı girişi yapılamıyorsa:
-1. API uygulamasını başlatın
-2. `/api/FixPassword/fix-passwords` endpoint'ine istek atın
-3. Bu işlem hem admin hem de normal kullanıcı hesaplarını düzeltecek
+**Planlama:**
+- İki modül için de kapsamlı planlama belgeleri oluşturuldu:
+  - `knowledge-base/feature_modules/bilgi_islem_module.md`
+  - `knowledge-base/feature_modules/revir_module.md`
+- Bu belgeler, modüllerin yapısı, bileşenleri, API'leri ve geliştirme aşamaları hakkında detaylı bilgiler içeriyor
+- Geliştirme başladığında, bu belgeler güncellenecek ve genişletilecek
 
 **Öğrenilen Dersler:**
-1. Veritabanı şemasında kritik değişiklikler yapan migration'lar dikkatli planlanmalı
-2. Seed data mekanizmaları mevcut verilerin kontrolünü ve gerektiğinde güncellemesini içermeli
-3. Farklı ortamlar arasında geçiş yapıldığında veritabanı durumunu senkronize tutmak için özel mekanizmalar gerekebilir
-4. Critical fix endpoint'leri gibi acil durum onarım mekanizmaları oluşturulmalı
-5. Migration'ların içeriğini commit etmeden önce olası etkileri değerlendirilmeli
-6. Farklı ortamlar arasındaki senkronizasyon sorunları için dokümantasyon sağlanmalı
+- Geliştirme başlamadan önce kapsamlı planlama yapmak, sonraki aşamalarda zaman kazandırır
+- Mevcut yapının ve standartların oturmasını beklemek, yeni modüllerin daha tutarlı geliştirilmesini sağlar
+- Belgeleri önceden hazırlamak, gereksinimlerin netleştirilmesine yardımcı olur
 
-**Önleyici Önlemler:**
-1. Migration'lar, mevcut verileri silmek yerine güncellemeyi tercih etmeli
-2. Seed data, var olan verilerin kontrolünü ve gerektiğinde güncellemesini içermeli
-3. Kritik veritabanı değişiklikleri için rollback stratejisi planlanmalı
-4. Önemli alanlar için varsayılan değerler atanmalı
-5. Farklı ortamlar arasında geçiş rehberi oluşturulmalı
+## Kullanıcı Yönetimi Arayüzü Sorunları
 
-## Rol Terminolojisi Değişikliği
+### Dropdown ve Buton Hizalama Sorunları
 
-**Hata:** Kullanıcı yönetimi arayüzünde "Katkıda Bulunan" terimi kullanılıyordu, ancak bu terim proje genelindeki rol terminolojisine uygun değildi. Ayrıca, sistemde "İzleyici" rolü bulunmasına rağmen bu rol aktif olarak kullanılmıyordu.
+**Tarih:** 2025-06-08
+
+**Sorun:** 
+Kullanıcı yönetimi sayfasında, arama kutusu, rol dropdown'ı ve "Yeni Kullanıcı" butonu arasında hizalama ve yükseklik farklılıkları vardı. Ayrıca, dropdown'lar ve butonlar farklı stillere sahipti.
 
 **Nedeni:**
-- Kullanıcı izinleri tablosunda "Contributor" teknik değeri için "Katkıda Bulunan" çevirisi kullanılmıştı.
-- Projenin standardizasyonu için tüm arayüzlerde "Yönetici" ve "Kullanıcı" şeklinde iki ana rol kullanılması gerekiyor.
-- "İzleyici" rolü kullanılmadığı halde kullanıcı arayüzünde görüntüleniyordu, bu da kullanıcıların kafasını karıştırabilirdi.
+1. PrimeNG dropdown bileşenleri ve standart HTML select elementleri arasında stil farklılıkları
+2. CSS seçicilerinin özgüllük (specificity) sorunları
+3. Tarayıcı önbelleği nedeniyle stil değişikliklerinin görünmemesi
+4. Farklı bileşenlerin farklı varsayılan yüksekliklere sahip olması
 
 **Çözüm:**
-1. İlk güncelleme: "Katkıda Bulunan" ifadesi "Kullanıcı" olarak güncellendi
-   ```diff
-   {{ user.permissions === 'Admin' ? 'Yönetici' : 
-   -  user.permissions === 'Contributor' ? 'Katkıda Bulunan' : 
-   +  user.permissions === 'Contributor' ? 'Kullanıcı' : 
-      user.permissions === 'Viewer' ? 'İzleyici' : user.permissions }}
-   ```
+1. Tüm dropdown'lar için tutarlı bir yükseklik (36px) belirlendi
+2. Dropdown'lar için basit HTML `<select>` elementleri kullanıldı
+3. Inline stil kullanılarak yükseklik ve diğer stil özellikleri doğrudan HTML elementlerine uygulandı
+4. Global stil dosyasına (styles.scss) yüksek öncelikli seçiciler eklendi
+5. Tüm butonlar ve dropdown'lar için tutarlı kenar boşlukları, kenarlık ve gölge efektleri uygulandı
 
-2. İkinci güncelleme: "İzleyici" rolü tamamen kaldırıldı
-   ```diff
-   roleFilterOptions: any[] = [
-     { label: 'Tümü', value: null },
-     { label: 'Yönetici', value: 'Admin' },
-   -  { label: 'Kullanıcı', value: 'Contributor' },
-   -  { label: 'İzleyici', value: 'Viewer' }
-   +  { label: 'Kullanıcı', value: 'Contributor' }
-   ];
-   ```
-
-3. Kullanıcı izinleri görüntüleme kısmında "İzleyici" kontrolü kaldırıldı
-   ```diff
-   <span class="permission-badge" [ngClass]="{
-     'admin-badge': user.permissions === 'Admin',
-   -  'contributor-badge': user.permissions === 'Contributor',
-   -  'viewer-badge': user.permissions === 'Viewer'
-   +  'contributor-badge': user.permissions === 'Contributor'
-   }">
-     {{ user.permissions === 'Admin' ? 'Yönetici' : 
-        user.permissions === 'Contributor' ? 'Kullanıcı' : 
-   -    user.permissions === 'Viewer' ? 'İzleyici' : user.permissions }}
-   +    user.permissions }}
-   </span>
-   ```
-
-**Önemli Notlar:**
-- Teknik değerler (arka planda kullanılan değerler) değiştirilmedi, sadece kullanıcıya gösterilen etiketler güncellendi.
-- Rol tabanlı erişim kontrol sistemi bu değişiklikten etkilenmedi.
-- Sistem, artık sadece "Yönetici" ve "Kullanıcı" rollerini destekliyor.
-- İlgili detaylı bilgi için bkz: `knowledge-base/user_role_terminology_update.md`
-
-## Sayfa Erişim İzinleri Geliştirmesi
-
-### Hata 1: PrimeNG Bileşenleri Görüntülenemedi
-**Sorun:** Rol detay sayfasında p-accordion ve p-toggleButton bileşenleri görüntülenemedi.
-**Çözüm:** Standalone bileşenlerde gerekli PrimeNG modüllerinin imports dizisine eklenmesi gerekiyor:
-```typescript
-@Component({
-  standalone: true,
-  imports: [
-    CommonModule,
-    FormsModule,
-    AccordionModule,
-    ToggleButtonModule,
-    CheckboxModule,
-    ButtonModule,
-    ProgressSpinnerModule
-  ]
-})
-```
-
-### Hata 2: İzin Gruplarına Erişilemedi
-**Sorun:** Şablonda belirli gruplar için izinlere erişirken hata alındı.
-**Çözüm:** Permission servisinden izinleri grup bazlı döndürmek için yardımcı metotlar eklendi:
-```typescript
-getPermissionsByGroup(groupName: string): Permission[] {
-  const group = this.permissionGroups.find(g => g.group === groupName);
-  return group ? group.permissions : [];
-}
-```
-
-### Hata 3: İzinlerin Kaydedilmesi Sırasında 401 Hatası
-**Sorun:** İzin güncelleme işlemi yapıldığında 401 Unauthorized hatası alındı.
-**Çözüm:** Kimlik doğrulama token'ının HTTP isteklerinde gönderildiğinden emin olmak ve API izin kontrolünü düzeltmek:
-```typescript
-// HTTP isteğine token ekleme
-const headers = {
-  'Authorization': `Bearer ${this.authService.getToken()}`
-};
-return this.http.post<boolean>(url, { permissionIds }, { headers });
-```
-
-### Hata 4: ToggleButton [checked] ve [value] Özelliği Hatası
-
-**Sorun:** Rol detay sayfasında p-toggleButton bileşenleri için şu hatalar alındı:
-```
-Can't bind to 'checked' since it isn't a known property of 'p-toggleButton'.
-Can't bind to 'value' since it isn't a known property of 'p-toggleButton'.
-```
-
-**Nedeni:**
-1. ToggleButton bileşeni, standart HTML input bileşenleri gibi `checked` ve `value` özelliklerini desteklemiyor.
-2. PrimeNG ToggleButton, bir dizi içinde değer varlığı kontrolü için doğrudan kullanılamıyor.
-
-**Çözüm:**
-1. `[checked]` ve `[value]` özellikleri yerine tek yönlü veri bağlama kullan:
+**Kod Değişiklikleri:**
 ```html
-<!-- Hatalı kod -->
-<p-toggleButton 
-    [checked]="isPermissionSelected(permission.id)" 
-    [(ngModel)]="selectedPermissions"
-    [value]="permission.id">
-</p-toggleButton>
+<!-- Rol dropdown'ı için -->
+<select class="basic-select role-select" style="height: 36px;" (change)="onRoleFilterChange($event)">
+  <option value="">Tümü</option>
+  <option *ngFor="let role of roleFilterOptions" [value]="role.value">{{ role.label }}</option>
+</select>
 
-<!-- Doğru kod -->
-<p-toggleButton 
-    [ngModel]="isPermissionSelected(permission.id)"
-    (onChange)="togglePermission(permission.id)">
-</p-toggleButton>
+<!-- Satır sayısı dropdown'ı için -->
+<select class="basic-select" style="height: 36px;" [(ngModel)]="rowsPerPage" (change)="onRowsPerPageChange()">
+  <option *ngFor="let option of rowsPerPageOptions" [value]="option">{{ option }}</option>
+</select>
+
+<!-- Yeni Kullanıcı butonu için -->
+<button class="create-button" style="height: 36px;" (click)="openNewUserDialog()">
+  <i class="pi pi-plus"></i> Yeni Kullanıcı
+</button>
 ```
 
-2. isPermissionSelected metodu, izin ID'sinin seçili izinler listesinde olup olmadığını kontrol eder:
-```typescript
-isPermissionSelected(permissionId: number): boolean {
-  return this.selectedPermissions.includes(permissionId);
-}
-```
-
-3. togglePermission metodu, izin ID'sini izin listesinden ekler veya çıkarır:
-```typescript
-togglePermission(permissionId: number): void {
-  const index = this.selectedPermissions.indexOf(permissionId);
-  if (index > -1) {
-    this.selectedPermissions.splice(index, 1);
-  } else {
-    this.selectedPermissions.push(permissionId);
+```scss
+// Global stil dosyasına eklenen yüksek öncelikli seçiciler
+.basic-select {
+  height: 36px !important;
+  padding: 0.5rem !important;
+  border: 1px solid #ced4da !important;
+  border-radius: 4px !important;
+  background-color: #fff !important;
+  font-size: 1rem !important;
+  color: #495057 !important;
+  transition: border-color 0.15s, box-shadow 0.15s !important;
+  
+  &:hover, &:focus {
+    border-color: #2196F3 !important;
+    box-shadow: 0 0 0 0.2rem rgba(33, 150, 243, 0.25) !important;
   }
+}
+
+.role-select {
+  min-width: 150px !important;
+  font-weight: 500 !important;
 }
 ```
 
 **Öğrenilen Dersler:**
-- PrimeNG bileşenleri, standart HTML bileşenlerinden farklı şekilde çalışır ve farklı özellikler kullanır.
-- ToggleButton için değer listesi bağlama doğrudan desteklenmez, özel bir mantıkla yönetilmelidir.
-- Bileşenlerde sorun yaşandığında, PrimeNG dokümantasyonunu kontrol etmek faydalıdır.
+1. Tarayıcı önbelleğini temizlemek (Ctrl+F5 veya Cmd+Shift+R) stil değişikliklerinin görünmesini sağlayabilir
+2. Karmaşık UI bileşenleri yerine basit HTML elementleri kullanmak bazen daha iyi sonuç verebilir
+3. Inline stiller, CSS seçici özgüllük sorunlarını aşmak için kullanılabilir
+4. Tutarlı bir UI için tüm benzer elementlerin aynı yüksekliğe sahip olması önemlidir
+5. !important kullanımı genellikle kaçınılması gereken bir pratik olsa da, üçüncü taraf kütüphanelerin stillerini geçersiz kılmak için bazen gereklidir
 
-### Hata 5: Admin/Roles Rota Hatası
+### İzinleri Yönet Butonu Sorunları
 
-**Sorun:** Admin dashboard'dan rol yönetimi sayfasına gitmeye çalışıldığında aşağıdaki hata alınıyor:
-```
-ERROR RuntimeError: NG04002: Cannot match any routes. URL Segment: 'admin/roles'
-```
+**Tarih:** 2025-06-08
+
+**Sorun:** 
+Kullanıcı yönetimi sayfasında "İzinleri Yönet" butonunda iki sorun vardı:
+1. Buton üzerine gelindiğinde (hover) "İzinleri Yönet" metni kaydı
+2. Buton üzerinde "İzinler" metni ve anahtar ikonu görünüyordu, ancak sadece anahtar ikonunun görünmesi isteniyordu
 
 **Nedeni:**
-1. Admin dashboard bileşeninde `navigateToRoleManagement()` metodu `/admin/roles` rotasına yönlendiriyor
-2. Ancak app.routes.ts dosyasında `admin/roles` rotası tanımlanmamış
-3. Sadece `roles/:id` ve `role-management` rotaları tanımlanmış
+1. Buton içindeki metin için yeterli alan olmaması
+2. Hover durumunda buton içeriğinin yeniden konumlandırılması
+3. CSS sınıflarının doğru uygulanmaması
 
 **Çözüm:**
-1. app.routes.ts dosyasına eksik olan `admin/roles` rotasını ekle:
-```typescript
-{ 
-  path: 'admin/roles', 
-  component: RoleManagementComponent,
-  canActivate: [AuthGuard],
-  data: { 
-    requiresAdmin: true,
-    requiredPermission: 'Pages.RoleManagement'
+1. `.permission-button` sınıfı güncellendi:
+   - Sabit genişlik ve yükseklik (2.5rem) belirlendi
+   - Taşan içeriği gizlemek için `overflow: hidden` eklendi
+   - Padding sıfırlandı
+   - Hover efekti sadece arka plan rengini değiştirecek şekilde güncellendi
+
+2. `.permission-icon-text` sınıfı güncellendi:
+   - "İzinler" metnini tamamen gizlemek için `display: none !important` eklendi
+
+3. Tooltip pozisyonu düzeltildi:
+   - Buton elementine `tooltipPosition="top"` özelliği eklendi
+   - Global tooltip stilleri güncellendi
+
+**Kod Değişiklikleri:**
+```scss
+.permission-button {
+  min-width: 2.5rem !important;
+  width: 2.5rem !important;
+  height: 2.5rem !important;
+  overflow: hidden !important;
+  padding: 0 !important;
+  
+  &:hover {
+    background-color: #e9ecef !important;
   }
+}
+
+.permission-icon-text {
+  display: none !important;
 }
 ```
 
-2. Ayrıca tutarlılık için `roles` rotasını da ekle:
-```typescript
-{ 
-  path: 'roles', 
-  component: RoleManagementComponent,
-  canActivate: [AuthGuard],
-  data: { 
-    requiresAdmin: true,
-    requiredPermission: 'Pages.RoleManagement'
-  }
-}
-```
-
-**Öğrenilen Dersler:**
-- Bir sayfaya yönlendirme yapmadan önce, hedef rotanın app.routes.ts dosyasında tanımlanmış olduğundan emin olunmalı
-- Admin dashboard gibi merkezi bir komponenten yapılan yönlendirmeler kontrol edilmeli
-- Angular'da rotaların tutarlı bir şekilde tanımlanması önemli
-- URL yolları ve rota tanımları arasında uyumsuzluk olmamalı
-
-### Hata 6: API Endpoint Uyumsuzluğu (Rol Yönetimi)
-
-**Sorun:** Rol yönetimi sayfasında roller yüklenirken aşağıdaki hata alınıyor:
-```
-GET http://localhost:5037/api/roles 404 (Not Found)
-```
-
-**Nedeni:**
-1. Frontend'de RoleService, `api/roles` endpoint'ine istek yapıyor
-2. Backend'de controller `api/Role` endpoint'ini sunuyor (controller adı RoleController)
-3. ASP.NET Core'da controller adı rota olarak kullanılıyor ve büyük/küçük harf duyarlı
-
-**Çözüm:**
-Frontend'deki RoleService'de API URL'sini değiştir:
-```typescript
-// Hatalı
-private apiUrl = `${environment.apiUrl}/api/roles`;
-
-// Doğru
-private apiUrl = `${environment.apiUrl}/api/Role`;
-```
-
-**Alternatif Çözüm:**
-Backend'de controller adını değiştirmek:
-```csharp
-// Hatalı
-public class RoleController : ControllerBase
-
-// Doğru
-public class RolesController : ControllerBase
-```
-
-**Öğrenilen Dersler:**
-- API endpoint'leri frontend ve backend arasında tam olarak eşleşmeli
-- ASP.NET Core'da controller adları rota olarak kullanılır ve büyük/küçük harf duyarlıdır
-- Frontend ve backend arasındaki API sözleşmesi tutarlı olmalı
-- API endpoint'lerini test etmek için Swagger veya Postman kullanılabilir
-
-### Hata 7: PrimeNG Table Responsive Özelliği Uyarısı
-
-**Sorun:** Rol yönetimi sayfasında PrimeNG Table bileşeni için aşağıdaki uyarı alınıyor:
-```
-responsive property is deprecated as table is always responsive with scrollable behavior.
-```
-
-**Nedeni:**
-PrimeNG'nin güncel sürümlerinde Table bileşeni her zaman responsive olarak çalışıyor ve `responsive` özelliği kullanımdan kaldırılmış.
-
-**Çözüm:**
-Table bileşeninden `[responsive]="true"` özelliğini kaldır:
 ```html
-<!-- Hatalı -->
-<p-table [value]="roles" [paginator]="true" [rows]="10" [responsive]="true" [loading]="loading">
+<button pButton 
+  class="p-button-secondary permission-button" 
+  icon="pi pi-key" 
+  pTooltip="İzinleri Yönet" 
+  tooltipPosition="top"
+  (click)="managePermissions(user)">
+  <span class="permission-icon-text">İzinler</span>
+</button>
+```
 
-<!-- Doğru -->
-<p-table [value]="roles" [paginator]="true" [rows]="10" [loading]="loading">
+**Tooltip Stilleri:**
+```scss
+.p-tooltip {
+  position: fixed !important;
+  z-index: 1000 !important;
+  
+  .p-tooltip-text {
+    background-color: #212529 !important;
+    color: #fff !important;
+    padding: 0.5rem 0.75rem !important;
+    border-radius: 4px !important;
+    font-size: 0.875rem !important;
+    font-weight: 400 !important;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2) !important;
+  }
+  
+  &.p-tooltip-top .p-tooltip-arrow {
+    border-top-color: #212529 !important;
+  }
+  
+  &.p-tooltip-right .p-tooltip-arrow {
+    border-right-color: #212529 !important;
+  }
+  
+  &.p-tooltip-bottom .p-tooltip-arrow {
+    border-bottom-color: #212529 !important;
+  }
+  
+  &.p-tooltip-left .p-tooltip-arrow {
+    border-left-color: #212529 !important;
+  }
+}
 ```
 
 **Öğrenilen Dersler:**
-- Kütüphane güncellemeleriyle bazı özellikler kullanımdan kaldırılabilir
-- Konsol uyarılarını düzenli olarak kontrol etmek ve çözmek önemli
-- PrimeNG gibi UI kütüphanelerinin dokümantasyonunu takip etmek gerekli
-
-### Hata 8: 500 Internal Server Error (Rol Yönetimi) - Döngüsel Referans
-
-**Sorun:** Rol yönetimi sayfasında roller yüklenirken aşağıdaki hata alınıyor:
-```
-GET http://localhost:5037/api/Role 500 (Internal Server Error)
-
-System.Text.Json.JsonException: A possible object cycle was detected. This can either be due to a cycle or if the object depth is larger than the maximum allowed depth of 32. Consider using ReferenceHandler.Preserve on JsonSerializerOptions to support cycles.
-```
-
-**Nedeni:**
-1. RoleController'da `Include(r => r.Users)` kullanılması döngüsel referans sorununa neden oluyor
-2. JSON serialization sırasında Role -> Users -> Role -> Users -> ... şeklinde sonsuz döngü oluşuyor
-3. Döngüsel referanslar için uygun JSON serialization ayarları kullanılmamış
-4. Entity Framework ile ilişkisel verileri döndürürken projection kullanılmamış
-
-**Çözüm 1: RoleController'da döngüsel referans sorununu önlemek için Select ile projection kullanımı:**
-```csharp
-// Hatalı
-return await _context.Roles.Include(r => r.Users).ToListAsync();
-
-// Doğru
-var roles = await _context.Roles
-    .AsNoTracking() // Performans için
-    .Select(r => new 
-    {
-        r.Id,
-        r.Name,
-        r.Description,
-        r.CreatedAt,
-        r.UpdatedAt,
-        UserCount = r.Users.Count,
-        // İlişkili kullanıcıları Role referansı olmadan seçici şekilde al
-        Users = r.Users.Select(u => new { u.Id, u.Username }).ToList()
-    })
-    .ToListAsync();
-
-return Ok(roles);
-```
-
-**Çözüm 2: Program.cs'de JSON serialization ayarlarını Preserve olarak güncelleme:**
-```csharp
-builder.Services.AddControllers()
-    .AddJsonOptions(options =>
-    {
+1. Butonlar için sabit boyutlar belirlemek, içerik değiştiğinde düzenin bozulmasını önler
+2. Tooltip'ler, buton üzerinde gösterilemeyen metinler için iyi bir alternatiftir
+3. `overflow: hidden` özelliği, taşan içeriği gizlemek için kullanılabilir
+4. Tooltip pozisyonunu belirlemek, kullanıcı deneyimini iyileştirir
+5. Global tooltip stilleri, tüm uygulamada tutarlı bir görünüm sağlar
