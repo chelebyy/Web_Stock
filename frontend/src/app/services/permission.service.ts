@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../../environments/environment';
-import { Permission, PermissionGroup } from '../models/permission.model';
+import { Permission, PermissionGroup } from '../shared/models/permission.model';
 import { map } from 'rxjs/operators';
 
 // ReferenceHandler.Preserve formatı için interface

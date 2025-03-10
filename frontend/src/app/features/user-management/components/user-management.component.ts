@@ -363,7 +363,7 @@ export class UserManagementComponent implements OnInit, AfterViewInit {
   
   // Checkbox durumları için değişkenler
   selectAllChecked: boolean = false;
-  selectedUsers: { [key: string]: boolean } = {};
+  selectedUsers: { [key: number]: boolean } = {};
   
   // Filtre seçenekleri
   joinedFilterOptions: any[] = [
@@ -528,16 +528,19 @@ export class UserManagementComponent implements OnInit, AfterViewInit {
         console.log('Kullanıcı verileri alındı:', data);
         
         if (data && Array.isArray(data)) {
-          this.users = data.map(user => ({
-            id: user.id,
-            fullName: user.fullName || `${user.username}`,
-            username: user.username,
-            sicil: user.sicil,
-            roleId: user.roleId,
-            roleName: this.getRoleName(user.roleId),
-            permissions: this.getUserPermissionLabel(user.isAdmin, user.roleId),
-            isAdmin: user.isAdmin
-          }));
+          this.users = data.map(user => {
+            console.log('Kullanıcı ID tipi:', typeof user.id, 'Değer:', user.id);
+            return {
+              id: user.id,
+              fullName: user.firstName && user.lastName ? `${user.firstName} ${user.lastName}` : user.username,
+              username: user.username,
+              sicil: user.sicil,
+              roleId: user.roleId,
+              roleName: this.getRoleName(user.roleId || null),
+              permissions: this.getUserPermissionLabel(user.isAdmin, user.roleId || null),
+              isAdmin: user.isAdmin
+            };
+          });
           
           // Kullanıcılar yüklendiğinde selectedUsers nesnesini sıfırla
           this.clearSelectedUsers();
@@ -611,7 +614,7 @@ export class UserManagementComponent implements OnInit, AfterViewInit {
     if (this.userToDelete.id === 'all') {
       // Seçili kullanıcıları sil
       const selectedUserIds = Object.keys(this.selectedUsers)
-        .filter(id => this.selectedUsers[id])
+        .filter(id => this.selectedUsers[parseInt(id)])
         .map(id => parseInt(id));
       
       if (selectedUserIds.length === 0) {
@@ -897,7 +900,7 @@ export class UserManagementComponent implements OnInit, AfterViewInit {
         // Hata durumunda varsayılan roller
         this.roles = [
           { label: 'Admin', value: 1 },
-          { label: 'User', value: 2 }
+          { label: 'Kullanıcı', value: 2 }
         ];
         
         // Rol filtre seçenekleri için "Tümü" seçeneğini ekle
@@ -1093,17 +1096,26 @@ export class UserManagementComponent implements OnInit, AfterViewInit {
 
   // Checkbox metodları
   toggleSelectAll() {
+    console.log('toggleSelectAll çağrıldı, önceki durum:', this.selectAllChecked);
     this.selectAllChecked = !this.selectAllChecked;
+    console.log('toggleSelectAll sonrası durum:', this.selectAllChecked);
     
     // Tüm kullanıcıların checkbox durumunu güncelle
     this.filteredUsers.forEach(user => {
       this.selectedUsers[user.id] = this.selectAllChecked;
     });
+    
+    console.log('Seçili kullanıcılar:', this.selectedUsers);
   }
   
-  toggleUserSelection(userId: string) {
+  toggleUserSelection(userId: number) {
+    console.log('toggleUserSelection çağrıldı, kullanıcı ID:', userId);
+    console.log('Önceki durum:', this.selectedUsers[userId]);
+    
     // Kullanıcının checkbox durumunu tersine çevir
     this.selectedUsers[userId] = !this.selectedUsers[userId];
+    
+    console.log('Sonraki durum:', this.selectedUsers[userId]);
     
     // Tüm kullanıcılar seçili mi kontrol et
     this.checkIfAllSelected();
@@ -1115,7 +1127,7 @@ export class UserManagementComponent implements OnInit, AfterViewInit {
       this.filteredUsers.every(user => this.selectedUsers[user.id]);
   }
   
-  isUserSelected(userId: string): boolean {
+  isUserSelected(userId: number): boolean {
     return this.selectedUsers[userId] === true;
   }
   
@@ -1130,7 +1142,8 @@ export class UserManagementComponent implements OnInit, AfterViewInit {
   
   deleteSelectedUsers() {
     const selectedUserIds = Object.keys(this.selectedUsers)
-      .filter(id => this.selectedUsers[id]);
+      .filter(id => this.selectedUsers[parseInt(id)])
+      .map(id => parseInt(id));
     
     if (selectedUserIds.length === 0) {
       this.messageService.add({

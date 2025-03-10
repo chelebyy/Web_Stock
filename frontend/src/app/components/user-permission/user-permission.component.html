@@ -17,16 +17,16 @@
         <div class="row" *ngIf="!loading">
             <!-- Kullanıcının mevcut izinleri -->
             <div class="col-md-6">
-                <h5>Mevcut İzinler</h5>
+                <h5 class="mb-3">Mevcut İzinler</h5>
                 <p-accordion [multiple]="true" class="permission-accordion">
                     <p-accordionTab *ngFor="let group of allPermissionsGroups" [header]="group.group">
-                        <p-table [value]="group.permissions" [scrollable]="true" scrollHeight="250px">
+                        <p-table [value]="group.permissions" [scrollable]="true" scrollHeight="250px" styleClass="p-datatable-sm">
                             <ng-template pTemplate="header">
                                 <tr>
-                                    <th>İzin Adı</th>
-                                    <th>Kaynak</th>
-                                    <th>İşlem</th>
-                                    <th>Durum</th>
+                                    <th style="width: 30%">İzin Adı</th>
+                                    <th style="width: 30%">Kaynak</th>
+                                    <th style="width: 20%">İşlem</th>
+                                    <th style="width: 20%">Durum</th>
                                 </tr>
                             </ng-template>
                             <ng-template pTemplate="body" let-permission>
@@ -43,7 +43,7 @@
                             </ng-template>
                             <ng-template pTemplate="emptymessage">
                                 <tr>
-                                    <td colspan="4" class="text-center">İzin bulunamadı</td>
+                                    <td colspan="4" class="text-center py-4">İzin bulunamadı</td>
                                 </tr>
                             </ng-template>
                         </p-table>
@@ -70,12 +70,13 @@
                                     sourceFilterPlaceholder="İzin ara..."
                                     targetFilterPlaceholder="İzin ara..."
                                     [sourceStyle]="{'height':'250px'}" 
-                                    [targetStyle]="{'height':'250px'}">
+                                    [targetStyle]="{'height':'250px'}"
+                                    styleClass="custom-picklist">
                                     <ng-template let-permission pTemplate="item">
-                                        <div>
-                                            <div><strong>{{ permission.name }}</strong></div>
-                                            <div>{{ permission.description }}</div>
-                                            <div><small>Grup: {{ permission.group }}</small></div>
+                                        <div class="permission-item">
+                                            <div class="permission-name">{{ permission.name }}</div>
+                                            <div class="permission-description">{{ permission.description }}</div>
+                                            <div class="permission-group">Grup: {{ permission.group }}</div>
                                         </div>
                                     </ng-template>
                                 </p-pickList>
@@ -83,7 +84,8 @@
                                 <div class="d-flex justify-content-end mt-3">
                                     <button pButton pRipple type="button" icon="pi pi-check" label="İzinleri Ata" 
                                         (click)="assignSelectedPermissions()" 
-                                        [disabled]="selectedPermissions.length === 0 || saveLoading">
+                                        [disabled]="selectedPermissions.length === 0 || saveLoading"
+                                        class="p-button-success">
                                     </button>
                                 </div>
                             </div>
@@ -103,16 +105,16 @@
                             </div>
                             <div class="card-body">
                                 <p-table [value]="userCustomPermissions" [scrollable]="true" scrollHeight="250px" 
-                                    [(selection)]="selectedCustomPermissions" dataKey="id">
+                                    [(selection)]="selectedCustomPermissions" dataKey="id" styleClass="p-datatable-sm">
                                     <ng-template pTemplate="header">
                                         <tr>
                                             <th style="width: 3rem">
                                                 <p-tableHeaderCheckbox></p-tableHeaderCheckbox>
                                             </th>
-                                            <th>İzin Adı</th>
-                                            <th>Kaynak</th>
-                                            <th>İşlem</th>
-                                            <th>Durum</th>
+                                            <th style="width: 30%">İzin Adı</th>
+                                            <th style="width: 25%">Kaynak</th>
+                                            <th style="width: 20%">İşlem</th>
+                                            <th style="width: 20%">Durum</th>
                                         </tr>
                                     </ng-template>
                                     <ng-template pTemplate="body" let-customPermission>
@@ -131,12 +133,12 @@
                                     </ng-template>
                                     <ng-template pTemplate="emptymessage">
                                         <tr>
-                                            <td colspan="5" class="text-center">Özel izin bulunamadı</td>
+                                            <td colspan="5" class="text-center py-4">Özel izin bulunamadı</td>
                                         </tr>
                                     </ng-template>
                                     <ng-template pTemplate="footer" *ngIf="userCustomPermissions.length > 0">
                                         <tr>
-                                            <td colspan="5">
+                                            <td colspan="5" class="p-3">
                                                 <button pButton pRipple type="button" icon="pi pi-trash" label="Seçilenleri Kaldır" 
                                                     (click)="removeSelectedCustomPermissions()" 
                                                     [disabled]="selectedCustomPermissions.length === 0 || saveLoading"

@@ -1,7 +1,3 @@
----
-description: 
-globs: 
----
 # Inventory and Stock Tracking Web Application - Product Requirements Document (PRD)
 
 ---
@@ -222,6 +218,76 @@ Create proper indexes for frequently queried columns
 Use appropriate data types for performance optimization
 Implement consistent naming for constraints and sequences
 Document complex queries with comments
+
+
+## Project Structure (Clean Architecture)
+
+```
+Solution
+├── src/
+│   ├── Stock.Domain/              # Domain Layer
+│   │   ├── Entities/             # Domain entities
+│   │   ├── Interfaces/           # Repository interfaces
+│   │   ├── Events/              # Domain events
+│   │   ├── Exceptions/          # Domain exceptions
+│   │   └── Specifications/      # Query specifications
+│   │
+│   ├── Stock.Application/         # Application Layer
+│   │   ├── Common/              # Shared components
+│   │   ├── Features/            # Use cases
+│   │   │   ├── Auth/           # Authentication
+│   │   │   ├── Users/          # User management
+│   │   │   └── Roles/          # Role management
+│   │   ├── Interfaces/         # Service interfaces
+│   │   ├── Models/             # DTOs
+│   │   └── Services/           # Application services
+│   │
+│   ├── Stock.Infrastructure/      # Infrastructure Layer
+│   │   ├── Data/               # Data access
+│   │   │   ├── Config/        # EF configurations
+│   │   │   ├── Migrations/    # EF migrations
+│   │   │   └── Repositories/  # Repository implementations
+│   │   ├── Identity/          # Authentication
+│   │   ├── Logging/           # Logging implementations
+│   │   └── Services/          # External services
+│   │
+│   └── Stock.API/                # API Layer
+│       ├── Controllers/         # API endpoints
+│       ├── Filters/            # Action filters
+│       ├── Middleware/         # Custom middleware
+│       └── Extensions/         # Service extensions
+│
+├── tests/                        # Test Projects
+│   ├── Stock.UnitTests/         # Unit tests
+│   ├── Stock.IntegrationTests/  # Integration tests
+│   └── Stock.FunctionalTests/   # E2E tests
+│
+frontend/
+├── src/
+│   ├── app/
+│   │   ├── core/ # Temel servisler ve interceptor'lar
+│   │   │   ├── authentication/
+│   │   │   ├── http/
+│   │   │   ├── guards/
+│   │   │   └── services/
+│   │   ├── shared/ # Paylaşılan bileşenler ve direktifler
+│   │   │   ├── components/
+│   │   │   ├── directives/
+│   │   │   ├── pipes/
+│   │   │   └── ui/
+│   │   ├── features/ # Özellik modülleri
+│   │   │   ├── auth/
+│   │   │   ├── dashboard/
+│   │   │   ├── user-management/
+│   │   │   ├── role-management/
+│   │   │   ├── bilgi-islem/
+│   │   │   └── ... (diğer özellikler)
+│   │   ├── models/ # Tüm veri modelleri
+│   │   └── services/ # Genel servisler (feature-specific olmayan)
+│   ├── assets/ # Statik dosyalar
+│   └── environments/ # Ortam yapılandırmaları
+└── angular.json
+```
 
 ---
 

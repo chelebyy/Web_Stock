@@ -19,37 +19,69 @@ export class AuthService {
     private http: HttpClient,
     private router: Router
   ) {
+    console.log('AuthService: Constructor çalıştı');
     this.loadStoredUser();
   }
 
   private loadStoredUser(): void {
+    console.log('AuthService: loadStoredUser metodu çalıştı');
     const token = this.getToken();
     console.log('Token kontrolü:', token ? 'Token mevcut' : 'Token bulunamadı');
     
-    if (token) {
-      try {
-        const decodedToken = this.jwtHelper.decodeToken(token);
-        console.log('Token çözümlendi:', decodedToken);
-        
-        if (decodedToken) {
-          const user: User = {
-            id: parseInt(decodedToken.nameid),
-            username: decodedToken.name,
-            sicil: decodedToken.sicil || '',
-            isAdmin: decodedToken.role === 'Admin',
-            createdAt: decodedToken.created_at || '',
-            lastLoginAt: decodedToken.last_login_at
-          };
-          console.log('Kullanıcı bilgileri:', user);
-          this.currentUserSubject.next(user);
-
-          // İzinleri yükle
-          this.permissions = this.extractPermissionsFromToken(decodedToken);
-          console.log('Kullanıcı izinleri:', this.permissions);
-        }
-      } catch (error) {
-        console.error('Token çözümleme hatası:', error);
+    if (!token) {
+      console.log('Token bulunamadı, kullanıcı oturumu yok');
+      return;
+    }
+    
+    try {
+      // Token süresi kontrolü
+      if (this.jwtHelper.isTokenExpired(token)) {
+        console.error('Token süresi dolmuş, token siliniyor');
+        localStorage.removeItem('token');
+        this.currentUserSubject.next(null);
+        this.permissions = [];
+        return;
       }
+      
+      const decodedToken = this.jwtHelper.decodeToken(token);
+      console.log('Token çözümlendi:', decodedToken);
+      
+      if (!decodedToken) {
+        console.error('Token çözümlenemedi, token siliniyor');
+        localStorage.removeItem('token');
+        this.currentUserSubject.next(null);
+        this.permissions = [];
+        return;
+      }
+      
+      // Kullanıcı bilgilerini oluştur
+      const user: User = {
+        id: parseInt(decodedToken.nameid || decodedToken.sub || '0'),
+        username: decodedToken.name || decodedToken.unique_name || 'Bilinmeyen Kullanıcı',
+        sicil: decodedToken.sicil || '',
+        isAdmin: decodedToken.role === 'Admin',
+        createdAt: decodedToken.created_at || '',
+        lastLoginAt: decodedToken.last_login_at || ''
+      };
+      
+      console.log('Kullanıcı bilgileri:', user);
+      this.currentUserSubject.next(user);
+
+      // İzinleri yükle
+      this.permissions = this.extractPermissionsFromToken(decodedToken);
+      console.log('Kullanıcı izinleri:', this.permissions);
+      
+      // Rol yönetimi izni kontrolü - admin kullanıcılar için otomatik ekle
+      if (user.isAdmin && !this.permissions.includes('Pages.RoleManagement')) {
+        console.log('Admin kullanıcı için rol yönetimi izni otomatik olarak ekleniyor');
+        this.permissions.push('Pages.RoleManagement');
+      }
+    } catch (error) {
+      console.error('Token çözümleme hatası:', error);
+      // Hata durumunda token'ı temizle
+      localStorage.removeItem('token');
+      this.currentUserSubject.next(null);
+      this.permissions = [];
     }
   }
 
@@ -59,11 +91,14 @@ export class AuthService {
     
     console.log('Token çözümlenmiş tam içerik:', JSON.stringify(decodedToken, null, 2));
     console.log('Token içindeki tüm claim anahtarları:', Object.keys(decodedToken));
-    console.log('Token içindeki izin claim\'leri:', { 
-      Permission: decodedToken.Permission, 
-      PermissionNames: decodedToken.PermissionNames,
-      role: decodedToken.role
-    });
+    
+    // Rol tabanlı izin kontrolü - Admin rolü için otomatik RoleManagement izni ekle
+    if (decodedToken.role === 'Admin') {
+      console.log('Admin rolü tespit edildi, Pages.RoleManagement izni ekleniyor');
+      permissions.push('Pages.RoleManagement');
+      permissions.push('Pages.AdminDashboard');
+      permissions.push('Pages.UserManagement');
+    }
     
     // Permission claim'lerini kontrol et
     if (decodedToken.Permission) {
@@ -97,12 +132,6 @@ export class AuthService {
       }
     } else {
       console.log('Permission claim bulunamadı');
-    }
-    
-    // Rol tabanlı izin kontrolü - Admin rolü için otomatik RoleManagement izni ekle
-    if (decodedToken.role === 'Admin') {
-      console.log('Admin rolü tespit edildi, Pages.RoleManagement izni ekleniyor');
-      permissions.push('Pages.RoleManagement');
     }
     
     // PermissionNames claim'ini de kontrol et (bazı token yapılandırmalarında kullanılabilir)
@@ -180,33 +209,46 @@ export class AuthService {
   }
 
   login(loginRequest: LoginRequest): Observable<LoginResponse> {
+    console.log('AuthService: login metodu çalıştı');
+    console.log('Login isteği:', loginRequest);
+    
     return this.http.post<LoginResponse>(`${this.apiUrl}/auth/login`, loginRequest)
       .pipe(
         tap(response => {
+          console.log('Login yanıtı:', response);
+          
           if (response.success) {
             localStorage.setItem('token', response.token);
+            console.log('Token localStorage\'a kaydedildi');
             
             // Token'dan kullanıcı bilgilerini al
             const decodedToken = this.jwtHelper.decodeToken(response.token);
+            console.log('Token çözümlendi:', decodedToken);
+            
             const user: User = {
-              id: parseInt(decodedToken.nameid),
-              username: decodedToken.unique_name,
+              id: parseInt(decodedToken.nameid || decodedToken.sub || '0'),
+              username: decodedToken.unique_name || decodedToken.name || 'Bilinmeyen Kullanıcı',
               sicil: decodedToken.sicil || '',
               isAdmin: decodedToken.role === 'Admin',
               createdAt: new Date().toISOString(),
               lastLoginAt: new Date().toISOString()
             };
+            console.log('Kullanıcı bilgileri:', user);
+            
             this.currentUserSubject.next(user);
             
             // İzinleri yükle
             this.permissions = this.extractPermissionsFromToken(decodedToken);
+            console.log('Kullanıcı izinleri:', this.permissions);
             
             // Kullanıcı rolüne göre yönlendirme
-            const targetRoute = user.isAdmin ? '/admin-dashboard' : '/user-dashboard';
+            const targetRoute = user.isAdmin ? '/dashboard/admin-dashboard' : '/dashboard/user-dashboard';
             console.log('Yönlendiriliyor:', targetRoute);
             this.router.navigate([targetRoute])
               .then(() => console.log('Yönlendirme başarılı'))
               .catch(err => console.error('Yönlendirme hatası:', err));
+          } else {
+            console.error('Login başarısız:', response.errorMessage);
           }
         }),
         catchError(error => {
@@ -221,26 +263,88 @@ export class AuthService {
   }
 
   logout(): void {
+    console.log('AuthService: logout metodu çalıştı');
     localStorage.removeItem('token');
     this.currentUserSubject.next(null);
+    this.permissions = [];
+    this.router.navigate(['/login']);
   }
 
   getToken(): string | null {
-    return localStorage.getItem('token');
+    const token = localStorage.getItem('token');
+    console.log('AuthService: getToken metodu çalıştı, token:', token ? 'Token mevcut' : 'Token bulunamadı');
+    return token;
   }
 
   isLoggedIn(): boolean {
+    console.log('AuthService: isLoggedIn metodu çalıştı');
     const token = this.getToken();
-    return token ? !this.jwtHelper.isTokenExpired(token) : false;
+    if (!token) {
+      console.log('Token bulunamadı, kullanıcı giriş yapmamış');
+      return false;
+    }
+    
+    try {
+      const isExpired = this.jwtHelper.isTokenExpired(token);
+      console.log('Token süresi dolmuş mu:', isExpired ? 'Evet' : 'Hayır');
+      
+      if (isExpired) {
+        console.log('Token süresi dolmuş, oturum kapatılıyor');
+        this.logout();
+        return false;
+      }
+      
+      // Kullanıcı bilgilerini kontrol et
+      const currentUser = this.currentUserSubject.value;
+      if (!currentUser) {
+        console.log('Kullanıcı bilgileri bulunamadı, token yeniden yükleniyor');
+        this.loadStoredUser();
+        return this.currentUserSubject.value !== null;
+      }
+      
+      console.log('Kullanıcı giriş yapmış');
+      return true;
+    } catch (error) {
+      console.error('Token kontrolünde hata:', error);
+      this.logout();
+      return false;
+    }
   }
 
   isAdmin(): boolean {
+    console.log('AuthService: isAdmin metodu çalıştı');
     const currentUser = this.currentUserSubject.value;
-    return currentUser ? currentUser.isAdmin : false;
+    const isAdmin = currentUser ? currentUser.isAdmin : false;
+    console.log('isAdmin kontrolü:', isAdmin ? 'Kullanıcı admin' : 'Kullanıcı admin değil');
+    
+    // Kullanıcı bilgileri yoksa ve token varsa, token'dan kullanıcı bilgilerini yükle
+    if (!currentUser && this.getToken()) {
+      console.log('Kullanıcı bilgileri bulunamadı ama token var, token yeniden yükleniyor');
+      this.loadStoredUser();
+      const updatedUser = this.currentUserSubject.value;
+      const updatedIsAdmin = updatedUser ? updatedUser.isAdmin : false;
+      console.log('Güncellenmiş isAdmin kontrolü:', updatedIsAdmin ? 'Kullanıcı admin' : 'Kullanıcı admin değil');
+      return updatedIsAdmin;
+    }
+    
+    return isAdmin;
   }
 
   getCurrentUser(): User | null {
-    return this.currentUserSubject.value;
+    console.log('AuthService: getCurrentUser metodu çalıştı');
+    const currentUser = this.currentUserSubject.value;
+    console.log('Mevcut kullanıcı:', currentUser);
+    
+    // Kullanıcı bilgileri yoksa ve token varsa, token'dan kullanıcı bilgilerini yükle
+    if (!currentUser && this.getToken()) {
+      console.log('Kullanıcı bilgileri bulunamadı ama token var, token yeniden yükleniyor');
+      this.loadStoredUser();
+      const updatedUser = this.currentUserSubject.value;
+      console.log('Güncellenmiş kullanıcı bilgileri:', updatedUser);
+      return updatedUser;
+    }
+    
+    return currentUser;
   }
 
   changePassword(currentPassword: string, newPassword: string): Observable<any> {
@@ -287,12 +391,27 @@ export class AuthService {
   }
 
   hasPermission(permissionName: string): boolean {
-    console.log(`İzin kontrolü: '${permissionName}'`);
+    console.log(`AuthService: hasPermission metodu çalıştı, izin: '${permissionName}'`);
+    
+    // Rol yönetimi sayfası için özel durum
+    if (permissionName === 'Pages.RoleManagement') {
+      // Admin her zaman rol yönetimi sayfasına erişebilir
+      if (this.isAdmin()) {
+        console.log('Kullanıcı admin, rol yönetimi iznine sahip');
+        return true;
+      }
+    }
     
     // Admin her zaman tüm izinlere sahiptir
     if (this.isAdmin()) {
       console.log('Kullanıcı admin, tüm izinlere sahip');
       return true;
+    }
+    
+    // İzinler boşsa ve token varsa, token'dan izinleri yükle
+    if (this.permissions.length === 0 && this.getToken()) {
+      console.log('İzinler bulunamadı ama token var, token yeniden yükleniyor');
+      this.loadStoredUser();
     }
     
     // Token'dan izinleri kontrol et

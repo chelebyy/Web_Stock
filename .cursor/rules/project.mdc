@@ -1,13 +1,8 @@
 ---
-description: 
+description: Project-main
 globs: 
-alwaysApply: false
+alwaysApply: true
 ---
----
-description: project
-globs: 
----
-# Project Rules
 
 ## Basic Operating Principles
 
@@ -83,20 +78,31 @@ Solution
 │   ├── Stock.IntegrationTests/  # Integration tests
 │   └── Stock.FunctionalTests/   # E2E tests
 │
-├── frontend/                     # Angular Frontend
-│   ├── src/
-│   │   ├── app/
-│   │   │   ├── components/    # UI components
-│   │   │   ├── services/      # API services
-│   │   │   ├── models/        # TypeScript interfaces
-│   │   │   └── guards/        # Route guards
-│   │   ├── assets/           # Static files
-│   │   └── environments/     # Environment configs
-│   └── tests/                # Frontend tests
-│
-└── docs/                        # Documentation
-    ├── guides/               # User guides
-    └── architecture/        # Architecture docs
+frontend/
+├── src/
+│   ├── app/
+│   │   ├── core/ # Temel servisler ve interceptor'lar
+│   │   │   ├── authentication/
+│   │   │   ├── http/
+│   │   │   ├── guards/
+│   │   │   └── services/
+│   │   ├── shared/ # Paylaşılan bileşenler ve direktifler
+│   │   │   ├── components/
+│   │   │   ├── directives/
+│   │   │   ├── pipes/
+│   │   │   └── ui/
+│   │   ├── features/ # Özellik modülleri
+│   │   │   ├── auth/
+│   │   │   ├── dashboard/
+│   │   │   ├── user-management/
+│   │   │   ├── role-management/
+│   │   │   ├── bilgi-islem/
+│   │   │   └── ... (diğer özellikler)
+│   │   ├── models/ # Tüm veri modelleri
+│   │   └── services/ # Genel servisler (feature-specific olmayan)
+│   ├── assets/ # Statik dosyalar
+│   └── environments/ # Ortam yapılandırmaları
+└── angular.json
 ```
 
 ## Local System Requirements

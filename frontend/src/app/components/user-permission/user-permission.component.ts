@@ -6,9 +6,9 @@ import { MessageService } from 'primeng/api';
 import { UserService } from '../../services/user.service';
 import { PermissionService } from '../../services/permission.service';
 import { UserPermissionService } from '../../services/user-permission.service';
-import { User } from '../../models/user.model';
-import { Permission, PermissionGroup } from '../../models/permission.model';
-import { UserPermission } from '../../models/user-permission.model';
+import { User } from '../../shared/models/user.model';
+import { Permission, PermissionGroup } from '../../shared/models/permission.model';
+import { UserPermission } from '../../shared/models/user-permission.model';
 
 // PrimeNG modülleri
 import { TableModule } from 'primeng/table';

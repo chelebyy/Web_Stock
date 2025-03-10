@@ -13,40 +13,52 @@ export const routes: Routes = [
   
   // Dashboard Module - Lazy Loading
   {
-    path: '',
-    loadChildren: () => import('./features/dashboard/dashboard.routes').then(m => m.DASHBOARD_ROUTES)
+    path: 'dashboard',
+    loadChildren: () => import('./features/dashboard/dashboard.routes').then(m => m.DASHBOARD_ROUTES),
+    canActivate: [AuthGuard]
   },
   
   // User Management Module - Lazy Loading
   {
-    path: '',
-    loadChildren: () => import('./features/user-management/user-management.routes').then(m => m.USER_MANAGEMENT_ROUTES)
+    path: 'user-management',
+    loadChildren: () => import('./features/user-management/user-management.routes').then(m => m.USER_MANAGEMENT_ROUTES),
+    canActivate: [AuthGuard]
   },
   
   // Role Management Module - Lazy Loading
   {
-    path: '',
-    loadChildren: () => import('./features/role-management/role-management.routes').then(m => m.ROLE_MANAGEMENT_ROUTES)
+    path: 'role-management',
+    loadChildren: () => import('./features/role-management/role-management.routes').then(m => m.ROLE_MANAGEMENT_ROUTES),
+    canActivate: [AuthGuard],
+    data: {
+      requiresAdmin: true
+    }
   },
   
   // Bilgi İşlem Module - Lazy Loading
   {
-    path: '',
-    loadChildren: () => import('./features/bilgi-islem/bilgi-islem.routes').then(m => m.BILGI_ISLEM_ROUTES)
+    path: 'bilgi-islem',
+    loadChildren: () => import('./features/bilgi-islem/bilgi-islem.routes').then(m => m.BILGI_ISLEM_ROUTES),
+    canActivate: [AuthGuard]
   },
   
   // Revir Module - Lazy Loading
   {
-    path: '',
-    loadChildren: () => import('./features/revir/revir.routes').then(m => m.REVIR_ROUTES)
+    path: 'revir',
+    loadChildren: () => import('./features/revir/revir.routes').then(m => m.REVIR_ROUTES),
+    canActivate: [AuthGuard]
   },
   
   // Inventory Module - Lazy Loading
   {
-    path: '',
-    loadChildren: () => import('./features/inventory/inventory.routes').then(m => m.INVENTORY_ROUTES)
+    path: 'inventory',
+    loadChildren: () => import('./features/inventory/inventory.routes').then(m => m.INVENTORY_ROUTES),
+    canActivate: [AuthGuard]
   },
   
-  // Catch-all route
-  { path: '**', redirectTo: '/login' }
+  // Catch-all route - Kullanıcı giriş yapmışsa dashboard'a, yapmamışsa login'e yönlendir
+  { 
+    path: '**', 
+    redirectTo: '/login'
+  }
 ];

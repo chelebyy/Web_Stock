@@ -1374,11 +1374,6 @@
         box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.25) !important;
       }
       
-      &:disabled {
-        background-color: #f8f9fa !important;
-        cursor: not-allowed !important;
-      }
-      
       option {
         padding: 0.75rem 1rem !important;
         font-size: 1rem !important;
@@ -1458,6 +1453,103 @@
             }
           }
         }
+      }
+    }
+
+    // Özel Checkbox Stilleri
+    .custom-checkbox-container {
+      position: relative;
+      display: inline-block;
+      cursor: pointer;
+      user-select: none;
+    }
+    
+    .custom-checkbox-input {
+      position: absolute;
+      opacity: 0;
+      cursor: pointer;
+      height: 0;
+      width: 0;
+    }
+    
+    .custom-checkbox-label {
+      position: relative;
+      display: inline-block;
+      width: 22px;
+      height: 22px;
+      background-color: #ffffff;
+      border: 2px solid #3B82F6;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      
+      &:hover {
+        border-color: #2563eb;
+      }
+    }
+    
+    .custom-checkbox-input:checked + .custom-checkbox-label {
+      background-color: #3B82F6;
+      border-color: #3B82F6;
+      
+      &:after {
+        content: '';
+        position: absolute;
+        left: 7px;
+        top: 3px;
+        width: 5px;
+        height: 10px;
+        border: solid white;
+        border-width: 0 2px 2px 0;
+        transform: rotate(45deg);
+      }
+    }
+    
+    .custom-checkbox-input:focus + .custom-checkbox-label {
+      box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.3);
+    }
+    
+    // Bulk Actions Stilleri
+    .bulk-actions {
+      position: fixed;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      background-color: #1e3a8a;
+      color: white;
+      padding: 12px 20px;
+      border-radius: 50px;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      z-index: 1000;
+      animation: slideUp 0.3s ease;
+      
+      .selected-count {
+        font-weight: 500;
+        font-size: 0.95rem;
+      }
+      
+      .p-button-danger {
+        background-color: #ef4444;
+        border-color: #ef4444;
+        
+        &:hover {
+          background-color: #dc2626;
+          border-color: #dc2626;
+        }
+      }
+    }
+    
+    @keyframes slideUp {
+      from {
+        transform: translate(-50%, 100%);
+        opacity: 0;
+      }
+      to {
+        transform: translate(-50%, 0);
+        opacity: 1;
       }
     }
   }

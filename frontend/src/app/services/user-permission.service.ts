@@ -2,8 +2,8 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../../environments/environment';
-import { Permission } from '../models/permission.model';
-import { UserPermission } from '../models/user-permission.model';
+import { Permission } from '../shared/models/permission.model';
+import { UserPermission } from '../shared/models/user-permission.model';
 import { map } from 'rxjs/operators';
 
 @Injectable({

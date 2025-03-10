@@ -1,6 +1,7 @@
 ---
 description: Best practices for using PrimeNG components in Angular
 globs: **/*.{ts,tsx,js,jsx}
+alwaysApply: true
 ---
 - Use PrimeNG's built-in theming capabilities for consistent UI styling
 - Leverage PrimeNG's responsive design features for mobile-friendly applications

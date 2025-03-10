@@ -1,6 +1,7 @@
 ---
 description: Best practices for database operations and migrations using Entity Framework Core
 globs: **/*.{cs}
+alwaysApply: true
 ---
 - Use migrations to manage database schema changes and ensure consistency across environments
 - Implement proper database indexing to optimize query performance

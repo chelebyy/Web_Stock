@@ -1,6 +1,7 @@
 ---
 description: Best practices for authentication and authorization using ASP.NET Identity
 globs: **/*.{cs}
+alwaysApply: true
 ---
 - Use ASP.NET Identity for user management, authentication, and authorization
 - Implement role-based authorization to control access to resources

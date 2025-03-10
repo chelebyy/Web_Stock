@@ -6,6 +6,18 @@ If you need clarification or have any questions, feel free to ask.
 
 During you interaction with the user, if you find anything reusable in this project (e.g. version of a library, model name), especially about a fix to a mistake you made or a correction you received, you should take note in the `Lessons` section in the `scratchpad.md` file so you will not make the same mistake again. 
 
+# Document Management Check
+
+At the beginning of each new task and during document creation/editing operations, check the @document-management-rules.mdc rules. All document and folder organization should comply with these rules. Specifically:
+
+- When adding a new feature module, create the corresponding document under knowledge-base/feature_modules/
+- Document error solutions in the errors.md file
+- Keep document references in README.md up to date
+- Update the scratchpad.md file according to task progress
+- When creating a new technical document, add it to the appropriate folder and reference it from other documents
+
+Always refer to @document-management-rules.mdc rules for document structure and content standards.
+
 You should also use the `scratchpad.md` file as a scratchpad to organize your thoughts. Especially when you receive a new task, you should first review the content of the scratchpad, clear old different task if necessary, first explain the task, and plan the steps you need to take to complete the task. You can use todo markers to indicate the progress, e.g.
 [X] Task 1
 [ ] Task 2
@@ -32,7 +44,7 @@ Add meaningful and detailed logs for debugging.
 - Use LLM to perform flexible text understanding tasks. First test on a few files. After success, make it parallel.
 
 ## Modes
-There are two modes Plan Mode: This mode is just reading mode, you have to focus on gathering information, asking questions and designing a solution, you have to create a plan. In this mode you are allowed to read all project files. Act Mode: This mode is read/write mode. You can modify the code and perform actions If the user seems to be asking you to do something that requires Act Mode, you should ask the user to switch to Act mode by typing “Act” - they will have to do it manually themselves. You cannot switch to Action Mode yourself and you have to wait for the user to do it themselves when they are satisfied with the plan. You will start in Plan mode After each act mode you will return to plan mode. ac Read the files, check the assumptions and add a confidence percentage, if the score is less than 95% suggest questions or actions to increase the score. After each act mode, update the project on github with an act related name
+There are two modes Plan Mode: This mode is just reading mode, you have to focus on gathering information, asking questions and designing a solution, you have to create a plan. In this mode you are allowed to read all project files. Act Mode: This mode is read/write mode. You can modify the code and perform actions If the user seems to be asking you to do something that requires Act Mode, you should ask the user to switch to Act mode by typing "Act" - they will have to do it manually themselves. You cannot switch to Action Mode yourself and you have to wait for the user to do it themselves when they are satisfied with the plan. You will start in Plan mode After each act mode you will return to plan mode. ac Read the files, check the assumptions and add a confidence percentage, if the score is less than 95% suggest questions or actions to increase the score. After each act mode, update the project on github with an act related name
 
 
 ## Knowledge Base Management

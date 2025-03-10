@@ -454,11 +454,11 @@ export class AdminDashboardComponent implements OnInit {
   }
 
   navigateToUserManagement(): void {
-    this.router.navigate(['/admin/users']);
+    this.router.navigate(['/user-management/user-management']);
   }
 
   navigateToRoleManagement(): void {
-    this.router.navigate(['/admin/roles']);
+    this.router.navigate(['/role-management']);
   }
   
   navigateToSystemSettings(): void {

@@ -181,16 +181,16 @@
 
 /* Şifre Değiştirme Formu */
 .password-change-form {
-  background: rgba(255, 255, 255, 0.95);
+  background: #1e293b;
   padding: 1.5rem;
-  border-radius: 12px;
+  border-radius: 8px;
   margin-bottom: 1.5rem;
-  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
   animation: fadeIn 0.3s ease-in-out;
   max-width: 400px;
   margin-left: auto;
   margin-right: auto;
-  border: 1px solid rgba(0, 0, 0, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.1);
   position: absolute;
   top: 80px;
   left: 50%;
@@ -214,15 +214,16 @@
   justify-content: space-between;
   align-items: center;
   margin-bottom: 1rem;
-  border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
   padding-bottom: 0.75rem;
+  background-color: transparent;
 }
 
 .password-form-header h2 {
   margin: 0;
   font-size: 1.25rem;
-  color: #333;
-  font-weight: 500;
+  color: #ffffff;
+  font-weight: 600;
 }
 
 .close-button {
@@ -239,12 +240,12 @@
 }
 
 .close-button:hover {
-  background-color: rgba(0, 0, 0, 0.05);
+  background-color: rgba(255, 255, 255, 0.1);
 }
 
 .close-button i {
   font-size: 0.875rem;
-  color: #333;
+  color: #ffffff;
 }
 
 .field {
@@ -252,40 +253,56 @@
   position: relative;
 }
 
+.p-inputgroup {
+  border-radius: 6px;
+  overflow: hidden;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+}
+
 .modern-input {
-  background-color: #f8fafc !important;
-  border: 1px solid #e2e8f0 !important;
-  border-radius: 6px !important;
-  color: #333 !important;
+  background-color: rgba(255, 255, 255, 0.1) !important;
+  border: 1px solid rgba(255, 255, 255, 0.2) !important;
+  border-radius: 0 !important;
+  color: #ffffff !important;
   padding: 0.5rem 0.75rem !important;
   width: 100% !important;
   transition: all 0.3s ease !important;
   font-size: 0.875rem !important;
+  height: 38px !important;
 }
 
 .modern-input:focus {
-  background-color: #fff !important;
-  border-color: #3B82F6 !important;
-  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.25) !important;
+  background-color: rgba(255, 255, 255, 0.15) !important;
+  border-color: rgba(255, 255, 255, 0.3) !important;
+  box-shadow: none !important;
 }
 
 .p-inputgroup-addon {
-  background-color: #f1f5f9 !important;
-  border-color: #e2e8f0 !important;
-  color: #64748b !important;
-  border-radius: 6px 0 0 6px !important;
+  background-color: rgba(255, 255, 255, 0.05) !important;
+  border-color: rgba(255, 255, 255, 0.2) !important;
+  color: rgba(255, 255, 255, 0.7) !important;
+  border-radius: 0 !important;
+  padding: 0 0.75rem !important;
+  height: 38px !important;
+  display: flex !important;
+  align-items: center !important;
 }
 
 .p-button-plain {
-  color: #64748b !important;
-  background: #f1f5f9 !important;
-  border: 1px solid #e2e8f0 !important;
-  border-radius: 0 6px 6px 0 !important;
+  color: rgba(255, 255, 255, 0.7) !important;
+  background: rgba(255, 255, 255, 0.05) !important;
+  border: 1px solid rgba(255, 255, 255, 0.2) !important;
+  border-radius: 0 !important;
+  height: 38px !important;
+  width: 38px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
 }
 
 .p-button-plain:hover {
-  background-color: #e2e8f0 !important;
-  color: #334155 !important;
+  background-color: rgba(255, 255, 255, 0.1) !important;
+  color: rgba(255, 255, 255, 0.9) !important;
 }
 
 .password-actions {
@@ -296,30 +313,34 @@
 }
 
 .change-button {
-  background: linear-gradient(135deg, #6366f1, #8b5cf6) !important;
-  border: none !important;
-  box-shadow: 0 2px 8px rgba(99, 102, 241, 0.3) !important;
+  background-color: rgba(34, 197, 94, 0.15) !important;
+  border: 1px solid rgba(34, 197, 94, 0.6) !important;
+  color: rgba(34, 197, 94, 1) !important;
   transition: all 0.3s ease !important;
   font-size: 0.875rem !important;
+  box-shadow: none !important;
 }
 
 .change-button:hover {
-  background: linear-gradient(135deg, #4f46e5, #7c3aed) !important;
-  box-shadow: 0 4px 12px rgba(99, 102, 241, 0.4) !important;
-  transform: translateY(-1px) !important;
+  background-color: rgba(34, 197, 94, 0.25) !important;
+  border-color: rgba(34, 197, 94, 0.8) !important;
+  color: rgba(255, 255, 255, 1) !important;
+  transform: none !important;
+  box-shadow: none !important;
 }
 
 .cancel-button {
-  border-color: #e2e8f0 !important;
-  color: #64748b !important;
+  border-color: rgba(255, 99, 99, 0.5) !important;
+  color: rgba(255, 99, 99, 0.9) !important;
+  background-color: rgba(255, 99, 99, 0.05) !important;
   transition: all 0.3s ease !important;
   font-size: 0.875rem !important;
 }
 
 .cancel-button:hover {
-  background-color: #f1f5f9 !important;
-  border-color: #cbd5e1 !important;
-  color: #334155 !important;
+  background-color: rgba(255, 99, 99, 0.15) !important;
+  border-color: rgba(255, 99, 99, 0.7) !important;
+  color: rgba(255, 255, 255, 1) !important;
 }
 
 /* Ana İçerik Alanı */
@@ -489,29 +510,34 @@
 }
 
 .change-button {
-  background: linear-gradient(135deg, #6366f1, #8b5cf6) !important;
-  border: none !important;
-  box-shadow: 0 2px 8px rgba(99, 102, 241, 0.3) !important;
+  background-color: rgba(34, 197, 94, 0.15) !important;
+  border: 1px solid rgba(34, 197, 94, 0.6) !important;
+  color: rgba(34, 197, 94, 1) !important;
   transition: all 0.3s ease !important;
   font-size: 0.875rem !important;
+  box-shadow: none !important;
 }
 
 .change-button:hover {
-  background: linear-gradient(135deg, #4f46e5, #7c3aed) !important;
-  box-shadow: 0 4px 12px rgba(99, 102, 241, 0.4) !important;
-  transform: translateY(-1px) !important;
+  background-color: rgba(34, 197, 94, 0.25) !important;
+  border-color: rgba(34, 197, 94, 0.8) !important;
+  color: rgba(255, 255, 255, 1) !important;
+  transform: none !important;
+  box-shadow: none !important;
 }
 
 .cancel-button {
-  border-color: rgba(255, 255, 255, 0.3) !important;
-  color: rgba(255, 255, 255, 0.8) !important;
+  border-color: rgba(255, 99, 99, 0.5) !important;
+  color: rgba(255, 99, 99, 0.9) !important;
+  background-color: rgba(255, 99, 99, 0.05) !important;
   transition: all 0.3s ease !important;
   font-size: 0.875rem !important;
 }
 
 .cancel-button:hover {
-  background-color: rgba(255, 255, 255, 0.1) !important;
-  border-color: rgba(255, 255, 255, 0.5) !important;
+  background-color: rgba(255, 99, 99, 0.15) !important;
+  border-color: rgba(255, 99, 99, 0.7) !important;
+  color: rgba(255, 255, 255, 1) !important;
 }
 
 .button-container {

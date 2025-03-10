@@ -100,15 +100,12 @@ export class RoleManagementComponent implements OnInit {
         name: role.name,
         description: role.description
       });
+      this.selectedRole = role;
     } else {
-      this.roleForm.reset({
-        id: null,
-        name: '',
-        description: ''
-      });
+      this.roleForm.reset();
+      this.selectedRole = null;
     }
     
-    // Dialog görünürlüğünü açıkça true olarak ayarla
     this.roleDialog.set(true);
   }
 
@@ -118,59 +115,63 @@ export class RoleManagementComponent implements OnInit {
   }
 
   saveRole() {
-    if (this.roleForm.invalid) {
-      Object.keys(this.roleForm.controls).forEach(key => {
-        const control = this.roleForm.get(key);
-        if (control?.invalid) {
-          control.markAsTouched();
-        }
-      });
-      return;
-    }
-
-    const roleData = {
-      id: this.roleForm.get('id')?.value,
-      name: this.roleForm.get('name')?.value,
-      description: this.roleForm.get('description')?.value
-    };
+    if (this.roleForm.invalid) return;
+    
+    const formValue = this.roleForm.value;
     
     if (this.editMode()) {
-      this.roleService.updateRole(roleData.id, roleData).subscribe({
-        next: () => {
+      // Güncelleme işlemi
+      const updatedRole: Role = {
+        id: formValue.id,
+        name: formValue.name,
+        description: formValue.description
+      };
+      
+      this.roleService.updateRole(updatedRole.id, updatedRole).subscribe({
+        next: (response) => {
           this.messageService.add({
             severity: 'success',
             summary: 'Başarılı',
-            detail: 'Rol güncellendi'
+            detail: 'Rol başarıyla güncellendi',
+            life: 3000
           });
-          this.roleService.loadRoles();
           this.hideDialog();
         },
         error: (error) => {
-          console.error('Error updating role:', error);
+          console.error('Rol güncellenirken hata:', error);
           this.messageService.add({
             severity: 'error',
             summary: 'Hata',
-            detail: 'Rol güncellenirken bir hata oluştu'
+            detail: `Rol güncellenirken bir hata oluştu: ${error.message || 'Bilinmeyen hata'}`,
+            life: 5000
           });
         }
       });
     } else {
-      this.roleService.createRole(roleData).subscribe({
-        next: () => {
+      // Yeni rol oluşturma
+      const newRole: Role = {
+        id: 0, // Backend tarafında atanacak
+        name: formValue.name,
+        description: formValue.description
+      };
+      
+      this.roleService.createRole(newRole).subscribe({
+        next: (response) => {
           this.messageService.add({
             severity: 'success',
             summary: 'Başarılı',
-            detail: 'Rol oluşturuldu'
+            detail: 'Yeni rol başarıyla oluşturuldu',
+            life: 3000
           });
-          this.roleService.loadRoles();
           this.hideDialog();
         },
         error: (error) => {
-          console.error('Error creating role:', error);
+          console.error('Rol oluşturulurken hata:', error);
           this.messageService.add({
             severity: 'error',
             summary: 'Hata',
-            detail: 'Rol oluşturulurken bir hata oluştu'
+            detail: `Rol oluşturulurken bir hata oluştu: ${error.message || 'Bilinmeyen hata'}`,
+            life: 5000
           });
         }
       });
@@ -190,19 +191,21 @@ export class RoleManagementComponent implements OnInit {
         this.messageService.add({
           severity: 'success',
           summary: 'Başarılı',
-          detail: 'Rol silindi'
+          detail: `${this.roleToDelete?.name} rolü başarıyla silindi`,
+          life: 3000
         });
-        this.roleService.loadRoles();
         this.roleToDelete = null;
+        this.deleteDialogVisible = false;
       },
       error: (error) => {
-        console.error('Error deleting role:', error);
+        console.error('Rol silinirken hata:', error);
         this.messageService.add({
           severity: 'error',
           summary: 'Hata',
-          detail: 'Rol silinirken bir hata oluştu'
+          detail: `Rol silinirken bir hata oluştu: ${error.message || 'Bilinmeyen hata'}`,
+          life: 5000
         });
-        this.roleToDelete = null;
+        this.deleteDialogVisible = false;
       }
     });
   }
@@ -210,18 +213,11 @@ export class RoleManagementComponent implements OnInit {
   cancelDelete() {
     this.roleToDelete = null;
   }
-  
-  managePermissions(role: Role) {
-    this.router.navigate([`/role-management/detail/${role.id}`]);
-  }
 
   filterRoles(searchText: string): void {
     this.searchText.set(searchText);
   }
-
-  /**
-   * Önceki sayfaya veya dashboard'a geri döner
-   */
+  
   goBack(): void {
     this.router.navigate(['/dashboard/admin-dashboard']);
   }

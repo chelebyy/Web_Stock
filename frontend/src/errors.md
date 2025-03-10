@@ -428,4 +428,78 @@ html body div.p-dropdown-panel .p-dropdown-items .p-dropdown-item.p-highlight {
 3. `background-color` ve `background` gibi özellikleri ayrı ayrı tanımlamak, inline stilleri geçersiz kılmak için faydalı olabilir.
 4. `html body` gibi üst seçicileri eklemek, CSS seçicilerinin spesifikliğini artırır.
 5. Koyu tema kullanılan uygulamalarda, açık tema için özel stil tanımları eklemek gerekebilir.
-6. PrimeNG 19'da, overlay bileşenleri için stil tanımlarını daha spesifik yapmak önemlidir. 
+6. PrimeNG 19'da, overlay bileşenleri için stil tanımlarını daha spesifik yapmak önemlidir.
+
+## PrimeNG 19 ve Angular Güncellemesi Sonrası Dropdown Sorunları
+
+### Sorun
+PrimeNG 19 ve Angular güncellemesi sonrası dropdown bileşenlerinde stil sorunları oluştu. Özellikle:
+1. Dropdown içindeki metin hizalaması bozuldu
+2. Dropdown panelinin genişliği dropdown genişliğiyle eşleşmiyordu
+3. Dropdown panelinin arka plan rengi siyah olarak görünüyordu
+4. Dropdown içindeki öğeler doğru şekilde görüntülenmiyordu
+
+### Çözüm
+PrimeNG 19'da DOM yapısı değiştiği için CSS seçicileri güncellemek gerekti. Çözüm şu adımları içerdi:
+
+1. Bileşene özgü SCSS dosyasında daha spesifik seçiciler kullanmak:
+   - `[data-pc-section="label"]` gibi yeni veri özniteliklerini hedeflemek
+   - `::ng-deep` kullanarak kapsülleme sorunlarını aşmak
+   - Daha yüksek özgüllüğe sahip seçiciler kullanmak
+
+2. HTML'de dropdown bileşenine ek özellikler eklemek:
+   - `panelStyleClass` ile panel için özel sınıf adı belirtmek
+   - `[panelStyle]` ile doğrudan stil özellikleri belirtmek
+   - `appendTo="body"` ile panelin doğru konumlandırılmasını sağlamak
+   - `ng-template` kullanarak özel içerik şablonları tanımlamak
+
+3. TypeScript'te DOM manipülasyonu eklemek:
+   - `ngAfterViewInit` içinde dropdown genişliğini hesaplamak
+   - CSS değişkenlerini kullanarak genişliği panele aktarmak
+   - MutationObserver kullanarak dropdown durumundaki değişiklikleri izlemek
+
+### Öğrenilen Dersler
+1. PrimeNG güncellemelerinde DOM yapısı değişebilir, bu nedenle CSS seçicileri daha esnek ve dayanıklı olmalıdır
+2. Bileşene özgü SCSS dosyalarında stil tanımlamak, global stil çakışmalarını önler
+3. CSS değişkenleri, JavaScript ile hesaplanan değerleri CSS'e aktarmak için kullanışlıdır
+4. PrimeNG'nin yeni veri öznitelikleri (`data-pc-section`, `data-pc-name` vb.) seçicilerde kullanılmalıdır
+5. MutationObserver, DOM değişikliklerini izlemek ve tepki vermek için güçlü bir araçtır
+
+### Kod Örneği
+```scss
+.user-role-dropdown {
+  position: relative !important;
+  
+  [data-pc-section="label"] {
+    padding-left: 42px !important;
+    display: flex !important;
+    align-items: center !important;
+  }
+}
+
+.p-dropdown-panel.user-role-dropdown-panel {
+  background-color: #ffffff !important;
+  width: var(--dropdown-width, 100%) !important;
+  
+  [data-pc-section="items"] {
+    background-color: #ffffff !important;
+    
+    [data-pc-section="item"] {
+      color: #333333 !important;
+      background-color: #ffffff !important;
+    }
+  }
+}
+```
+
+```typescript
+ngAfterViewInit() {
+  setTimeout(() => {
+    const dropdown = document.querySelector('.user-role-dropdown') as HTMLElement;
+    if (dropdown) {
+      const width = dropdown.offsetWidth;
+      dropdown.style.setProperty('--dropdown-width', `${width}px`);
+    }
+  }, 0);
+}
+``` 

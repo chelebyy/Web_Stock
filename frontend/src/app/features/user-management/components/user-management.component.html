@@ -26,7 +26,7 @@
             <option *ngFor="let role of roleFilterOptions" 
                     [value]="role.value === null ? '' : role.value" 
                     [selected]="(role.value === null && !selectedRole) || (selectedRole && selectedRole.value === role.value)">
-              {{ role.label }}
+              {{ role.label === 'User' ? 'Kullanıcı' : role.label }}
             </option>
           </select>
         </div>
@@ -42,7 +42,11 @@
       <!-- Tablo Başlığı -->
       <div class="table-header">
         <div class="header-cell checkbox-cell">
-          <p-checkbox [binary]="true" [(ngModel)]="selectAllChecked" (onChange)="toggleSelectAll()"></p-checkbox>
+          <!-- Tüm kullanıcıları seçme checkbox'ı -->
+          <div class="custom-checkbox-container">
+            <input type="checkbox" id="selectAll" [checked]="selectAllChecked" (change)="toggleSelectAll()" class="custom-checkbox-input">
+            <label for="selectAll" class="custom-checkbox-label"></label>
+          </div>
         </div>
         <div class="header-cell name-cell">Ad Soyad</div>
         <div class="header-cell sicil-cell">Sicil</div>
@@ -53,7 +57,11 @@
       <!-- Kullanıcı Satırları -->
       <div class="table-row" *ngFor="let user of paginatedUsers">
         <div class="row-cell checkbox-cell">
-          <p-checkbox [binary]="true" [(ngModel)]="selectedUsers[user.id]" (onChange)="toggleUserSelection(user.id)"></p-checkbox>
+          <!-- Kullanıcı seçme checkbox'ı -->
+          <div class="custom-checkbox-container">
+            <input type="checkbox" [id]="'user_' + user.id" [checked]="selectedUsers[user.id]" (change)="toggleUserSelection(user.id)" class="custom-checkbox-input">
+            <label [for]="'user_' + user.id" class="custom-checkbox-label"></label>
+          </div>
         </div>
         <div class="row-cell name-cell">
           <div class="user-info">

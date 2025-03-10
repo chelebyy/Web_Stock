@@ -1,6 +1,7 @@
 ---
 description: Best practices for using SASS in Angular applications
 globs: 
+alwaysApply: false
 ---
 - Use nested selectors to improve readability and maintainability
 - Implement variables for consistent theming across the application

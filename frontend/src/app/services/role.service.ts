@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpErrorResponse, HttpHeaders } from '@angular/common/http';
 import { Observable, catchError, map, throwError } from 'rxjs';
-import { Role } from '../models/role.model';
+import { Role } from '../shared/models/role.model';
 import { environment } from '../../environments/environment';
 import { AuthService } from '../core/authentication/auth.service';
 

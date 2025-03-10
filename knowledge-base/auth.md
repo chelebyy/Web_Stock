@@ -13,8 +13,8 @@ Bu belge, Stock uygulamasının kimlik doğrulama sistemini açıklar.
    - Tam yetkili
    - Kullanıcı yönetimi yapabilir
    - Varsayılan admin hesabı:
-     - Kullanıcı adı: admin
-     - Şifre: Admin123!
+     - Kullanıcı adı: A001
+     - Şifre: admin123
 
 2. Normal Kullanıcı
    - Sınırlı yetkiler
@@ -88,6 +88,5 @@ Bu belge, Stock uygulamasının kimlik doğrulama sistemini açıklar.
 
 ## İyileştirme Önerileri
 1. Şifre politikası güçlendirme
-2. İki faktörlü doğrulama (2FA)
-3. Oturum yönetimi geliştirme
-4. Parola sıfırlama mekanizması
+2. Oturum yönetimi geliştirme
+3. Parola sıfırlama mekanizması

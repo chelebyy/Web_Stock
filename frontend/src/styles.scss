@@ -19,6 +19,38 @@
   --dropdown-hover-text-color: #000000 !important;
   --dropdown-highlight-background: rgba(59, 130, 246, 0.1) !important;
   --dropdown-highlight-text-color: #2563eb !important;
+  
+  /* Yeni değişkenler */
+  --surface-ground: #f8f9fa;
+  --surface-card: #ffffff;
+  --surface-section: #ffffff;
+  --surface-border: #e9ecef;
+  --text-color: #333333;
+  --text-color-secondary: #6c757d;
+  
+  // Ana renkler
+  --primary-color: #3B82F6;
+  --primary-color-hover: #2563eb;
+  --secondary-color: #64748b;
+  --success-color: #10b981;
+  --danger-color: #ef4444;
+  --warning-color: #f59e0b;
+  --info-color: #0ea5e9;
+  
+  // Yüzey renkleri
+  --surface-section: #ffffff;
+  --surface-overlay: #ffffff;
+  --surface-hover: #f8fafc;
+  
+  // Metin renkleri
+  --text-color-secondary: #64748b;
+  --text-color-disabled: #94a3b8;
+  
+  // Gölge
+  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  --shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
 }
 
 /* Şifre alanları için global stil düzeltmesi */
@@ -1146,14 +1178,14 @@ input[type="text"].p-inputtext {
 }
 
 .p-accordion .p-accordion-header {
-  background-color: #f8fafc !important;
+  background-color: #ffffff !important;
   border-radius: 8px !important;
   margin-bottom: 0.5rem !important;
 }
 
 .p-accordion .p-accordion-header a {
-  background-color: #f8fafc !important;
-  color: #1e3a8a !important;
+  background-color: #ffffff !important;
+  color: #333333 !important;
   font-weight: 600 !important;
   padding: 1rem !important;
   border-radius: 8px !important;
@@ -1531,9 +1563,6 @@ div.input-with-icon,
   top: 0 !important;
   width: 100% !important;
   height: 100% !important;
-  display: flex !important;
-  align-items: center !important;
-  line-height: 50px !important;
 }
 
 /* PrimeNG 19 için en spesifik dropdown label düzeltmesi */
@@ -1549,4 +1578,654 @@ div.input-with-icon,
   text-indent: 0 !important;
   display: flex !important;
   align-items: center !important;
+}
+
+/* PrimeNG ConfirmDialog Global Stil Düzeltmesi */
+body .p-confirm-dialog,
+body .p-dialog.p-confirm-dialog,
+body [data-pc-name="confirmdialog"],
+body [data-pc-section="root"].p-dialog.p-confirm-dialog {
+  background-color: #ffffff !important;
+  color: #000000 !important;
+  border-radius: 8px !important;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2) !important;
+  z-index: 9999 !important;
+  
+  .p-dialog-header,
+  [data-pc-section="header"] {
+    background-color: #ffffff !important;
+    color: #000000 !important;
+    border-bottom: 1px solid #f0f0f0 !important;
+    padding: 1.5rem 2rem 1rem !important;
+    
+    .p-dialog-title,
+    [data-pc-section="title"] {
+      font-size: 1.25rem !important;
+      font-weight: 600 !important;
+      color: #000000 !important;
+      visibility: visible !important;
+      opacity: 1 !important;
+      display: block !important;
+    }
+    
+    .p-dialog-header-icons,
+    [data-pc-section="icons"] {
+      .p-dialog-header-icon,
+      [data-pc-section="closebutton"] {
+        color: #000000 !important;
+        visibility: visible !important;
+        opacity: 1 !important;
+      }
+    }
+  }
+  
+  .p-dialog-content,
+  [data-pc-section="content"] {
+    background-color: #ffffff !important;
+    color: #000000 !important;
+    padding: 2rem !important;
+    
+    .p-confirm-dialog-icon,
+    [data-pc-section="icon"] {
+      font-size: 2rem !important;
+      color: #f59e0b !important; /* Yellow 500 */
+      margin-right: 1rem !important;
+      visibility: visible !important;
+      opacity: 1 !important;
+      display: inline-block !important;
+    }
+    
+    .p-confirm-dialog-message,
+    [data-pc-section="message"] {
+      color: #000000 !important;
+      font-size: 1.1rem !important;
+      line-height: 1.5 !important;
+      visibility: visible !important;
+      opacity: 1 !important;
+      display: inline-block !important;
+    }
+    
+    /* Genel metin seçicisi - tüm olası metin öğelerini kapsar */
+    span, p, div, h1, h2, h3, h4, h5, h6, label, a {
+      color: #000000 !important;
+      visibility: visible !important;
+      opacity: 1 !important;
+    }
+  }
+  
+  .p-dialog-footer,
+  [data-pc-section="footer"] {
+    background-color: #ffffff !important;
+    border-top: 1px solid #f0f0f0 !important;
+    padding: 1.5rem 2rem !important;
+    
+    .p-button,
+    [data-pc-section="button"] {
+      margin-left: 0.5rem !important;
+      
+      &.p-confirm-dialog-reject,
+      &[data-pc-section="rejectbutton"] {
+        background-color: #f8f9fa !important;
+        color: #000000 !important;
+        border: 1px solid #ced4da !important;
+        
+        &:hover {
+          background-color: #e9ecef !important;
+        }
+        
+        span,
+        [data-pc-section="label"] {
+          color: #000000 !important;
+          visibility: visible !important;
+          opacity: 1 !important;
+          display: inline-block !important;
+        }
+      }
+      
+      &.p-confirm-dialog-accept,
+      &[data-pc-section="acceptbutton"] {
+        background-color: #dc3545 !important;
+        color: #ffffff !important;
+        border: 1px solid #dc3545 !important;
+        
+        &:hover {
+          background-color: #c82333 !important;
+        }
+        
+        span,
+        [data-pc-section="label"] {
+          color: #ffffff !important;
+          visibility: visible !important;
+          opacity: 1 !important;
+          display: inline-block !important;
+        }
+      }
+    }
+  }
+}
+
+/* Modern Confirm Dialog ve Custom Confirm Dialog için ek düzeltmeler */
+body .modern-confirm-dialog,
+body .custom-confirm-dialog,
+body .p-dialog.modern-confirm-dialog,
+body .p-dialog.custom-confirm-dialog {
+  .p-dialog-header,
+  [data-pc-section="header"] {
+    .p-dialog-title,
+    [data-pc-section="title"] {
+      color: #000000 !important;
+      visibility: visible !important;
+      opacity: 1 !important;
+      display: block !important;
+    }
+  }
+  
+  .p-dialog-content,
+  [data-pc-section="content"] {
+    .p-confirm-dialog-message,
+    [data-pc-section="message"] {
+      color: #000000 !important;
+      visibility: visible !important;
+      opacity: 1 !important;
+      display: inline-block !important;
+    }
+    
+    .p-confirm-dialog-icon,
+    [data-pc-section="icon"] {
+      color: #f59e0b !important;
+      visibility: visible !important;
+      opacity: 1 !important;
+      display: inline-block !important;
+    }
+  }
+  
+  .p-dialog-footer,
+  [data-pc-section="footer"] {
+    .p-button,
+    [data-pc-section="button"] {
+      &.p-confirm-dialog-reject,
+      &[data-pc-section="rejectbutton"],
+      &.p-confirm-dialog-accept,
+      &[data-pc-section="acceptbutton"] {
+        span,
+        [data-pc-section="label"] {
+          visibility: visible !important;
+          opacity: 1 !important;
+          display: inline-block !important;
+        }
+      }
+    }
+  }
+}
+
+/* PrimeNG Dialog Overlay için düzeltme */
+body .p-component-overlay,
+body .p-dialog-mask,
+body [data-pc-name="dialog"] {
+  .p-dialog.p-confirm-dialog,
+  [data-pc-section="root"].p-dialog.p-confirm-dialog {
+    background-color: #ffffff !important;
+    
+    .p-dialog-content,
+    [data-pc-section="content"] {
+      background-color: #ffffff !important;
+      color: #000000 !important;
+      
+      .p-confirm-dialog-message,
+      [data-pc-section="message"] {
+        color: #000000 !important;
+        visibility: visible !important;
+        opacity: 1 !important;
+        display: inline-block !important;
+      }
+    }
+  }
+}
+
+/* PrimeNG Checkbox Düzeltmesi */
+.p-checkbox {
+  display: inline-flex !important;
+  cursor: pointer !important;
+  user-select: none !important;
+  vertical-align: bottom !important;
+  position: relative !important;
+  
+  .p-checkbox-box {
+    border: 2px solid #ced4da !important;
+    background: #ffffff !important;
+    width: 20px !important;
+    height: 20px !important;
+    color: #495057 !important;
+    border-radius: 4px !important;
+    transition: background-color 0.2s, color 0.2s, border-color 0.2s, box-shadow 0.2s !important;
+    
+    &:not(.p-disabled):hover {
+      border-color: #3B82F6 !important;
+    }
+    
+    &.p-highlight {
+      background: #3B82F6 !important;
+      border-color: #3B82F6 !important;
+      color: #ffffff !important;
+      
+      .p-checkbox-icon {
+        color: #ffffff !important;
+        font-size: 14px !important;
+        transform: scale(1) !important;
+        opacity: 1 !important;
+        visibility: visible !important;
+      }
+    }
+    
+    .p-checkbox-icon {
+      font-size: 14px !important;
+      transform: scale(1) !important;
+      opacity: 1 !important;
+      visibility: visible !important;
+    }
+  }
+}
+
+/* PrimeNG Checkbox için özel düzeltme */
+.p-checkbox .p-checkbox-box.p-highlight .p-checkbox-icon.pi-check:before {
+  content: "\e909" !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  display: inline-block !important;
+}
+
+/* Özel Checkbox Stili */
+.custom-checkbox {
+  .p-checkbox-box {
+    border: 2px solid #3B82F6 !important;
+    background: #ffffff !important;
+    width: 22px !important;
+    height: 22px !important;
+    
+    &.p-highlight {
+      background: #3B82F6 !important;
+      border-color: #3B82F6 !important;
+      
+      .p-checkbox-icon {
+        color: #ffffff !important;
+        font-size: 16px !important;
+        font-weight: bold !important;
+        visibility: visible !important;
+        opacity: 1 !important;
+      }
+    }
+    
+    &:hover {
+      border-color: #2563eb !important;
+    }
+  }
+}
+
+/* PrimeNG Accordion ve Tab Bileşenleri için Global Düzeltmeler */
+body .p-accordion,
+html body .p-accordion,
+.p-accordion {
+  .p-accordion-header {
+    background-color: #ffffff !important;
+    
+    .p-accordion-header-link {
+      background-color: #ffffff !important;
+      color: #1e3a8a !important;
+      border: 1px solid #f1f5f9 !important;
+      
+      &:hover {
+        background-color: #f8fafc !important;
+      }
+      
+      .p-accordion-toggle-icon {
+        color: #3B82F6 !important;
+      }
+      
+      .p-accordion-header-text {
+        color: #1e3a8a !important;
+        font-weight: 600 !important;
+      }
+    }
+    
+    &.p-highlight {
+      .p-accordion-header-link {
+        background-color: #f0f9ff !important;
+        border-color: #bae6fd !important;
+        color: #1e3a8a !important;
+        
+        .p-accordion-toggle-icon {
+          color: #3B82F6 !important;
+        }
+      }
+    }
+  }
+  
+  .p-accordion-content {
+    background-color: #ffffff !important;
+    color: #333333 !important;
+    border: 1px solid #f1f5f9 !important;
+  }
+}
+
+body .p-tabview,
+html body .p-tabview,
+.p-tabview {
+  .p-tabview-nav {
+    background-color: transparent !important;
+    
+    li {
+      .p-tabview-nav-link {
+        background-color: #ffffff !important;
+        color: #333333 !important;
+        border-color: #e9ecef !important;
+        
+        &:hover {
+          background-color: #f8fafc !important;
+        }
+      }
+      
+      &.p-highlight {
+        .p-tabview-nav-link {
+          background-color: #ffffff !important;
+          color: #3B82F6 !important;
+          border-color: #3B82F6 !important;
+        }
+      }
+    }
+  }
+  
+  .p-tabview-panels {
+    background-color: #ffffff !important;
+    color: #333333 !important;
+    border-color: #e9ecef !important;
+  }
+}
+
+/* İzin Yönetimi Sayfası için Özel Düzeltmeler */
+.permission-management-container {
+  .p-togglebutton {
+    &.p-highlight {
+      background-color: #10b981 !important;
+      border-color: #10b981 !important;
+      color: #ffffff !important;
+      
+      .p-button-label, .p-button-icon {
+        color: #ffffff !important;
+        visibility: visible !important;
+        opacity: 1 !important;
+      }
+    }
+    
+    &:not(.p-highlight) {
+      background-color: #fee2e2 !important;
+      border-color: #ef4444 !important;
+      color: #b91c1c !important;
+      
+      .p-button-label, .p-button-icon {
+        color: #b91c1c !important;
+        visibility: visible !important;
+        opacity: 1 !important;
+      }
+    }
+  }
+  
+  .status-indicator {
+    &.enabled {
+      background-color: #10b981 !important;
+    }
+    
+    &:not(.enabled) {
+      background-color: #ef4444 !important;
+    }
+  }
+  
+  .p-checkbox {
+    .p-checkbox-box {
+      border: 2px solid #cbd5e1 !important;
+      background-color: #ffffff !important;
+      
+      &.p-highlight {
+        background-color: #3B82F6 !important;
+        border-color: #3B82F6 !important;
+        
+        .p-checkbox-icon {
+          color: #ffffff !important;
+          visibility: visible !important;
+          opacity: 1 !important;
+        }
+      }
+    }
+  }
+}
+
+/* Rol Yönetimi Sayfası için Özel Düzeltmeler */
+app-role-detail {
+  .p-accordion {
+    .p-accordion-header {
+      .p-accordion-header-link {
+        background-color: #ffffff !important;
+        color: #1e3a8a !important;
+        border: 1px solid #f1f5f9 !important;
+        
+        .p-accordion-toggle-icon {
+          color: #3B82F6 !important;
+        }
+      }
+    }
+    
+    .p-accordion-content {
+      background-color: #ffffff !important;
+      color: #333333 !important;
+      border: 1px solid #f1f5f9 !important;
+    }
+  }
+  
+  .p-togglebutton {
+    &.p-highlight {
+      background-color: #10b981 !important;
+      border-color: #10b981 !important;
+      color: #ffffff !important;
+      
+      .p-button-label, .p-button-icon {
+        color: #ffffff !important;
+        visibility: visible !important;
+        opacity: 1 !important;
+      }
+    }
+    
+    &:not(.p-highlight) {
+      background-color: #fee2e2 !important;
+      border-color: #ef4444 !important;
+      color: #b91c1c !important;
+      
+      .p-button-label, .p-button-icon {
+        color: #b91c1c !important;
+        visibility: visible !important;
+        opacity: 1 !important;
+      }
+    }
+  }
+}
+
+/* Rol Yönetimi Sayfası için Kritik Düzeltmeler */
+body app-role-detail,
+html body app-role-detail,
+app-role-detail {
+  .permission-management-container {
+    background-color: #f8f9fa !important;
+  }
+  
+  .card, 
+  .permission-card {
+    background-color: #ffffff !important;
+  }
+  
+  .card-header {
+    background-color: #ffffff !important;
+  }
+  
+  .card-content {
+    background-color: #ffffff !important;
+  }
+  
+  .p-accordion {
+    background-color: transparent !important;
+    
+    .p-accordion-header {
+      background-color: #ffffff !important;
+      
+      .p-accordion-header-link {
+        background-color: #ffffff !important;
+        color: #1e3a8a !important;
+        border: 1px solid #f1f5f9 !important;
+        
+        .p-accordion-toggle-icon {
+          color: #3B82F6 !important;
+        }
+        
+        .p-accordion-header-text {
+          color: #1e3a8a !important;
+        }
+      }
+      
+      &.p-highlight {
+        .p-accordion-header-link {
+          background-color: #f0f9ff !important;
+          border-color: #bae6fd !important;
+          color: #1e3a8a !important;
+        }
+      }
+    }
+    
+    .p-accordion-content {
+      background-color: #ffffff !important;
+      color: #333333 !important;
+      border: 1px solid #f1f5f9 !important;
+    }
+  }
+  
+  .p-togglebutton {
+    &.p-highlight {
+      background-color: #10b981 !important;
+      border-color: #10b981 !important;
+      color: #ffffff !important;
+      
+      .p-button-label {
+        color: #ffffff !important;
+        visibility: visible !important;
+        opacity: 1 !important;
+      }
+      
+      .p-button-icon {
+        color: #ffffff !important;
+        visibility: visible !important;
+        opacity: 1 !important;
+      }
+    }
+    
+    &:not(.p-highlight) {
+      background-color: #fee2e2 !important;
+      border-color: #ef4444 !important;
+      color: #b91c1c !important;
+      
+      .p-button-label {
+        color: #b91c1c !important;
+        visibility: visible !important;
+        opacity: 1 !important;
+      }
+      
+      .p-button-icon {
+        color: #b91c1c !important;
+        visibility: visible !important;
+        opacity: 1 !important;
+      }
+    }
+  }
+  
+  .status-indicator {
+    &.enabled {
+      background-color: #10b981 !important;
+    }
+    
+    &:not(.enabled) {
+      background-color: #ef4444 !important;
+    }
+  }
+  
+  .p-checkbox {
+    .p-checkbox-box {
+      border: 2px solid #cbd5e1 !important;
+      background-color: #ffffff !important;
+      
+      &.p-highlight {
+        background-color: #3B82F6 !important;
+        border-color: #3B82F6 !important;
+        
+        .p-checkbox-icon {
+          color: #ffffff !important;
+          visibility: visible !important;
+          opacity: 1 !important;
+        }
+      }
+    }
+  }
+  
+  .p-button {
+    &.p-button-primary {
+      background-color: #3B82F6 !important;
+      border-color: #3B82F6 !important;
+      color: #ffffff !important;
+    }
+    
+    &.p-button-success {
+      background-color: #10b981 !important;
+      border-color: #10b981 !important;
+      color: #ffffff !important;
+    }
+    
+    &.p-button-danger {
+      background-color: #ef4444 !important;
+      border-color: #ef4444 !important;
+      color: #ffffff !important;
+    }
+  }
+}
+
+/* PrimeNG Accordion Bileşeni için Kritik Düzeltmeler */
+body .p-accordion,
+html body .p-accordion,
+.p-accordion {
+  background-color: transparent !important;
+  
+  .p-accordion-header {
+    background-color: #ffffff !important;
+    
+    .p-accordion-header-link {
+      background-color: #ffffff !important;
+      color: #1e3a8a !important;
+      border: 1px solid #f1f5f9 !important;
+      
+      .p-accordion-toggle-icon {
+        color: #3B82F6 !important;
+      }
+      
+      .p-accordion-header-text {
+        color: #1e3a8a !important;
+      }
+    }
+    
+    &.p-highlight {
+      .p-accordion-header-link {
+        background-color: #f0f9ff !important;
+        border-color: #bae6fd !important;
+        color: #1e3a8a !important;
+      }
+    }
+  }
+  
+  .p-accordion-content {
+    background-color: #ffffff !important;
+    color: #333333 !important;
+    border: 1px solid #f1f5f9 !important;
+  }
 }

@@ -179,7 +179,7 @@ export class LoginComponent implements OnInit, AfterViewInit {
         
         // Kullanıcı rolüne göre yönlendirme
         const user = this.authService.getCurrentUser();
-        const targetRoute = user?.isAdmin ? '/admin-dashboard' : '/user-dashboard';
+        const targetRoute = user?.isAdmin ? '/dashboard/admin-dashboard' : '/dashboard/user-dashboard';
         console.log('Yönlendiriliyor:', targetRoute);
         
         setTimeout(() => {
@@ -204,7 +204,12 @@ export class LoginComponent implements OnInit, AfterViewInit {
   }
 
   ngOnInit(): void {
-    // Initialize component
+    // Kullanıcı zaten giriş yapmışsa, dashboard'a yönlendir
+    if (this.authService.isLoggedIn()) {
+      const user = this.authService.getCurrentUser();
+      const targetRoute = user?.isAdmin ? '/dashboard/admin-dashboard' : '/dashboard/user-dashboard';
+      this.router.navigate([targetRoute]);
+    }
   }
 }
 

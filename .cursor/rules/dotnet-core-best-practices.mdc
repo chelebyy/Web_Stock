@@ -1,6 +1,7 @@
 ---
 description: dotnet core best practices
 globs: **/*.{cs}
+alwaysApply: true
 ---
 Use async/await for non-blocking operations throughout the application
 - Implement proper error handling and logging using .NET Core's built-in features

@@ -1,195 +1,43 @@
 <div class="permission-management-container">
   <div class="page-header">
     <div class="page-title-container">
-      <h1 class="page-title" *ngIf="role">{{ role.name }} - İzin Yönetimi</h1>
+      @if (role) {
+        <h1 class="page-title">{{ role.name }} - İzin Yönetimi</h1>
+      }
       <p class="page-subtitle">Bu rol için izinleri düzenleyin ve yönetin</p>
     </div>
     <button pButton pRipple icon="pi pi-arrow-left" label="Geri Dön" class="p-button-outlined back-button" (click)="goBack()"></button>
   </div>
 
-  <div *ngIf="loading" class="loading-container">
-    <p-progressSpinner styleClass="w-4rem h-4rem" strokeWidth="4" fill="var(--surface-ground)" animationDuration=".5s"></p-progressSpinner>
-    <span>Bilgiler yükleniyor...</span>
-  </div>
+  @if (loading) {
+    <div class="loading-container">
+      <p-progressSpinner styleClass="w-4rem h-4rem" strokeWidth="4" fill="var(--surface-ground)" animationDuration=".5s"></p-progressSpinner>
+      <span>Bilgiler yükleniyor...</span>
+    </div>
+  }
   
-  <div *ngIf="!loading && role" class="content-container">
-    <!-- Sayfa Erişim İzinleri Kartı -->
-    <div class="card permission-card">
-      <div class="card-header">
-        <h2 class="card-title"><i class="pi pi-window-maximize"></i> Sayfa Erişim İzinleri</h2>
-        <p class="card-subtitle">Bu rolün hangi sayfalara erişebileceğini kontrol eder. Erişim izni verilen sayfalarda rol kullanıcıları işlem yapabilir.</p>
-      </div>
-      <div class="card-content">
-        <div class="page-access-description">
-          <div class="access-info">
-            <i class="pi pi-info-circle access-info-icon"></i>
-            <p>Her izin kartı bir sayfaya erişimi kontrol eder. İzin açıksa sayfaya erişim vardır, kapalıysa erişim engellenir.</p>
-          </div>
-          
-          <div class="page-legend">
-            <div class="legend-item">
-              <div class="status-dot enabled"></div>
-              <span>Erişim İzni Var</span>
-            </div>
-            <div class="legend-item">
-              <div class="status-dot disabled"></div>
-              <span>Erişim İzni Yok</span>
-            </div>
-          </div>
-        </div>
-        
-        <div class="page-access-categories">
-          <div class="category-section">
-            <div class="category-header">
-              <i class="pi pi-desktop"></i>
-              <h3>Panel Sayfaları</h3>
-            </div>
-            <div class="permission-grid">
-              <div *ngFor="let permission of getPagePermissionsByCategory('Dashboard')" class="permission-item">
-                <div class="page-access-card" [ngClass]="{'access-enabled': isPermissionSelected(permission.id)}">
-                  <div class="permission-header">
-                    <span class="permission-name">{{ permission.displayName }}</span>
-                    <div class="status-indicator" [ngClass]="{'enabled': isPermissionSelected(permission.id)}">
-                      <i class="pi" [ngClass]="isPermissionSelected(permission.id) ? 'pi-check' : 'pi-times'"></i>
-                    </div>
-                  </div>
-                  <p class="permission-description">{{ permission.description }}</p>
-                  <div class="permission-toggle">
-                    <p-toggleButton 
-                      [ngModel]="isPermissionSelected(permission.id)" 
-                      (onChange)="togglePermission(permission.id)"
-                      onLabel="Erişim Var" 
-                      offLabel="Erişim Yok"
-                      onIcon="pi pi-check"
-                      offIcon="pi pi-times"
-                      styleClass="permission-toggle-button"
-                    ></p-toggleButton>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-          
-          <div class="category-section">
-            <div class="category-header">
-              <i class="pi pi-users"></i>
-              <h3>Kullanıcı Yönetimi</h3>
-            </div>
-            <div class="permission-grid">
-              <div *ngFor="let permission of getPagePermissionsByCategory('User')" class="permission-item">
-                <div class="page-access-card" [ngClass]="{'access-enabled': isPermissionSelected(permission.id)}">
-                  <div class="permission-header">
-                    <span class="permission-name">{{ permission.displayName }}</span>
-                    <div class="status-indicator" [ngClass]="{'enabled': isPermissionSelected(permission.id)}">
-                      <i class="pi" [ngClass]="isPermissionSelected(permission.id) ? 'pi-check' : 'pi-times'"></i>
-                    </div>
-                  </div>
-                  <p class="permission-description">{{ permission.description }}</p>
-                  <div class="permission-toggle">
-                    <p-toggleButton 
-                      [ngModel]="isPermissionSelected(permission.id)" 
-                      (onChange)="togglePermission(permission.id)"
-                      onLabel="Erişim Var" 
-                      offLabel="Erişim Yok"
-                      onIcon="pi pi-check"
-                      offIcon="pi pi-times"
-                      styleClass="permission-toggle-button"
-                    ></p-toggleButton>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-          
-          <div class="category-section">
-            <div class="category-header">
-              <i class="pi pi-key"></i>
-              <h3>Rol Yönetimi</h3>
-            </div>
-            <div class="permission-grid">
-              <div *ngFor="let permission of getPagePermissionsByCategory('Role')" class="permission-item">
-                <div class="page-access-card" [ngClass]="{'access-enabled': isPermissionSelected(permission.id)}">
-                  <div class="permission-header">
-                    <span class="permission-name">{{ permission.displayName }}</span>
-                    <div class="status-indicator" [ngClass]="{'enabled': isPermissionSelected(permission.id)}">
-                      <i class="pi" [ngClass]="isPermissionSelected(permission.id) ? 'pi-check' : 'pi-times'"></i>
-                    </div>
-                  </div>
-                  <p class="permission-description">{{ permission.description }}</p>
-                  <div class="permission-toggle">
-                    <p-toggleButton 
-                      [ngModel]="isPermissionSelected(permission.id)" 
-                      (onChange)="togglePermission(permission.id)"
-                      onLabel="Erişim Var" 
-                      offLabel="Erişim Yok"
-                      onIcon="pi pi-check"
-                      offIcon="pi pi-times"
-                      styleClass="permission-toggle-button"
-                    ></p-toggleButton>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-          
-          <!-- Diğer kategoriler için benzer yapılar -->
-        </div>
-        
-        <div class="page-access-actions">
-          <button pButton pRipple icon="pi pi-check-square" label="Tüm Sayfa İzinlerini Seç" 
-                  class="p-button-outlined p-button-success" (click)="selectAllPagePermissions()"></button>
-          <button pButton pRipple icon="pi pi-minus-circle" label="Tüm Sayfa İzinlerini Kaldır" 
-                  class="p-button-outlined p-button-danger" (click)="unselectAllPagePermissions()"></button>
-        </div>
-      </div>
+  @if (!loading && role) {
+    <div class="content-container">
+      <!-- İçerik tamamen silindi -->
     </div>
-    
-    <!-- İşlem İzinleri Kartı -->
-    <div class="card permission-card">
-      <div class="card-header">
-        <h2 class="card-title"><i class="pi pi-cog"></i> İşlem İzinleri</h2>
-        <p class="card-subtitle">Bu rolün hangi işlemleri yapabileceğini kontrol eder. İşlem izinleri, sayfalardaki belirli özellikleri kullanma yetkisini belirler.</p>
-      </div>
-      <div class="card-content">
-        <p-accordion [multiple]="true" styleClass="permission-accordion">
-          <p-accordionTab *ngFor="let group of permissionGroups" [header]="group.name" [selected]="true">
-            <div class="permission-list">
-              <div *ngFor="let permission of getPermissionsByGroup(group.name)" class="permission-checkbox-item">
-                <p-checkbox 
-                  [(ngModel)]="selectedPermissions" 
-                  [value]="permission.id" 
-                  [binary]="false"
-                  [inputId]="'perm_' + permission.id"
-                ></p-checkbox>
-                <label [for]="'perm_' + permission.id" class="permission-label">
-                  <span class="permission-checkbox-name">{{ permission.displayName }}</span>
-                  <span class="permission-checkbox-description">{{ permission.description }}</span>
-                </label>
-              </div>
-            </div>
-          </p-accordionTab>
-        </p-accordion>
-      </div>
-    </div>
-    
-    <!-- Kaydet Butonu -->
-    <div class="save-container">
-      <button pButton pRipple icon="pi pi-save" label="İzinleri Kaydet" 
-              class="p-button-primary save-button" 
-              [loading]="savingPermissions"
-              (click)="savePermissions()"></button>
-    </div>
-  </div>
+  }
   
   <!-- Hata Durumu -->
-  <div *ngIf="!loading && loadError" class="error-container">
-    <i class="pi pi-exclamation-triangle error-icon"></i>
-    <h2>Veriler Yüklenemedi</h2>
-    <p>İzin bilgileri yüklenirken bir hata oluştu. Lütfen tekrar deneyin.</p>
-    <button pButton pRipple icon="pi pi-refresh" label="Yeniden Dene" 
-            class="p-button-primary retry-button" 
-            (click)="loadRoleData()"></button>
-  </div>
+  @if (!loading && loadError) {
+    <div class="error-container">
+      <i class="pi pi-exclamation-triangle error-icon"></i>
+      <h2>Veriler Yüklenemedi</h2>
+      <p>İzin bilgileri yüklenirken bir hata oluştu. Lütfen tekrar deneyin.</p>
+      <button pButton pRipple icon="pi pi-refresh" label="Yeniden Dene" 
+              class="p-button-primary retry-button" 
+              (click)="loadRoleData()"></button>
+    </div>
+  }
 </div>
 
-<p-toast position="top-right" styleClass="modern-toast"></p-toast> 
+@defer {
+  <p-toast position="top-right" styleClass="modern-toast"></p-toast>
+} @placeholder {
+  <!-- Toast için placeholder -->
+  <div class="toast-placeholder"></div>
+} 

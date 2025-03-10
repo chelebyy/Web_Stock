@@ -1,6 +1,7 @@
 ---
 description: Best practices for using RxJS in Angular 19
 globs: **/*.ts
+alwaysApply: true
 ---
 - Use `AsyncPipe` in templates to auto-subscribe and avoid memory leaks
 - Manage subscriptions properly in components
