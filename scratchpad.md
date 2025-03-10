@@ -248,7 +248,7 @@
 - Tüm dropdown'lar ve butonlar için tutarlı yükseklik (36px) ve stil uygulandı
 - "İzinleri Yönet" butonundaki metin kayma sorunu çözüldü
 - "İzinleri Yönet" butonunda sadece anahtar ikonunun görünmesi sağlandı
-- Login sayfasındaki şifre alanı arka plan sorunu çözüldü (beyaz arka plan üzerinde beyaz metin görünmüyordu)
+- Kullanıcı ve rol yönetimi sayfalarındaki silme onay dialogu sorunu çözüldü (HTML sanitization sorunu)
 
 ## Gelecek Adımlar
 1. GitHub'a son değişiklikleri push etmek
@@ -343,5 +343,43 @@
 - Yeni bileşen, eski bileşenin tüm işlevselliğini kapsıyor ve iyileştirmeler içeriyor
 - `app.routes.ts` ve `auth.routes.ts` dosyalarında yapılan kontrollerde, rotaların yeni bileşene yönlendirildiği doğrulandı
 - Eski bileşene başka herhangi bir referans bulunmadığı grep aramaları ile teyit edildi
+
+## PrimeNG ConfirmDialog Buton Olayları Düzeltmesi
+
+### Yapılan Değişiklikler
+- [X] RoleManagementComponent'te ConfirmDialog butonlarının onClick olayları güncellendi
+- [X] UserManagementComponent'te ConfirmDialog butonlarının onClick olayları güncellendi
+- [X] Her iki component'e accept() ve reject() yardımcı metotları eklendi
+- [X] errors.md dosyasına hata ve çözüm detayları eklendi
+
+### Öğrenilen Dersler
+- PrimeNG'nin ConfirmDialog bileşeni için özel yardımcı metotlar gerekebilir
+- Component'lerde kullanılan servislerin erişim düzeylerini (private/public) doğru ayarlamak önemli
+- Onay diyaloglarında buton olaylarını component seviyesinde yönetmek daha güvenli
+
+### Sonraki Adımlar
+- [ ] Diğer bileşenlerde benzer sorunlar olup olmadığını kontrol et
+- [ ] Onay diyaloglarının görünüm ve davranışlarını test et
+- [ ] Kullanıcı geri bildirimlerini topla ve gerekirse iyileştirmeler yap
+
+## Güncel Görevler (10 Haziran 2025)
+- [x] Kullanıcı yönetimi sayfasındaki silme onay dialogu sorununu çözmek
+  - [x] HTML sanitization uyarılarını incelemek
+  - [x] Özel bir DeleteConfirmationDialog bileşeni oluşturmak
+  - [x] Kullanıcı yönetimi bileşenini güncellemek
+  - [x] Rol yönetimi bileşenini güncellemek
+  - [x] Çözümü errors.md dosyasına belgelemek
+
+### Silme Onay Dialogu Sorunu ve Çözümü
+Kullanıcı yönetimi ve rol yönetimi sayfalarında, silme işlemi için kullanılan PrimeNG ConfirmDialog bileşeninde "Evet" ve "Hayır" butonları görünmüyor veya çalışmıyordu. Bu sorun, Angular'ın güvenlik mekanizmasının HTML içeriğini sanitize etmesinden kaynaklanıyordu.
+
+**Çözüm Adımları:**
+1. Özel bir DeleteConfirmationDialog bileşeni oluşturuldu
+2. Bu bileşen, Angular'ın güvenlik mekanizması ile uyumlu çalışacak şekilde tasarlandı
+3. Kullanıcı yönetimi ve rol yönetimi bileşenlerinde, PrimeNG'nin ConfirmDialog bileşeni yerine özel DeleteConfirmationDialog bileşeni kullanıldı
+4. Silme işlemi için gerekli değişkenler ve metodlar eklendi
+5. Çözüm errors.md dosyasına belgelendi
+
+Bu çözüm, hem kullanıcı yönetimi hem de rol yönetimi sayfalarında başarıyla uygulandı ve silme onay dialogu artık düzgün çalışıyor.
 
 

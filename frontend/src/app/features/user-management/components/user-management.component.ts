@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, AfterViewInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ConfirmationService, MessageService } from 'primeng/api';
@@ -19,6 +19,8 @@ import { User } from '../../../shared/models/user.model';
 import { Role, RoleWithUsers } from '../../../shared/models/role.model';
 import { Router } from '@angular/router';
 import { AuthService } from '../../../core/authentication/auth.service';
+import { HostListener } from '@angular/core';
+import { DeleteConfirmationDialogComponent } from '../../../features/shared/components/delete-confirmation-dialog/delete-confirmation-dialog.component';
 
 @Component({
     selector: 'app-user-management',
@@ -39,11 +41,313 @@ import { AuthService } from '../../../core/authentication/auth.service';
         ConfirmDialogModule,
         CheckboxModule,
         PasswordModule,
-        TooltipModule
+        TooltipModule,
+        DeleteConfirmationDialogComponent
     ],
-    providers: [ConfirmationService, MessageService]
+    providers: [MessageService, ConfirmationService],
+    styles: [`
+    .modern-dialog {
+      border-radius: 12px;
+      box-shadow: 0 6px 16px rgba(0, 0, 0, 0.1);
+      overflow: hidden;
+    }
+    
+    .modern-dialog .p-dialog-header {
+      background-color: #ffffff;
+      padding: 1.5rem 2rem 0.5rem;
+      border-bottom: none;
+    }
+    
+    .modern-dialog .p-dialog-title {
+      font-size: 1.25rem;
+      font-weight: 600;
+      color: #333;
+    }
+    
+    .modern-dialog .p-dialog-content {
+      background-color: #ffffff;
+      padding: 2rem;
+    }
+    
+    .dialog-content {
+      display: flex;
+      flex-direction: column;
+      gap: 1.5rem;
+    }
+    
+    .field {
+      margin-bottom: 1.5rem;
+    }
+    
+    .input-with-icon {
+      position: relative;
+      width: 100%;
+      display: block;
+    }
+    
+    .input-icon {
+      position: absolute;
+      left: 14px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: #6c757d;
+      font-size: 1.1rem;
+      z-index: 5;
+    }
+    
+    .input-with-icon .modern-input,
+    .input-with-icon .modern-select {
+      padding-left: 42px;
+      width: 100%;
+      height: 48px;
+      border-radius: 8px;
+      border: 1px solid #ced4da;
+      transition: all 0.3s;
+      font-size: 1rem;
+      color: #333;
+      background-color: #ffffff;
+    }
+    
+    .modern-input:focus,
+    .modern-select:focus {
+      border-color: #2196F3;
+      box-shadow: 0 0 0 2px rgba(33, 150, 243, 0.2);
+    }
+    
+    .modern-input:hover:not(:focus):not(:disabled),
+    .modern-select:hover:not(:focus):not(:disabled) {
+      border-color: #bbdefb;
+    }
+    
+    .modern-select {
+      appearance: none;
+      background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="%236c757d" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>');
+      background-repeat: no-repeat;
+      background-position: right 14px center;
+      padding-right: 40px;
+    }
+    
+    .p-error {
+      color: #f44336;
+      font-size: 0.875rem;
+      margin-top: 0.25rem;
+      display: block;
+    }
+    
+    .p-help {
+      color: #6c757d;
+      font-size: 0.875rem;
+      margin-top: 0.25rem;
+      display: flex;
+      align-items: center;
+    }
+    
+    .dialog-footer {
+      display: flex;
+      justify-content: flex-end;
+      gap: 0.75rem;
+      padding: 1rem 2rem 1.5rem;
+      background-color: #ffffff;
+    }
+    
+    .cancel-button, .save-button {
+      min-width: 120px;
+      height: 40px;
+      border-radius: 8px;
+      font-weight: 500;
+      transition: all 0.3s;
+    }
+    
+    .cancel-button:hover {
+      background-color: rgba(0, 0, 0, 0.04);
+    }
+    
+    .save-button:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+    
+    /* Dropdown özel stilleri */
+    .modern-dropdown {
+      width: 100% !important;
+      height: 48px !important;
+      position: relative !important;
+    }
+    
+    .modern-dropdown .p-dropdown {
+      width: 100% !important;
+      height: 48px !important;
+      border-radius: 8px !important;
+      background-color: #ffffff !important;
+      border: 1px solid #ced4da !important;
+      display: flex !important;
+      align-items: center !important;
+    }
+    
+    .modern-dropdown .p-dropdown-label {
+      padding-left: 42px !important;
+      display: flex !important;
+      align-items: center !important;
+      color: #333333 !important;
+      font-size: 1rem !important;
+      font-weight: normal !important;
+      height: 100% !important;
+      background-color: transparent !important;
+      z-index: 1 !important;
+      position: relative !important;
+      visibility: visible !important;
+      opacity: 1 !important;
+    }
+    
+    .modern-dropdown .p-dropdown-label.p-placeholder {
+      color: #6c757d !important;
+      visibility: visible !important;
+      opacity: 1 !important;
+      display: flex !important;
+      align-items: center !important;
+    }
+    
+    .modern-dropdown .p-dropdown-trigger {
+      color: #6c757d !important;
+      width: 3rem !important;
+      z-index: 2 !important;
+    }
+    
+    .input-with-icon .p-dropdown {
+      background-color: #ffffff !important;
+      position: relative !important;
+    }
+    
+    .input-with-icon .p-dropdown .p-dropdown-label {
+      padding-left: 42px !important;
+      color: #333333 !important;
+      font-size: 1rem !important;
+      background-color: #ffffff !important;
+      visibility: visible !important;
+      opacity: 1 !important;
+    }
+    
+    .input-with-icon .p-dropdown .p-dropdown-label.p-placeholder {
+      color: #6c757d !important;
+      visibility: visible !important;
+      opacity: 1 !important;
+    }
+    
+    /* Dropdown panel stilleri */
+    .p-dropdown-panel {
+      background-color: #ffffff !important;
+      border: 1px solid #ced4da !important;
+      border-radius: 8px !important;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15) !important;
+      z-index: 1000 !important;
+    }
+    
+    .p-dropdown-panel .p-dropdown-items {
+      padding: 0.5rem 0 !important;
+      background-color: #ffffff !important;
+    }
+    
+    .p-dropdown-panel .p-dropdown-items .p-dropdown-item {
+      padding: 0.75rem 1rem !important;
+      color: #333333 !important;
+      font-size: 1rem !important;
+      border-bottom: 1px solid rgba(0, 0, 0, 0.05) !important;
+      background-color: #ffffff !important;
+    }
+    
+    .p-dropdown-panel .p-dropdown-items .p-dropdown-item:hover {
+      background-color: #f8f9fa !important;
+      color: #000000 !important;
+    }
+    
+    .p-dropdown-panel .p-dropdown-items .p-dropdown-item.p-highlight {
+      background-color: rgba(59, 130, 246, 0.1) !important;
+      color: #2563eb !important;
+      font-weight: 600 !important;
+    }
+    
+    /* Yüksek öncelikli dropdown panel seçicileri */
+    html body .p-dropdown-panel,
+    body .p-dropdown-panel,
+    .p-dropdown-panel,
+    html body .p-dropdown-items-wrapper,
+    body .p-dropdown-items-wrapper,
+    .p-dropdown-items-wrapper {
+      background-color: #ffffff !important;
+      border: 1px solid #ced4da !important;
+      border-radius: 8px !important;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15) !important;
+    }
+    
+    html body .p-dropdown-panel .p-dropdown-items,
+    body .p-dropdown-panel .p-dropdown-items,
+    .p-dropdown-panel .p-dropdown-items,
+    html body .p-dropdown-items-wrapper .p-dropdown-items,
+    body .p-dropdown-items-wrapper .p-dropdown-items,
+    .p-dropdown-items-wrapper .p-dropdown-items {
+      background-color: #ffffff !important;
+      padding: 0.5rem 0 !important;
+    }
+    
+    html body .p-dropdown-panel .p-dropdown-items .p-dropdown-item,
+    body .p-dropdown-panel .p-dropdown-items .p-dropdown-item,
+    .p-dropdown-panel .p-dropdown-items .p-dropdown-item,
+    html body .p-dropdown-items-wrapper .p-dropdown-items .p-dropdown-item,
+    body .p-dropdown-items-wrapper .p-dropdown-items .p-dropdown-item,
+    .p-dropdown-items-wrapper .p-dropdown-items .p-dropdown-item {
+      padding: 0.75rem 1rem !important;
+      color: #333333 !important;
+      font-size: 1rem !important;
+      border-bottom: 1px solid rgba(0, 0, 0, 0.05) !important;
+      background-color: #ffffff !important;
+    }
+    
+    html body .p-dropdown-panel .p-dropdown-items .p-dropdown-item:hover,
+    body .p-dropdown-panel .p-dropdown-items .p-dropdown-item:hover,
+    .p-dropdown-panel .p-dropdown-items .p-dropdown-item:hover,
+    html body .p-dropdown-items-wrapper .p-dropdown-items .p-dropdown-item:hover,
+    body .p-dropdown-items-wrapper .p-dropdown-items .p-dropdown-item:hover,
+    .p-dropdown-items-wrapper .p-dropdown-items .p-dropdown-item:hover {
+      background-color: #f8f9fa !important;
+      color: #000000 !important;
+    }
+    
+    html body .p-dropdown-panel .p-dropdown-items .p-dropdown-item.p-highlight,
+    body .p-dropdown-panel .p-dropdown-items .p-dropdown-item.p-highlight,
+    .p-dropdown-panel .p-dropdown-items .p-dropdown-item.p-highlight,
+    html body .p-dropdown-items-wrapper .p-dropdown-items .p-dropdown-item.p-highlight,
+    body .p-dropdown-items-wrapper .p-dropdown-items .p-dropdown-item.p-highlight,
+    .p-dropdown-items-wrapper .p-dropdown-items .p-dropdown-item.p-highlight {
+      background-color: rgba(59, 130, 246, 0.1) !important;
+      color: #2563eb !important;
+      font-weight: 600 !important;
+    }
+    
+    /* Yüksek öncelikli input seçicileri */
+    html body .input-with-icon .p-dropdown .p-dropdown-label,
+    body .input-with-icon .p-dropdown .p-dropdown-label,
+    .input-with-icon .p-dropdown .p-dropdown-label {
+      padding-left: 42px !important;
+      color: #333333 !important;
+      font-size: 1rem !important;
+      visibility: visible !important;
+      opacity: 1 !important;
+      display: flex !important;
+      align-items: center !important;
+    }
+    
+    html body .input-with-icon .p-dropdown .p-dropdown-label.p-placeholder,
+    body .input-with-icon .p-dropdown .p-dropdown-label.p-placeholder,
+    .input-with-icon .p-dropdown .p-dropdown-label.p-placeholder {
+      color: #6c757d !important;
+      visibility: visible !important;
+      opacity: 1 !important;
+      display: flex !important;
+      align-items: center !important;
+    }
+  `]
 })
-export class UserManagementComponent implements OnInit {
+export class UserManagementComponent implements OnInit, AfterViewInit {
   users: any[] = [];
   filteredUsers: any[] = [];
   user: any = {};
@@ -80,6 +384,15 @@ export class UserManagementComponent implements OnInit {
   rowsPerPage: number = 10;
   totalPages: number = 1;
 
+  // Dropdown açma kapama state'leri
+  roleDropdownOpen: boolean = false;
+  rowsDropdownOpen: boolean = false;
+  roleDialogDropdownOpen: boolean = false;
+
+  // Silme dialogu için yeni değişkenler
+  deleteDialogVisible: boolean = false;
+  userToDelete: any = null;
+
   constructor(
     private formBuilder: FormBuilder,
     private router: Router,
@@ -113,12 +426,83 @@ export class UserManagementComponent implements OnInit {
     this.loadRoles();
   }
 
+  ngAfterViewInit() {
+    // PrimeNG 19 dropdown düzeltmesi
+    setTimeout(() => {
+      // Dropdown panelinin genişliğini ayarla
+      const dropdown = document.querySelector('.user-role-dropdown') as HTMLElement;
+      if (dropdown) {
+        const width = dropdown.offsetWidth;
+        dropdown.style.setProperty('--dropdown-width', `${width}px`);
+        
+        // Dropdown açıldığında panel genişliğini ayarla
+        const observer = new MutationObserver((mutations) => {
+          mutations.forEach((mutation) => {
+            if (mutation.type === 'attributes' && mutation.attributeName === 'class') {
+              const panel = document.querySelector('.user-role-dropdown-panel') as HTMLElement;
+              if (panel) {
+                panel.style.width = `${width}px`;
+                panel.style.minWidth = `${width}px`;
+                panel.style.backgroundColor = '#ffffff';
+              }
+            }
+          });
+        });
+        
+        observer.observe(dropdown, { attributes: true });
+      }
+    }, 0);
+
+    // Placeholder metinlerinin görünürlüğünü artır
+    setTimeout(() => {
+      this.enhancePlaceholderVisibility();
+    }, 100);
+  }
+
+  // Placeholder metinlerinin görünürlüğünü artıran fonksiyon
+  private enhancePlaceholderVisibility() {
+    // Şifre alanı
+    const passwordInput = document.getElementById('password') as HTMLInputElement;
+    if (passwordInput) {
+      passwordInput.style.color = '#333333';
+      passwordInput.addEventListener('focus', () => {
+        passwordInput.style.color = '#333333';
+      });
+      passwordInput.addEventListener('blur', () => {
+        passwordInput.style.color = passwordInput.value ? '#333333' : '#333333';
+      });
+    }
+    
+    // Kullanıcı rolü alanı
+    const roleSelect = document.getElementById('roleId') as HTMLSelectElement;
+    if (roleSelect) {
+      roleSelect.style.color = '#333333';
+      
+      // Seçim yapıldığında rengi güncelle
+      roleSelect.addEventListener('change', () => {
+        roleSelect.style.color = roleSelect.value ? '#333333' : '#333333';
+        
+        // Seçeneklerin rengini güncelle
+        Array.from(roleSelect.options).forEach(option => {
+          option.style.color = '#333333';
+          if (option.selected && option.value) {
+            option.style.color = '#2563eb';
+            option.style.fontWeight = '600';
+          }
+        });
+      });
+      
+      // İlk yüklemede rengi ayarla
+      roleSelect.style.color = roleSelect.value ? '#333333' : '#333333';
+    }
+  }
+
   initForm() {
     // Temel form alanları
     this.userForm = this.formBuilder.group({
       fullName: ['', Validators.required],
       sicil: ['', Validators.required],
-      roleId: [null, Validators.required]
+      roleId: [2, Validators.required]  // Varsayılan olarak "Kullanıcı" rolünü seçiyoruz (id: 2)
     });
 
     // Şifre alanı, düzenleme modunda opsiyonel, yeni kullanıcı oluşturmada zorunlu
@@ -205,7 +589,8 @@ export class UserManagementComponent implements OnInit {
     this.userForm.reset();
     this.userForm.patchValue({
       isAdmin: false,
-      isActive: true
+      isActive: true,
+      roleId: 2  // Varsayılan olarak "Kullanıcı" rolünü seçiyoruz (id: 2)
     });
     this.userDialog = true;
   }
@@ -231,42 +616,102 @@ export class UserManagementComponent implements OnInit {
   }
 
   deleteUser(user: any) {
-    this.confirmationService.confirm({
-      message: `${user.fullName} adlı kullanıcıyı silmek istediğinizden emin misiniz?`,
-      header: 'Silme Onayı',
-      icon: 'pi pi-exclamation-triangle',
-      acceptLabel: 'Evet',
-      rejectLabel: 'Hayır',
-      accept: () => {
-        // Backend API'ye silme isteği gönder
-        this.userService.deleteUser(user.id).subscribe({
-          next: () => {
-            // Başarılı silme işlemi sonrası
-            this.users = this.users.filter(u => u.id !== user.id);
-            
-            // localStorage'a güncellenmiş kullanıcıları kaydet
-            localStorage.setItem('users', JSON.stringify(this.users));
-            
-            this.applyFilters();
-            this.messageService.add({
-              severity: 'success',
-              summary: 'Başarılı',
-              detail: 'Kullanıcı silindi',
-              life: 3000
-            });
-          },
-          error: (error) => {
-            console.error('Kullanıcı silme hatası:', error);
-            this.messageService.add({
-              severity: 'error',
-              summary: 'Hata',
-              detail: 'Kullanıcı silinirken bir hata oluştu.',
-              life: 3000
-            });
-          }
+    this.userToDelete = user;
+    this.deleteDialogVisible = true;
+  }
+
+  confirmDelete() {
+    if (!this.userToDelete) return;
+    
+    // Tüm kullanıcıları silme durumu
+    if (this.userToDelete.id === 'all') {
+      // Tüm kullanıcılar için silme istekleri gönder
+      const deletePromises = this.users.map(user => {
+        return new Promise<void>((resolve, reject) => {
+          this.userService.deleteUser(user.id).subscribe({
+            next: () => resolve(),
+            error: (err) => {
+              console.error(`Kullanıcı silme hatası (ID: ${user.id}):`, err);
+              reject(err);
+            }
+          });
         });
+      });
+
+      // Tüm silme istekleri tamamlandığında
+      Promise.all(deletePromises)
+        .then(() => {
+          this.users = [];
+          this.filteredUsers = [];
+          
+          // localStorage'a boş kullanıcı dizisini kaydet
+          localStorage.setItem('users', JSON.stringify(this.users));
+          
+          this.updatePagination();
+          this.messageService.add({
+            severity: 'success',
+            summary: 'Başarılı',
+            detail: 'Tüm kullanıcılar silindi',
+            life: 3000
+          });
+          
+          // Silme işlemi tamamlandıktan sonra referansı temizle
+          this.userToDelete = null;
+        })
+        .catch(error => {
+          console.error('Toplu silme işlemi sırasında hata:', error);
+          this.messageService.add({
+            severity: 'error',
+            summary: 'Hata',
+            detail: 'Bazı kullanıcılar silinirken hata oluştu.',
+            life: 3000
+          });
+          // Hata olsa bile güncel listeyi yeniden yükle
+          this.loadUsers();
+          
+          // Hata durumunda da referansı temizle
+          this.userToDelete = null;
+        });
+      return;
+    }
+    
+    // Tek kullanıcı silme durumu
+    this.userService.deleteUser(this.userToDelete.id).subscribe({
+      next: () => {
+        // Başarılı silme işlemi sonrası
+        this.users = this.users.filter(u => u.id !== this.userToDelete.id);
+        
+        // localStorage'a güncellenmiş kullanıcıları kaydet
+        localStorage.setItem('users', JSON.stringify(this.users));
+        
+        this.applyFilters();
+        this.messageService.add({
+          severity: 'success',
+          summary: 'Başarılı',
+          detail: 'Kullanıcı silindi',
+          life: 3000
+        });
+        
+        // Silme işlemi tamamlandıktan sonra referansı temizle
+        this.userToDelete = null;
+      },
+      error: (error) => {
+        console.error('Kullanıcı silme hatası:', error);
+        this.messageService.add({
+          severity: 'error',
+          summary: 'Hata',
+          detail: 'Kullanıcı silinirken bir hata oluştu.',
+          life: 3000
+        });
+        
+        // Hata durumunda da referansı temizle
+        this.userToDelete = null;
       }
     });
+  }
+  
+  cancelDelete() {
+    this.userToDelete = null;
   }
 
   hideDialog() {
@@ -414,9 +859,12 @@ export class UserManagementComponent implements OnInit {
     }
     
     // Eğer rol filtresi aktifse, rol filtresini de uygula
-    if (this.selectedRole !== null) {
-      this.applyRoleFilter({ value: this.selectedRole });
+    if (this.selectedRole !== null && this.selectedRole.value !== null) {
+      this.filteredUsers = this.applyRoleFilter(this.selectedRole.value);
     }
+    
+    // Sayfalama bilgilerini güncelle
+    this.updatePagination();
   }
   
   // Sayfalama işlevleri
@@ -447,148 +895,235 @@ export class UserManagementComponent implements OnInit {
   }
 
   manageUserPermissions(user: any) {
-    this.router.navigate([`/users/${user.id}/page-permissions`]);
+    this.router.navigate([`/user-management/users/${user.id}/page-permissions`]);
   }
 
   // Tüm kullanıcıları temizleme metodu
   clearAllUsers() {
-    this.confirmationService.confirm({
-      message: 'Tüm kullanıcıları silmek istediğinizden emin misiniz?',
-      header: 'Tümünü Silme Onayı',
-      icon: 'pi pi-exclamation-triangle',
-      acceptLabel: 'Evet',
-      rejectLabel: 'Hayır',
-      accept: () => {
-        // Tüm kullanıcılar için silme istekleri gönder
-        const deletePromises = this.users.map(user => {
-          return new Promise<void>((resolve, reject) => {
-            this.userService.deleteUser(user.id).subscribe({
-              next: () => resolve(),
-              error: (err) => {
-                console.error(`Kullanıcı silme hatası (ID: ${user.id}):`, err);
-                reject(err);
-              }
-            });
-          });
-        });
-
-        // Tüm silme istekleri tamamlandığında
-        Promise.all(deletePromises)
-          .then(() => {
-            this.users = [];
-            this.filteredUsers = [];
-            
-            // localStorage'a boş kullanıcı dizisini kaydet
-            localStorage.setItem('users', JSON.stringify(this.users));
-            
-            this.updatePagination();
-            this.messageService.add({
-              severity: 'success',
-              summary: 'Başarılı',
-              detail: 'Tüm kullanıcılar silindi',
-              life: 3000
-            });
-          })
-          .catch(error => {
-            console.error('Toplu silme işlemi sırasında hata:', error);
-            this.messageService.add({
-              severity: 'error',
-              summary: 'Hata',
-              detail: 'Bazı kullanıcılar silinirken hata oluştu.',
-              life: 3000
-            });
-            // Hata olsa bile güncel listeyi yeniden yükle
-            this.loadUsers();
-          });
-      }
-    });
+    this.userToDelete = { id: 'all', fullName: 'tüm kullanıcıları' };
+    this.deleteDialogVisible = true;
   }
 
   loadRoles() {
-    // Backend'den rolleri çekelim
+    // Role Service ile gerçek rollerini yüklemek burada yapılacak
+    // Şimdilik statik veriler kullanıyoruz
     this.roleService.getRoles().subscribe({
       next: (roles) => {
-        if (roles && roles.length > 0) {
-          console.log('Roller yüklendi:', roles);
-          
-          // Rolleri dropdown için formatlayalım
-          this.roles = roles.map(role => ({
+        // API'den gelen roller için
+        this.roles = roles.map(role => {
+          return {
             label: role.name,
             value: role.id
-          }));
-          
-          // Rol filtre seçeneklerini güncelle
-          this.roleFilterOptions = [
-            { label: 'Tümü', value: null },
-            ...this.roles
-          ];
-        } else {
-          console.log('Backend\'den rol verisi alınamadı veya boş.');
-          
-          // Varsayılan roller
-          this.roles = [
-            { label: 'Yönetici', value: 1, name: 'Yönetici' },
-            { label: 'Kullanıcı', value: 2, name: 'Kullanıcı' }
-          ];
-          
-          // Rol filtre seçeneklerini güncelle
-          this.roleFilterOptions = [
-            { label: 'Tümü', value: null },
-            ...this.roles.map(role => ({
-              label: role.label,
-              value: role.value
-            }))
-          ];
-        }
-      },
-      error: (error) => {
-        console.error('Rolleri yükleme hatası:', error);
+          };
+        });
         
-        // Hata durumunda varsayılan rolleri kullan
-        this.roles = [
-          { label: 'Yönetici', value: 1, name: 'Yönetici' },
-          { label: 'Kullanıcı', value: 2, name: 'Kullanıcı' }
-        ];
-        
-        // Rol filtre seçeneklerini güncelle
+        // Rol filtre seçenekleri için "Tümü" seçeneğini ekle
         this.roleFilterOptions = [
           { label: 'Tümü', value: null },
-          ...this.roles.map(role => ({
-            label: role.label,
-            value: role.value
-          }))
+          ...this.roles
         ];
+        
+        console.log('Roller yüklendi:', this.roles);
+        console.log('Rol filtre seçenekleri:', this.roleFilterOptions);
+      },
+      error: (err) => {
+        // Hata durumunda
+        console.error('Roller yüklenirken hata oluştu:', err);
+        
+        // Hata durumunda varsayılan roller
+        this.roles = [
+          { label: 'Admin', value: 1 },
+          { label: 'User', value: 2 }
+        ];
+        
+        // Rol filtre seçenekleri için "Tümü" seçeneğini ekle
+        this.roleFilterOptions = [
+          { label: 'Tümü', value: null },
+          ...this.roles
+        ];
+        
+        console.log('Varsayılan roller yüklendi:', this.roles);
+        console.log('Varsayılan rol filtre seçenekleri:', this.roleFilterOptions);
       }
     });
   }
 
   // Rol filtresini uygula
-  applyRoleFilter(event: any) {
-    const selectedRoleId = event.value;
+  applyRoleFilter(roleId: number) {
+    console.log('Rol filtresi uygulanıyor:', roleId);
     
-    if (selectedRoleId === null) {
+    if (roleId === null) {
       // Tüm roller seçiliyse filtreleme yapma
-      this.applyFilters();
+      return [...this.users];
     } else {
       // Seçilen role göre filtrele
-      this.filteredUsers = this.users.filter(user => {
+      return this.users.filter(user => {
         // Admin kullanıcılar için özel kontrol
-        if (user.permissions === 'Admin' && selectedRoleId === 1) {
+        if (user.permissions === 'Admin' && roleId === 1) {
           return true;
         }
         
         // Diğer roller için kontrol
-        if (user.roleId === selectedRoleId) {
+        if (user.roleId === roleId) {
           return true;
         }
         
         // Permissions değerine göre kontrol
-        if (selectedRoleId === 2 && (user.permissions === 'Kullanıcı' || user.permissions === 'Contributor')) {
+        if (roleId === 2 && (user.permissions === 'Kullanıcı' || user.permissions === 'Contributor')) {
           return true;
         }
         
         return false;
       });
     }
+  }
+
+  /**
+   * Seçilen rol değerinin etiketini döndürür
+   * Angular 19 PrimeNG dropdown görünürlük sorunu için çözüm
+   */
+  getSelectedRoleLabel(): string {
+    if (this.selectedRole) {
+      // roleFilterOptions içinde seçilen değerin etiketini bul
+      const option = this.roleFilterOptions.find(opt => opt.value === this.selectedRole.value);
+      return option ? option.label : this.selectedRole.label || '';
+    }
+    return 'Tümü';
+  }
+
+  // Rol dropdown'unu aç/kapat
+  toggleRoleDropdown() {
+    this.roleDropdownOpen = !this.roleDropdownOpen;
+    // Diğer açık dropdownları kapat
+    if (this.roleDropdownOpen) {
+      this.rowsDropdownOpen = false;
+      this.roleDialogDropdownOpen = false;
+    }
+  }
+
+  // Sayfa başına satır dropdown'unu aç/kapat
+  toggleRowsDropdown() {
+    this.rowsDropdownOpen = !this.rowsDropdownOpen;
+    // Diğer açık dropdownları kapat
+    if (this.rowsDropdownOpen) {
+      this.roleDropdownOpen = false;
+      this.roleDialogDropdownOpen = false;
+    }
+  }
+
+  // Dialog içindeki rol dropdown'unu aç/kapat
+  toggleRoleDialogDropdown() {
+    this.roleDialogDropdownOpen = !this.roleDialogDropdownOpen;
+    // Diğer açık dropdownları kapat
+    if (this.roleDialogDropdownOpen) {
+      this.roleDropdownOpen = false;
+      this.rowsDropdownOpen = false;
+    }
+  }
+
+  /**
+   * Rol seçimi yapar ve dropdown'ı kapatır
+   */
+  selectRole(role: any) {
+    this.selectedRole = role;
+    this.roleDropdownOpen = false;
+    // Rol değişikliğini uygula
+    if (role === null) {
+      this.selectedRole = null;
+    } else {
+      this.selectedRole = role;
+    }
+    
+    console.log('Rol seçildi:', this.selectedRole);
+    this.currentPage = 1; // İlk sayfaya dön
+    this.applyFilters(); // Filtreleri uygula
+  }
+
+  // Sayfa başına satır seç ve dropdown'u kapat
+  selectRowsPerPage(rows: number) {
+    this.rowsPerPage = rows;
+    this.rowsDropdownOpen = false;
+    // Satır sayısı değişikliğini uygula
+    this.changeRowsPerPage({ value: rows });
+  }
+
+  // Dialog içinde rol seç
+  selectRoleInDialog(role: any) {
+    this.userForm.patchValue({
+      roleId: role.value
+    });
+    this.roleDialogDropdownOpen = false;
+  }
+
+  // Dialog içinde seçilen rolü göster
+  getSelectedRoleInDialog(): string {
+    const roleId = this.userForm?.get('roleId')?.value;
+    if (roleId) {
+      const selectedRole = this.roles.find(r => r.value === roleId);
+      return selectedRole ? selectedRole.label : '';
+    }
+    return 'Rol seçin';
+  }
+
+  // Dropdown dışına tıklandığında dropdownları kapat
+  @HostListener('document:click', ['$event'])
+  onDocumentClick(event: MouseEvent) {
+    // Eğer tıklanan element dropdown içinde değilse dropdown'u kapat
+    const target = event.target as HTMLElement;
+    
+    // Rol dropdown'u için kontrol
+    if (this.roleDropdownOpen && !target.closest('.custom-dropdown')) {
+      this.roleDropdownOpen = false;
+    }
+    
+    // Sayfa başına satır dropdown'u için kontrol
+    if (this.rowsDropdownOpen && !target.closest('.rows-dropdown')) {
+      this.rowsDropdownOpen = false;
+    }
+    
+    // Dialog rol dropdown'u için kontrol
+    if (this.roleDialogDropdownOpen && !target.closest('.dialog-dropdown')) {
+      this.roleDialogDropdownOpen = false;
+    }
+  }
+
+  // Tümü seçeneği var mı kontrolü
+  get hasTumuOption(): boolean {
+    return this.roleFilterOptions.some(role => role.label === 'Tümü' || role.value === null);
+  }
+
+  /**
+   * Satır sayısı seçiminin değişimini işler
+   */
+  onRowsPerPageChange(event: Event): void {
+    const selectElement = event.target as HTMLSelectElement;
+    const value = Number(selectElement.value);
+    this.rowsPerPage = value;
+    this.currentPage = 1; // Sayfa değiştiğinde ilk sayfaya dön
+    this.applyFilters(); // Filtreleri uygula, pagination'ı da güncelleyecek
+  }
+
+  /**
+   * Rol filtresi seçiminin değişimini işler
+   */
+  onRoleFilterChange(event: Event): void {
+    const selectElement = event.target as HTMLSelectElement;
+    const value = selectElement.value;
+    
+    if (value === "") {
+      // "Tümü" seçildi, filtre olmayacak
+      this.selectedRole = null;
+    } else {
+      // Seçilen değere göre roleFilterOptions'dan rolü bul
+      const numericValue = Number(value);
+      const selectedRole = this.roleFilterOptions.find(role => role.value === numericValue);
+      if (selectedRole) {
+        this.selectedRole = selectedRole;
+      }
+    }
+    
+    console.log('Seçilen rol:', this.selectedRole);
+    this.currentPage = 1; // İlk sayfaya dön
+    this.applyFilters(); // Filtreleri uygula
   }
 }

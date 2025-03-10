@@ -10,22 +10,30 @@
 
   <div class="card main-card">
     <div class="card-header">
-      <div class="card-header-content">
+      <div class="card-header-content" style="display: flex !important; align-items: center !important; gap: 1.25rem !important;">
         <div class="search-container">
-          <span class="p-input-icon-left">
-            <i class="pi pi-search"></i>
-            <input type="text" pInputText placeholder="Kullanıcı ara..." [(ngModel)]="searchText" (input)="applyFilters()">
+          <span class="p-input-icon-left" style="height: 36px !important; display: flex !important; align-items: center !important;">
+            <i class="pi pi-search" style="left: 0.75rem !important; color: #666 !important;"></i>
+            <input type="text" pInputText placeholder="Kullanıcı ara..." [(ngModel)]="searchText" (input)="applyFilters()" 
+                   style="height: 36px !important; padding: 0.5rem 0.75rem 0.5rem 2.25rem !important; border: 1px solid #ced4da !important; border-radius: 4px !important; font-size: 0.9rem !important; width: 100% !important; min-width: 200px !important; box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05) !important;">
           </span>
         </div>
         
-        <div class="filter-dropdown" *ngIf="roleFilterOptions.length > 0">
-          <p-dropdown [options]="roleFilterOptions" [(ngModel)]="selectedRole" 
-            (onChange)="applyRoleFilter($event)" placeholder="Rol filtrele" 
-            styleClass="p-dropdown-sm" [showClear]="true">
-          </p-dropdown>
+        <!-- Rol Filtresi -->
+        <div class="filter-dropdown-container" *ngIf="roleFilterOptions.length > 0" style="margin-right: 12px !important; display: flex !important; align-items: center !important;">
+          <select class="basic-select role-select" (change)="onRoleFilterChange($event)" 
+                  style="height: 36px !important; padding: 0.5rem 0.75rem !important; border: 1px solid #ced4da !important; border-radius: 4px !important; min-width: 150px !important; font-weight: 500 !important; box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05) !important; background-color: white !important; color: #333 !important; appearance: none !important; background-image: url('data:image/svg+xml;utf8,<svg xmlns=&quot;http://www.w3.org/2000/svg&quot; width=&quot;12&quot; height=&quot;12&quot; viewBox=&quot;0 0 24 24&quot; fill=&quot;none&quot; stroke=&quot;%23666&quot; stroke-width=&quot;2&quot; stroke-linecap=&quot;round&quot; stroke-linejoin=&quot;round&quot;><path d=&quot;M6 9l6 6 6-6&quot;/></svg>') !important; background-repeat: no-repeat !important; background-position: right 0.75rem center !important; padding-right: 2rem !important;">
+            <option *ngFor="let role of roleFilterOptions" 
+                    [value]="role.value === null ? '' : role.value" 
+                    [selected]="(role.value === null && !selectedRole) || (selectedRole && selectedRole.value === role.value)">
+              {{ role.label }}
+            </option>
+          </select>
         </div>
         
-        <button pButton pRipple icon="pi pi-plus" label="Yeni Kullanıcı" class="p-button-primary create-button" (click)="openNewUserDialog()"></button>
+        <button pButton pRipple icon="pi pi-plus" label="Yeni Kullanıcı" class="p-button-primary create-button" 
+                (click)="openNewUserDialog()" 
+                style="height: 36px !important; display: flex !important; align-items: center !important; justify-content: center !important; padding: 0 1.25rem !important;"></button>
       </div>
     </div>
   
@@ -73,7 +81,7 @@
             <button pButton pRipple icon="pi pi-trash" class="p-button-rounded p-button-text p-button-danger" 
               (click)="deleteUser(user)" pTooltip="Sil"></button>
             <button pButton pRipple icon="pi pi-key" class="p-button-rounded p-button-text p-button-success permission-button" 
-              (click)="manageUserPermissions(user)" pTooltip="İzinleri Yönet">
+              (click)="manageUserPermissions(user)" pTooltip="İzinleri Yönet" tooltipPosition="top">
               <span class="permission-icon-text">İzinler</span>
             </button>
           </div>
@@ -136,56 +144,58 @@
       </div>
       <div class="rows-selector">
         <span class="mr-2">Göster:</span>
-        <p-dropdown [options]="[
-          {label: '5 satır', value: 5},
-          {label: '10 satır', value: 10},
-          {label: '20 satır', value: 20}
-        ]" [(ngModel)]="rowsPerPage" (onChange)="changeRowsPerPage($event)" styleClass="p-dropdown-sm"></p-dropdown>
+        <select class="basic-select" (change)="onRowsPerPageChange($event)" 
+                style="height: 36px !important; padding: 0.5rem 0.75rem !important; border: 1px solid #ced4da !important; border-radius: 4px !important; min-width: 80px !important; font-weight: 500 !important; box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05) !important; background-color: white !important; color: #333 !important; appearance: none !important; background-image: url('data:image/svg+xml;utf8,<svg xmlns=&quot;http://www.w3.org/2000/svg&quot; width=&quot;12&quot; height=&quot;12&quot; viewBox=&quot;0 0 24 24&quot; fill=&quot;none&quot; stroke=&quot;%23666&quot; stroke-width=&quot;2&quot; stroke-linecap=&quot;round&quot; stroke-linejoin=&quot;round&quot;><path d=&quot;M6 9l6 6 6-6&quot;/></svg>') !important; background-repeat: no-repeat !important; background-position: right 0.75rem center !important; padding-right: 2rem !important;">
+          <option [selected]="rowsPerPage === 5" value="5">5 satır</option>
+          <option [selected]="rowsPerPage === 10" value="10">10 satır</option>
+          <option [selected]="rowsPerPage === 20" value="20">20 satır</option>
+        </select>
       </div>
     </div>
   </div>
 </div>
 
 <!-- Kullanıcı Ekleme/Düzenleme Dialog -->
-<p-dialog [(visible)]="userDialog" [style]="{width: '450px'}" 
+<p-dialog [(visible)]="userDialog" [style]="{width: '500px'}" 
   [header]="editMode ? 'Kullanıcı Düzenle' : 'Yeni Kullanıcı'" 
   [modal]="true" styleClass="p-fluid modern-dialog" [draggable]="false" [resizable]="false"
   [closeOnEscape]="true" [dismissableMask]="true">
   <div class="dialog-content">
     <form [formGroup]="userForm" (ngSubmit)="saveUser()">
+      <!-- Ad Soyad Alanı -->
       <div class="field">
-        <div class="p-inputgroup">
-          <span class="p-inputgroup-addon">
-            <i class="pi pi-user"></i>
-          </span>
+        <label for="fullName" style="display: block; margin-bottom: 8px; color: #333333; font-weight: 500;">Ad Soyad</label>
+        <div class="input-with-icon">
+          <i class="pi pi-user input-icon"></i>
           <input type="text" id="fullName" pInputText formControlName="fullName" 
-            placeholder="Ad soyad girin">
+            placeholder="Ad Soyad" class="modern-input" style="height: 50px; width: 100%; border-radius: 8px; background-color: #ffffff; color: #333333; padding-left: 42px; font-size: 1rem; border: 1px solid #ced4da;">
         </div>
         <small *ngIf="submitted && f['fullName'].errors" class="p-error">
           Ad soyad gereklidir.
         </small>
       </div>
       
+      <!-- Sicil Numarası Alanı -->
       <div class="field">
-        <div class="p-inputgroup">
-          <span class="p-inputgroup-addon">
-            <i class="pi pi-id-card"></i>
-          </span>
+        <label for="sicil" style="display: block; margin-bottom: 8px; color: #333333; font-weight: 500;">Sicil Numarası</label>
+        <div class="input-with-icon">
+          <i class="pi pi-id-card input-icon"></i>
           <input type="text" id="sicil" pInputText formControlName="sicil" 
-            placeholder="Sicil numarası girin">
+            placeholder="Sicil Numarası" class="modern-input" style="height: 50px; width: 100%; border-radius: 8px; background-color: #ffffff; color: #333333; padding-left: 42px; font-size: 1rem; border: 1px solid #ced4da;">
         </div>
         <small *ngIf="submitted && f['sicil'].errors?.['required']" class="p-error">
           Sicil numarası gereklidir.
         </small>
       </div>
       
+      <!-- Şifre Alanı -->
       <div class="field">
-        <div class="p-inputgroup">
-          <span class="p-inputgroup-addon">
-            <i class="pi pi-lock"></i>
-          </span>
+        <label for="password" style="display: block; margin-bottom: 8px; color: #333333; font-weight: 500;">{{editMode ? 'Yeni Şifre (Opsiyonel)' : 'Şifre'}}</label>
+        <div class="input-with-icon">
+          <i class="pi pi-lock input-icon"></i>
           <input type="password" id="password" pInputText formControlName="password" 
-            placeholder="{{editMode ? 'Yeni şifre girin (opsiyonel)' : 'Şifre girin'}}">
+            placeholder="{{editMode ? 'Yeni Şifre (Opsiyonel)' : 'Şifre'}}" 
+            class="modern-input" style="height: 50px; width: 100%; border-radius: 8px; background-color: #ffffff !important; color: #333333 !important; padding-left: 42px; font-size: 1rem; border: 1px solid #ced4da;">
         </div>
         <small *ngIf="submitted && !editMode && f['password'].errors?.['required']" class="p-error">
           Şifre gereklidir.
@@ -193,18 +203,27 @@
         <small *ngIf="submitted && f['password'].errors?.['minlength']" class="p-error">
           Şifre en az 6 karakter olmalıdır.
         </small>
-        <small *ngIf="editMode" class="p-help">Şifre alanını boş bırakırsanız, kullanıcının mevcut şifresi değişmez.</small>
+        <small *ngIf="editMode" class="p-help">
+          <i class="pi pi-info-circle" style="margin-right: 4px;"></i>
+          Şifre alanını boş bırakırsanız, kullanıcının mevcut şifresi değişmez.
+        </small>
       </div>
       
+      <!-- Kullanıcı Rolü Alanı -->
       <div class="field">
-        <div class="p-inputgroup">
-          <span class="p-inputgroup-addon">
-            <i class="pi pi-users"></i>
-          </span>
-          <p-dropdown id="roleId" [options]="roles" formControlName="roleId" 
-            optionLabel="label" optionValue="value" placeholder="Rol seçin"
-            styleClass="user-role-dropdown" [showClear]="false" appendTo="body"></p-dropdown>
+        <label for="roleId" style="display: block; margin-bottom: 8px; color: #333333; font-weight: 500;">Kullanıcı Rolü</label>
+        <div class="input-with-icon">
+          <i class="pi pi-users input-icon"></i>
+          <select id="roleId" formControlName="roleId" 
+                  class="modern-input role-select"
+                  style="height: 50px; width: 100%; border-radius: 8px; background-color: #ffffff; padding-left: 42px; font-size: 1rem; border: 1px solid #ced4da; appearance: none; background-image: url('data:image/svg+xml;utf8,<svg xmlns=&quot;http://www.w3.org/2000/svg&quot; width=&quot;12&quot; height=&quot;12&quot; viewBox=&quot;0 0 24 24&quot; fill=&quot;none&quot; stroke=&quot;%23666&quot; stroke-width=&quot;2&quot; stroke-linecap=&quot;round&quot; stroke-linejoin=&quot;round&quot;><path d=&quot;M6 9l6 6 6-6&quot;/></svg>'); background-repeat: no-repeat; background-position: right 1rem center; padding-right: 2.5rem; color: #333333;">
+            <option value="" disabled>Kullanıcı Rolü Seçin</option>
+            <option *ngFor="let role of roles" [value]="role.value">{{role.label}}</option>
+          </select>
         </div>
+        <small *ngIf="submitted && f['roleId'].errors?.['required']" class="p-error">
+          Kullanıcı rolü seçilmelidir.
+        </small>
       </div>
     </form>
   </div>
@@ -220,8 +239,13 @@
   </ng-template>
 </p-dialog>
 
-<p-confirmDialog [style]="{width: '450px'}" styleClass="modern-confirm-dialog" 
-                rejectButtonStyleClass="p-button-outlined p-button-secondary" 
-                acceptButtonStyleClass="p-button-danger"></p-confirmDialog>
-                
+<!-- Özel Silme Onay Dialogu -->
+<app-delete-confirmation-dialog
+  [(visible)]="deleteDialogVisible"
+  [itemName]="userToDelete?.fullName"
+  [title]="userToDelete?.id === 'all' ? 'Toplu Silme' : 'Kullanıcı Silme'"
+  (confirm)="confirmDelete()"
+  (cancel)="cancelDelete()">
+</app-delete-confirmation-dialog>
+
 <p-toast position="top-right" styleClass="modern-toast"></p-toast>

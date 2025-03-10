@@ -3898,7 +3898,7 @@ Login sayfasında şifre alanının arkaplanı beyaz renkteydi, bu nedenle beyaz
 ```
 
 **Öğrenilen Dersler:**
-1. `!important` bayrağını CSS'de kullanmaktan mümkün olduğunca kaçınmalıyız çünkü tarayıcı davranışlarını kontrol etmeyi ve sorunları gidermeyi zorlaştırabilir.
+1. `!important` bayrağı CSS'de kullanmaktan mümkün olduğunca kaçınmalıyız çünkü tarayıcı davranışlarını kontrol etmeyi ve sorunları gidermeyi zorlaştırabilir.
 2. Tarayıcıların otomatik doldurma davranışlarının CSS üzerindeki etkilerini dikkate almalıyız.
 3. Özellikle kullanıcı girişi formları gibi kritik bileşenlerde, farklı tarayıcılarda ve farklı kullanım senaryolarında görsel tutarlılığı test etmeliyiz.
 4. CSS stil tanımlamalarında temiz ve minimum tanımlamaları tercih etmeliyiz.
@@ -4000,3 +4000,303 @@ Angular 19 geçişi sırasında, eski role management bileşenleri (`/frontend/s
 - Eski dosyaların temizlenmesi, bundle boyutunu azaltmaya ve geliştirme ortamını daha kolay yönetilebilir hale getirmeye yardımcı oldu
 - Rota tanımları ve bileşen referanslarını tam olarak kontrol etmek, herhangi bir kesinti olmadan temizleme yapmayı sağladı
 - Her bileşen temizliğinden sonra ayrıntılı bir test ve doğrulama süreci, sorunları erken tespit etmeye yardımcı oldu
+
+### Angular ve PrimeNG Geçişi Sonrası Yönlendirme Sorunları
+
+#### Kullanıcı Yönetimi Sayfasında İzinleri Yönet Butonu Yönlendirme Sorunu
+
+**Sorun:** Kullanıcı yönetimi sayfasındaki "izinleri yönet" ikonuna tıklandığında, kullanıcı dashboard'a yönlendiriliyordu.
+
+**Analiz:**
+1. Kullanıcı yönetimi sayfasındaki "izinleri yönet" ikonuna tıklandığında `manageUserPermissions(user)` metodu çağrılıyordu.
+2. Bu metot, kullanıcıyı `/users/${user.id}/page-permissions` yoluna yönlendiriyordu.
+3. Ancak bu yol, ana routing dosyasında (app.routes.ts) tanımlı değildi, sadece user-management.routes.ts dosyasında tanımlıydı.
+4. Ana routing dosyasında user-management modülü için tanımlanan yol 'user-management' olarak belirtilmişti.
+5. Bu nedenle, doğru yönlendirme yolu `/user-management/users/${user.id}/page-permissions` olmalıydı.
+
+**Çözüm:**
+`manageUserPermissions` metodunu düzelterek yönlendirme yolunu `/user-management/users/${user.id}/page-permissions` olarak değiştirdim:
+
+```typescript
+manageUserPermissions(user: any) {
+  this.router.navigate([`/user-management/users/${user.id}/page-permissions`]);
+}
+```
+
+Bu değişiklikle birlikte, kullanıcı yönetimi sayfasındaki "izinleri yönet" ikonuna tıklandığında artık dashboard'a değil, doğru şekilde kullanıcı izinleri sayfasına yönlendirilecektir.
+
+#### URL'de Tekrarlanan Yol Sorunu (user-management/user-management)
+
+**Sorun:** Kullanıcı yönetimi sayfasına erişildiğinde, URL'de iki kez "user-management" görünüyordu: `localhost:4200/user-management/user-management`.
+
+**Analiz:**
+1. Sorun, user-management.routes.ts dosyasındaki yönlendirme yapılandırmasından kaynaklanıyordu.
+2. Dosyada boş yol ('') için 'user-management' yoluna yönlendirme yapılıyordu:
+   ```typescript
+   {
+     path: '',
+     redirectTo: 'user-management',
+     pathMatch: 'full'
+   },
+   {
+     path: 'user-management',
+     loadComponent: () => import('./components/user-management.component').then(m => m.UserManagementComponent),
+     // ...
+   }
+   ```
+3. Ana routes dosyasında (app.routes.ts) 'user-management' yolu tanımlanmış ve bu yol user-management.routes.ts dosyasına yönlendiriliyordu.
+4. Bu durumda, kullanıcı '/user-management' yoluna gittiğinde, user-management.routes.ts dosyasındaki boş yol ('') eşleşiyor ve tekrar 'user-management' yoluna yönlendiriliyor, bu da URL'de iki kez 'user-management' görünmesine neden oluyordu.
+
+**Çözüm:**
+user-management.routes.ts dosyasını şu şekilde düzenledim:
+```typescript
+export const USER_MANAGEMENT_ROUTES: Routes = [
+  {
+    path: '',
+    loadComponent: () => import('./components/user-management.component').then(m => m.UserManagementComponent),
+    canActivate: [AuthGuard],
+    data: { 
+      requiresAdmin: true
+    }
+  },
+  {
+    path: 'user-management',
+    redirectTo: '',
+    pathMatch: 'full'
+  },
+  // Diğer rotalar...
+];
+```
+
+Bu değişiklikle:
+1. Boş yol ('') için doğrudan UserManagementComponent yükleniyor.
+2. 'user-management' yolu boş yola ('') yönlendiriliyor.
+3. Kullanıcı '/user-management' yoluna gittiğinde doğrudan UserManagementComponent yükleniyor ve URL'de tek bir 'user-management' görünüyor.
+4. Kullanıcı '/user-management/user-management' yoluna gittiğinde, '/user-management' yoluna yönlendiriliyor ve yine URL'de tek bir 'user-management' görünüyor.
+```
+
+#### Silme Onay Dialogunda Yazıların Görünmeme Sorunu
+
+**Sorun:** Kullanıcı yönetimi sayfasında silme ikonuna tıklandığında açılan onay dialogunda, "Silme Onayı" başlığı ve "Test8 adlı kullanıcıyı silmek istediğinizden emin misiniz?" gibi yazılar var olmasına rağmen görünmüyordu.
+
+**Analiz:**
+1. Sorun, PrimeNG'nin ConfirmDialog bileşeni için stil tanımlamalarının eksik olmasından kaynaklanıyordu.
+2. HTML dosyasında ConfirmDialog bileşeni şu şekilde tanımlanmıştı:
+   ```html
+   <p-confirmDialog [style]="{width: '450px'}" styleClass="modern-confirm-dialog" 
+                   rejectButtonStyleClass="p-button-outlined p-button-secondary" 
+                   acceptButtonStyleClass="p-button-danger"></p-confirmDialog>
+   ```
+3. Ancak, 'modern-confirm-dialog' sınıfı için özel bir stil tanımlaması yoktu.
+4. Angular ve PrimeNG geçişi sırasında tema yapısı değişmiş olabilir ve mevcut stiller yeni tema yapısıyla uyumlu olmayabilirdi.
+
+**Çözüm:**
+user-management.component.scss dosyasına 'modern-confirm-dialog' sınıfı için özel bir stil tanımlaması ekledim:
+
+```scss
+// Modern confirm dialog stilleri
+.modern-confirm-dialog {
+  .p-dialog-header {
+    background-color: #ffffff;
+    color: #333333;
+    border-bottom: 1px solid #f0f0f0;
+    padding: 1.5rem 2rem 1rem;
+    
+    .p-dialog-title {
+      font-size: 1.25rem;
+      font-weight: 600;
+    }
+  }
+  
+  .p-dialog-content {
+    background-color: #ffffff;
+    color: #333333;
+    padding: 2rem;
+    
+    .p-confirm-dialog-icon {
+      font-size: 2rem;
+      color: #f59e0b; // Yellow 500
+      margin-right: 1rem;
+    }
+    
+    .p-confirm-dialog-message {
+      color: #333333;
+      font-size: 1.1rem;
+      line-height: 1.5;
+    }
+  }
+  
+  .p-dialog-footer {
+    background-color: #ffffff;
+    border-top: 1px solid #f0f0f0;
+    padding: 1.5rem 2rem;
+    
+    .p-button {
+      margin-left: 0.5rem;
+    }
+  }
+}
+```
+
+Bu stil tanımlaması, dialog içindeki tüm öğelerin görünür olmasını sağladı. Özellikle, metin rengi (#333333) ve arka plan rengi (#ffffff) açıkça belirtilerek, yazıların görünür hale gelmesi sağlandı.
+
+Detaylı bilgi için: [knowledge-base/primeng_confirm_dialog_visibility_fix.md](knowledge-base/primeng_confirm_dialog_visibility_fix.md)
+
+**Sorun:** PrimeNG ConfirmDialog bileşeninde yazılar görünmüyordu.
+
+**Analiz:**
+1. Sorun, PrimeNG'nin ConfirmDialog bileşeninin stil tanımlamalarında eksikliklerden kaynaklanıyordu.
+2. Angular 19 ve PrimeNG geçişi sonrasında, bileşenlerin varsayılan davranışları değişmiş olabilir ve bu da görünürlük sorunlarına neden olmuş olabilir.
+3. Metin rengi arka plan rengiyle aynı veya çok benzer olduğu için yazılar görünmüyordu.
+4. Hem User-management hem de Role-management bileşenlerinde aynı sorun vardı.
+
+**Çözüm:**
+1. Global stil tanımlamaları yaparak sorunu çözdüm:
+   - styles.scss dosyasına, ConfirmDialog bileşeni için özel stil tanımlamaları ekledim.
+   - Bu stil tanımlamalarında, metin görünürlüğü için gerekli tüm özellikleri (color, visibility, opacity, display) belirttim.
+   - Stil tanımlamalarında, PrimeNG'nin ConfirmDialog bileşeninin DOM yapısına uygun seçiciler kullandım.
+   - Hem modern-confirm-dialog hem de custom-confirm-dialog sınıfları için özel stil tanımlamaları ekledim.
+
+2. ConfirmDialog bileşenlerini güncelledim:
+   - HTML şablonlarında, ConfirmDialog bileşenlerine özel şablonlar (ng-template) ekledim.
+   - Bu şablonlarda, başlık ve butonlar için özel stil tanımlamaları yaptım.
+   - Bileşenlere, dismissableMask, closable ve closeOnEscape gibi özellikler ekledim.
+
+3. deleteUser ve deleteRole metotlarını güncelledim:
+   - Onay mesajlarını HTML formatında ve özel stil tanımlamalarıyla birlikte oluşturdum.
+   - Bu sayede, mesajların görünürlüğünü artırdım.
+
+Bu değişiklikler, ConfirmDialog bileşenlerindeki yazıların görünür olmasını sağladı.
+
+### Hata: PrimeNG ConfirmDialog Buton Olayları Hatası
+
+**Hata Mesajı:** ConfirmDialog bileşeninde butonların onClick olayları çalışmıyordu.
+
+**Nedeni:** 
+1. `confirmationService.reject()` ve `confirmationService.accept()` metotları doğrudan erişilebilir değildi.
+2. Component'lerde `confirmationService` private olarak tanımlanmıştı.
+
+**Çözüm:**
+1. Her iki component'e (RoleManagement ve UserManagement) `accept()` ve `reject()` yardımcı metotları eklendi:
+```typescript
+accept() {
+  this.confirmationService.confirm({
+    accept: () => {
+      // Boş metot - onay diyaloğu kendi accept callback'ini kullanacak
+    }
+  });
+}
+
+reject() {
+  this.confirmationService.confirm({
+    reject: () => {
+      // Boş metot - onay diyaloğu kendi reject callback'ini kullanacak
+    }
+  });
+}
+```
+
+2. ConfirmDialog butonlarının onClick olayları güncellendi:
+```html
+<button (click)="reject()">Hayır</button>
+<button (click)="accept()">Evet</button>
+```
+
+**Öğrenilen Dersler:**
+- PrimeNG'nin ConfirmDialog bileşeni için özel yardımcı metotlar gerekebilir
+- Component'lerde kullanılan servislerin erişim düzeylerini (private/public) doğru ayarlamak önemli
+- Onay diyaloglarında buton olaylarını component seviyesinde yönetmek daha güvenli
+
+## HTML Sanitization ve Dialog Sorunları
+
+### Hata: Silme Onay Dialogunda Butonların Çalışmaması
+
+**Hata Mesajı:**
+```
+WARNING: sanitizing HTML stripped some content, see https://g.co/ng/security#xss
+```
+
+**Hata Detayı:**
+Kullanıcı yönetimi ve rol yönetimi sayfalarında, silme işlemi için kullanılan PrimeNG ConfirmDialog bileşeninde "Evet" ve "Hayır" butonları görünmüyor veya çalışmıyordu. Ayrıca, silme onay mesajı arka planda görünüyor ancak dialog içinde düzgün görüntülenmiyordu.
+
+**Nedeni:**
+Angular'ın güvenlik mekanizması, potansiyel XSS saldırılarını önlemek için HTML içeriğini sanitize ediyor. PrimeNG'nin ConfirmDialog bileşeni, mesaj içeriğini HTML olarak işlediği için Angular tarafından sanitize ediliyordu. Bu da butonların ve mesajın düzgün görüntülenmemesine neden oluyordu.
+
+**Çözüm:**
+1. Özel bir DeleteConfirmationDialog bileşeni oluşturuldu:
+```typescript
+@Component({
+  selector: 'app-delete-confirmation-dialog',
+  standalone: true,
+  imports: [CommonModule, DialogModule, ButtonModule],
+  templateUrl: './delete-confirmation-dialog.component.html',
+  styleUrls: ['./delete-confirmation-dialog.component.scss']
+})
+export class DeleteConfirmationDialogComponent {
+  @Input() visible: boolean = false;
+  @Input() itemName: string = '';
+  @Input() title: string = 'Silme Onayı';
+  
+  @Output() visibleChange = new EventEmitter<boolean>();
+  @Output() confirm = new EventEmitter<void>();
+  @Output() cancel = new EventEmitter<void>();
+
+  onHide() {
+    this.visible = false;
+    this.visibleChange.emit(false);
+  }
+
+  onConfirm() {
+    this.confirm.emit();
+    this.onHide();
+  }
+
+  onCancel() {
+    this.cancel.emit();
+    this.onHide();
+  }
+}
+```
+
+2. Kullanıcı yönetimi ve rol yönetimi bileşenlerinde, PrimeNG'nin ConfirmDialog bileşeni yerine özel DeleteConfirmationDialog bileşeni kullanıldı:
+```html
+<app-delete-confirmation-dialog
+  [(visible)]="deleteDialogVisible"
+  [itemName]="roleToDelete?.name || ''"
+  [title]="'Rol Silme'"
+  (confirm)="confirmDelete()"
+  (cancel)="cancelDelete()">
+</app-delete-confirmation-dialog>
+```
+
+3. Silme işlemi için gerekli değişkenler ve metodlar eklendi:
+```typescript
+// Silme dialogu için değişkenler
+deleteDialogVisible: boolean = false;
+roleToDelete: Role | null = null;
+
+// Silme işlemi için metodlar
+deleteRole(role: Role) {
+  this.roleToDelete = role;
+  this.deleteDialogVisible = true;
+}
+
+confirmDelete() {
+  if (!this.roleToDelete) return;
+  
+  // Silme işlemi kodu...
+}
+
+cancelDelete() {
+  this.roleToDelete = null;
+}
+```
+
+**Öğrenilen Ders:**
+1. Angular'ın güvenlik mekanizması, HTML içeriğini sanitize ederek XSS saldırılarını önler.
+2. PrimeNG'nin ConfirmDialog bileşeni gibi HTML içeriğini işleyen bileşenler, Angular'ın sanitization mekanizması ile uyumsuzluk yaşayabilir.
+3. Bu tür durumlarda, özel bileşenler oluşturarak sorunu çözmek daha güvenli ve esnektir.
+4. Özel bileşenler, Angular'ın güvenlik mekanizması ile uyumlu çalışacak şekilde tasarlanmalıdır.
+5. İçerik sanitization uyarıları görmezden gelinmemeli, güvenlik açıklarına neden olabilecek potansiyel sorunlar olarak değerlendirilmelidir.
+
+**Not:** Bu çözüm, hem kullanıcı yönetimi hem de rol yönetimi sayfalarında uygulanmıştır. Benzer silme onay dialogu gerektiren diğer sayfalarda da aynı yaklaşım kullanılabilir.

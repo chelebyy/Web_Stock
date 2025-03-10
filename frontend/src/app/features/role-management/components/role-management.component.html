@@ -32,7 +32,7 @@
         </tr>
       </ng-template>
       <ng-template pTemplate="body" let-role>
-        <tr class="role-row">
+        <tr class="role-row" style="cursor: default;">
           <td><span class="id-badge">{{role.id}}</span></td>
           <td><span class="role-name">{{role.name}}</span></td>
           <td><div class="role-description">{{role.description}}</div></td>
@@ -41,9 +41,9 @@
               <button pButton pRipple icon="pi pi-pencil" class="p-button-rounded p-button-text p-button-info" 
                       (click)="openDialog(role)" pTooltip="Düzenle"></button>
               <button pButton pRipple icon="pi pi-trash" class="p-button-rounded p-button-text p-button-danger" 
-                      (click)="deleteRole(role)" pTooltip="Sil"></button>
+                      (click)="deleteRole(role); $event.stopPropagation()" pTooltip="Sil"></button>
               <button pButton pRipple icon="pi pi-key" class="p-button-rounded p-button-text p-button-success" 
-                      (click)="managePermissions(role)" pTooltip="İzinleri Yönet"></button>
+                      (click)="managePermissions(role); $event.stopPropagation()" pTooltip="İzinleri Yönet"></button>
             </div>
           </td>
         </tr>
@@ -122,55 +122,49 @@
 </div>
 
 <!-- Rol Dialog -->
-@defer (on interaction) {
-  <p-dialog [visible]="roleDialog()" (visibleChange)="roleDialog.set($event)" [style]="{width: '450px'}" [header]="editMode() ? 'Rolü Düzenle' : 'Yeni Rol Ekle'" 
-            [modal]="true" [draggable]="false" [resizable]="false" styleClass="role-dialog modern-dialog" 
-            [closeOnEscape]="true" [dismissableMask]="true">
-    <div class="dialog-content">
-      <form [formGroup]="roleForm" class="role-form">
-        <div class="field">
-          <label for="name" class="form-label">Rol Adı</label>
-          <input type="text" pInputText id="name" formControlName="name" autocomplete="off" />
-          @if (roleForm.get('name')?.errors?.['required'] && roleForm.get('name')?.touched) {
-            <small class="p-error">Rol adı gereklidir.</small>
-          }
-        </div>
-        
-        <div class="field">
-          <label for="description" class="form-label">Açıklama</label>
-          <textarea pInputTextarea id="description" formControlName="description" rows="3" autoResize="true"></textarea>
-          @if (roleForm.get('description')?.errors?.['required'] && roleForm.get('description')?.touched) {
-            <small class="p-error">Açıklama gereklidir.</small>
-          }
-        </div>
-      </form>
-    </div>
-
-    <ng-template pTemplate="footer">
-      <div class="dialog-footer">
-        <button pButton pRipple type="button" label="İptal" icon="pi pi-times" 
-                class="p-button-outlined p-button-secondary cancel-button" (click)="hideDialog()"></button>
-        <button pButton pRipple type="button" [label]="editMode() ? 'Güncelle' : 'Kaydet'" icon="pi pi-check" 
-                class="p-button-primary save-button" (click)="saveRole()" 
-                [disabled]="roleForm.invalid || roleForm.pristine"></button>
+<p-dialog [visible]="roleDialog()" (visibleChange)="roleDialog.set($event)" [style]="{width: '500px'}" [header]="editMode() ? 'Rolü Düzenle' : 'Yeni Rol Ekle'" 
+          [modal]="true" [draggable]="false" [resizable]="false" styleClass="role-dialog modern-dialog custom-light-dialog" 
+          [closeOnEscape]="true" [dismissableMask]="true">
+  <div class="dialog-content">
+    <form [formGroup]="roleForm" class="role-form">
+      <div class="field">
+        <label for="name" class="form-label">Rol Adı</label>
+        <input type="text" pInputText id="name" formControlName="name" autocomplete="off" 
+               class="w-full custom-input" style="background-color: #ffffff !important; color: #1e293b !important;" />
+        @if (roleForm.get('name')?.errors?.['required'] && roleForm.get('name')?.touched) {
+          <small class="p-error">Rol adı gereklidir.</small>
+        }
       </div>
-    </ng-template>
-  </p-dialog>
-} @loading {
-  <!-- Dialog yüklenirken gösterilecek içerik -->
-  <div class="dialog-loading"></div>
-} @placeholder {
-  <!-- Dialog için placeholder -->
-  <div class="dialog-placeholder"></div>
-}
+      
+      <div class="field">
+        <label for="description" class="form-label">Açıklama</label>
+        <textarea pTextarea id="description" formControlName="description" rows="3" 
+                  class="w-full custom-textarea" style="background-color: #ffffff !important; color: #1e293b !important;"></textarea>
+        @if (roleForm.get('description')?.errors?.['required'] && roleForm.get('description')?.touched) {
+          <small class="p-error">Açıklama gereklidir.</small>
+        }
+      </div>
+    </form>
+  </div>
 
-<!-- Onay Diyaloğu ve Toast -->
-@defer {
-  <p-confirmDialog [style]="{width: '450px'}" styleClass="modern-confirm-dialog" 
-                rejectButtonStyleClass="p-button-outlined p-button-secondary" 
-                acceptButtonStyleClass="p-button-danger"></p-confirmDialog>
-}
+  <ng-template pTemplate="footer">
+    <div class="dialog-footer">
+      <button pButton pRipple type="button" label="İptal" icon="pi pi-times" 
+              class="p-button-outlined p-button-secondary cancel-button" (click)="hideDialog()"></button>
+      <button pButton pRipple type="button" [label]="editMode() ? 'Güncelle' : 'Kaydet'" icon="pi pi-check" 
+              class="p-button-primary save-button" (click)="saveRole()" 
+              [disabled]="roleForm.invalid || roleForm.pristine"></button>
+    </div>
+  </ng-template>
+</p-dialog>
 
-@defer {              
-  <p-toast position="top-right" styleClass="modern-toast"></p-toast> 
-} 
+<!-- Özel Silme Onay Dialogu -->
+<app-delete-confirmation-dialog
+  [(visible)]="deleteDialogVisible"
+  [itemName]="roleToDelete?.name || ''"
+  [title]="'Rol Silme'"
+  (confirm)="confirmDelete()"
+  (cancel)="cancelDelete()">
+</app-delete-confirmation-dialog>
+
+<p-toast position="top-right" styleClass="modern-toast"></p-toast> 

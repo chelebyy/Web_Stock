@@ -10,7 +10,7 @@ import { TableModule } from 'primeng/table';
 import { ToastModule } from 'primeng/toast';
 import { ToolbarModule } from 'primeng/toolbar';
 import { DropdownModule } from 'primeng/dropdown';
-import { InputTextarea } from 'primeng/inputtextarea';
+import { Textarea } from 'primeng/inputtextarea';
 import { TooltipModule } from 'primeng/tooltip';
 import { CardModule } from 'primeng/card';
 import { RippleModule } from 'primeng/ripple';
@@ -18,6 +18,7 @@ import { RoleService } from '../services/role.service';
 import { Role, RoleWithUsers } from '../../../shared/models/role.model';
 import { Router, RouterModule } from '@angular/router';
 import { signal, computed } from '@angular/core';
+import { DeleteConfirmationDialogComponent } from '../../../features/shared/components/delete-confirmation-dialog/delete-confirmation-dialog.component';
 
 @Component({
     selector: 'app-role-management',
@@ -33,13 +34,15 @@ import { signal, computed } from '@angular/core';
         ConfirmDialogModule,
         DialogModule,
         InputTextModule,
+        Textarea,
         TableModule,
         ToastModule,
         ToolbarModule,
         DropdownModule,
         TooltipModule,
         CardModule,
-        RippleModule
+        RippleModule,
+        DeleteConfirmationDialogComponent
     ],
     providers: [ConfirmationService, MessageService]
 })
@@ -51,6 +54,11 @@ export class RoleManagementComponent implements OnInit {
   searchText = signal<string>('');
   roleDialog = signal<boolean>(false);
   editMode = signal<boolean>(false);
+  selectedRole: Role | null = null;
+  
+  // Silme dialogu için yeni değişkenler
+  deleteDialogVisible: boolean = false;
+  roleToDelete: Role | null = null;
   
   // Hesaplanmış değerler
   filteredRoles = computed(() => {
@@ -67,7 +75,7 @@ export class RoleManagementComponent implements OnInit {
   
   constructor(
     private messageService: MessageService,
-    private confirmationService: ConfirmationService,
+    public confirmationService: ConfirmationService,
     private fb: FormBuilder,
     private router: Router
   ) {
@@ -85,6 +93,7 @@ export class RoleManagementComponent implements OnInit {
 
   openDialog(role?: Role) {
     this.editMode.set(!!role);
+    
     if (role) {
       this.roleForm.patchValue({
         id: role.id,
@@ -98,6 +107,8 @@ export class RoleManagementComponent implements OnInit {
         description: ''
       });
     }
+    
+    // Dialog görünürlüğünü açıkça true olarak ayarla
     this.roleDialog.set(true);
   }
 
@@ -167,35 +178,41 @@ export class RoleManagementComponent implements OnInit {
   }
 
   deleteRole(role: Role) {
-    this.confirmationService.confirm({
-      message: 'Bu rolü silmek istediğinizden emin misiniz?',
-      header: 'Onay',
-      icon: 'pi pi-exclamation-triangle',
-      accept: () => {
-        this.roleService.deleteRole(role.id).subscribe({
-          next: () => {
-            this.messageService.add({
-              severity: 'success',
-              summary: 'Başarılı',
-              detail: 'Rol silindi'
-            });
-            this.roleService.loadRoles();
-          },
-          error: (error) => {
-            console.error('Error deleting role:', error);
-            this.messageService.add({
-              severity: 'error',
-              summary: 'Hata',
-              detail: 'Rol silinirken bir hata oluştu'
-            });
-          }
+    this.roleToDelete = role;
+    this.deleteDialogVisible = true;
+  }
+  
+  confirmDelete() {
+    if (!this.roleToDelete) return;
+    
+    this.roleService.deleteRole(this.roleToDelete.id).subscribe({
+      next: () => {
+        this.messageService.add({
+          severity: 'success',
+          summary: 'Başarılı',
+          detail: 'Rol silindi'
         });
+        this.roleService.loadRoles();
+        this.roleToDelete = null;
+      },
+      error: (error) => {
+        console.error('Error deleting role:', error);
+        this.messageService.add({
+          severity: 'error',
+          summary: 'Hata',
+          detail: 'Rol silinirken bir hata oluştu'
+        });
+        this.roleToDelete = null;
       }
     });
   }
   
+  cancelDelete() {
+    this.roleToDelete = null;
+  }
+  
   managePermissions(role: Role) {
-    this.router.navigate([`/roles/${role.id}/permissions`]);
+    this.router.navigate([`/role-management/detail/${role.id}`]);
   }
 
   filterRoles(searchText: string): void {
@@ -206,6 +223,6 @@ export class RoleManagementComponent implements OnInit {
    * Önceki sayfaya veya dashboard'a geri döner
    */
   goBack(): void {
-    this.router.navigate(['/admin-dashboard']);
+    this.router.navigate(['/dashboard/admin-dashboard']);
   }
 } 
