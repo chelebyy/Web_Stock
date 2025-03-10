@@ -4300,3 +4300,46 @@ cancelDelete() {
 5. İçerik sanitization uyarıları görmezden gelinmemeli, güvenlik açıklarına neden olabilecek potansiyel sorunlar olarak değerlendirilmelidir.
 
 **Not:** Bu çözüm, hem kullanıcı yönetimi hem de rol yönetimi sayfalarında uygulanmıştır. Benzer silme onay dialogu gerektiren diğer sayfalarda da aynı yaklaşım kullanılabilir.
+
+## Checkbox İşlevselliği Sorunu
+
+### Hata
+Kullanıcı yönetimi sayfasında bulunan checkbox'lar işaretlenmiyordu ve herhangi bir işlevselliği yoktu.
+
+### Nedeni
+PrimeNG checkbox bileşenleri `[(ngModel)]` veya `formControlName` gibi bir veri bağlantısı olmadan kullanılmıştı. Ayrıca, checkbox'ların durumunu saklamak için gerekli değişkenler ve tıklama olayları için gerekli metodlar tanımlanmamıştı.
+
+### Çözüm
+1. TypeScript dosyasında checkbox durumlarını saklamak için değişkenler eklendi:
+   ```typescript
+   selectAllChecked: boolean = false;
+   selectedUsers: { [key: string]: boolean } = {};
+   ```
+
+2. Checkbox'ları yönetmek için gerekli metodlar eklendi:
+   ```typescript
+   toggleSelectAll() { ... }
+   toggleUserSelection(userId: string) { ... }
+   checkIfAllSelected() { ... }
+   isUserSelected(userId: string): boolean { ... }
+   getSelectedUserCount(): number { ... }
+   clearSelectedUsers() { ... }
+   ```
+
+3. HTML dosyasında checkbox'lara veri bağlantıları ve olay işleyicileri eklendi:
+   ```html
+   <p-checkbox [binary]="true" [(ngModel)]="selectAllChecked" (onChange)="toggleSelectAll()"></p-checkbox>
+   <p-checkbox [binary]="true" [(ngModel)]="selectedUsers[user.id]" (onChange)="toggleUserSelection(user.id)"></p-checkbox>
+   ```
+
+4. Angular 19'da kullanımdan kaldırılan `toPromise()` metodu yerine `firstValueFrom` kullanıldı:
+   ```typescript
+   import { firstValueFrom } from 'rxjs';
+   
+   firstValueFrom(this.userService.deleteUser(userId))
+   ```
+
+### Öğrenilen Dersler
+- PrimeNG bileşenlerini kullanırken, veri bağlantısı için `[(ngModel)]` veya `formControlName` kullanılmalıdır.
+- Etkileşimli bileşenler için, durumu saklamak ve olayları işlemek için gerekli değişkenler ve metodlar tanımlanmalıdır.
+- Angular 19'da kullanımdan kaldırılan metodlar yerine, modern alternatifler kullanılmalıdır.

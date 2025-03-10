@@ -21,6 +21,7 @@ import { Router } from '@angular/router';
 import { AuthService } from '../../../core/authentication/auth.service';
 import { HostListener } from '@angular/core';
 import { DeleteConfirmationDialogComponent } from '../../../features/shared/components/delete-confirmation-dialog/delete-confirmation-dialog.component';
+import { firstValueFrom } from 'rxjs';
 
 @Component({
     selector: 'app-user-management',
@@ -360,6 +361,10 @@ export class UserManagementComponent implements OnInit, AfterViewInit {
   searchText: string = ''; // Arama metni
   selectedRole: any = null; // Seçili rol
   
+  // Checkbox durumları için değişkenler
+  selectAllChecked: boolean = false;
+  selectedUsers: { [key: string]: boolean } = {};
+  
   // Filtre seçenekleri
   joinedFilterOptions: any[] = [
     { label: 'Herhangi', value: null },
@@ -522,58 +527,38 @@ export class UserManagementComponent implements OnInit, AfterViewInit {
       next: (data) => {
         console.log('Kullanıcı verileri alındı:', data);
         
-        this.users = data.map(user => {
-          // Kullanıcı verilerini dönüştür
-          return {
+        if (data && Array.isArray(data)) {
+          this.users = data.map(user => ({
             id: user.id,
-            fullName: user.username, // Kullanıcı adını fullName alanına at
-            sicil: user.sicil || `N/A-${user.id}`,
-            permissions: user.isAdmin ? 'Admin' : (user.roleName || 'Kullanıcı'),
-            roleId: user.roleId || (user.isAdmin ? 1 : 2),
-            isAdmin: user.isAdmin,
-            isActive: true,
-            createdAt: user.createdAt || new Date()
-          };
-        });
-        
-        console.log('Kullanıcı verileri işlendi:', this.users);
-        this.filteredUsers = [...this.users];
-        this.updatePagination();
+            fullName: user.fullName || `${user.username}`,
+            username: user.username,
+            sicil: user.sicil,
+            roleId: user.roleId,
+            roleName: this.getRoleName(user.roleId),
+            permissions: this.getUserPermissionLabel(user.isAdmin, user.roleId),
+            isAdmin: user.isAdmin
+          }));
+          
+          // Kullanıcılar yüklendiğinde selectedUsers nesnesini sıfırla
+          this.clearSelectedUsers();
+          
+          console.log('Kullanıcı verileri işlendi:', this.users);
+          this.applyFilters();
+        } else {
+          console.error('Geçersiz kullanıcı verisi:', data);
+          this.users = [];
+          this.filteredUsers = [];
+        }
       },
       error: (error) => {
-        console.error('Kullanıcı verileri yüklenirken hata oluştu:', error);
+        console.error('Kullanıcı verileri alınırken hata oluştu:', error);
         this.messageService.add({
           severity: 'error',
           summary: 'Hata',
-          detail: 'Kullanıcı verileri yüklenemedi.'
+          detail: 'Kullanıcı verileri alınırken bir hata oluştu'
         });
-        
-        // Hata durumunda test verilerini kullan
-        this.users = [
-          { 
-            id: 1, 
-            fullName: 'Admin Kullanıcı', 
-            sicil: 'A001',
-            permissions: 'Admin', 
-            isAdmin: true, 
-            roleId: 1, 
-            isActive: true,
-            createdAt: new Date()
-          },
-          { 
-            id: 2, 
-            fullName: 'Test Kullanıcı 1', 
-            sicil: 'U001',
-            permissions: 'Kullanıcı', 
-            isAdmin: false, 
-            roleId: 2, 
-            isActive: true,
-            createdAt: new Date()
-          }
-        ];
-        
-        this.filteredUsers = [...this.users];
-        this.updatePagination();
+        this.users = [];
+        this.filteredUsers = [];
       }
     });
   }
@@ -623,91 +608,78 @@ export class UserManagementComponent implements OnInit, AfterViewInit {
   confirmDelete() {
     if (!this.userToDelete) return;
     
-    // Tüm kullanıcıları silme durumu
     if (this.userToDelete.id === 'all') {
-      // Tüm kullanıcılar için silme istekleri gönder
-      const deletePromises = this.users.map(user => {
-        return new Promise<void>((resolve, reject) => {
-          this.userService.deleteUser(user.id).subscribe({
-            next: () => resolve(),
-            error: (err) => {
-              console.error(`Kullanıcı silme hatası (ID: ${user.id}):`, err);
-              reject(err);
-            }
-          });
+      // Seçili kullanıcıları sil
+      const selectedUserIds = Object.keys(this.selectedUsers)
+        .filter(id => this.selectedUsers[id])
+        .map(id => parseInt(id));
+      
+      if (selectedUserIds.length === 0) {
+        this.messageService.add({
+          severity: 'warn',
+          summary: 'Uyarı',
+          detail: 'Lütfen silmek için en az bir kullanıcı seçin'
         });
-      });
-
-      // Tüm silme istekleri tamamlandığında
-      Promise.all(deletePromises)
-        .then(() => {
-          this.users = [];
-          this.filteredUsers = [];
-          
-          // localStorage'a boş kullanıcı dizisini kaydet
-          localStorage.setItem('users', JSON.stringify(this.users));
-          
-          this.updatePagination();
+        this.deleteDialogVisible = false;
+        return;
+      }
+      
+      // Burada toplu silme işlemi yapılabilir
+      // Örnek olarak her bir kullanıcıyı tek tek siliyoruz
+      let successCount = 0;
+      let errorCount = 0;
+      
+      const deletePromises = selectedUserIds.map(userId => 
+        firstValueFrom(this.userService.deleteUser(userId))
+          .then(() => { successCount++; })
+          .catch(() => { errorCount++; })
+      );
+      
+      Promise.all(deletePromises).then(() => {
+        if (successCount > 0) {
           this.messageService.add({
             severity: 'success',
             summary: 'Başarılı',
-            detail: 'Tüm kullanıcılar silindi',
-            life: 3000
+            detail: `${successCount} kullanıcı başarıyla silindi${errorCount > 0 ? `, ${errorCount} kullanıcı silinemedi` : ''}`
           });
-          
-          // Silme işlemi tamamlandıktan sonra referansı temizle
-          this.userToDelete = null;
-        })
-        .catch(error => {
-          console.error('Toplu silme işlemi sırasında hata:', error);
+        } else if (errorCount > 0) {
           this.messageService.add({
             severity: 'error',
             summary: 'Hata',
-            detail: 'Bazı kullanıcılar silinirken hata oluştu.',
-            life: 3000
+            detail: `${errorCount} kullanıcı silinemedi`
           });
-          // Hata olsa bile güncel listeyi yeniden yükle
+        }
+        
+        this.loadUsers();
+        this.clearSelectedUsers();
+        this.deleteDialogVisible = false;
+        this.userToDelete = null;
+      });
+    } else {
+      // Tek kullanıcı silme işlemi (mevcut kod)
+      this.userService.deleteUser(this.userToDelete.id).subscribe({
+        next: () => {
+          this.messageService.add({
+            severity: 'success',
+            summary: 'Başarılı',
+            detail: 'Kullanıcı silindi'
+          });
           this.loadUsers();
-          
-          // Hata durumunda da referansı temizle
+          this.deleteDialogVisible = false;
           this.userToDelete = null;
-        });
-      return;
+        },
+        error: (error) => {
+          console.error('Error deleting user:', error);
+          this.messageService.add({
+            severity: 'error',
+            summary: 'Hata',
+            detail: 'Kullanıcı silinirken bir hata oluştu'
+          });
+          this.deleteDialogVisible = false;
+          this.userToDelete = null;
+        }
+      });
     }
-    
-    // Tek kullanıcı silme durumu
-    this.userService.deleteUser(this.userToDelete.id).subscribe({
-      next: () => {
-        // Başarılı silme işlemi sonrası
-        this.users = this.users.filter(u => u.id !== this.userToDelete.id);
-        
-        // localStorage'a güncellenmiş kullanıcıları kaydet
-        localStorage.setItem('users', JSON.stringify(this.users));
-        
-        this.applyFilters();
-        this.messageService.add({
-          severity: 'success',
-          summary: 'Başarılı',
-          detail: 'Kullanıcı silindi',
-          life: 3000
-        });
-        
-        // Silme işlemi tamamlandıktan sonra referansı temizle
-        this.userToDelete = null;
-      },
-      error: (error) => {
-        console.error('Kullanıcı silme hatası:', error);
-        this.messageService.add({
-          severity: 'error',
-          summary: 'Hata',
-          detail: 'Kullanıcı silinirken bir hata oluştu.',
-          life: 3000
-        });
-        
-        // Hata durumunda da referansı temizle
-        this.userToDelete = null;
-      }
-    });
   }
   
   cancelDelete() {
@@ -807,19 +779,11 @@ export class UserManagementComponent implements OnInit, AfterViewInit {
    * İzin etiketi oluşturur
    */
   getUserPermissionLabel(isAdmin: boolean, roleId: number | null): string {
-    if (isAdmin) {
-      return 'Admin';
-    }
+    if (isAdmin) return 'Admin';
+    if (!roleId) return 'Kullanıcı';
     
-    // roleId'ye göre değerlendirme yap
-    switch (roleId) {
-      case 1:
-        return 'Admin';
-      case 2:
-        return 'Kullanıcı';
-      default:
-        return 'Kullanıcı'; // Varsayılan
-    }
+    const role = this.roles.find(r => r.id === roleId);
+    return role ? role.name : 'Kullanıcı';
   }
 
   generateId(): number {
@@ -1125,5 +1089,67 @@ export class UserManagementComponent implements OnInit, AfterViewInit {
     console.log('Seçilen rol:', this.selectedRole);
     this.currentPage = 1; // İlk sayfaya dön
     this.applyFilters(); // Filtreleri uygula
+  }
+
+  // Checkbox metodları
+  toggleSelectAll() {
+    this.selectAllChecked = !this.selectAllChecked;
+    
+    // Tüm kullanıcıların checkbox durumunu güncelle
+    this.filteredUsers.forEach(user => {
+      this.selectedUsers[user.id] = this.selectAllChecked;
+    });
+  }
+  
+  toggleUserSelection(userId: string) {
+    // Kullanıcının checkbox durumunu tersine çevir
+    this.selectedUsers[userId] = !this.selectedUsers[userId];
+    
+    // Tüm kullanıcılar seçili mi kontrol et
+    this.checkIfAllSelected();
+  }
+  
+  checkIfAllSelected() {
+    // Tüm kullanıcılar seçili mi kontrol et
+    this.selectAllChecked = this.filteredUsers.length > 0 && 
+      this.filteredUsers.every(user => this.selectedUsers[user.id]);
+  }
+  
+  isUserSelected(userId: string): boolean {
+    return this.selectedUsers[userId] === true;
+  }
+  
+  getSelectedUserCount(): number {
+    return Object.values(this.selectedUsers).filter(selected => selected).length;
+  }
+  
+  clearSelectedUsers() {
+    this.selectAllChecked = false;
+    this.selectedUsers = {};
+  }
+  
+  deleteSelectedUsers() {
+    const selectedUserIds = Object.keys(this.selectedUsers)
+      .filter(id => this.selectedUsers[id]);
+    
+    if (selectedUserIds.length === 0) {
+      this.messageService.add({
+        severity: 'warn',
+        summary: 'Uyarı',
+        detail: 'Lütfen silmek için en az bir kullanıcı seçin'
+      });
+      return;
+    }
+    
+    this.userToDelete = { id: 'all', fullName: `${selectedUserIds.length} kullanıcı` };
+    this.deleteDialogVisible = true;
+  }
+
+  // Rol adını getiren yardımcı metod
+  getRoleName(roleId: number | null): string {
+    if (!roleId) return 'Rol Atanmamış';
+    
+    const role = this.roles.find(r => r.id === roleId);
+    return role ? role.name : 'Bilinmeyen Rol';
   }
 }

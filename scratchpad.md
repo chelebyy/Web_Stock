@@ -382,4 +382,23 @@ Kullanıcı yönetimi ve rol yönetimi sayfalarında, silme işlemi için kullan
 
 Bu çözüm, hem kullanıcı yönetimi hem de rol yönetimi sayfalarında başarıyla uygulandı ve silme onay dialogu artık düzgün çalışıyor.
 
+## Checkbox İşlevselliği Görevi
+
+### Görev Tanımı
+Kullanıcı yönetimi sayfasında bulunan checkbox'lar işaretlenmiyordu ve herhangi bir işlevselliği yoktu. Bu sorunu çözmek için gerekli değişiklikleri yapmak.
+
+### Yapılan İşlemler
+[X] Sorunun analizi yapıldı
+[X] TypeScript dosyasında checkbox durumlarını saklamak için değişkenler eklendi
+[X] Checkbox'ları yönetmek için gerekli metodlar eklendi
+[X] HTML dosyasında checkbox'lara veri bağlantıları ve olay işleyicileri eklendi
+[X] Toplu işlem butonları eklendi
+[X] CSS dosyasında gerekli stiller eklendi
+[X] Angular 19 uyumluluğu için `toPromise()` yerine `firstValueFrom` kullanıldı
+[X] Bilgi tabanı dosyası oluşturuldu
+[X] Errors.md dosyası güncellendi
+
+### Sonuç
+Kullanıcı yönetimi sayfasındaki checkbox'lar artık işlevsel hale geldi. Kullanıcılar, tek tek veya toplu olarak kullanıcıları seçebilir ve seçili kullanıcılar üzerinde işlemler yapabilir.
+
 

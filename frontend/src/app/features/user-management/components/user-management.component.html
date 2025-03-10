@@ -42,7 +42,7 @@
       <!-- Tablo Başlığı -->
       <div class="table-header">
         <div class="header-cell checkbox-cell">
-          <p-checkbox [binary]="true"></p-checkbox>
+          <p-checkbox [binary]="true" [(ngModel)]="selectAllChecked" (onChange)="toggleSelectAll()"></p-checkbox>
         </div>
         <div class="header-cell name-cell">Ad Soyad</div>
         <div class="header-cell sicil-cell">Sicil</div>
@@ -53,7 +53,7 @@
       <!-- Kullanıcı Satırları -->
       <div class="table-row" *ngFor="let user of paginatedUsers">
         <div class="row-cell checkbox-cell">
-          <p-checkbox [binary]="true"></p-checkbox>
+          <p-checkbox [binary]="true" [(ngModel)]="selectedUsers[user.id]" (onChange)="toggleUserSelection(user.id)"></p-checkbox>
         </div>
         <div class="row-cell name-cell">
           <div class="user-info">
@@ -247,5 +247,11 @@
   (confirm)="confirmDelete()"
   (cancel)="cancelDelete()">
 </app-delete-confirmation-dialog>
+
+<!-- Toplu işlem butonları ekleyelim -->
+<div class="bulk-actions" *ngIf="getSelectedUserCount() > 0">
+  <span class="selected-count">{{ getSelectedUserCount() }} kullanıcı seçildi</span>
+  <button pButton type="button" icon="pi pi-trash" class="p-button-danger" (click)="deleteSelectedUsers()" label="Seçilenleri Sil"></button>
+</div>
 
 <p-toast position="top-right" styleClass="modern-toast"></p-toast>
