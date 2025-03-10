@@ -13,6 +13,7 @@
 10. [Karşılaşılan Sorunlar ve Çözümleri](#karşılaşılan-sorunlar-ve-çözümleri)
 11. [Sonraki Adımlar](#sonraki-adımlar)
 12. [Kaynaklar](#kaynaklar)
+13. [Eski Bileşenlerin Temizlenmesi](#eski-bileşenlerin-temizlenmesi)
 
 ## Genel Bakış
 
@@ -474,6 +475,23 @@ Eski *ngIf ve *ngFor direktifleri Angular 19'un yeni control flow syntax'ına uy
 ```
 - @switch ve @for direktifleri uygun yerlerde kullanıldı
 
+### 9. Login Sayfası Şifre Alanı Arka Plan Sorunu
+
+**Sorun:**
+Login sayfasındaki şifre alanının arka planı beyaz olarak görünüyor ve metin içeriği okunmuyordu. Bu sorun özellikle input alanına uygulanan background rengi ve içeriğinin kontrastı ile ilgiliydi.
+
+**Çözüm:**
+Şifre input alanının stilini güncelleyerek çözüldü:
+```html
+<!-- Eski -->
+background: rgba(23, 26, 33, 0.9) !important;
+
+<!-- Yeni -->
+background: rgba(35, 40, 50, 0.8) !important;
+```
+
+Bu değişiklik, arka plan rengini daha koyu bir tona getirerek beyaz metinle kontrast oluşturdu ve şifre metni artık okunabilir hale geldi. Ayrıca saydamlık değeri biraz düşürülerek daha iyi görünürlük sağlandı.
+
 ## Sonraki Adımlar
 
 1. **Signal API Entegrasyonu**: Örnek bir bileşen seçilerek Signal API'nin nasıl kullanılacağı gösterilecek. **Tamamlandı**
@@ -482,6 +500,8 @@ Eski *ngIf ve *ngFor direktifleri Angular 19'un yeni control flow syntax'ına uy
 4. **Revir Feature Modülü**: Revir bileşenlerinin feature modülüne taşınması ve lazy loading uygulanması (Angular 19 geçişi tamamlandıktan sonra yapılacak).
 5. **Test Güncellemeleri**: Unit testlerin ve E2E testlerin güncellenmesi.
 6. **Dokümantasyon**: Yeni mimari yapının ve kullanılan özelliklerin dokümantasyonunun hazırlanması.
+7. **UI Sorunlarının Çözümü**: Geçiş sırasında oluşan UI sorunlarının tespit edilip çözülmesi.
+8. **Performans Optimizasyonu**: Uygulama performansının ölçülmesi ve iyileştirilmesi.
 
 ## Kaynaklar
 
@@ -491,3 +511,59 @@ Eski *ngIf ve *ngFor direktifleri Angular 19'un yeni control flow syntax'ına uy
 4. [Angular Style Guide](https://angular.dev/style-guide)
 5. [Angular Architecture](https://angular.dev/best-practices/application-structure)
 6. [Angular Signals Guide](https://angular.dev/guide/signals) 
+
+## Eski Bileşenlerin Temizlenmesi
+
+Angular 19 geçişi sırasında feature modüllerine taşınan bileşenlerin eski versiyonları hala proje içerisinde yer almaktadır. Bu durum karmaşıklığı artırmakta ve gelecekteki bakım süreçlerini zorlaştırmaktadır. Aşağıdaki plan, geçiş tamamlandıktan sonra eski bileşenlerin güvenli bir şekilde kaldırılması için uygulanacaktır.
+
+### Temizleme Planı
+
+1. **Kullanımda Olan Bileşenlerin Tespiti**:
+   - Tüm routing tanımları kontrol edilecek (app.routes.ts ve feature route dosyaları)
+   - Tüm bileşen importları taranacak
+   - Mevcut bileşenlerin kullanıldığı yerler tespit edilecek
+
+2. **Kademeli Temizleme Stratejisi**:
+   - Her feature modülü için şu sıra takip edilecek:
+     1. Yeni yapıya taşınan bileşenlerin tamamen çalıştığının doğrulanması
+     2. Eski bileşene yapılan tüm referansların kaldırılması
+     3. Eski bileşen dosyalarının yedeklenmesi
+     4. Eski bileşen dosyalarının silinmesi
+
+3. **Doğrulama Süreci**:
+   - Her silinen bileşenden sonra uygulamanın tamamı test edilecek
+   - Özellikle ilgili feature'ın tüm fonksiyonlarının çalıştığı doğrulanacak
+   - Hata durumunda hızlı geri dönüş için yedekler kullanılacak
+
+### Temizlenecek Eski Bileşenler
+
+Aşağıdaki bileşenler geçiş sürecinde taşınmış ve eski versiyonları kaldırılacaktır:
+
+1. **Auth Module**:
+   - `src/app/components/login/login.component.*` -> `src/app/features/auth/components/login.component.*`
+
+2. **Dashboard Module**:
+   - `src/app/components/dashboard/dashboard.component.*` -> `src/app/features/dashboard/components/dashboard.component.*`
+   - `src/app/components/admin-dashboard/admin-dashboard.component.*` -> `src/app/features/dashboard/components/admin-dashboard.component.*`
+
+3. **User Management Module**:
+   - `src/app/components/user-management/user-management.component.*` -> `src/app/features/user-management/components/user-management.component.*`
+
+4. **Role Management Module**:
+   - `src/app/components/role-management/role-management.component.*` -> `src/app/features/role-management/components/role-management.component.*`
+   - `src/app/components/role-detail/role-detail.component.*` -> `src/app/features/role-management/components/role-detail/role-detail.component.*`
+
+### Zaman Çizelgesi
+
+- Her feature modülünün tüm işlevleri tamamlandıktan sonra eski bileşenleri temizleme işlemi yapılacak
+- Öncelik kritik olmayan modüllerden başlayacak
+- Tüm temizleme işlemi Angular 19 geçişi tamamlandıktan sonraki 2 hafta içerisinde tamamlanacak
+
+### Riskler ve Önlemler
+
+- **Risk**: Bazı eski bileşenlere yapılan referansların gözden kaçması
+  - **Önlem**: Kapsamlı kod taraması ve otomatik testler
+- **Risk**: Silinen bileşenlerin üretimde sorunlara yol açması
+  - **Önlem**: Her silme işleminden önce staging ortamında test
+- **Risk**: Geri dönüş gereksinimi
+  - **Önlem**: Detaylı yedekleme ve sürüm kontrol sistemi ile işaretleme 

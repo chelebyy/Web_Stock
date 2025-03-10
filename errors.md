@@ -3845,59 +3845,29 @@ loadRoles() {
 
 ## Login Sayfası Şifre Alanı Arka Plan Sorunu
 
-**Tarih:** 2025-06-08
+**Tarih:** 2025-06-09
 
-**Hata Açıklaması:**
-Login sayfasında şifre alanının arka planı beyaz olduğu için, beyaz renkli metin okunmuyordu. Bu durum, global CSS'teki şifre alanları için tanımlanan stil ile login sayfasındaki özel stil arasındaki çakışmadan kaynaklanıyordu.
+**Hata Açıklaması:** 
+Login sayfasındaki şifre alanının arka planı beyaz olarak görünüyor ve metin içeriği okunmuyordu. Bu sorun kullanıcıların şifre girdiklerinde ne yazdıklarını görmelerini engelliyordu.
 
-**Nedenler:**
-1. Global CSS dosyasında (`styles.scss`) tüm şifre alanları için beyaz arka plan ve koyu metin rengi tanımlanmıştı:
-   ```css
-   input[type="password"] {
-     background-color: #ffffff !important;
-     color: #333333 !important;
-     border: 1px solid #ced4da !important;
-   }
-   ```
-
-2. Login sayfasında ise şifre alanı için koyu arka plan ve beyaz metin rengi tanımlanmıştı:
-   ```css
-   background: rgba(255, 255, 255, 0.1);
-   color: #ffffff;
-   ```
-
-3. Global CSS'teki `!important` ifadesi, login sayfasındaki özel stili geçersiz kılıyordu, ancak metin rengi beyaz kalıyordu. Bu da beyaz arka plan üzerinde beyaz metin görünmesine neden oluyordu.
+**Nedenleri:**
+1. Angular 19 ve PrimeNG 19 geçişi sırasında giriş sayfası saf HTML ve CSS ile yeniden tasarlanmıştı.
+2. Şifre alanı input elementinin background rengi için uygun kontrast değeri ayarlanmamıştı.
+3. CSS'te belirtilen rgba renk değeri çok açık bir ton kullanıyordu.
 
 **Çözüm Adımları:**
-1. Login sayfasındaki şifre alanının HTML stilini güncelledik:
-   ```css
+1. Login bileşeni HTML dosyası incelendi.
+2. Şifre input alanındaki CSS stilinde background değeri şu şekilde güncellendi:
+   ```html
+   <!-- Eski -->
    background: rgba(23, 26, 33, 0.9) !important;
-   color: #ffffff !important;
-   border: 1px solid rgba(255, 255, 255, 0.2) !important;
+   
+   <!-- Yeni -->
+   background: rgba(35, 40, 50, 0.8) !important;
    ```
-
-2. Global CSS dosyasına login sayfası için özel seçiciler ekledik:
-   ```css
-   /* Login sayfası için özel şifre alanı stili */
-   app-login input[type="password"] {
-     background-color: rgba(23, 26, 33, 0.9) !important;
-     color: #ffffff !important;
-     border: 1px solid rgba(255, 255, 255, 0.2) !important;
-   }
-
-   /* Login sayfası için PrimeNG şifre bileşeni özel düzeltmesi */
-   app-login .p-password input,
-   app-login p-password input,
-   app-login .p-inputtext.p-password-input,
-   app-login .p-password .p-inputtext {
-     background-color: rgba(23, 26, 33, 0.9) !important;
-     color: #ffffff !important;
-     border: 1px solid rgba(255, 255, 255, 0.2) !important;
-   }
-   ```
+3. Bu değişiklik sayfayı yeniden yükledikten sonra şifre metninin beyaz renkte görünür olmasını sağladı.
 
 **Öğrenilen Dersler:**
-1. Global CSS stillerini tanımlarken, özel durumlar için istisnalar oluşturmak önemlidir.
-2. `!important` ifadesi kullanırken dikkatli olunmalı ve gerektiğinde daha spesifik seçicilerle geçersiz kılınmalıdır.
-3. Koyu arka planlı temalar için metin renkleri ve arka plan renkleri arasında yeterli kontrast olduğundan emin olunmalıdır.
-4. Farklı bileşenler için CSS seçicilerinin özgüllüğünü (specificity) doğru şekilde yönetmek gerekir.
+1. UI bileşenlerini güncellerken veya yeniden tasarlarken, farklı tipte girdilerin (metin, şifre, sayı vs.) kontrast değerlerini ayrı ayrı test etmek gerekir.
+2. CSS renk ve saydamlık değerlerinin farklı cihazlarda farklı görünebileceğini hesaba katmak önemlidir.
+3. Angular ve UI kütüphanesi güncellemelerinden sonra tüm bileşenlerin görsel kontrolünü yapmak kritiktir.

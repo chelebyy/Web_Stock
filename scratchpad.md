@@ -308,4 +308,30 @@
 - [Bilgi İşlem Modülü (Planlanan)](knowledge-base/feature_modules/bilgi_islem_module.md)
 - [Revir Modülü (Planlanan)](knowledge-base/feature_modules/revir_module.md)
 
+## Angular 19 Geçiş Çalışmaları
+
+### Genel Durum
+Angular 19 geçiş çalışmaları kapsamında aşağıdaki işler tamamlanmıştır:
+- [X] Core modüllerinin oluşturulması
+- [X] Feature modüllerinin oluşturulması
+- [X] Lazy loading uygulaması
+- [X] Angular Signals API entegrasyonu
+- [X] Yeni Control Flow syntax uygulaması
+- [X] Temel UI sorunlarının çözülmesi
+- [ ] Mimari yapının dokümantasyonu
+- [ ] Performans optimizasyonu
+- [ ] Test ve doğrulama
+
+### Son Yapılan İşler
+- Login sayfasındaki şifre alanının arka plan rengi sorunu çözüldü. Arka plan rengi daha koyu bir ton olan rgba(35, 40, 50, 0.8) değeri ile güncellendi, böylece beyaz metin görünür hale geldi.
+- Angular 19 geçiş planına "Eski Bileşenlerin Temizlenmesi" bölümü eklendi.
+- Eski ve yeni bileşenlerin birlikte var olma durumu analiz edildi ve çözüm stratejisi geliştirildi.
+
+### Sonraki Adımlar
+- [ ] Diğer feature modüllerinin (Bilgi İşlem, Revir) oluşturulması
+- [ ] Signal API ve yeni Control Flow syntax'ının diğer bileşenlere uygulanması
+- [ ] Angular 19 geçişi sırasında oluşan diğer UI sorunlarının tespiti ve çözümü
+- [ ] Test ve doğrulama süreçlerinin tamamlanması
+- [ ] Eski bileşenlerin temizlenmesi
+
 
