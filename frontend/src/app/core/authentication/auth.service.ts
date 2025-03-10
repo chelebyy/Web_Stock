@@ -56,12 +56,19 @@ export class AuthService {
   // Token'dan izinleri çıkartır
   private extractPermissionsFromToken(decodedToken: any): string[] {
     const permissions: string[] = [];
-    console.log('Token içindeki izin claim\'leri:', 
-                { Permission: decodedToken.Permission, 
-                  PermissionNames: decodedToken.PermissionNames });
+    
+    console.log('Token çözümlenmiş tam içerik:', JSON.stringify(decodedToken, null, 2));
+    console.log('Token içindeki tüm claim anahtarları:', Object.keys(decodedToken));
+    console.log('Token içindeki izin claim\'leri:', { 
+      Permission: decodedToken.Permission, 
+      PermissionNames: decodedToken.PermissionNames,
+      role: decodedToken.role
+    });
     
     // Permission claim'lerini kontrol et
     if (decodedToken.Permission) {
+      console.log('Permission içeriği türü:', typeof decodedToken.Permission);
+      
       // String formatında tek bir izin olabilir
       if (typeof decodedToken.Permission === 'string') {
         permissions.push(decodedToken.Permission);
@@ -73,13 +80,35 @@ export class AuthService {
         console.log('Dizi olarak izinler eklendi:', decodedToken.Permission);
       } else {
         console.log('Permission claim var ama tanınmayan formatta:', typeof decodedToken.Permission);
+        
+        // Özel bir objeyse, içeriğini kontrol et
+        try {
+          const permObj = JSON.parse(JSON.stringify(decodedToken.Permission));
+          console.log('Permission objesi içeriği:', permObj);
+          
+          // Eğer objeyse ve $values gibi bir property varsa, bu koleksiyon olabilir
+          if (permObj && permObj.$values && Array.isArray(permObj.$values)) {
+            console.log('Permission $values dizisi bulundu, ekleniyor:', permObj.$values);
+            permissions.push(...permObj.$values);
+          }
+        } catch (error) {
+          console.error('Permission içeriği parse edilemedi:', error);
+        }
       }
     } else {
       console.log('Permission claim bulunamadı');
     }
     
+    // Rol tabanlı izin kontrolü - Admin rolü için otomatik RoleManagement izni ekle
+    if (decodedToken.role === 'Admin') {
+      console.log('Admin rolü tespit edildi, Pages.RoleManagement izni ekleniyor');
+      permissions.push('Pages.RoleManagement');
+    }
+    
     // PermissionNames claim'ini de kontrol et (bazı token yapılandırmalarında kullanılabilir)
     if (decodedToken.PermissionNames) {
+      console.log('PermissionNames içeriği türü:', typeof decodedToken.PermissionNames);
+      
       if (typeof decodedToken.PermissionNames === 'string') {
         permissions.push(decodedToken.PermissionNames);
         console.log('PermissionNames string olarak eklendi:', decodedToken.PermissionNames);
@@ -89,6 +118,20 @@ export class AuthService {
         console.log('PermissionNames dizi olarak eklendi:', decodedToken.PermissionNames);
       } else {
         console.log('PermissionNames claim var ama tanınmayan formatta:', typeof decodedToken.PermissionNames);
+        
+        // Özel bir objeyse, içeriğini kontrol et
+        try {
+          const permObj = JSON.parse(JSON.stringify(decodedToken.PermissionNames));
+          console.log('PermissionNames objesi içeriği:', permObj);
+          
+          // Eğer objeyse ve $values gibi bir property varsa, bu koleksiyon olabilir
+          if (permObj && permObj.$values && Array.isArray(permObj.$values)) {
+            console.log('PermissionNames $values dizisi bulundu, ekleniyor:', permObj.$values);
+            permissions.push(...permObj.$values);
+          }
+        } catch (error) {
+          console.error('PermissionNames içeriği parse edilemedi:', error);
+        }
       }
     }
     
