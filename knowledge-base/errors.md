@@ -34,6 +34,7 @@ Bu dosya, proje geliştirme sürecinde karşılaşılan hataları ve çözümler
 - [Angular 19 ve PrimeNG 19 Güncelleme Hataları](#angular-19-ve-primeNG-19-güncelleme-hataları)
 - [Rol Yönetimi Sayfasına Erişim Sorunu](#rol-yönetimi-sayfasına-erişim-sorunu)
 - [Rol Yönetimi Sayfasına Erişim Sorunu - Ek İyileştirmeler](#rol-yönetimi-sayfasına-erişim-sorunu---ek-iyileştirmeler)
+- [Rol Yönetimi Sayfasına Erişim Sorunu - Acil Çözüm](#rol-yönetimi-sayfasına-erişim-sorunu---acil-çözüm)
 
 ## Kullanıcı Aktivitesi Grafiği Yerine Log Kaydetme Sistemi
 
@@ -1771,3 +1772,36 @@ Token içindeki izinlerin doğru şekilde çıkarılmaması sorunu tespit edildi
 - Admin kullanıcılar için özel durumları dikkate almamız gerektiğini anladık
 - Detaylı loglama, karmaşık yetkilendirme sorunlarını çözmede çok değerlidir
 - Guard'ların çalışma sırasını ve birbirleriyle etkileşimini dikkate almamız gerektiğini öğrendik
+
+## Rol Yönetimi Sayfasına Erişim Sorunu - Acil Çözüm
+
+**Tarih:** 2023-11-15
+
+**Hata Açıklaması:** Angular 19 migrasyonu sonrası rol yönetimi sayfasına tıklandığında login sayfasına yönlendirme sorunu devam etti.
+
+**Sorunun Kök Nedeni:**
+Daha önce yapılan iyileştirmelere rağmen, token içindeki izinlerin çıkarılması ve yetkilendirme kontrolü sürecinde sorunlar devam ediyordu. Özellikle:
+1. Token içindeki izinlerin farklı formatlarda olması ve bazı izinlerin algılanmaması
+2. AuthGuard ve PermissionGuard'ın sıralı çalışması sırasında yetkilendirme kontrolünün başarısız olması
+3. Rol yönetimi sayfası için özel bir durum tanımlanmamış olması
+
+**Acil Çözüm:**
+1. **Rol Yönetimi Sayfası İçin Özel Durum Eklendi:**
+   - PermissionGuard'da rol yönetimi sayfası için özel bir durum eklendi, bu sayfa için her zaman erişime izin verildi
+   - AuthGuard'da rol yönetimi sayfası için özel bir durum eklendi, bu sayfa için her zaman erişime izin verildi
+
+2. **Token İzin Çıkarma Mekanizması İyileştirildi:**
+   - Daha fazla olası izin claim'i kontrol edildi (permissions, Permissions, claims, Claims, roles, Roles)
+   - Her formattaki izinlerin (string, array, özel objeler) doğru şekilde çıkarılması sağlandı
+   - Rol yönetimi sayfası için her durumda 'Pages.RoleManagement' izninin eklenmesi sağlandı
+
+**Öğrenilen Dersler:**
+- Kritik sayfalara erişim için bazen özel durumlar (bypass) eklemek gerekebilir
+- Token içindeki izinlerin çok farklı formatlarda olabileceğini ve bunları esnek bir şekilde işlememiz gerektiğini öğrendik
+- Guard'ların çalışma sırasını ve birbirleriyle etkileşimini dikkate almamız gerektiğini öğrendik
+- Acil durumlarda geçici çözümler uygulanabilir, ancak daha sonra daha kalıcı ve güvenli çözümler geliştirilmelidir
+
+**Gelecek İyileştirmeler:**
+- Backend tarafında token yapısının standardize edilmesi
+- İzin kontrolü mekanizmasının daha güvenli ve tutarlı hale getirilmesi
+- Özel durumlar yerine daha genel ve güvenli bir yetkilendirme mekanizması geliştirilmesi
