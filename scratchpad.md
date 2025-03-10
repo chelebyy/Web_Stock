@@ -319,14 +319,19 @@
     - [X] `frontend/src/app/components/login/login.component.html` 
     - [X] `frontend/src/app/components/login/login.component.scss`
     - [X] `frontend/src/app/components/login/login.component.spec.ts`
-  - [ ] Uygulamayı çalıştırarak login işlevselliğinin hala çalıştığını doğrula
+  - [X] Uygulamayı çalıştırarak login işlevselliğinin hala çalıştığını doğrula
+  
+- [X] **Role Management Module Temizlenmesi**
+  - [X] Eski role management bileşenlerinin yedeğini al:
+    - [X] `frontend/src/app/components/role-management/role-management.component.*`
+    - [X] `frontend/src/app/components/role-management/role-detail/role-detail.component.*`
+  - [X] Eski role management bileşenlerini kaldır
+  - [X] Eski app-routing.module.ts dosyasını kaldır (artık kullanılmıyor)
+  - [ ] Uygulamayı çalıştırarak role management işlevselliğinin hala çalıştığını doğrula
   
 - [ ] **Dashboard Module Temizlenmesi**
   - [ ] Admin dashboard bileşeninin eski versiyonlarını temizle
   - [ ] User dashboard bileşeninin eski versiyonlarını temizle
-  
-- [ ] **Role Management Module Temizlenmesi**
-  - [ ] Role Management ve Role Detail bileşenlerinin eski versiyonlarını temizle
 
 ### Bulgular ve Değerlendirmeler
 

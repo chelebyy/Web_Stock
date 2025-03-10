@@ -548,28 +548,24 @@ Bu aşamada, şu bileşenlerin eski versiyonlarını temizleyeceğiz:
 - ✅ Temizlendi: `frontend/src/app/components/login/login.component.spec.ts` (10.03.2025)
 
 **1.2. Role Management Module**:
-- Temizlenecek: `frontend/src/app/components/role-management/role-management.component.ts`
-- Temizlenecek: `frontend/src/app/components/role-management/role-management.component.html`
-- Temizlenecek: `frontend/src/app/components/role-management/role-management.component.scss`
-- Temizlenecek: `frontend/src/app/components/role-management/role-management.component.spec.ts`
-- Temizlenecek: `frontend/src/app/components/role-management/role-detail/role-detail.component.ts`
-- Temizlenecek: `frontend/src/app/components/role-management/role-detail/role-detail.component.html`
-- Temizlenecek: `frontend/src/app/components/role-management/role-detail/role-detail.component.scss`
-- Temizlenecek: `frontend/src/app/components/role-management/role-detail/role-detail.component.spec.ts`
+- ✅ Temizlendi: `frontend/src/app/components/role-management/role-management.component.ts` (10.03.2025)
+- ✅ Temizlendi: `frontend/src/app/components/role-management/role-management.component.html` (10.03.2025)
+- ✅ Temizlendi: `frontend/src/app/components/role-management/role-management.component.scss` (10.03.2025)
+- ✅ Temizlendi: `frontend/src/app/components/role-management/role-detail/role-detail.component.ts` (10.03.2025)
+- ✅ Temizlendi: `frontend/src/app/components/role-management/role-detail/role-detail.component.html` (10.03.2025)
+- ✅ Temizlendi: `frontend/src/app/components/role-management/role-detail/role-detail.component.scss` (10.03.2025)
+- ✅ Temizlendi: `frontend/src/app/app-routing.module.ts` (10.03.2025) - Bu dosya artık kullanılmıyor ve sadece eski role-detail bileşenine referans veriyordu
 
 **1.3. Dashboard Module**:
 - Temizlenecek: `frontend/src/app/components/dashboard/dashboard.component.ts`
 - Temizlenecek: `frontend/src/app/components/dashboard/dashboard.component.html`
 - Temizlenecek: `frontend/src/app/components/dashboard/dashboard.component.scss`
-- Temizlenecek: `frontend/src/app/components/dashboard/dashboard.component.spec.ts`
 - Temizlenecek: `frontend/src/app/components/admin-dashboard/admin-dashboard.component.ts`
 - Temizlenecek: `frontend/src/app/components/admin-dashboard/admin-dashboard.component.html`
 - Temizlenecek: `frontend/src/app/components/admin-dashboard/admin-dashboard.component.scss`
-- Temizlenecek: `frontend/src/app/components/admin-dashboard/admin-dashboard.component.spec.ts`
 - Temizlenecek: `frontend/src/app/components/user-dashboard/user-dashboard.component.ts`
 - Temizlenecek: `frontend/src/app/components/user-dashboard/user-dashboard.component.html`
 - Temizlenecek: `frontend/src/app/components/user-dashboard/user-dashboard.component.scss`
-- Temizlenecek: `frontend/src/app/components/user-dashboard/user-dashboard.component.spec.ts`
 
 #### Aşama 2: Kısmen Yeni Yapıya Geçirilen Modüllerin Eski Bileşenlerini Taşıma veya Temizleme
 

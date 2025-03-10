@@ -3942,3 +3942,61 @@ Angular 19 geçişi sırasında, eski login bileşeni (`/frontend/src/app/compon
 - Bileşenleri silmeden önce tüm referansların yeni modüllere yönlendirildiğinden emin olunmalı
 - HTML, CSS ve TypeScript dosyalarının birlikte temizlenmesi, artık kalan dosyaların oluşmamasını sağlar
 - Bileşen temizliğinden sonra kapsamlı test yapılması, beklenmeyen sorunların erken tespit edilmesini sağlar
+
+### Role Management Modülü Temizlenmesi
+
+#### Problem Tanımı
+Angular 19 geçişi sırasında, eski role management bileşenleri (`/frontend/src/app/components/role-management/`) ve yeni role management bileşenleri (`/frontend/src/app/features/role-management/components/`) aynı anda sistemde bulunuyordu. Yeni bileşenlerin başarıyla uygulamaya entegre edilmesi sonrası, eski bileşenlerin güvenli bir şekilde temizlenmesi gerekiyordu.
+
+#### Temizleme Adımları
+1. Eski ve yeni role management bileşenlerinin karşılaştırılması:
+   ```
+   - Eski role management: `/frontend/src/app/components/role-management/role-management.component.*`
+   - Yeni role management: `/frontend/src/app/features/role-management/components/role-management.component.*`
+   
+   - Eski role detail: `/frontend/src/app/components/role-management/role-detail/role-detail.component.*`
+   - Yeni role detail: `/frontend/src/app/features/role-management/components/role-detail/role-detail.component.*`
+   ```
+
+2. Eski bileşenlerin kullanım durumunun analizi:
+   - `app.routes.ts` dosyası incelenerek aktif rotaların yeni bileşenlere yönlendirildiği doğrulandı
+   - `app-routing.module.ts` dosyası içeriğinin artık kullanılmadığı tespit edildi
+   - `grep` aramaları ile eski bileşenlere başka aktif referanslar bulunmadığı teyit edildi
+
+3. Eski bileşen dosyalarının yedeğinin alınması:
+   ```
+   mkdir -p knowledge-base/old_components_backup/role-management/role-detail
+   cp frontend/src/app/components/role-management/role-management.component.* knowledge-base/old_components_backup/role-management/
+   cp frontend/src/app/components/role-management/role-detail/role-detail.component.* knowledge-base/old_components_backup/role-management/role-detail/
+   ```
+
+4. Eski role management bileşeni dosyalarının silinmesi:
+   ```
+   rm frontend/src/app/components/role-management/role-detail/role-detail.component.*
+   rmdir frontend/src/app/components/role-management/role-detail
+   rm frontend/src/app/components/role-management/role-management.component.*
+   rmdir frontend/src/app/components/role-management
+   ```
+
+5. Kullanılmayan `app-routing.module.ts` dosyasının silinmesi:
+   ```
+   rm frontend/src/app/app-routing.module.ts
+   ```
+
+6. Angular 19 migration belgesinin güncellenmes
+   ```
+   // angular19_migration.md dosyasında ilgili bileşenlerin temizlendiği işaretlendi
+   ```
+
+7. Scratchpad belgesinin güncellenmesi
+   ```
+   // scratchpad.md dosyasında role management temizleme adımlarının tamamlandığı işaretlendi
+   ```
+
+#### Alınan Dersler
+- Eski ve yeni bileşenlerin tam olarak karşılaştırılması, eksik veya farklı işlevselliğin olup olmadığını belirlemeye yardımcı oldu
+- Eski routing dosyalarının tamamen kaldırılması, rota çakışmalarını önlemeye yardımcı oldu
+- Tek bir bileşenin yeni yapıya taşınmasından ziyade, bir modülün tamamının taşınması daha temiz bir kod tabanı sağladı
+- Eski dosyaların temizlenmesi, bundle boyutunu azaltmaya ve geliştirme ortamını daha kolay yönetilebilir hale getirmeye yardımcı oldu
+- Rota tanımları ve bileşen referanslarını tam olarak kontrol etmek, herhangi bir kesinti olmadan temizleme yapmayı sağladı
+- Her bileşen temizliğinden sonra ayrıntılı bir test ve doğrulama süreci, sorunları erken tespit etmeye yardımcı oldu
