@@ -274,6 +274,7 @@
 - [X] Global stil dosyasına yüksek öncelikli selektörler eklendi
 - [X] Rol filtreleme dropdown'ındaki çift "Tümü" seçeneği sorunu çözüldü
 - [X] Rol filtreleme işlevselliği düzeltildi (string/number dönüşüm sorunu)
+- [X] Login sayfasında şifre alanının arka plan sorunu çözüldü, şifre metni artık görünür durumda
 
 ### Planlanan İyileştirmeler
 - [ ] Kullanıcı tablosunun responsive tasarımının iyileştirilmesi

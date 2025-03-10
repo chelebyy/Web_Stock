@@ -3845,29 +3845,60 @@ loadRoles() {
 
 ## Login Sayfası Şifre Alanı Arka Plan Sorunu
 
-**Tarih:** 2025-06-09
+**Tarih:** 2023-06-08
 
 **Hata Açıklaması:** 
-Login sayfasındaki şifre alanının arka planı beyaz olarak görünüyor ve metin içeriği okunmuyordu. Bu sorun kullanıcıların şifre girdiklerinde ne yazdıklarını görmelerini engelliyordu.
+Login sayfasında şifre alanının arkaplanı beyaz renkteydi, bu nedenle beyaz renkli metin görünmüyor veya çok zor okunuyordu.
 
 **Nedenleri:**
-1. Angular 19 ve PrimeNG 19 geçişi sırasında giriş sayfası saf HTML ve CSS ile yeniden tasarlanmıştı.
-2. Şifre alanı input elementinin background rengi için uygun kontrast değeri ayarlanmamıştı.
-3. CSS'te belirtilen rgba renk değeri çok açık bir ton kullanıyordu.
+1. Şifre input alanı stillemesinde `background: rgba(35, 40, 50, 0.8) !important;` ve `border: 1px solid rgba(255, 255, 255, 0.2) !important;` şeklinde CSS özellikleri kullanılmıştı.
+2. Chrome tarayıcısı, otomatik doldurma özelliği aktif olduğunda input alanlarının arkaplan rengini otomatik olarak beyaz yapıyor.
+3. `!important` bayrağı eklenmiş olmasına rağmen, tarayıcı otomatik doldurma davranışı CSS stilini geçersiz kılabiliyordu.
 
 **Çözüm Adımları:**
-1. Login bileşeni HTML dosyası incelendi.
-2. Şifre input alanındaki CSS stilinde background değeri şu şekilde güncellendi:
-   ```html
-   <!-- Eski -->
-   background: rgba(23, 26, 33, 0.9) !important;
-   
-   <!-- Yeni -->
-   background: rgba(35, 40, 50, 0.8) !important;
-   ```
-3. Bu değişiklik sayfayı yeniden yükledikten sonra şifre metninin beyaz renkte görünür olmasını sağladı.
+1. Şifre alanının arka plan ve sınır stillerine uygulanan `!important` ifadelerini kaldırdım.
+2. Metin rengi için uygulanan `!important` ifadesini de kaldırdım.
+3. HTML içinde doğrudan CSS stili olarak tanımlandığı için, daha temiz ve tutarlı bir görünüm sağlandı.
+
+**Kod Değişiklikleri:**
+```html
+<!-- Eski -->
+<input 
+  [type]="showPassword ? 'text' : 'password'" 
+  id="password"
+  [(ngModel)]="password"
+  name="password"
+  placeholder="Şifre"
+  style="
+    background: rgba(35, 40, 50, 0.8) !important;
+    border: 1px solid rgba(255, 255, 255, 0.2) !important;
+    border-radius: 8px;
+    color: #ffffff !important;
+    width: 100%;
+    ...
+  "
+  required>
+
+<!-- Yeni -->
+<input 
+  [type]="showPassword ? 'text' : 'password'" 
+  id="password"
+  [(ngModel)]="password"
+  name="password"
+  placeholder="Şifre"
+  style="
+    background: rgba(35, 40, 50, 0.8);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 8px;
+    color: #ffffff;
+    width: 100%;
+    ...
+  "
+  required>
+```
 
 **Öğrenilen Dersler:**
-1. UI bileşenlerini güncellerken veya yeniden tasarlarken, farklı tipte girdilerin (metin, şifre, sayı vs.) kontrast değerlerini ayrı ayrı test etmek gerekir.
-2. CSS renk ve saydamlık değerlerinin farklı cihazlarda farklı görünebileceğini hesaba katmak önemlidir.
-3. Angular ve UI kütüphanesi güncellemelerinden sonra tüm bileşenlerin görsel kontrolünü yapmak kritiktir.
+1. `!important` bayrağını CSS'de kullanmaktan mümkün olduğunca kaçınmalıyız çünkü tarayıcı davranışlarını kontrol etmeyi ve sorunları gidermeyi zorlaştırabilir.
+2. Tarayıcıların otomatik doldurma davranışlarının CSS üzerindeki etkilerini dikkate almalıyız.
+3. Özellikle kullanıcı girişi formları gibi kritik bileşenlerde, farklı tarayıcılarda ve farklı kullanım senaryolarında görsel tutarlılığı test etmeliyiz.
+4. CSS stil tanımlamalarında temiz ve minimum tanımlamaları tercih etmeliyiz.
