@@ -572,10 +572,9 @@ Bu aşamada, şu bileşenlerin eski versiyonlarını temizleyeceğiz:
 - ✅ Temizlendi: `frontend/src/app/components/user-management/user-management.module.ts` (10.03.2025)
 
 **2.2. Permission Management Bileşenlerini Taşıma**:
-- Taşınacak: `frontend/src/app/components/permission-management/permission-management.component.ts` → `frontend/src/app/features/user-management/components/permission-management.component.ts`
-- Taşınacak: `frontend/src/app/components/user-page-permissions/user-page-permissions.component.ts` → `frontend/src/app/features/user-management/components/user-page-permissions.component.ts`
-
-- User Management'in routes dosyasını güncelleme (user-management.routes.ts)
+- ✅ Taşındı: `frontend/src/app/components/permission-management/permission-management.component.ts` → `frontend/src/app/features/user-management/components/permission-management.component.ts` (10.03.2025)
+- ✅ Taşındı: `frontend/src/app/components/user-page-permissions/user-page-permissions.component.ts` → `frontend/src/app/features/user-management/components/user-page-permissions.component.ts` (10.03.2025)
+- ✅ Güncellendi: User Management'in routes dosyası (user-management.routes.ts) (10.03.2025)
 
 #### Aşama 3: Yeni Feature Modülleri Oluşturma ve Taşıma
 

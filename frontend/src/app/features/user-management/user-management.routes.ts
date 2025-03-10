@@ -23,7 +23,7 @@ export const USER_MANAGEMENT_ROUTES: Routes = [
   },
   {
     path: 'users/:userId/permissions',
-    loadComponent: () => import('../../components/permission-management/permission-management.component').then(m => m.PermissionManagementComponent),
+    loadComponent: () => import('./components/permission-management.component').then(m => m.PermissionManagementComponent),
     canActivate: [AuthGuard, PermissionGuard],
     data: { 
       requiresAdmin: true,
@@ -32,7 +32,7 @@ export const USER_MANAGEMENT_ROUTES: Routes = [
   },
   {
     path: 'users/:userId/page-permissions',
-    loadComponent: () => import('../../components/user-page-permissions/user-page-permissions.component').then(m => m.UserPagePermissionsComponent),
+    loadComponent: () => import('./components/user-page-permissions.component').then(m => m.UserPagePermissionsComponent),
     canActivate: [AuthGuard, PermissionGuard],
     data: { 
       requiresAdmin: true,

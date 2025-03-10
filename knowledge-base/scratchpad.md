@@ -674,7 +674,7 @@ Angular 19 güncellemesi sonrası uygulamanın modüler yapıya geçirilmesi ve 
 [X] Role Management modülü eski bileşenleri temizlendi
 [X] Dashboard modülü eski bileşenleri temizlendi
 [X] User Management modülü eski bileşenleri temizlendi
-[ ] Permission Management bileşenleri taşınacak
+[X] Permission Management bileşenleri taşındı
 [ ] Bilgi İşlem, Revir ve Inventory modülleri oluşturulacak
 
 ### Yapılan Değişiklikler
@@ -695,8 +695,19 @@ Angular 19 güncellemesi sonrası uygulamanın modüler yapıya geçirilmesi ve 
    - Boş klasörler temizlendi
    - Angular19_migration.md dosyası güncellendi
 
+3. Permission Management bileşenleri taşıma (10.03.2025):
+   - Bileşenler yedeklendi:
+     - `frontend/src/app/components/permission-management/permission-management.component.ts`
+     - `frontend/src/app/components/user-page-permissions/user-page-permissions.component.ts`
+   - Bileşenler yeni konumlarına taşındı:
+     - `frontend/src/app/features/user-management/components/permission-management.component.ts`
+     - `frontend/src/app/features/user-management/components/user-page-permissions.component.ts`
+   - User Management routes dosyası güncellendi
+   - Eski bileşen dosyaları silindi
+   - Boş klasörler temizlendi
+   - Angular19_migration.md dosyası güncellendi
+
 ### Sonraki Adımlar
-- Permission Management bileşenlerinin taşınması
 - Bilgi İşlem, Revir ve Inventory modüllerinin oluşturulması
 - Tüm modüllerin test edilmesi
 
