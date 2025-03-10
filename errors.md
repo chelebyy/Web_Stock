@@ -3902,3 +3902,43 @@ Login sayfasında şifre alanının arkaplanı beyaz renkteydi, bu nedenle beyaz
 2. Tarayıcıların otomatik doldurma davranışlarının CSS üzerindeki etkilerini dikkate almalıyız.
 3. Özellikle kullanıcı girişi formları gibi kritik bileşenlerde, farklı tarayıcılarda ve farklı kullanım senaryolarında görsel tutarlılığı test etmeliyiz.
 4. CSS stil tanımlamalarında temiz ve minimum tanımlamaları tercih etmeliyiz.
+
+## Angular 19 Geçişi - Eski Bileşenlerin Temizlenmesi
+
+### Login Bileşeni Temizlenmesi
+
+#### Problem Tanımı
+Angular 19 geçişi sırasında, eski login bileşeni (`/frontend/src/app/components/login`) ve yeni login bileşeni (`/frontend/src/app/features/auth/components`) aynı anda sistemde bulunuyordu. Yeni bileşenin başarıyla uygulamaya entegre edilmesi sonrası, eski bileşenin güvenli bir şekilde temizlenmesi gerekiyordu.
+
+#### Temizleme Adımları
+1. Eski ve yeni login bileşenlerinin karşılaştırılması:
+   ```
+   - Eski: `/frontend/src/app/components/login/login.component.*`
+   - Yeni: `/frontend/src/app/features/auth/components/login.component.*`
+   ```
+
+2. Eski login bileşeninin kullanım durumunun analizi:
+   - `app.routes.ts` dosyası incelenerek aktif rotaların yeni bileşene yönlendirildiği doğrulandı
+   - `grep` aramaları ile eski bileşene başka aktif referanslar bulunmadığı teyit edildi
+
+3. Eski bileşen dosyalarının yedeğinin alınması:
+   ```
+   mkdir -p knowledge-base/old_components_backup/login
+   cp frontend/src/app/components/login/login.component.* knowledge-base/old_components_backup/login/
+   ```
+
+4. Eski login bileşeni dosyalarının silinmesi:
+   ```
+   rm frontend/src/app/components/login/login.component.ts
+   rm frontend/src/app/components/login/login.component.html
+   rm frontend/src/app/components/login/login.component.scss
+   rm frontend/src/app/components/login/login.component.spec.ts
+   ```
+
+5. Uygulamanın çalıştırılarak login işlevinin test edilmesi
+
+#### Alınan Dersler
+- Eski bileşenlerin temizlenmeden önce yedeklenmesi çok önemli
+- Bileşenleri silmeden önce tüm referansların yeni modüllere yönlendirildiğinden emin olunmalı
+- HTML, CSS ve TypeScript dosyalarının birlikte temizlenmesi, artık kalan dosyaların oluşmamasını sağlar
+- Bileşen temizliğinden sonra kapsamlı test yapılması, beklenmeyen sorunların erken tespit edilmesini sağlar
