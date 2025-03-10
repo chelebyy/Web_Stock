@@ -580,7 +580,7 @@ Kullanıcı dashboard bileşeni yeniden tasarlandıktan sonra, PrimeNG bileşenl
 
 2. **Varsayılan Profil Resmi Hatası**: UserDashboardComponent içinde, profil resmi yüklenemediğinde kullanılan varsayılan resim dosyasının yolu yanlış belirtilmişti. Dosya `assets/images/default-avatar.png` konumunda olmasına rağmen, kod `assets/default-profile.png` konumunu arıyordu.
 
-3. **Eksik Servis Dosyası**: UserDashboardComponent, PasswordService'i import ediyordu ancak bu servis dosyası mevcut değildi. Bu nedenle TypeScript derleyicisi hata veriyordu.
+3. **Eksik Servis Dosyası**: UserDashboardComponent, PasswordService'i import ediyordu ancak bu servis dosyası mevcut değil. Bu nedenle TypeScript derleyicisi hata veriyordu.
 
 4. **Profil Resmi Endpoint Hatası**: Backend tarafında `/api/users/{userId}/profile-picture` endpoint'i mevcut değil veya doğru çalışmıyor. Bu nedenle profil resmi yüklenirken 404 hatası alınıyor.
 
@@ -731,3 +731,34 @@ Angular 19 güncellemesi sonrası uygulamanın modüler yapıya geçirilmesi ve 
 - Performans optimizasyonu
 
 ### Öğrenilen Dersler
+
+## Rol Yönetimi Sayfasına Erişim Sorunu Çözümü
+
+**Tarih:** 2023-11-15
+
+### Sorun Tanımı
+Angular 19 migrasyonu sonrası rol yönetimi sayfasına tıklandığında login sayfasına yönlendirme sorunu yaşanıyor.
+
+### Yapılan İncelemeler
+- Rol yönetimi rotalarının yapılandırması kontrol edildi ve doğru olduğu görüldü.
+- Auth servisindeki token yönetimi ve izin kontrolleri incelendi.
+- Rota koruyucuları (AuthGuard ve PermissionGuard) incelendi.
+
+### Çözüm Yaklaşımı
+1. [X] Auth servisine debug logları eklendi.
+2. [X] İzin koruyucusuna debug logları eklendi.
+3. [X] Rota koruyucusuna debug logları eklendi.
+4. [ ] Debug logları ile sorunun kaynağı tespit edilecek.
+5. [ ] Tespit edilen soruna göre çözüm uygulanacak.
+
+### Olası Çözümler
+1. Token yönetiminin düzeltilmesi
+2. İzin kontrollerinin güncellenmesi
+3. Rota koruyucularının doğru şekilde yapılandırılması
+4. Kullanıcıya gerekli izinlerin atanması
+
+### Sonraki Adımlar
+- Debug loglarını inceleyerek sorunun kaynağını tespit et.
+- Tespit edilen soruna göre çözüm uygula.
+- Çözümü test et ve doğrula.
+- Benzer sorunların diğer modüllerde de olup olmadığını kontrol et.

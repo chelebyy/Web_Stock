@@ -24,21 +24,31 @@ export class AuthService {
 
   private loadStoredUser(): void {
     const token = this.getToken();
+    console.log('Token kontrolü:', token ? 'Token mevcut' : 'Token bulunamadı');
+    
     if (token) {
-      const decodedToken = this.jwtHelper.decodeToken(token);
-      if (decodedToken) {
-        const user: User = {
-          id: parseInt(decodedToken.nameid),
-          username: decodedToken.name,
-          sicil: decodedToken.sicil || '',
-          isAdmin: decodedToken.role === 'Admin',
-          createdAt: decodedToken.created_at || '',
-          lastLoginAt: decodedToken.last_login_at
-        };
-        this.currentUserSubject.next(user);
+      try {
+        const decodedToken = this.jwtHelper.decodeToken(token);
+        console.log('Token çözümlendi:', decodedToken);
         
-        // İzinleri yükle
-        this.permissions = this.extractPermissionsFromToken(decodedToken);
+        if (decodedToken) {
+          const user: User = {
+            id: parseInt(decodedToken.nameid),
+            username: decodedToken.name,
+            sicil: decodedToken.sicil || '',
+            isAdmin: decodedToken.role === 'Admin',
+            createdAt: decodedToken.created_at || '',
+            lastLoginAt: decodedToken.last_login_at
+          };
+          console.log('Kullanıcı bilgileri:', user);
+          this.currentUserSubject.next(user);
+
+          // İzinleri yükle
+          this.permissions = this.extractPermissionsFromToken(decodedToken);
+          console.log('Kullanıcı izinleri:', this.permissions);
+        }
+      } catch (error) {
+        console.error('Token çözümleme hatası:', error);
       }
     }
   }
@@ -169,12 +179,19 @@ export class AuthService {
   }
 
   hasPermission(permissionName: string): boolean {
+    console.log(`İzin kontrolü: '${permissionName}'`);
+    
     // Admin her zaman tüm izinlere sahiptir
     if (this.isAdmin()) {
+      console.log('Kullanıcı admin, tüm izinlere sahip');
       return true;
     }
-    
+
     // Token'dan izinleri kontrol et
-    return this.permissions.includes(permissionName);
+    const hasPermission = this.permissions.includes(permissionName);
+    console.log(`İzin '${permissionName}' kontrolü sonucu:`, hasPermission ? 'İzin var' : 'İzin yok');
+    console.log('Mevcut izinler:', this.permissions);
+    
+    return hasPermission;
   }
 } 

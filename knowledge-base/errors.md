@@ -32,6 +32,7 @@ Bu dosya, proje geliştirme sürecinde karşılaşılan hataları ve çözümler
 - [Revir ve BilgiIslem İzinlerinin Görünmeme Sorunu](#revir-ve-bilgiislem-izinlerinin-görünmeme-sorunu)
 - [Angular 19 Geçiş Süreci Hataları ve Çözümleri](#angular-19-geçiş-süreci-hataları-ve-çözümleri)
 - [Angular 19 ve PrimeNG 19 Güncelleme Hataları](#angular-19-ve-primeNG-19-güncelleme-hataları)
+- [Rol Yönetimi Sayfasına Erişim Sorunu](#rol-yönetimi-sayfasına-erişim-sorunu)
 
 ## Kullanıcı Aktivitesi Grafiği Yerine Log Kaydetme Sistemi
 
@@ -1696,3 +1697,32 @@ const [roles, loading, loadRoles] = createHttpSignal(
   <p>This is wrong</p>
 </div>
 ```
+
+## Rol Yönetimi Sayfasına Erişim Sorunu
+
+**Tarih:** 2023-11-15
+
+**Hata Açıklaması:** Angular 19 migrasyonu sonrası rol yönetimi sayfasına tıklandığında login sayfasına yönlendirme sorunu yaşandı.
+
+**Çözüm Yaklaşımı:** 
+1. Auth servisine, izin koruyucusuna ve rota koruyucusuna debug logları eklendi.
+2. Token ve izin kontrollerinin nasıl çalıştığını izlemek için loglar eklendi.
+3. Rol yönetimi rotalarının doğru şekilde yapılandırıldığı doğrulandı.
+
+**Olası Nedenler:**
+- Token'ın geçersiz olması veya süresi dolmuş olması
+- İzin kontrollerinde sorun olması
+- Rota koruyucularının doğru şekilde yapılandırılmamış olması
+- Kullanıcının gerekli izinlere sahip olmaması
+
+**Çözüm:**
+Debug logları ile sorunun kaynağı tespit edilecek ve buna göre çözüm uygulanacak. Olası çözümler:
+1. Token yönetiminin düzeltilmesi
+2. İzin kontrollerinin güncellenmesi
+3. Rota koruyucularının doğru şekilde yapılandırılması
+4. Kullanıcıya gerekli izinlerin atanması
+
+**Öğrenilen Dersler:**
+- Rota koruyucuları ve izin kontrolleri için kapsamlı log kaydı tutmak sorun tespitini kolaylaştırır.
+- Token tabanlı yetkilendirme sistemlerinde token içeriğinin doğru şekilde çözümlenmesi ve izinlerin doğru şekilde çıkarılması önemlidir.
+- Lazy loading yapılandırmasında rota koruyucularının doğru şekilde uygulanması gerekir.
