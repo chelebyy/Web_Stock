@@ -1,158 +1,52 @@
 import { Routes } from '@angular/router';
-import { LoginComponent } from './components/login/login.component';
-import { UserManagementComponent } from './components/user-management/user-management.component';
-import { RoleManagementComponent } from './components/role-management/role-management.component';
-import { LayoutComponent } from './components/layout/layout.component';
-import { ComputersComponent } from './components/inventory/computers/computers.component';
 import { AuthGuard } from './core/guards/auth.guard';
 import { PermissionGuard } from './core/guards/permission.guard';
-import { AdminDashboardComponent } from './components/admin-dashboard/admin-dashboard.component';
-import { UserDashboardComponent } from './components/user-dashboard/user-dashboard.component';
-import { RoleDetailComponent } from './components/role-management/role-detail/role-detail.component';
-import { PermissionManagementComponent } from './components/permission-management/permission-management.component';
-import { UserPagePermissionsComponent } from './components/user-page-permissions/user-page-permissions.component';
-import { RevirComponent } from './components/revir/revir.component';
-import { BilgiIslemComponent } from './components/bilgi-islem/bilgi-islem.component';
 
 export const routes: Routes = [
   { path: '', redirectTo: '/login', pathMatch: 'full' },
-  { path: 'login', component: LoginComponent },
-  { 
-    path: 'admin-dashboard', 
-    component: AdminDashboardComponent,
-    canActivate: [AuthGuard, PermissionGuard],
-    data: { 
-      requiresAdmin: true,
-      permissions: ['Pages.AdminDashboard']
-    }
-  },
-  { 
-    path: 'user-dashboard', 
-    component: UserDashboardComponent,
-    canActivate: [AuthGuard, PermissionGuard],
-    data: {
-      permissions: ['Pages.UserDashboard']
-    }
-  },
-  { 
-    path: 'user-management', 
-    component: UserManagementComponent,
-    canActivate: [AuthGuard, PermissionGuard],
-    data: { 
-      requiresAdmin: true,
-      permissions: ['Pages.UserManagement']
-    }
-  },
-  { 
-    path: 'admin/users', 
-    component: UserManagementComponent,
-    canActivate: [AuthGuard, PermissionGuard],
-    data: { 
-      requiresAdmin: true,
-      permissions: ['Pages.UserManagement']
-    }
-  },
-  { 
-    path: 'role-management', 
-    component: RoleManagementComponent,
-    canActivate: [AuthGuard, PermissionGuard],
-    data: { 
-      requiresAdmin: true,
-      permissions: ['Pages.RoleManagement']
-    }
-  },
-  { 
-    path: 'roles', 
-    component: RoleManagementComponent,
-    canActivate: [AuthGuard, PermissionGuard],
-    data: { 
-      requiresAdmin: true,
-      permissions: ['Pages.RoleManagement']
-    }
-  },
-  { 
-    path: 'admin/roles', 
-    component: RoleManagementComponent,
-    canActivate: [AuthGuard, PermissionGuard],
-    data: { 
-      requiresAdmin: true,
-      permissions: ['Pages.RoleManagement']
-    }
-  },
-  { 
-    path: 'roles/:id', 
-    component: RoleDetailComponent,
-    canActivate: [AuthGuard, PermissionGuard],
-    data: { 
-      requiresAdmin: true,
-      permissions: ['Pages.RoleManagement']
-    }
-  },
+  
+  // Auth Module - Lazy Loading
   {
-    path: 'bilgi-islem',
-    component: BilgiIslemComponent,
-    canActivate: [AuthGuard, PermissionGuard],
-    data: {
-      permissions: ['Pages.BilgiIslem.View']
-    }
+    path: 'login',
+    loadChildren: () => import('./features/auth/auth.routes').then(m => m.AUTH_ROUTES)
   },
+  
+  // Dashboard Module - Lazy Loading
   {
-    path: 'revir',
-    component: RevirComponent,
-    canActivate: [AuthGuard, PermissionGuard],
-    data: {
-      permissions: ['Pages.Revir.View']
-    }
+    path: '',
+    loadChildren: () => import('./features/dashboard/dashboard.routes').then(m => m.DASHBOARD_ROUTES)
   },
+  
+  // User Management Module - Lazy Loading
   {
-    path: 'it',
-    component: LayoutComponent,
-    canActivate: [AuthGuard, PermissionGuard],
-    data: {
-      permissions: ['IT.Access', 'Pages.StockManagement']
-    },
-    children: [
-      { path: '', redirectTo: 'inventory/computers', pathMatch: 'full' },
-      { path: 'inventory/computers', component: ComputersComponent },
-      { path: 'inventory/printers', component: ComputersComponent },
-      { path: 'inventory/network', component: ComputersComponent },
-      { path: 'stock/consumables', component: ComputersComponent },
-      { path: 'stock/spare-parts', component: ComputersComponent },
-      { path: 'tasks/active', component: ComputersComponent },
-      { path: 'tasks/completed', component: ComputersComponent },
-      { path: 'settings/general', component: ComputersComponent },
-      { path: 'settings/categories', component: ComputersComponent }
-    ]
+    path: '',
+    loadChildren: () => import('./features/user-management/user-management.routes').then(m => m.USER_MANAGEMENT_ROUTES)
   },
+  
+  // Role Management Module - Lazy Loading
   {
-    path: 'access-denied',
-    component: AdminDashboardComponent,
+    path: '',
+    loadChildren: () => import('./features/role-management/role-management.routes').then(m => m.ROLE_MANAGEMENT_ROUTES)
   },
-  { 
-    path: 'roles/:roleId/permissions', 
-    component: PermissionManagementComponent,
-    canActivate: [AuthGuard, PermissionGuard],
-    data: { 
-      requiresAdmin: true,
-      permissions: ['Roles.Update']
-    }
+  
+  // Bilgi İşlem Module - Lazy Loading
+  {
+    path: '',
+    loadChildren: () => import('./features/bilgi-islem/bilgi-islem.routes').then(m => m.BILGI_ISLEM_ROUTES)
   },
-  { 
-    path: 'users/:userId/permissions', 
-    component: PermissionManagementComponent,
-    canActivate: [AuthGuard, PermissionGuard],
-    data: { 
-      requiresAdmin: true,
-      permissions: ['Users.Permissions.Manage']
-    }
+  
+  // Revir Module - Lazy Loading
+  {
+    path: '',
+    loadChildren: () => import('./features/revir/revir.routes').then(m => m.REVIR_ROUTES)
   },
-  { 
-    path: 'users/:userId/page-permissions', 
-    component: UserPagePermissionsComponent,
-    canActivate: [AuthGuard, PermissionGuard],
-    data: { 
-      requiresAdmin: true,
-      permissions: ['Users.Permissions.Manage']
-    }
-  }
+  
+  // Inventory Module - Lazy Loading
+  {
+    path: '',
+    loadChildren: () => import('./features/inventory/inventory.routes').then(m => m.INVENTORY_ROUTES)
+  },
+  
+  // Catch-all route
+  { path: '**', redirectTo: '/login' }
 ];
