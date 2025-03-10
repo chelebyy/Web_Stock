@@ -550,30 +550,26 @@ Bu aşamada, şu bileşenlerin eski versiyonlarını temizleyeceğiz:
 **1.2. Role Management Module**:
 - ✅ Temizlendi: `frontend/src/app/components/role-management/role-management.component.ts` (10.03.2025)
 - ✅ Temizlendi: `frontend/src/app/components/role-management/role-management.component.html` (10.03.2025)
-- ✅ Temizlendi: `frontend/src/app/components/role-management/role-management.component.scss` (10.03.2025)
 - ✅ Temizlendi: `frontend/src/app/components/role-management/role-detail/role-detail.component.ts` (10.03.2025)
 - ✅ Temizlendi: `frontend/src/app/components/role-management/role-detail/role-detail.component.html` (10.03.2025)
-- ✅ Temizlendi: `frontend/src/app/components/role-management/role-detail/role-detail.component.scss` (10.03.2025)
 - ✅ Temizlendi: `frontend/src/app/app-routing.module.ts` (10.03.2025) - Bu dosya artık kullanılmıyor ve sadece eski role-detail bileşenine referans veriyordu
 
 **1.3. Dashboard Module**:
 - ✅ Temizlendi: `frontend/src/app/components/dashboard/dashboard.component.ts` (10.03.2025)
 - ✅ Temizlendi: `frontend/src/app/components/dashboard/dashboard.component.html` (10.03.2025)
-- ✅ Temizlendi: `frontend/src/app/components/dashboard/dashboard.component.scss` (10.03.2025)
 - ✅ Temizlendi: `frontend/src/app/components/admin-dashboard/admin-dashboard.component.ts` (10.03.2025)
 - ✅ Temizlendi: `frontend/src/app/components/admin-dashboard/admin-dashboard.component.html` (10.03.2025)
-- ✅ Temizlendi: `frontend/src/app/components/admin-dashboard/admin-dashboard.component.scss` (10.03.2025)
 - ✅ Temizlendi: `frontend/src/app/components/user-dashboard/user-dashboard.component.ts` (10.03.2025)
 - ✅ Temizlendi: `frontend/src/app/components/user-dashboard/user-dashboard.component.html` (10.03.2025)
-- ✅ Temizlendi: `frontend/src/app/components/user-dashboard/user-dashboard.component.scss` (10.03.2025)
 
 #### Aşama 2: Kısmen Yeni Yapıya Geçirilen Modüllerin Eski Bileşenlerini Taşıma veya Temizleme
 
 **2.1. User Management Module**:
-- Temizlenecek: `frontend/src/app/components/user-management/user-management.component.ts`
-- Temizlenecek: `frontend/src/app/components/user-management/user-management.component.html`
-- Temizlenecek: `frontend/src/app/components/user-management/user-management.component.scss`
-- Temizlenecek: `frontend/src/app/components/user-management/user-management.component.spec.ts`
+- ✅ Temizlendi: `frontend/src/app/components/user-management/user-management.component.ts` (10.03.2025)
+- ✅ Temizlendi: `frontend/src/app/components/user-management/user-management.component.html` (10.03.2025)
+- ✅ Temizlendi: `frontend/src/app/components/user-management/user-management.component.scss` (10.03.2025)
+- ✅ Temizlendi: `frontend/src/app/components/user-management/user-management.component.spec.ts` (10.03.2025)
+- ✅ Temizlendi: `frontend/src/app/components/user-management/user-management.module.ts` (10.03.2025)
 
 **2.2. Permission Management Bileşenlerini Taşıma**:
 - Taşınacak: `frontend/src/app/components/permission-management/permission-management.component.ts` → `frontend/src/app/features/user-management/components/permission-management.component.ts`
