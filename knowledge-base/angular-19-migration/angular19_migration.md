@@ -535,6 +535,76 @@ Angular 19 geçişi sırasında feature modüllerine taşınan bileşenlerin esk
    - Özellikle ilgili feature'ın tüm fonksiyonlarının çalıştığı doğrulanacak
    - Hata durumunda hızlı geri dönüş için yedekler kullanılacak
 
+### Aşamalı Temizleme Planı
+
+#### Aşama 1: Tamamen Yeni Yapıya Geçirilen Modüllerin Eski Bileşenlerini Temizleme
+
+Bu aşamada, şu bileşenlerin eski versiyonlarını temizleyeceğiz:
+
+**1.1. Auth Module**:
+- Temizlenecek: `frontend/src/app/components/login/login.component.ts`
+- Temizlenecek: `frontend/src/app/components/login/login.component.html`
+- Temizlenecek: `frontend/src/app/components/login/login.component.scss`
+- Temizlenecek: `frontend/src/app/components/login/login.component.spec.ts`
+
+**1.2. Role Management Module**:
+- Temizlenecek: `frontend/src/app/components/role-management/role-management.component.ts`
+- Temizlenecek: `frontend/src/app/components/role-management/role-management.component.html`
+- Temizlenecek: `frontend/src/app/components/role-management/role-management.component.scss`
+- Temizlenecek: `frontend/src/app/components/role-management/role-management.component.spec.ts`
+- Temizlenecek: `frontend/src/app/components/role-management/role-detail/role-detail.component.ts`
+- Temizlenecek: `frontend/src/app/components/role-management/role-detail/role-detail.component.html`
+- Temizlenecek: `frontend/src/app/components/role-management/role-detail/role-detail.component.scss`
+- Temizlenecek: `frontend/src/app/components/role-management/role-detail/role-detail.component.spec.ts`
+
+**1.3. Dashboard Module**:
+- Temizlenecek: `frontend/src/app/components/dashboard/dashboard.component.ts`
+- Temizlenecek: `frontend/src/app/components/dashboard/dashboard.component.html`
+- Temizlenecek: `frontend/src/app/components/dashboard/dashboard.component.scss`
+- Temizlenecek: `frontend/src/app/components/dashboard/dashboard.component.spec.ts`
+- Temizlenecek: `frontend/src/app/components/admin-dashboard/admin-dashboard.component.ts`
+- Temizlenecek: `frontend/src/app/components/admin-dashboard/admin-dashboard.component.html`
+- Temizlenecek: `frontend/src/app/components/admin-dashboard/admin-dashboard.component.scss`
+- Temizlenecek: `frontend/src/app/components/admin-dashboard/admin-dashboard.component.spec.ts`
+- Temizlenecek: `frontend/src/app/components/user-dashboard/user-dashboard.component.ts`
+- Temizlenecek: `frontend/src/app/components/user-dashboard/user-dashboard.component.html`
+- Temizlenecek: `frontend/src/app/components/user-dashboard/user-dashboard.component.scss`
+- Temizlenecek: `frontend/src/app/components/user-dashboard/user-dashboard.component.spec.ts`
+
+#### Aşama 2: Kısmen Yeni Yapıya Geçirilen Modüllerin Eski Bileşenlerini Taşıma veya Temizleme
+
+**2.1. User Management Module**:
+- Temizlenecek: `frontend/src/app/components/user-management/user-management.component.ts`
+- Temizlenecek: `frontend/src/app/components/user-management/user-management.component.html`
+- Temizlenecek: `frontend/src/app/components/user-management/user-management.component.scss`
+- Temizlenecek: `frontend/src/app/components/user-management/user-management.component.spec.ts`
+
+**2.2. Permission Management Bileşenlerini Taşıma**:
+- Taşınacak: `frontend/src/app/components/permission-management/permission-management.component.ts` → `frontend/src/app/features/user-management/components/permission-management.component.ts`
+- Taşınacak: `frontend/src/app/components/user-page-permissions/user-page-permissions.component.ts` → `frontend/src/app/features/user-management/components/user-page-permissions.component.ts`
+
+- User Management'in routes dosyasını güncelleme (user-management.routes.ts)
+
+#### Aşama 3: Yeni Feature Modülleri Oluşturma ve Taşıma
+
+**3.1. Bilgi İşlem Feature Modülü**:
+- Yeni klasör oluşturma: `frontend/src/app/features/bilgi-islem/`
+- Yeni bileşen oluşturma: `frontend/src/app/features/bilgi-islem/components/bilgi-islem.component.ts`
+- Routes dosyası oluşturma: `frontend/src/app/features/bilgi-islem/bilgi-islem.routes.ts`
+- App routes'u güncelleme
+
+**3.2. Revir Feature Modülü**:
+- Yeni klasör oluşturma: `frontend/src/app/features/revir/`
+- Yeni bileşen oluşturma: `frontend/src/app/features/revir/components/revir.component.ts`
+- Routes dosyası oluşturma: `frontend/src/app/features/revir/revir.routes.ts`
+- App routes'u güncelleme
+
+**3.3. Inventory Feature Modülü** (Computers bileşeni için):
+- Yeni klasör oluşturma: `frontend/src/app/features/inventory/`
+- Yeni bileşen oluşturma: `frontend/src/app/features/inventory/components/computers/computers.component.ts`
+- Routes dosyası oluşturma: `frontend/src/app/features/inventory/inventory.routes.ts`
+- App routes'u güncelleme
+
 ### Temizlenecek Eski Bileşenler
 
 Aşağıdaki bileşenler geçiş sürecinde taşınmış ve eski versiyonları kaldırılacaktır:
@@ -545,13 +615,16 @@ Aşağıdaki bileşenler geçiş sürecinde taşınmış ve eski versiyonları k
 2. **Dashboard Module**:
    - `src/app/components/dashboard/dashboard.component.*` -> `src/app/features/dashboard/components/dashboard.component.*`
    - `src/app/components/admin-dashboard/admin-dashboard.component.*` -> `src/app/features/dashboard/components/admin-dashboard.component.*`
+   - `src/app/components/user-dashboard/user-dashboard.component.*` -> `src/app/features/dashboard/components/user-dashboard.component.*`
 
 3. **User Management Module**:
    - `src/app/components/user-management/user-management.component.*` -> `src/app/features/user-management/components/user-management.component.*`
+   - `src/app/components/permission-management/permission-management.component.*` -> `src/app/features/user-management/components/permission-management.component.*` (taşınacak)
+   - `src/app/components/user-page-permissions/user-page-permissions.component.*` -> `src/app/features/user-management/components/user-page-permissions.component.*` (taşınacak)
 
 4. **Role Management Module**:
    - `src/app/components/role-management/role-management.component.*` -> `src/app/features/role-management/components/role-management.component.*`
-   - `src/app/components/role-detail/role-detail.component.*` -> `src/app/features/role-management/components/role-detail/role-detail.component.*`
+   - `src/app/components/role-management/role-detail/role-detail.component.*` -> `src/app/features/role-management/components/role-detail/role-detail.component.*`
 
 ### Zaman Çizelgesi
 
@@ -567,3 +640,15 @@ Aşağıdaki bileşenler geçiş sürecinde taşınmış ve eski versiyonları k
   - **Önlem**: Her silme işleminden önce staging ortamında test
 - **Risk**: Geri dönüş gereksinimi
   - **Önlem**: Detaylı yedekleme ve sürüm kontrol sistemi ile işaretleme 
+
+### Temizleme Kontrol Listesi
+
+Her bileşen için aşağıdaki kontrol listesi uygulanacaktır:
+
+1. [ ] Bileşenin yeni versiyonunun tüm işlevselliğinin çalıştığını doğrula
+2. [ ] Bileşene yapılan tüm referansları tespit et
+3. [ ] Referansları yeni bileşene yönlendir
+4. [ ] Eski bileşeni yedekle
+5. [ ] Eski bileşeni sil
+6. [ ] Uygulamayı test et
+7. [ ] Değişiklikleri commit et ve dokümante et 
