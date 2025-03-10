@@ -4343,3 +4343,119 @@ PrimeNG checkbox bileşenleri `[(ngModel)]` veya `formControlName` gibi bir veri
 - PrimeNG bileşenlerini kullanırken, veri bağlantısı için `[(ngModel)]` veya `formControlName` kullanılmalıdır.
 - Etkileşimli bileşenler için, durumu saklamak ve olayları işlemek için gerekli değişkenler ve metodlar tanımlanmalıdır.
 - Angular 19'da kullanımdan kaldırılan metodlar yerine, modern alternatifler kullanılmalıdır.
+```
+
+## PrimeNG 19 Uyumluluk Sorunları
+
+### PrimeNG Checkbox Fonksiyonalitesi Sorunu (Angular 19)
+
+**Tarih:** 2025-06-08
+
+**Hata Mesajı:** 
+```
+Kullanıcı yönetimi sayfasında checkbox'lar düzgün çalışmıyor. Kullanıcı ID 20 için checkbox işaretlenmiyor veya işareti kaldırılmıyor.
+```
+
+**Nedeni:**
+1. PrimeNG'nin `<p-checkbox>` bileşeni Angular 19 ile tam uyumlu çalışmıyor
+2. `[(ngModel)]` binding ve `onChange` event handling mekanizması düzgün çalışmıyor
+3. PrimeNG'nin DOM yapısı ve Angular 19'un değişiklik algılama mekanizması arasında uyumsuzluk var
+4. Checkbox'ların görsel stili ve etkileşimi doğru şekilde uygulanmıyor
+
+**Çözüm:**
+1. PrimeNG'nin `<p-checkbox>` bileşeni yerine standart HTML checkbox'ları kullanıldı:
+```html
+<!-- Eski kod (PrimeNG checkbox) -->
+<p-checkbox [(ngModel)]="selectedUsers[user.id]" [binary]="true" (onChange)="toggleUserSelection(user.id)"></p-checkbox>
+
+<!-- Yeni kod (Özel HTML checkbox) -->
+<div class="custom-checkbox-container">
+  <input type="checkbox" [id]="'user_' + user.id" class="custom-checkbox-input" 
+         [checked]="selectedUsers[user.id]" (change)="toggleUserSelection(user.id)">
+  <label [for]="'user_' + user.id" class="custom-checkbox-label"></label>
+</div>
+```
+
+2. Özel CSS stilleri eklendi:
+```scss
+.custom-checkbox-container {
+  position: relative;
+  display: inline-block;
+  width: 20px;
+  height: 20px;
+  cursor: pointer;
+}
+
+.custom-checkbox-input {
+  position: absolute;
+  opacity: 0;
+  cursor: pointer;
+  height: 0;
+  width: 0;
+}
+
+.custom-checkbox-label {
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 20px;
+  width: 20px;
+  background-color: #ffffff;
+  border: 2px solid #3B82F6;
+  border-radius: 4px;
+  transition: all 0.2s ease;
+}
+
+.custom-checkbox-label:hover {
+  background-color: #f0f7ff;
+}
+
+.custom-checkbox-input:checked + .custom-checkbox-label {
+  background-color: #3B82F6;
+}
+
+.custom-checkbox-input:checked + .custom-checkbox-label:after {
+  content: "";
+  position: absolute;
+  left: 6px;
+  top: 2px;
+  width: 5px;
+  height: 10px;
+  border: solid white;
+  border-width: 0 2px 2px 0;
+  transform: rotate(45deg);
+}
+```
+
+3. TypeScript kodunda `toggleSelectAll` ve `toggleUserSelection` metotları güncellendi:
+```typescript
+toggleSelectAll() {
+  console.log('Önceki durum:', this.selectAllChecked);
+  this.selectAllChecked = !this.selectAllChecked;
+  
+  this.users.forEach(user => {
+    this.selectedUsers[user.id] = this.selectAllChecked;
+  });
+  
+  console.log('Seçilen kullanıcılar:', this.selectedUsers);
+}
+
+toggleUserSelection(userId: number) {
+  console.log('Kullanıcı seçimi değişti:', userId, 'Önceki durum:', this.selectedUsers[userId]);
+  this.selectedUsers[userId] = !this.selectedUsers[userId];
+  
+  // Tüm kullanıcılar seçili mi kontrol et
+  const allSelected = this.users.every(user => this.selectedUsers[user.id]);
+  this.selectAllChecked = allSelected;
+}
+```
+
+**Öğrenilen Dersler:**
+1. PrimeNG bileşenleri ile Angular 19 arasında uyumluluk sorunları olabilir
+2. Karmaşık bileşenler yerine bazen daha basit HTML/CSS çözümleri tercih edilebilir
+3. Özel CSS ile standart HTML bileşenlerini görsel olarak zenginleştirmek mümkün
+4. Checkbox gibi temel bileşenlerde sorun yaşandığında, kendi özel bileşenlerinizi oluşturmak daha güvenilir olabilir
+5. Değişiklik algılama sorunlarını çözmek için konsola log eklemek faydalı olabilir
+6. Bileşen etkileşimlerinde her zaman önceki ve sonraki durumu kontrol etmek önemlidir
+
+**Referans:** [knowledge-base/checkbox_functionality_knowledge_base.md](knowledge-base/checkbox_functionality_knowledge_base.md)
