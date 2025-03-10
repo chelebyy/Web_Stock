@@ -748,17 +748,36 @@ Angular 19 migrasyonu sonrası rol yönetimi sayfasına tıklandığında login 
 1. [X] Auth servisine debug logları eklendi.
 2. [X] İzin koruyucusuna debug logları eklendi.
 3. [X] Rota koruyucusuna debug logları eklendi.
-4. [ ] Debug logları ile sorunun kaynağı tespit edilecek.
-5. [ ] Tespit edilen soruna göre çözüm uygulanacak.
+4. [X] Debug logları ile sorunun kaynağı tespit edildi.
+5. [X] Tespit edilen soruna göre çözüm uygulandı.
 
-### Olası Çözümler
-1. Token yönetiminin düzeltilmesi
-2. İzin kontrollerinin güncellenmesi
-3. Rota koruyucularının doğru şekilde yapılandırılması
-4. Kullanıcıya gerekli izinlerin atanması
+### Tespit Edilen Sorun
+Token içindeki izinlerin doğru şekilde çıkarılmaması sorunu tespit edildi. Debug logları incelendiğinde:
+- `extractPermissionsFromToken` metodu, token içerisinde string veya array olarak gelebilecek izinleri doğru şekilde kontrol etmiyordu
+- Bazı token yapılandırmalarında kullanılan "PermissionNames" claim'i kontrolü eksikti
+- Yukarıdaki nedenlerle, 'Pages.RoleManagement' izni token içinde olsa bile izinler listesine eklenemiyordu
 
-### Sonraki Adımlar
-- Debug loglarını inceleyerek sorunun kaynağını tespit et.
-- Tespit edilen soruna göre çözüm uygula.
-- Çözümü test et ve doğrula.
-- Benzer sorunların diğer modüllerde de olup olmadığını kontrol et.
+### Uygulanan Çözümler
+1. **`extractPermissionsFromToken` metodu güncellendi:**
+   - `Permission` claim'i için daha sağlam tip kontrolü eklendi (string, array veya diğer tipler için)
+   - `PermissionNames` claim'i için destek eklendi (bazı token yapılandırmalarında kullanılabilir)
+   - Tekrarlayan izinleri temizlemek için Set kullanıldı
+   - Daha detaylı loglama eklendi
+
+2. **`hasPermission` metodu güncellendi:**
+   - Daha detaylı loglama eklendi
+   - Admin kullanıcılar için izin kontrolünün doğru çalıştığından emin olundu
+
+3. **`PermissionGuard.canActivate` metodu güncellendi:**
+   - Daha detaylı loglama eklendi
+   - Her bir izin için bireysel kontrol ve loglama eklendi
+
+### Sonuç
+Bu değişiklikler sonrasında, rol yönetimi sayfasına erişim sorunu çözüldü. Kullanıcılar artık rol yönetimi sayfasına düzgün bir şekilde erişebiliyorlar.
+
+### Öğrenilen Dersler
+- Token içindeki claim'lerin farklı formatlarda gelebileceğini dikkate almalıyız
+- İzin kontrolü yaparken tüm olası claim formatlarını desteklemeliyiz
+- Detaylı loglama, karmaşık yetkilendirme sorunlarını çözmede çok değerlidir
+- Admin kullanıcıların özel durumlarını dikkatle ele almalıyız
+- Lazy loading mimarisi, yetkilendirme mekanizmalarında yeni zorluklar getirebilir

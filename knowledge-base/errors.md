@@ -1709,20 +1709,27 @@ const [roles, loading, loadRoles] = createHttpSignal(
 2. Token ve izin kontrollerinin nasıl çalıştığını izlemek için loglar eklendi.
 3. Rol yönetimi rotalarının doğru şekilde yapılandırıldığı doğrulandı.
 
-**Olası Nedenler:**
-- Token'ın geçersiz olması veya süresi dolmuş olması
-- İzin kontrollerinde sorun olması
-- Rota koruyucularının doğru şekilde yapılandırılmamış olması
-- Kullanıcının gerekli izinlere sahip olmaması
+**Tespit Edilen Sorun:**
+Token içindeki izinlerin doğru şekilde çıkarılmaması sorunu tespit edildi. `extractPermissionsFromToken` metodu, token içerisinde string veya array olarak gelebilecek izinleri doğru şekilde kontrol etmiyordu. Ayrıca, bazı token yapılandırmalarında kullanılan "PermissionNames" claim'i kontrolü eksikti.
 
 **Çözüm:**
-Debug logları ile sorunun kaynağı tespit edilecek ve buna göre çözüm uygulanacak. Olası çözümler:
-1. Token yönetiminin düzeltilmesi
-2. İzin kontrollerinin güncellenmesi
-3. Rota koruyucularının doğru şekilde yapılandırılması
-4. Kullanıcıya gerekli izinlerin atanması
+1. `extractPermissionsFromToken` metodu güncellendi:
+   - `Permission` claim'i için daha sağlam tip kontrolü eklendi
+   - `PermissionNames` claim'i için destek eklendi
+   - Tekrarlayan izinleri temizlemek için Set kullanıldı
+   - Daha detaylı loglama eklendi
+
+2. `hasPermission` metodu güncellendi:
+   - Daha detaylı loglama eklendi
+   - Admin kullanıcılar için doğru izin kontrolü sağlandı
+
+3. `PermissionGuard.canActivate` metodu güncellendi:
+   - Daha detaylı loglama eklendi
+   - Her bir izin için bireysel kontrol ve loglama eklendi
 
 **Öğrenilen Dersler:**
-- Rota koruyucuları ve izin kontrolleri için kapsamlı log kaydı tutmak sorun tespitini kolaylaştırır.
-- Token tabanlı yetkilendirme sistemlerinde token içeriğinin doğru şekilde çözümlenmesi ve izinlerin doğru şekilde çıkarılması önemlidir.
-- Lazy loading yapılandırmasında rota koruyucularının doğru şekilde uygulanması gerekir.
+- Token içindeki claim'lerin farklı formatlarda gelebileceğini dikkate almalıyız
+- İzin kontrolü yaparken tüm olası claim formatlarını desteklemeliyiz
+- Detaylı loglama, karmaşık yetkilendirme sorunlarını çözmede çok değerlidir
+- Admin kullanıcıların özel durumlarını dikkatle ele almalıyız
+- Yeni uygulamanın lazy loading mimarisinde yetkilendirmenin farklı çalışabileceğini göz önünde bulundurmalıyız

@@ -34,8 +34,11 @@ export class PermissionGuard {
     }
 
     // Kullanıcının gerekli izinlerden en az birine sahip olup olmadığını kontrol et
-    const hasPermission = requiredPermissions.some(permission => 
-      this.authService.hasPermission(permission));
+    const hasPermission = requiredPermissions.some(permission => {
+      const hasOnePermission = this.authService.hasPermission(permission);
+      console.log(`PermissionGuard: İzin kontrolü - "${permission}": ${hasOnePermission ? 'Var' : 'Yok'}`);
+      return hasOnePermission;
+    });
     
     console.log('PermissionGuard: İzin kontrolü sonucu:', hasPermission ? 'İzin var' : 'İzin yok');
 

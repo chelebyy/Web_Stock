@@ -56,19 +56,50 @@ export class AuthService {
   // Token'dan izinleri çıkartır
   private extractPermissionsFromToken(decodedToken: any): string[] {
     const permissions: string[] = [];
+    console.log('Token içindeki izin claim\'leri:', 
+                { Permission: decodedToken.Permission, 
+                  PermissionNames: decodedToken.PermissionNames });
     
-    // Permission claim'lerini bul
+    // Permission claim'lerini kontrol et
     if (decodedToken.Permission) {
-      if (Array.isArray(decodedToken.Permission)) {
-        // Birden fazla izin varsa
-        permissions.push(...decodedToken.Permission);
-      } else {
-        // Tek bir izin varsa
+      // String formatında tek bir izin olabilir
+      if (typeof decodedToken.Permission === 'string') {
         permissions.push(decodedToken.Permission);
+        console.log('Tek string izin eklendi:', decodedToken.Permission);
+      }
+      // Array formatında birden çok izin olabilir
+      else if (Array.isArray(decodedToken.Permission)) {
+        permissions.push(...decodedToken.Permission);
+        console.log('Dizi olarak izinler eklendi:', decodedToken.Permission);
+      } else {
+        console.log('Permission claim var ama tanınmayan formatta:', typeof decodedToken.Permission);
+      }
+    } else {
+      console.log('Permission claim bulunamadı');
+    }
+    
+    // PermissionNames claim'ini de kontrol et (bazı token yapılandırmalarında kullanılabilir)
+    if (decodedToken.PermissionNames) {
+      if (typeof decodedToken.PermissionNames === 'string') {
+        permissions.push(decodedToken.PermissionNames);
+        console.log('PermissionNames string olarak eklendi:', decodedToken.PermissionNames);
+      }
+      else if (Array.isArray(decodedToken.PermissionNames)) {
+        permissions.push(...decodedToken.PermissionNames);
+        console.log('PermissionNames dizi olarak eklendi:', decodedToken.PermissionNames);
+      } else {
+        console.log('PermissionNames claim var ama tanınmayan formatta:', typeof decodedToken.PermissionNames);
       }
     }
     
-    return permissions;
+    // permissions içeriğini kontrol et
+    console.log('Çıkarılan izinler (temizleme öncesi):', permissions);
+    
+    // Tekrarlayan izinleri temizle
+    const uniquePermissions = [...new Set(permissions)];
+    console.log('Çıkarılan benzersiz izinler:', uniquePermissions);
+    
+    return uniquePermissions;
   }
 
   login(loginRequest: LoginRequest): Observable<LoginResponse> {
@@ -186,7 +217,7 @@ export class AuthService {
       console.log('Kullanıcı admin, tüm izinlere sahip');
       return true;
     }
-
+    
     // Token'dan izinleri kontrol et
     const hasPermission = this.permissions.includes(permissionName);
     console.log(`İzin '${permissionName}' kontrolü sonucu:`, hasPermission ? 'İzin var' : 'İzin yok');
