@@ -557,15 +557,15 @@ Bu aşamada, şu bileşenlerin eski versiyonlarını temizleyeceğiz:
 - ✅ Temizlendi: `frontend/src/app/app-routing.module.ts` (10.03.2025) - Bu dosya artık kullanılmıyor ve sadece eski role-detail bileşenine referans veriyordu
 
 **1.3. Dashboard Module**:
-- Temizlenecek: `frontend/src/app/components/dashboard/dashboard.component.ts`
-- Temizlenecek: `frontend/src/app/components/dashboard/dashboard.component.html`
-- Temizlenecek: `frontend/src/app/components/dashboard/dashboard.component.scss`
-- Temizlenecek: `frontend/src/app/components/admin-dashboard/admin-dashboard.component.ts`
-- Temizlenecek: `frontend/src/app/components/admin-dashboard/admin-dashboard.component.html`
-- Temizlenecek: `frontend/src/app/components/admin-dashboard/admin-dashboard.component.scss`
-- Temizlenecek: `frontend/src/app/components/user-dashboard/user-dashboard.component.ts`
-- Temizlenecek: `frontend/src/app/components/user-dashboard/user-dashboard.component.html`
-- Temizlenecek: `frontend/src/app/components/user-dashboard/user-dashboard.component.scss`
+- ✅ Temizlendi: `frontend/src/app/components/dashboard/dashboard.component.ts` (10.03.2025)
+- ✅ Temizlendi: `frontend/src/app/components/dashboard/dashboard.component.html` (10.03.2025)
+- ✅ Temizlendi: `frontend/src/app/components/dashboard/dashboard.component.scss` (10.03.2025)
+- ✅ Temizlendi: `frontend/src/app/components/admin-dashboard/admin-dashboard.component.ts` (10.03.2025)
+- ✅ Temizlendi: `frontend/src/app/components/admin-dashboard/admin-dashboard.component.html` (10.03.2025)
+- ✅ Temizlendi: `frontend/src/app/components/admin-dashboard/admin-dashboard.component.scss` (10.03.2025)
+- ✅ Temizlendi: `frontend/src/app/components/user-dashboard/user-dashboard.component.ts` (10.03.2025)
+- ✅ Temizlendi: `frontend/src/app/components/user-dashboard/user-dashboard.component.html` (10.03.2025)
+- ✅ Temizlendi: `frontend/src/app/components/user-dashboard/user-dashboard.component.scss` (10.03.2025)
 
 #### Aşama 2: Kısmen Yeni Yapıya Geçirilen Modüllerin Eski Bileşenlerini Taşıma veya Temizleme
 
