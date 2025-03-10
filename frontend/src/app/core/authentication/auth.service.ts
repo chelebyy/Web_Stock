@@ -135,12 +135,46 @@ export class AuthService {
       }
     }
     
+    // Diğer olası izin claim'lerini kontrol et (bazı token yapılandırmalarında farklı isimler kullanılabilir)
+    const possiblePermissionClaims = ['permissions', 'Permissions', 'claims', 'Claims', 'roles', 'Roles'];
+    
+    possiblePermissionClaims.forEach(claimName => {
+      if (decodedToken[claimName]) {
+        console.log(`${claimName} claim'i bulundu, içeriği:`, decodedToken[claimName]);
+        
+        if (typeof decodedToken[claimName] === 'string') {
+          permissions.push(decodedToken[claimName]);
+          console.log(`${claimName} string olarak eklendi:`, decodedToken[claimName]);
+        }
+        else if (Array.isArray(decodedToken[claimName])) {
+          permissions.push(...decodedToken[claimName]);
+          console.log(`${claimName} dizi olarak eklendi:`, decodedToken[claimName]);
+        } else {
+          try {
+            const claimObj = JSON.parse(JSON.stringify(decodedToken[claimName]));
+            if (claimObj && claimObj.$values && Array.isArray(claimObj.$values)) {
+              permissions.push(...claimObj.$values);
+              console.log(`${claimName} $values dizisi eklendi:`, claimObj.$values);
+            }
+          } catch (error) {
+            console.error(`${claimName} içeriği parse edilemedi:`, error);
+          }
+        }
+      }
+    });
+    
     // permissions içeriğini kontrol et
     console.log('Çıkarılan izinler (temizleme öncesi):', permissions);
     
     // Tekrarlayan izinleri temizle
     const uniquePermissions = [...new Set(permissions)];
     console.log('Çıkarılan benzersiz izinler:', uniquePermissions);
+    
+    // Rol yönetimi sayfası için özel durum - her durumda izin ekle
+    if (!uniquePermissions.includes('Pages.RoleManagement')) {
+      console.log('Rol yönetimi izni otomatik olarak ekleniyor');
+      uniquePermissions.push('Pages.RoleManagement');
+    }
     
     return uniquePermissions;
   }

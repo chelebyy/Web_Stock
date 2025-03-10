@@ -26,6 +26,13 @@ export class PermissionGuard {
     console.log('Token mevcut mu:', token ? 'Evet' : 'Hayır');
     console.log('Token süresi dolmuş mu:', token ? (this.authService['jwtHelper'].isTokenExpired(token) ? 'Evet' : 'Hayır') : 'Token yok');
 
+    // Rol yönetimi sayfası için özel durum - her zaman erişime izin ver
+    const url = route.url.join('/');
+    if (url === 'role-management' || url === 'roles' || url.startsWith('roles/')) {
+      console.log('PermissionGuard: Rol yönetimi sayfası için özel durum, erişim onaylandı');
+      return true;
+    }
+
     // Admin kullanıcılar her sayfaya erişebilir
     if (this.authService.isAdmin()) {
       console.log('PermissionGuard: Kullanıcı admin, erişim onaylandı');

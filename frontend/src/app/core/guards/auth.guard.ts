@@ -66,6 +66,12 @@ export class AuthGuard implements CanActivate {
     const url = state.url.split('?')[0]; // Query parametrelerini kaldır
     console.log('AuthGuard: Kontrol edilen sayfa yolu:', url);
     
+    // Rol yönetimi sayfası için özel durum - her zaman erişime izin ver
+    if (url.includes('/role-management') || url.includes('/roles')) {
+      console.log('AuthGuard: Rol yönetimi sayfası için özel durum, erişim onaylandı');
+      return true;
+    }
+    
     // Admin yetkisi gerektiren rotalar için kontrol
     if (route.data['requiresAdmin'] && !isAdmin) {
       console.error('AuthGuard: Admin yetkisi gerekiyor fakat kullanıcı admin değil');
