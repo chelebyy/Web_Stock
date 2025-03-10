@@ -309,30 +309,125 @@
 - [Bilgi İşlem Modülü (Planlanan)](knowledge-base/feature_modules/bilgi_islem_module.md)
 - [Revir Modülü (Planlanan)](knowledge-base/feature_modules/revir_module.md)
 
-## Angular 19 Geçiş Çalışmaları
+## Angular 19 Geçiş Planı ve Eski Bileşenlerin Temizlenmesi
 
-### Genel Durum
-Angular 19 geçiş çalışmaları kapsamında aşağıdaki işler tamamlanmıştır:
-- [X] Core modüllerinin oluşturulması
-- [X] Feature modüllerinin oluşturulması
-- [X] Lazy loading uygulaması
-- [X] Angular Signals API entegrasyonu
-- [X] Yeni Control Flow syntax uygulaması
-- [X] Temel UI sorunlarının çözülmesi
-- [ ] Mimari yapının dokümantasyonu
-- [ ] Performans optimizasyonu
-- [ ] Test ve doğrulama
+### Mevcut Durum Analizi
 
-### Son Yapılan İşler
-- Login sayfasındaki şifre alanının arka plan rengi sorunu çözüldü. Arka plan rengi daha koyu bir ton olan rgba(35, 40, 50, 0.8) değeri ile güncellendi, böylece beyaz metin görünür hale geldi.
-- Angular 19 geçiş planına "Eski Bileşenlerin Temizlenmesi" bölümü eklendi.
-- Eski ve yeni bileşenlerin birlikte var olma durumu analiz edildi ve çözüm stratejisi geliştirildi.
+Angular 19 geçiş süreci %75 tamamlanmış durumda. Şu ana kadar aşağıdaki modüller yeni yapıya taşındı:
 
-### Sonraki Adımlar
-- [ ] Diğer feature modüllerinin (Bilgi İşlem, Revir) oluşturulması
-- [ ] Signal API ve yeni Control Flow syntax'ının diğer bileşenlere uygulanması
-- [ ] Angular 19 geçişi sırasında oluşan diğer UI sorunlarının tespiti ve çözümü
-- [ ] Test ve doğrulama süreçlerinin tamamlanması
-- [ ] Eski bileşenlerin temizlenmesi
+1. **Tamamen Yeni Yapıya Geçirilen Modüller**:
+   - Auth Module
+   - Dashboard Module
+   - Role Management Module
+
+2. **Kısmen Yeni Yapıya Geçirilen Modüller**:
+   - User Management Module (ana bileşen geçirilmiş, ancak kullanıcı izinleri ile ilgili bileşenler hala eski yapıda)
+
+3. **Henüz Geçirilmeyen Modüller/Bileşenler**:
+   - BilgiIslem
+   - Revir
+   - Computers
+
+Ancak, eski bileşenler hala proje içerisinde yer almakta ve bu durum karmaşıklığı artırmaktadır. Bu nedenle, eski bileşenlerin temizlenmesi için detaylı bir plan oluşturuldu.
+
+### Eski Bileşenlerin Temizlenmesi İçin Yol Haritası
+
+#### Hafta 1: Tamamen Yeni Yapıya Geçirilen Modüllerin Eski Bileşenlerini Temizleme
+
+**Gün 1-2: Auth Module Temizliği**
+- [ ] Login bileşeninin yeni versiyonunun tüm işlevselliğinin çalıştığını doğrula
+- [ ] Eski login bileşenine yapılan tüm referansları tespit et
+- [ ] Referansları yeni login bileşenine yönlendir
+- [ ] Eski login bileşenini yedekle
+- [ ] Eski login bileşenini sil
+- [ ] Uygulamayı test et
+- [ ] Değişiklikleri commit et ve dokümante et
+
+**Gün 3-4: Role Management Module Temizliği**
+- [ ] Role management bileşenlerinin yeni versiyonlarının tüm işlevselliğinin çalıştığını doğrula
+- [ ] Eski role management bileşenlerine yapılan tüm referansları tespit et
+- [ ] Referansları yeni role management bileşenlerine yönlendir
+- [ ] Eski role management bileşenlerini yedekle
+- [ ] Eski role management bileşenlerini sil
+- [ ] Uygulamayı test et
+- [ ] Değişiklikleri commit et ve dokümante et
+
+**Gün 5-6: Dashboard Module Temizliği**
+- [ ] Dashboard bileşenlerinin yeni versiyonlarının tüm işlevselliğinin çalıştığını doğrula
+- [ ] Eski dashboard bileşenlerine yapılan tüm referansları tespit et
+- [ ] Referansları yeni dashboard bileşenlerine yönlendir
+- [ ] Eski dashboard bileşenlerini yedekle
+- [ ] Eski dashboard bileşenlerini sil
+- [ ] Uygulamayı test et
+- [ ] Değişiklikleri commit et ve dokümante et
+
+#### Hafta 2: Kısmen Yeni Yapıya Geçirilen Modüllerin Eski Bileşenlerini Taşıma veya Temizleme
+
+**Gün 1-2: User Management Module Temizliği**
+- [ ] User management bileşeninin yeni versiyonunun tüm işlevselliğinin çalıştığını doğrula
+- [ ] Eski user management bileşenine yapılan tüm referansları tespit et
+- [ ] Referansları yeni user management bileşenine yönlendir
+- [ ] Eski user management bileşenini yedekle
+- [ ] Eski user management bileşenini sil
+- [ ] Uygulamayı test et
+- [ ] Değişiklikleri commit et ve dokümante et
+
+**Gün 3-5: Permission Management Bileşenlerini Taşıma**
+- [ ] Permission management ve user-page-permissions bileşenlerinin yeni versiyonlarını oluştur
+- [ ] Eski bileşenlerin işlevselliğini yeni bileşenlere taşı
+- [ ] User management routes dosyasını güncelle
+- [ ] Eski bileşenlere yapılan tüm referansları tespit et
+- [ ] Referansları yeni bileşenlere yönlendir
+- [ ] Eski bileşenleri yedekle
+- [ ] Eski bileşenleri sil
+- [ ] Uygulamayı test et
+- [ ] Değişiklikleri commit et ve dokümante et
+
+#### Hafta 3: Yeni Feature Modülleri Oluşturma ve Taşıma
+
+**Gün 1-2: Bilgi İşlem Feature Modülü Oluşturma**
+- [ ] Bilgi İşlem feature modülü için klasör yapısını oluştur
+- [ ] Bilgi İşlem bileşeninin yeni versiyonunu oluştur
+- [ ] Bilgi İşlem routes dosyasını oluştur
+- [ ] App routes dosyasını güncelle
+- [ ] Eski bileşene yapılan tüm referansları tespit et
+- [ ] Referansları yeni bileşene yönlendir
+- [ ] Eski bileşeni yedekle
+- [ ] Eski bileşeni sil
+- [ ] Uygulamayı test et
+- [ ] Değişiklikleri commit et ve dokümante et
+
+**Gün 3-4: Revir Feature Modülü Oluşturma**
+- [ ] Revir feature modülü için klasör yapısını oluştur
+- [ ] Revir bileşeninin yeni versiyonunu oluştur
+- [ ] Revir routes dosyasını oluştur
+- [ ] App routes dosyasını güncelle
+- [ ] Eski bileşene yapılan tüm referansları tespit et
+- [ ] Referansları yeni bileşene yönlendir
+- [ ] Eski bileşeni yedekle
+- [ ] Eski bileşeni sil
+- [ ] Uygulamayı test et
+- [ ] Değişiklikleri commit et ve dokümante et
+
+**Gün 5: Inventory Feature Modülü Oluşturma**
+- [ ] Inventory feature modülü için klasör yapısını oluştur
+- [ ] Computers bileşeninin yeni versiyonunu oluştur
+- [ ] Inventory routes dosyasını oluştur
+- [ ] App routes dosyasını güncelle
+- [ ] Eski bileşene yapılan tüm referansları tespit et
+- [ ] Referansları yeni bileşene yönlendir
+- [ ] Eski bileşeni yedekle
+- [ ] Eski bileşeni sil
+- [ ] Uygulamayı test et
+- [ ] Değişiklikleri commit et ve dokümante et
+
+### Riskler ve Önlemler
+
+- **Risk**: Bazı eski bileşenlere yapılan referansların gözden kaçması
+  - **Önlem**: Kapsamlı kod taraması ve otomatik testler
+- **Risk**: Silinen bileşenlerin üretimde sorunlara yol açması
+  - **Önlem**: Her silme işleminden önce staging ortamında test
+- **Risk**: Geri dönüş gereksinimi
+  - **Önlem**: Detaylı yedekleme ve sürüm kontrol sistemi ile işaretleme
 
 
