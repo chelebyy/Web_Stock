@@ -32,11 +32,7 @@ export class HasPermissionDirective implements OnInit {
       return false;
     }
 
-    // Admin kullanıcılar her zaman tüm içeriği görebilir
-    if (this.authService.isAdmin()) {
-      return true;
-    }
-
+    // Admin kontrolünü kaldırdık - artık admin kullanıcılar da izin kontrolüne tabi
     // İzin bir dizi ise, herhangi birinin olması yeterli
     if (Array.isArray(this.hasPermission)) {
       return this.hasPermission.some(permission => 
