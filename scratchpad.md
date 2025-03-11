@@ -419,4 +419,18 @@ Kullanıcı yönetimi sayfasında bulunan checkbox'lar işaretlenmiyordu ve herh
 ### Sonuç
 Kullanıcı yönetimi sayfasındaki checkbox'lar artık işlevsel hale geldi. Kullanıcılar, tek tek veya toplu olarak kullanıcıları seçebilir ve seçili kullanıcılar üzerinde işlemler yapabilir.
 
+## Şifre Doğrulama Sorunu Çözümü
+
+### Tamamlanan İyileştirmeler
+- [X] BCrypt.Net-Next kütüphanesinin hash formatı sorunu çözüldü
+- [X] Admin kullanıcısı şifre hashleme metodu `EnhancedHashPassword` yerine `HashPassword` olarak değiştirildi
+- [X] Program.cs dosyasında erişilebilirlik sorunu çözüldü (Program sınıfı public yapıldı)
+- [X] Uygulama başlangıcında admin kullanıcısının şifresi otomatik olarak güncelleniyor
+
+### Öğrenilen Dersler
+- BCrypt.Net-Next kütüphanesinin farklı hashleme metotları arasındaki farkları anlamak önemlidir
+- Şifre hashleme ve doğrulama işlemlerinde tutarlı metotlar kullanılmalıdır
+- Hata ayıklama için detaylı loglama çok faydalıdır
+- Statik sınıflar tür bağımsız değişkeni olarak kullanılamaz
+
 
