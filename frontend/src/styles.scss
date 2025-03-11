@@ -61,6 +61,12 @@
   --text-color-secondary: #6c757d !important;
   --primary-color: #0077cc !important;
   --primary-color-text: white !important;
+  
+  /* Kalem ikonu için özel değişkenler - Kaldırıldı */
+  /* --pencil-icon-color: #4caf50;
+  --pencil-icon-hover-color: #45a049;
+  --pencil-icon-shadow: 0 2px 5px rgba(76, 175, 80, 0.3);
+  --pencil-icon-hover-shadow: 0 4px 8px rgba(76, 175, 80, 0.4); */
 }
 
 /* Şifre alanları için global stil düzeltmesi */
@@ -2427,3 +2433,23 @@ body .p-dropdown-panel {
   background-color: white !important;
   color: #333333 !important;
 }
+
+/* Kalem ikonu için global stil - Kaldırıldı */
+/* .pi-pencil {
+  position: relative;
+  color: var(--pencil-icon-color);
+  transition: all 0.3s ease;
+} */
+
+/* Özel düğme animasyonları - Kaldırıldı */
+/* @keyframes pulse {
+  0% {
+    box-shadow: 0 0 0 0 rgba(76, 175, 80, 0.4);
+  }
+  70% {
+    box-shadow: 0 0 0 10px rgba(76, 175, 80, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(76, 175, 80, 0);
+  }
+} */
