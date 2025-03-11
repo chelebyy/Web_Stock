@@ -33,6 +33,13 @@
 - Angular 19 ve PrimeNG 19 güncellemesi tamamlandı
 - Login sayfası tasarım sorunları çözüldü (PrimeNG bileşenleri yerine saf HTML/CSS kullanıldı)
 - Hata mesajları için renk kodları düzeltildi (kırmızı: hata, yeşil: başarı)
+- Angular 19 geçiş planı knowledge-base/angular19_migration_plan.md dosyasına eklendi
+- Kullanıcı yönetimi arayüzündeki dropdown ve buton hizalama sorunları çözüldü
+- Tüm dropdown'lar ve butonlar için tutarlı yükseklik (36px) ve stil uygulandı
+- "İzinleri Yönet" butonundaki metin kayma sorunu çözüldü
+- "İzinleri Yönet" butonunda sadece anahtar ikonunun görünmesi sağlandı
+- Kullanıcı ve rol yönetimi sayfalarındaki silme onay dialogu sorunu çözüldü (HTML sanitization sorunu)
+- Rol yönetimi sayfasında rol ekleme, güncelleme ve silme işlemlerinden sonra sayfa otomatik olarak yenileniyor
 
 ## Clean Architecture Geçişi
 
@@ -215,6 +222,7 @@
 - Hata mesajları için uygun renk kodları kullanılmalı (kırmızı: hata, yeşil: başarı)
 - Kullanıcı deneyimini iyileştirmek için animasyonlar ve görsel geri bildirimler eklenmelidir
 - Responsive tasarım için medya sorguları kullanılmalıdır
+- CRUD işlemlerinden sonra veri listesinin otomatik olarak yenilenmesi kullanıcı deneyimini iyileştirir
 
 ## Zaman Çizelgesi
 - **Domain Katmanı**: Tamamlandı
@@ -249,6 +257,7 @@
 - "İzinleri Yönet" butonundaki metin kayma sorunu çözüldü
 - "İzinleri Yönet" butonunda sadece anahtar ikonunun görünmesi sağlandı
 - Kullanıcı ve rol yönetimi sayfalarındaki silme onay dialogu sorunu çözüldü (HTML sanitization sorunu)
+- Rol yönetimi sayfasında rol ekleme, güncelleme ve silme işlemlerinden sonra sayfa otomatik olarak yenileniyor
 
 ## Gelecek Adımlar
 1. GitHub'a son değişiklikleri push etmek

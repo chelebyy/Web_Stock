@@ -136,6 +136,8 @@ export class RoleManagementComponent implements OnInit {
             life: 3000
           });
           this.hideDialog();
+          // Rol listesini yenile
+          this.roleService.loadRoles();
         },
         error: (error) => {
           console.error('Rol güncellenirken hata:', error);
@@ -164,6 +166,8 @@ export class RoleManagementComponent implements OnInit {
             life: 3000
           });
           this.hideDialog();
+          // Rol listesini yenile
+          this.roleService.loadRoles();
         },
         error: (error) => {
           console.error('Rol oluşturulurken hata:', error);
@@ -196,6 +200,8 @@ export class RoleManagementComponent implements OnInit {
         });
         this.roleToDelete = null;
         this.deleteDialogVisible = false;
+        // Rol listesini yenile
+        this.roleService.loadRoles();
       },
       error: (error) => {
         console.error('Rol silinirken hata:', error);

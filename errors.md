@@ -4459,3 +4459,69 @@ toggleUserSelection(userId: number) {
 6. Bileşen etkileşimlerinde her zaman önceki ve sonraki durumu kontrol etmek önemlidir
 
 **Referans:** [knowledge-base/checkbox_functionality_knowledge_base.md](knowledge-base/checkbox_functionality_knowledge_base.md)
+
+## Rol Yönetimi Sayfası Otomatik Yenilenmeme Sorunu
+
+**Sorun:** Rol yönetimi sayfasında yeni bir rol eklendiğinde, kaydet butonuna basıldıktan sonra sayfa otomatik olarak yenilenmiyor ve eklenen yeni rol görünmüyor. Kullanıcının sayfayı manuel olarak yenilemesi gerekiyor.
+
+**Hata Nedeni:** Rol ekleme, güncelleme veya silme işlemlerinden sonra rol listesinin otomatik olarak yenilenmesi için gerekli kod eksik.
+
+**Çözüm:** `role-management.component.ts` dosyasında, rol ekleme, güncelleme ve silme işlemlerinden sonra `roleService.loadRoles()` metodunu çağırarak rol listesinin otomatik olarak yenilenmesini sağladık.
+
+```typescript
+// Rol güncelleme işlemi sonrası
+this.roleService.updateRole(updatedRole.id, updatedRole).subscribe({
+  next: (response) => {
+    this.messageService.add({
+      severity: 'success',
+      summary: 'Başarılı',
+      detail: 'Rol başarıyla güncellendi',
+      life: 3000
+    });
+    this.hideDialog();
+    // Rol listesini yenile
+    this.roleService.loadRoles();
+  },
+  // ...
+});
+
+// Yeni rol oluşturma işlemi sonrası
+this.roleService.createRole(newRole).subscribe({
+  next: (response) => {
+    this.messageService.add({
+      severity: 'success',
+      summary: 'Başarılı',
+      detail: 'Yeni rol başarıyla oluşturuldu',
+      life: 3000
+    });
+    this.hideDialog();
+    // Rol listesini yenile
+    this.roleService.loadRoles();
+  },
+  // ...
+});
+
+// Rol silme işlemi sonrası
+this.roleService.deleteRole(this.roleToDelete.id).subscribe({
+  next: () => {
+    this.messageService.add({
+      severity: 'success',
+      summary: 'Başarılı',
+      detail: `${this.roleToDelete?.name} rolü başarıyla silindi`,
+      life: 3000
+    });
+    this.roleToDelete = null;
+    this.deleteDialogVisible = false;
+    // Rol listesini yenile
+    this.roleService.loadRoles();
+  },
+  // ...
+});
+```
+
+**Öğrenilen Dersler:**
+1. CRUD (Create, Read, Update, Delete) işlemlerinden sonra veri listesinin otomatik olarak yenilenmesi kullanıcı deneyimini iyileştirir
+2. Angular'da reactive programlama yaklaşımında, veri değişikliklerinden sonra ilgili servislerin yeniden yükleme metodlarını çağırmak önemlidir
+3. Signal API kullanıldığında, veri değişikliklerinden sonra signal'ları güncellemek gerekir
+4. Başarılı işlemlerden sonra kullanıcıya görsel geri bildirim vermek ve veri listesini güncellemek iyi bir pratiktir
+5. Rol ekleme, güncelleme ve silme işlemlerinde aynı yenileme mantığını tutarlı bir şekilde uygulamak gerekir
