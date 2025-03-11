@@ -18,7 +18,7 @@
             <img [src]="profileImageUrl" alt="Profil" class="menu-avatar" onerror="this.src='https://via.placeholder.com/60x60?text=A'">
             <div class="menu-user-info">
               <span class="menu-username">{{ username }}</span>
-              <span class="menu-role">Yönetici</span>
+              <span class="menu-role">{{ authService.isAdmin() ? 'Yönetici' : 'Kullanıcı' }}</span>
             </div>
           </div>
           <div class="menu-item" (click)="showPasswordChange = true; showAdminMenu = false;">
@@ -97,7 +97,7 @@
       <!-- Sol Taraf - Ana Yönetim Modülleri -->
       <div class="left-column">
         <div class="admin-modules">
-          <div class="admin-card user-management-card" (click)="navigateToUserManagement()">
+          <div class="admin-card user-management-card" (click)="navigateToUserManagement()" *hasPermission="'Pages.UserManagement'">
             <div class="card-icon">
               <i class="pi pi-users"></i>
             </div>
@@ -107,7 +107,7 @@
             </div>
           </div>
 
-          <div class="admin-card role-management-card" (click)="navigateToRoleManagement()">
+          <div class="admin-card role-management-card" (click)="navigateToRoleManagement()" *hasPermission="'Pages.RoleManagement'">
             <div class="card-icon">
               <i class="pi pi-id-card"></i>
             </div>
@@ -117,7 +117,7 @@
             </div>
           </div>
 
-          <div class="admin-card settings-card" (click)="navigateToSystemSettings()">
+          <div class="admin-card settings-card" (click)="navigateToSystemSettings()" *hasPermission="'Pages.Settings'">
             <div class="card-icon">
               <i class="pi pi-cog"></i>
             </div>
@@ -134,25 +134,25 @@
         <!-- Hızlı Erişim Kartı -->
         <p-card styleClass="quick-access-card" header="Hızlı Erişim">
           <div class="p-grid">
-            <div class="p-col-6 p-md-3">
+            <div class="p-col-6 p-md-3" *hasPermission="'Pages.Reports'">
               <div class="quick-access-item" (click)="navigateToReports()">
                 <i class="pi pi-chart-bar"></i>
                 <span>Raporlar</span>
               </div>
             </div>
-            <div class="p-col-6 p-md-3">
+            <div class="p-col-6 p-md-3" *hasPermission="'Pages.Logs'">
               <div class="quick-access-item" (click)="navigateToLogs()">
                 <i class="pi pi-list"></i>
                 <span>Sistem Logları</span>
               </div>
             </div>
-            <div class="p-col-6 p-md-3">
+            <div class="p-col-6 p-md-3" *hasPermission="'Pages.Backup'">
               <div class="quick-access-item" (click)="navigateToBackup()">
                 <i class="pi pi-database"></i>
                 <span>Yedekleme</span>
               </div>
             </div>
-            <div class="p-col-6 p-md-3">
+            <div class="p-col-6 p-md-3" *hasPermission="'Pages.Help'">
               <div class="quick-access-item" (click)="navigateToHelp()">
                 <i class="pi pi-question-circle"></i>
                 <span>Yardım</span>
@@ -162,7 +162,7 @@
         </p-card>
 
         <!-- Son Aktiviteler Tablosu -->
-        <p-card styleClass="activity-card" header="Son Aktiviteler">
+        <p-card styleClass="activity-card" header="Son Aktiviteler" *hasPermission="'Pages.ActivityLogs'">
           <p-table [value]="recentActivities" [paginator]="true" [rows]="5" styleClass="p-datatable-sm">
             <ng-template pTemplate="header">
               <tr>
