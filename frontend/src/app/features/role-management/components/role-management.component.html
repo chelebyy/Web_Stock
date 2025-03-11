@@ -38,10 +38,10 @@
           <td><div class="role-description">{{role.description}}</div></td>
           <td>
             <div class="action-buttons">
-              <button pButton pRipple icon="pi pi-pencil" class="p-button-rounded p-button-text p-button-info" 
-                      (click)="openDialog(role)" pTooltip="Düzenle"></button>
-              <button pButton pRipple icon="pi pi-trash" class="p-button-rounded p-button-text p-button-danger" 
-                      (click)="deleteRole(role); $event.stopPropagation()" pTooltip="Sil"></button>
+              <button pButton pRipple icon="pi pi-pencil" class="p-button-rounded p-button-text p-button-info dashboard-edit-icon" 
+                      (click)="openDialog(role)" pTooltip="Düzenle" tooltipPosition="top"></button>
+              <button pButton pRipple icon="pi pi-trash" class="p-button-rounded p-button-text p-button-danger dashboard-delete-icon" 
+                      (click)="deleteRole(role); $event.stopPropagation()" pTooltip="Sil" tooltipPosition="top"></button>
             </div>
           </td>
         </tr>
@@ -103,10 +103,10 @@
             }
           </div>
           <div class="role-actions flex gap-2">
-            <button pButton pRipple icon="pi pi-pencil" class="p-button-rounded p-button-sm p-button-outlined" 
-                    (click)="openDialog(role)"></button>
-            <button pButton pRipple icon="pi pi-trash" class="p-button-rounded p-button-sm p-button-outlined p-button-danger" 
-                    (click)="deleteRole(role)"></button>
+            <button pButton pRipple icon="pi pi-pencil" class="p-button-rounded p-button-sm p-button-outlined dashboard-edit-icon" 
+                    (click)="openDialog(role)" pTooltip="Düzenle" tooltipPosition="top"></button>
+            <button pButton pRipple icon="pi pi-trash" class="p-button-rounded p-button-sm p-button-outlined p-button-danger dashboard-delete-icon" 
+                    (click)="deleteRole(role)" pTooltip="Sil" tooltipPosition="top"></button>
           </div>
         </div>
       } @empty {

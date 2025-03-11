@@ -86,11 +86,11 @@
         </div>
         <div class="row-cell actions-cell">
           <div class="action-buttons">
-            <button pButton pRipple icon="pi pi-pencil" class="p-button-rounded p-button-text p-button-info user-management-edit-button" 
-              (click)="editUser(user)" pTooltip="Düzenle"></button>
-            <button pButton pRipple icon="pi pi-trash" class="p-button-rounded p-button-text p-button-danger" 
-              (click)="deleteUser(user)" pTooltip="Sil"></button>
-            <button pButton pRipple icon="pi pi-key" class="p-button-rounded p-button-text p-button-success permission-button" 
+            <button pButton pRipple icon="pi pi-pencil" class="p-button-rounded p-button-text p-button-info dashboard-edit-icon" 
+              (click)="editUser(user)" pTooltip="Düzenle" tooltipPosition="top"></button>
+            <button pButton pRipple icon="pi pi-trash" class="p-button-rounded p-button-text p-button-danger dashboard-delete-icon" 
+              (click)="deleteUser(user)" pTooltip="Sil" tooltipPosition="top"></button>
+            <button pButton pRipple icon="pi pi-key" class="p-button-rounded p-button-text p-button-success dashboard-permission-icon" 
               (click)="manageUserPermissions(user)" pTooltip="İzinleri Yönet" tooltipPosition="top">
               <span class="permission-icon-text">İzinler</span>
             </button>

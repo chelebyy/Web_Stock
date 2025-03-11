@@ -1,5 +1,7 @@
 @import "@angular/material/prebuilt-themes/indigo-pink.css";
 @import "primeicons/primeicons.css";
+@import "./app/features/dashboard/shared/styles/dashboard-icons.scss";
+@import "./app/features/bilgi-islem/shared/styles/bilgi-islem-icons.scss";
 
 /* PrimeNG 19 Tema Ayarları */
 :root {
@@ -62,11 +64,11 @@
   --primary-color: #0077cc !important;
   --primary-color-text: white !important;
   
-  /* Kalem ikonu için özel değişkenler - Kaldırıldı */
-  /* --pencil-icon-color: #4caf50;
+  /* Kalem ikonu için özel değişkenler */
+  --pencil-icon-color: #4caf50;
   --pencil-icon-hover-color: #45a049;
   --pencil-icon-shadow: 0 2px 5px rgba(76, 175, 80, 0.3);
-  --pencil-icon-hover-shadow: 0 4px 8px rgba(76, 175, 80, 0.4); */
+  --pencil-icon-hover-shadow: 0 4px 8px rgba(76, 175, 80, 0.4);
 }
 
 /* Şifre alanları için global stil düzeltmesi */
@@ -2434,15 +2436,15 @@ body .p-dropdown-panel {
   color: #333333 !important;
 }
 
-/* Kalem ikonu için global stil - Kaldırıldı */
-/* .pi-pencil {
+/* Kalem ikonu için global stil */
+.pi-pencil {
   position: relative;
   color: var(--pencil-icon-color);
   transition: all 0.3s ease;
-} */
+}
 
-/* Özel düğme animasyonları - Kaldırıldı */
-/* @keyframes pulse {
+/* Özel düğme animasyonları */
+@keyframes pulse {
   0% {
     box-shadow: 0 0 0 0 rgba(76, 175, 80, 0.4);
   }
@@ -2452,4 +2454,4 @@ body .p-dropdown-panel {
   100% {
     box-shadow: 0 0 0 0 rgba(76, 175, 80, 0);
   }
-} */
+}
