@@ -842,37 +842,44 @@ Bu acil çözüm ile rol yönetimi sayfasına erişim sorunu giderildi. Kullanı
 - [ ] İzin kontrolü mekanizmasının daha güvenli ve tutarlı hale getirilmesi
 - [ ] Özel durumlar yerine daha genel ve güvenli bir yetkilendirme mekanizması geliştirilmesi
 
-## Admin Kullanıcılar İçin İzin Kontrolü Düzeltmesi
-
-**Tarih:** 11.03.2024
+## Görev: Dashboard Management Modülü Hataları Düzeltmesi
 
 ### Görev Tanımı
-B001 kullanıcısı admin paneline erişebiliyor ancak Kullanıcı Yönetimi ve Rol Yönetimi gibi izin verilmemiş modüller de görünüyor. Kullanıcı bu modüllere erişim izni olmadığı halde modülleri görebiliyor. Bu sorunu çözmek için izin kontrolü mekanizmasını düzeltmemiz gerekiyor.
+Dashboard Management modülünde karşılaşılan hataları düzeltmek.
 
 ### İlerleme
-- [X] Sorunun kaynağını tespit ettik: HasPermissionDirective ve AuthService'deki hasPermission metodunda, admin kullanıcılar için izin kontrolü yapılmadan otomatik olarak tüm izinlere sahip olduğu varsayılıyordu.
-- [X] HasPermissionDirective'de admin kullanıcılar için otomatik izin veren kontrolü kaldırdık.
-- [X] AuthService'deki hasPermission metodunda admin kullanıcılar için otomatik izin veren kontrolü kaldırdık.
-- [X] Değişiklikleri GitHub'a gönderdik.
-- [X] Errors.md dosyasına sorunu ve çözümü ekledik.
-- [X] Scratchpad.md dosyasını güncelledik.
+[X] Sorunlar tespit edildi: TagModule eksikliği, tip uyumsuzlukları ve NgModule yapılandırma hataları
+[X] TagModule bileşeni import edildi
+[X] Kullanılmayan HasPermissionDirective import'u kaldırıldı
+[X] Bileşen NgModule'den kaldırıldı (standalone olduğu için)
+[X] getStatusSeverity metodunun dönüş tipi düzeltildi
+[X] TagSeverity tipi PrimeNG'nin beklediği değerlere göre güncellendi
+[X] Bilgi tabanı dosyaları güncellendi
 
 ### Yapılan Değişiklikler
-1. `frontend/src/app/shared/directives/has-permission.directive.ts`:
-   - Admin kullanıcılar için otomatik izin veren kontrolü kaldırdık.
+1. `frontend/src/app/features/dashboard-management/components/dashboard-management.component.ts` dosyasında:
+   - TagModule import edildi
+   - HasPermissionDirective import'u kaldırıldı
+   - TagSeverity tipi tanımlandı ve 'warning' yerine 'warn' kullanıldı
+   - getStatusSeverity metodunun dönüş tipi TagSeverity olarak güncellendi
 
-2. `frontend/src/app/core/authentication/auth.service.ts`:
-   - hasPermission metodunda admin kullanıcılar için otomatik izin veren kontrolü kaldırdık.
+2. `frontend/src/app/features/dashboard-management/dashboard-management.module.ts` dosyasında:
+   - declarations ve exports listeleri kaldırıldı (bileşen standalone olduğu için)
 
-3. Bilgi tabanı güncellemeleri:
-   - `errors.md` dosyasına sorunu ve çözümü ekledik
-   - `scratchpad.md` dosyasını güncelledik.
+3. `frontend/src/app/app.routes.ts` dosyasında:
+   - Dashboard Management rotasındaki izin adı 'dashboard_management' yerine 'Pages.DashboardManagement' olarak güncellendi
+
+4. Bilgi tabanı dosyaları güncellendi:
+   - `knowledge-base/errors.md` dosyasına yeni hata ve çözüm eklendi
+   - `knowledge-base/scratchpad.md` dosyası güncellendi
 
 ### Sonraki Adımlar
-- [ ] Değişiklikleri test et ve B001 kullanıcısının artık sadece izin verilen modülleri görebildiğini doğrula.
-- [ ] Diğer admin kullanıcılarının izinlerini kontrol et ve gerekirse düzenle.
+- Değişikliklerin test edilmesi
+- Dashboard Management modülünün tüm özelliklerinin doğru çalıştığının kontrol edilmesi
+- Backend API entegrasyonunun planlanması
 
 ### Öğrenilen Dersler
-1. Admin kullanıcılar için bile detaylı izin kontrolü yapılmalıdır. Tüm admin kullanıcıların tüm modüllere erişim izni olmamalıdır.
-2. İzin kontrolü, kullanıcının rolüne (admin olup olmadığına) değil, sahip olduğu izinlere göre yapılmalıdır.
-3. Kullanıcıların izinlerini detaylı bir şekilde yönetmek, güvenlik açısından daha iyi bir yaklaşımdır.
+- PrimeNG bileşenlerini kullanırken, bileşenlerin beklediği prop tipleri ve değerlerini doğru şekilde tanımlamak önemlidir
+- Standalone bileşenler, NgModule içinde declarations ve exports listelerine eklenmemelidir
+- Kullanılmayan importlar kaldırılmalıdır
+- PrimeNG'nin Tag bileşeni için severity değerleri: 'success', 'info', 'warn', 'danger', 'secondary', 'contrast'

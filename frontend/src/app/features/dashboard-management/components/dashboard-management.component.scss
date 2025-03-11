@@ -1,0 +1,129 @@
+.dashboard-management-container {
+  padding: 1.5rem;
+  
+  .header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+    
+    .title {
+      h1 {
+        margin: 0;
+        font-size: 1.8rem;
+        color: var(--text-color);
+      }
+      
+      p {
+        margin: 0.5rem 0 0;
+        color: var(--text-color-secondary);
+      }
+    }
+  }
+  
+  .content {
+    margin-bottom: 2rem;
+  }
+  
+  .dashboard-pages-card {
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  }
+  
+  .table-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  
+  .action-buttons {
+    display: flex;
+    justify-content: flex-start;
+    gap: 0.5rem;
+  }
+  
+  .empty-message, .loading-message {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem;
+    
+    .empty-icon, .loading-icon {
+      font-size: 2rem;
+      margin-bottom: 1rem;
+      color: var(--text-color-secondary);
+    }
+    
+    p {
+      margin-bottom: 1rem;
+      color: var(--text-color-secondary);
+    }
+  }
+  
+  .field {
+    margin-bottom: 1.5rem;
+    
+    label {
+      display: block;
+      margin-bottom: 0.5rem;
+      font-weight: 500;
+    }
+    
+    small.p-error {
+      display: block;
+      margin-top: 0.25rem;
+    }
+  }
+  
+  .field-checkbox {
+    display: flex;
+    align-items: center;
+    margin-bottom: 1.5rem;
+    
+    label {
+      margin-left: 0.5rem;
+      margin-bottom: 0;
+    }
+  }
+  
+  ::ng-deep {
+    .p-dialog .p-dialog-header {
+      padding: 1.5rem 1.5rem 0.5rem;
+    }
+    
+    .p-dialog .p-dialog-content {
+      padding: 0 1.5rem 1.5rem;
+    }
+    
+    .p-dialog .p-dialog-footer {
+      padding: 0 1.5rem 1.5rem;
+      text-align: right;
+    }
+    
+    .p-tag {
+      font-size: 0.75rem;
+      font-weight: 500;
+    }
+    
+    .p-datatable .p-datatable-header {
+      background: transparent;
+      border: none;
+      padding: 1rem;
+    }
+    
+    .p-datatable .p-datatable-thead > tr > th {
+      background: var(--surface-card);
+      color: var(--text-color);
+      font-weight: 600;
+    }
+    
+    .p-button-sm {
+      width: 2rem;
+      height: 2rem;
+    }
+    
+    .mr-2 {
+      margin-right: 0.5rem;
+    }
+  }
+} 

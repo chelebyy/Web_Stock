@@ -20,6 +20,7 @@ import { CalendarModule } from 'primeng/calendar';
 import { DialogModule } from 'primeng/dialog';
 import { HostListener } from '@angular/core';
 import { DragDropModule } from '@angular/cdk/drag-drop';
+import { HasPermissionDirective } from '../../../shared/directives/has-permission.directive';
 
 // PrimeNG Tag bileşeni için geçerli severity tipleri
 type TagSeverity = 'success' | 'info' | 'warning' | 'danger' | 'secondary' | 'contrast' | undefined;
@@ -45,13 +46,13 @@ type TagSeverity = 'success' | 'info' | 'warning' | 'danger' | 'secondary' | 'co
         DropdownModule,
         CalendarModule,
         DialogModule,
-        DragDropModule
+        DragDropModule,
+        HasPermissionDirective
     ],
     providers: [MessageService]
 })
 export class AdminDashboardComponent implements OnInit {
   username: string = '';
-  isAdmin: boolean = true;
   showPasswordChange: boolean = false;
   showAdminMenu: boolean = false;
   currentPassword: string = '';
@@ -137,9 +138,21 @@ export class AdminDashboardComponent implements OnInit {
   // Aktif menü öğesi
   activeMenuItem: string = '';
 
+  // Modül erişim izinleri
+  hasUserManagementAccess: boolean = false;
+  hasRoleManagementAccess: boolean = false;
+  hasSettingsAccess: boolean = false;
+  hasReportsAccess: boolean = false;
+  hasLogsAccess: boolean = false;
+  hasBackupAccess: boolean = false;
+  hasHelpAccess: boolean = false;
+  hasActivityLogsAccess: boolean = false;
+  hasDashboardManagementAccess: boolean = false;
+  hasPageManagementAccess: boolean = false;
+
   constructor(
     private router: Router,
-    private authService: AuthService,
+    public authService: AuthService,
     private messageService: MessageService,
     private logService: LogService
   ) {
@@ -154,8 +167,10 @@ export class AdminDashboardComponent implements OnInit {
     const user = this.authService.getCurrentUser();
     if (user) {
       this.username = user.username;
-      this.isAdmin = user.isAdmin;
     }
+    
+    // İzinleri kontrol et
+    this.checkPermissions();
     
     // Sistem verilerini yükle
     this.loadSystemData();
@@ -175,6 +190,33 @@ export class AdminDashboardComponent implements OnInit {
       description: 'Yönetim paneline erişim sağlandı',
       status: 'info'
     }).subscribe();
+  }
+
+  // İzinleri kontrol et
+  checkPermissions(): void {
+    // Modül erişim izinlerini kontrol et
+    this.hasUserManagementAccess = this.authService.hasPermission('Pages.UserManagement');
+    this.hasRoleManagementAccess = this.authService.hasPermission('Pages.RoleManagement');
+    this.hasSettingsAccess = this.authService.hasPermission('Pages.Settings');
+    this.hasReportsAccess = this.authService.hasPermission('Pages.Reports');
+    this.hasLogsAccess = this.authService.hasPermission('Pages.Logs');
+    this.hasBackupAccess = this.authService.hasPermission('Pages.Backup');
+    this.hasHelpAccess = this.authService.hasPermission('Pages.Help');
+    this.hasActivityLogsAccess = this.authService.hasPermission('Pages.ActivityLogs');
+    this.hasDashboardManagementAccess = this.authService.hasPermission('Pages.DashboardManagement');
+    this.hasPageManagementAccess = this.authService.hasPermission('Pages.PageManagement');
+    
+    console.log('İzin kontrolleri yapıldı:');
+    console.log('Kullanıcı Yönetimi:', this.hasUserManagementAccess);
+    console.log('Rol Yönetimi:', this.hasRoleManagementAccess);
+    console.log('Ayarlar:', this.hasSettingsAccess);
+    console.log('Raporlar:', this.hasReportsAccess);
+    console.log('Loglar:', this.hasLogsAccess);
+    console.log('Yedekleme:', this.hasBackupAccess);
+    console.log('Yardım:', this.hasHelpAccess);
+    console.log('Aktivite Logları:', this.hasActivityLogsAccess);
+    console.log('Dashboard Yönetimi:', this.hasDashboardManagementAccess);
+    console.log('Sayfa Yönetimi:', this.hasPageManagementAccess);
   }
   
   // Kullanıcı aktivite loglarını yükle
@@ -479,6 +521,21 @@ export class AdminDashboardComponent implements OnInit {
 
   navigateToHelp(): void {
     this.router.navigate(['/admin/help']);
+  }
+
+  navigateToDashboardManagement(): void {
+    this.router.navigate(['/dashboard-management']);
+    
+    // Kullanıcılara bir bilgi mesajı göster
+    this.messageService.add({
+      severity: 'success',
+      summary: 'Bilgi',
+      detail: 'Dashboard Yönetimi sayfasına yönlendiriliyorsunuz.'
+    });
+  }
+
+  navigateToPageManagement(): void {
+    this.router.navigate(['/admin/page-management']);
   }
 
   togglePasswordChange(): void {

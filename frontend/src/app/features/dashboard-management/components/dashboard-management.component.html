@@ -1,0 +1,152 @@
+<div class="dashboard-management-container">
+  <p-toast></p-toast>
+  
+  <div class="header">
+    <div class="title">
+      <h1>Dashboard Yönetimi</h1>
+      <p>Dashboard sayfalarını ve erişim izinlerini yönetin</p>
+    </div>
+    <div class="actions">
+      <button pButton pRipple label="Yeni Sayfa" icon="pi pi-plus" class="p-button-success" (click)="openNew()"></button>
+    </div>
+  </div>
+  
+  <div class="content">
+    <p-card styleClass="dashboard-pages-card">
+      <p-table 
+        [value]="dashboardPages" 
+        [paginator]="true" 
+        [rows]="10" 
+        [loading]="loading"
+        styleClass="p-datatable-gridlines p-datatable-striped" 
+        [tableStyle]="{'min-width': '50rem'}"
+        [rowHover]="true"
+        dataKey="id"
+        [showCurrentPageReport]="true"
+        currentPageReportTemplate="Toplam {totalRecords} sayfadan {first} - {last} arası gösteriliyor"
+        [rowsPerPageOptions]="[5, 10, 25]">
+        
+        <ng-template pTemplate="caption">
+          <div class="table-header">
+            <span class="p-input-icon-left">
+              <i class="pi pi-search"></i>
+              <input pInputText type="text" placeholder="Ara..." />
+            </span>
+          </div>
+        </ng-template>
+        
+        <ng-template pTemplate="header">
+          <tr>
+            <th pSortableColumn="id" style="width: 5%">ID <p-sortIcon field="id"></p-sortIcon></th>
+            <th pSortableColumn="name" style="width: 20%">Sayfa Adı <p-sortIcon field="name"></p-sortIcon></th>
+            <th pSortableColumn="description" style="width: 25%">Açıklama <p-sortIcon field="description"></p-sortIcon></th>
+            <th pSortableColumn="route" style="width: 15%">Rota <p-sortIcon field="route"></p-sortIcon></th>
+            <th pSortableColumn="requiredPermission" style="width: 15%">Gerekli İzin <p-sortIcon field="requiredPermission"></p-sortIcon></th>
+            <th pSortableColumn="isActive" style="width: 10%">Durum <p-sortIcon field="isActive"></p-sortIcon></th>
+            <th style="width: 10%">İşlemler</th>
+          </tr>
+        </ng-template>
+        
+        <ng-template pTemplate="body" let-page>
+          <tr>
+            <td>{{ page.id }}</td>
+            <td>{{ page.name }}</td>
+            <td>{{ page.description }}</td>
+            <td>{{ page.route }}</td>
+            <td>{{ page.requiredPermission }}</td>
+            <td>
+              <p-tag 
+                [value]="getStatusLabel(page.isActive)" 
+                [severity]="getStatusSeverity(page.isActive)">
+              </p-tag>
+            </td>
+            <td>
+              <div class="action-buttons">
+                <button pButton pRipple icon="pi pi-pencil" class="p-button-rounded p-button-success p-button-sm mr-2" (click)="editPage(page)"></button>
+                <button pButton pRipple icon="pi pi-trash" class="p-button-rounded p-button-danger p-button-sm mr-2" (click)="deletePage(page)"></button>
+                <button pButton pRipple icon="pi pi-external-link" class="p-button-rounded p-button-info p-button-sm" (click)="navigateTo(page.route)"></button>
+              </div>
+            </td>
+          </tr>
+        </ng-template>
+        
+        <ng-template pTemplate="emptymessage">
+          <tr>
+            <td colspan="7" class="text-center">
+              <div class="empty-message">
+                <i class="pi pi-info-circle empty-icon"></i>
+                <p>Henüz dashboard sayfası bulunmuyor.</p>
+                <button pButton pRipple label="Yeni Sayfa Ekle" icon="pi pi-plus" class="p-button-success" (click)="openNew()"></button>
+              </div>
+            </td>
+          </tr>
+        </ng-template>
+        
+        <ng-template pTemplate="loadingbody">
+          <tr>
+            <td colspan="7" class="text-center">
+              <div class="loading-message">
+                <i class="pi pi-spin pi-spinner loading-icon"></i>
+                <p>Yükleniyor...</p>
+              </div>
+            </td>
+          </tr>
+        </ng-template>
+      </p-table>
+    </p-card>
+  </div>
+  
+  <!-- Dashboard Sayfası Ekleme/Düzenleme Dialog -->
+  <p-dialog 
+    [(visible)]="displayDialog" 
+    [style]="{width: '450px'}" 
+    [header]="dialogHeader" 
+    [modal]="true" 
+    styleClass="p-fluid">
+    
+    <ng-template pTemplate="content">
+      <div class="field">
+        <label for="name">Sayfa Adı*</label>
+        <input type="text" pInputText id="name" [(ngModel)]="page.name" required autofocus />
+        <small class="p-error" *ngIf="!page.name && displayDialog">Sayfa adı zorunludur.</small>
+      </div>
+      
+      <div class="field">
+        <label for="description">Açıklama</label>
+        <input type="text" pInputText id="description" [(ngModel)]="page.description" />
+      </div>
+      
+      <div class="field">
+        <label for="route">Rota*</label>
+        <input type="text" pInputText id="route" [(ngModel)]="page.route" required />
+        <small class="p-error" *ngIf="!page.route && displayDialog">Rota zorunludur.</small>
+      </div>
+      
+      <div class="field">
+        <label for="requiredPermission">Gerekli İzin*</label>
+        <p-dropdown 
+          id="requiredPermission" 
+          [options]="permissionOptions" 
+          [(ngModel)]="page.requiredPermission" 
+          placeholder="İzin seçin" 
+          [showClear]="true"
+          optionLabel="label" 
+          optionValue="value"
+          [style]="{'width':'100%'}"
+          required>
+        </p-dropdown>
+        <small class="p-error" *ngIf="!page.requiredPermission && displayDialog">Gerekli izin zorunludur.</small>
+      </div>
+      
+      <div class="field-checkbox">
+        <p-checkbox [(ngModel)]="page.isActive" [binary]="true" inputId="isActive"></p-checkbox>
+        <label for="isActive">Aktif</label>
+      </div>
+    </ng-template>
+    
+    <ng-template pTemplate="footer">
+      <button pButton pRipple label="İptal" icon="pi pi-times" class="p-button-text" (click)="hideDialog()"></button>
+      <button pButton pRipple label="Kaydet" icon="pi pi-check" class="p-button-text" (click)="savePage()"></button>
+    </ng-template>
+  </p-dialog>
+</div> 

@@ -387,17 +387,68 @@
         
         &.admin-badge {
           background-color: rgba(244, 67, 54, 0.1);
-          color: #f44336;
+          color: #f44336; // Kırmızı
         }
         
         &.contributor-badge {
           background-color: rgba(33, 150, 243, 0.1);
-          color: #2196f3;
+          color: #2196f3; // Mavi
         }
         
         &.viewer-badge {
           background-color: rgba(156, 39, 176, 0.1);
-          color: #9c27b0;
+          color: #9c27b0; // Mor
+        }
+        
+        // Yeni otomatik renk sınıfları
+        &.blue-badge {
+          background-color: rgba(33, 150, 243, 0.1);
+          color: #2196f3; // Mavi
+        }
+        
+        &.green-badge {
+          background-color: rgba(76, 175, 80, 0.1);
+          color: #4caf50; // Yeşil
+        }
+        
+        &.purple-badge {
+          background-color: rgba(156, 39, 176, 0.1);
+          color: #9c27b0; // Mor
+        }
+        
+        &.orange-badge {
+          background-color: rgba(255, 152, 0, 0.1);
+          color: #ff9800; // Turuncu
+        }
+        
+        &.teal-badge {
+          background-color: rgba(0, 150, 136, 0.1);
+          color: #009688; // Turkuaz
+        }
+        
+        &.pink-badge {
+          background-color: rgba(233, 30, 99, 0.1);
+          color: #e91e63; // Pembe
+        }
+        
+        &.indigo-badge {
+          background-color: rgba(63, 81, 181, 0.1);
+          color: #3f51b5; // İndigo
+        }
+        
+        &.amber-badge {
+          background-color: rgba(255, 193, 7, 0.1);
+          color: #ffc107; // Amber
+        }
+        
+        &.cyan-badge {
+          background-color: rgba(0, 188, 212, 0.1);
+          color: #00bcd4; // Camgöbeği
+        }
+        
+        &.lime-badge {
+          background-color: rgba(205, 220, 57, 0.1);
+          color: #cddc39; // Limon
         }
       }
     }

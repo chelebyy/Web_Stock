@@ -117,6 +117,26 @@
             </div>
           </div>
 
+          <div class="admin-card dashboard-management-card" (click)="navigateToDashboardManagement()" *hasPermission="'Pages.DashboardManagement'">
+            <div class="card-icon">
+              <i class="pi pi-th-large"></i>
+            </div>
+            <div class="card-content">
+              <h3>Dashboard Yönetimi</h3>
+              <p>Dashboard sayfalarını ve erişim izinlerini yönetin</p>
+            </div>
+          </div>
+
+          <div class="admin-card page-management-card" (click)="navigateToPageManagement()" *hasPermission="'Pages.PageManagement'">
+            <div class="card-icon">
+              <i class="pi pi-file"></i>
+            </div>
+            <div class="card-content">
+              <h3>Sayfa Yönetimi</h3>
+              <p>Sayfalara erişim izinlerini düzenle ve yönet</p>
+            </div>
+          </div>
+
           <div class="admin-card settings-card" (click)="navigateToSystemSettings()" *hasPermission="'Pages.Settings'">
             <div class="card-icon">
               <i class="pi pi-cog"></i>

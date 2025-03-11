@@ -393,6 +393,21 @@ export class AuthService {
   hasPermission(permissionName: string): boolean {
     console.log(`AuthService: hasPermission metodu çalıştı, izin: '${permissionName}'`);
     
+    // Rol yönetimi sayfası için özel durum
+    if (permissionName === 'Pages.RoleManagement') {
+      // Admin her zaman rol yönetimi sayfasına erişebilir
+      if (this.isAdmin()) {
+        console.log('Kullanıcı admin, rol yönetimi iznine sahip');
+        return true;
+      }
+    }
+    
+    // Admin her zaman tüm izinlere sahiptir
+    if (this.isAdmin()) {
+      console.log('Kullanıcı admin, tüm izinlere sahip');
+      return true;
+    }
+    
     // İzinler boşsa ve token varsa, token'dan izinleri yükle
     if (this.permissions.length === 0 && this.getToken()) {
       console.log('İzinler bulunamadı ama token var, token yeniden yükleniyor');

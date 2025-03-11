@@ -91,6 +91,13 @@
 
     <div class="main-content">
       <div class="admin-modules">
+        <div class="module-card" *hasPermission="'Pages.AdminDashboard'">
+          <div class="card-content" (click)="navigateToAdminDashboard()">
+            <i class="pi pi-cog"></i>
+            <h3>ADMİN PANELİ</h3>
+          </div>
+        </div>
+        
         <div class="module-card" *hasPermission="'Pages.BilgiIslem.View'">
           <div class="card-content" (click)="navigateToBilgiIslem()">
             <i class="pi pi-desktop"></i>

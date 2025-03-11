@@ -255,4 +255,28 @@ Modül aşağıdaki Angular 19 özelliklerini kullanacak:
 
 ## Not
 
-**Bu modül, Angular 19 geçişi tamamlandıktan sonra geliştirilecektir.** Şu anda planlanma aşamasındadır ve bu belge süreç ilerledikçe güncellenecektir. 
+**Bu modül, Angular 19 geçişi tamamlandıktan sonra geliştirilecektir.** Şu anda planlanma aşamasındadır ve bu belge süreç ilerledikçe güncellenecektir.
+
+## Bilgi İşlem Sayfası Erişim İzinleri Düzeltmesi
+
+### Tarih: 11.03.2024
+
+### Sorun
+Bilgi İşlem sayfasına erişim izinleri ile ilgili bir tutarsızlık tespit edildi. Kullanıcı dashboard bileşenindeki `checkPermissions` metodu, Bilgi İşlem sayfasına erişim için `IT.Access` izni kontrol ederken, rota tanımında ve HTML şablonunda `Pages.BilgiIslem.View` izni kullanılıyordu. Bu tutarsızlık, bazı kullanıcıların (örneğin B001) doğru izinlere sahip olmasına rağmen Bilgi İşlem sayfasına erişememesine neden oluyordu.
+
+### Yapılan Değişiklikler
+
+1. `frontend/src/app/features/bilgi-islem/bilgi-islem.routes.ts` dosyasında:
+   - Rota tanımından `requiresAdmin: true` parametresi kaldırıldı, böylece admin olmayan kullanıcılar da gerekli izinlere sahip olduklarında sayfaya erişebilecekler.
+   - İzin adı `Pages.BilgiIslem` yerine `Pages.BilgiIslem.View` olarak güncellendi.
+
+2. `frontend/src/app/features/dashboard/components/user-dashboard.component.ts` dosyasında:
+   - `checkPermissions` metodunda Bilgi İşlem sayfası için izin kontrolü `IT.Access` yerine `Pages.BilgiIslem.View` olarak güncellendi.
+
+### Sonuç
+Bu değişikliklerle birlikte, kullanıcılar `Pages.BilgiIslem.View` iznine sahip olduklarında Bilgi İşlem sayfasına erişebilecekler. Admin olmayan kullanıcılar da gerekli izinlere sahip olduklarında sayfaya erişebilecekler.
+
+### Öğrenilen Dersler
+- İzin kontrollerinin tüm uygulama genelinde tutarlı olması önemlidir.
+- Rota tanımları ve bileşen izin kontrolleri arasında uyumsuzluk olmamalıdır.
+- Gereksiz admin kısıtlamaları, izin tabanlı erişim kontrolünün etkinliğini azaltabilir. 

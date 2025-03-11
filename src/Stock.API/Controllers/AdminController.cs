@@ -43,9 +43,6 @@ namespace Stock.API.Controllers
                     await RemovePermission(settingsPermission.Id, "Pages.Settings");
                 }
 
-                // NOT: Revir ve BilgiIslem izinleri artık temizlenmeyecek çünkü bu sayfalar oluşturuldu
-                // Revir ve BilgiIslem sayfaları için izinler korunacak
-
                 // Eğitim sayfası izinleri
                 var egitimPermissions = await _context.Permissions.Where(p => p.Name.StartsWith("Pages.Egitim")).ToListAsync();
                 foreach (var permission in egitimPermissions)

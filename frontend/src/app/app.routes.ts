@@ -35,6 +35,16 @@ export const routes: Routes = [
     }
   },
   
+  // Dashboard Management Module - Lazy Loading
+  {
+    path: 'dashboard-management',
+    loadChildren: () => import('./features/dashboard-management/dashboard-management.routes').then(m => m.DASHBOARD_MANAGEMENT_ROUTES),
+    canActivate: [AuthGuard, PermissionGuard],
+    data: {
+      requiredPermission: 'Pages.DashboardManagement'
+    }
+  },
+  
   // Bilgi İşlem Module - Lazy Loading
   {
     path: 'bilgi-islem',

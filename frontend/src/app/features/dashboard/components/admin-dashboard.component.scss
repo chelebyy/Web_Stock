@@ -609,6 +609,14 @@
   border-left-color: #b721ff;
 }
 
+.dashboard-management-card {
+  border-left-color: #00c6fb;
+}
+
+.page-management-card {
+  border-left-color: #38ef7d;
+}
+
 .settings-card {
   border-left-color: #f83600;
 }
@@ -618,7 +626,6 @@
   align-items: center;
   justify-content: center;
   width: 80px;
-  background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
   color: white;
   padding: 0 1rem;
   font-size: 2.5rem;
@@ -630,6 +637,14 @@
 
 .role-management-card .card-icon {
   background: linear-gradient(135deg, #b721ff 0%, #21d4fd 100%);
+}
+
+.dashboard-management-card .card-icon {
+  background: linear-gradient(135deg, #00c6fb 0%, #005bea 100%);
+}
+
+.page-management-card .card-icon {
+  background: linear-gradient(135deg, #38ef7d 0%, #11998e 100%);
 }
 
 .settings-card .card-icon {

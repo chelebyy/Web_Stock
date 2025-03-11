@@ -36,7 +36,8 @@ Bu dosya, proje geliştirme sürecinde karşılaşılan hataları ve çözümler
 - [Rol Yönetimi Sayfasına Erişim Sorunu - Ek İyileştirmeler](#rol-yönetimi-sayfasına-erişim-sorunu---ek-iyileştirmeler)
 - [Rol Yönetimi Sayfasına Erişim Sorunu - Acil Çözüm](#rol-yönetimi-sayfasına-erişim-sorunu---acil-çözüm)
 - [Bilgi İşlem Sayfası Erişim İzinleri Sorunu](#bilgi-işlem-sayfası-erişim-izinleri-sorunu)
-- [Admin Kullanıcılar İçin İzin Kontrolü Sorunu](#admin-kullanıcılar-için-izin-kontrolü-sorunu)
+- [Admin Dashboard Yönetimi Modülü Sorunu](#admin-dashboard-yönetimi-modülü-sorunu)
+- [Dashboard Management Modülü Hataları](#dashboard-management-modülü-hataları)
 
 ## Kullanıcı Aktivitesi Grafiği Yerine Log Kaydetme Sistemi
 
@@ -1866,41 +1867,112 @@ Kullanıcı dashboard bileşenindeki `checkPermissions` metodu, Bilgi İşlem sa
 ### Tarih
 11.03.2024
 
-## Admin Kullanıcılar İçin İzin Kontrolü Sorunu
+## Admin Dashboard Yönetimi Modülü Sorunu
 
-**Tarih:** 11.03.2024
+**Tarih:** 2025-03-07
+**Hata Mesajı:** 
+```
+Admin Dashboard Yönetimi kartına tıklandığında, kullanıcı yönetimi sayfasına yönlendiriliyor ve "Dashboard Yönetimi modülü ayrı bir sayfa olarak geliştirilecektir. Şu anda veriler User Management sayfasından çekilmektedir." mesajı gösteriliyor.
+```
 
-**Sorun:** B001 kullanıcısı admin paneline erişebiliyor ancak Kullanıcı Yönetimi ve Rol Yönetimi gibi izin verilmemiş modüller de görünüyor. Kullanıcı bu modüllere erişim izni olmadığı halde modülleri görebiliyor.
-
-**Nedeni:** HasPermissionDirective ve AuthService'deki hasPermission metodunda, admin kullanıcılar için izin kontrolü yapılmadan otomatik olarak tüm izinlere sahip olduğu varsayılıyordu. B001 kullanıcısı admin olarak işaretlenmiş olduğu için, izin kontrolü yapılmadan tüm modüller gösteriliyordu.
+**Nedeni:**
+1. Admin Dashboard Yönetimi için ayrı bir sayfa oluşturulmamış
+2. `navigateToDashboardManagement()` metodu geçici olarak kullanıcıları `/user-management` sayfasına yönlendiriyor
+3. Dashboard yönetimi için gerekli bileşenler ve rotalar tanımlanmamış
 
 **Çözüm:**
-1. HasPermissionDirective'de admin kullanıcılar için otomatik izin veren kontrolü kaldırdık:
-```typescript
-// Eski kod
-// Admin kullanıcılar her zaman tüm içeriği görebilir
-if (this.authService.isAdmin()) {
-  return true;
-}
+1. Dashboard Management modülü için gerekli dosyaları oluşturmak:
+   - `frontend/src/app/features/dashboard-management/components/dashboard-management.component.ts`
+   - `frontend/src/app/features/dashboard-management/components/dashboard-management.component.html`
+   - `frontend/src/app/features/dashboard-management/components/dashboard-management.component.scss`
+   - `frontend/src/app/features/dashboard-management/dashboard-management.module.ts`
+   - `frontend/src/app/features/dashboard-management/dashboard-management.routes.ts`
+   - `frontend/src/app/features/dashboard-management/index.ts`
 
-// Yeni kod
-// Admin kontrolünü kaldırdık - artık admin kullanıcılar da izin kontrolüne tabi
+2. Ana rota dosyasına Dashboard Management modülünü eklemek:
+```typescript
+// app.routes.ts
+{
 ```
 
-2. AuthService'deki hasPermission metodunda admin kullanıcılar için otomatik izin veren kontrolü kaldırdık:
-```typescript
-// Eski kod
-// Admin her zaman tüm izinlere sahiptir
-if (this.isAdmin()) {
-  console.log('Kullanıcı admin, tüm izinlere sahip');
-  return true;
-}
+## Dashboard Management Modülü Hataları
 
-// Yeni kod
-// Admin kontrolünü kaldırdık - artık admin kullanıcılar da izin kontrolüne tabi
+**Tarih:** 2025-03-07
+**Hata Mesajları:** 
+```
+1. NG8001: 'p-tag' is not a known element
+2. NG8002: Can't bind to 'value' since it isn't a known property of 'p-tag'
+3. NG8002: Can't bind to 'severity' since it isn't a known property of 'p-tag'
+4. NG2: Type 'string' is not assignable to type '"success" | "secondary" | "info" | "warn" | "danger" | "contrast" | undefined'
+5. NG2: Type 'TagSeverity' is not assignable to type '"success" | "secondary" | "info" | "warn" | "danger" | "contrast" | undefined'
 ```
 
-**Öğrenilen Dersler:**
-1. Admin kullanıcılar için bile detaylı izin kontrolü yapılmalıdır. Tüm admin kullanıcıların tüm modüllere erişim izni olmamalıdır.
-2. İzin kontrolü, kullanıcının rolüne (admin olup olmadığına) değil, sahip olduğu izinlere göre yapılmalıdır.
-3. Kullanıcıların izinlerini detaylı bir şekilde yönetmek, güvenlik açısından daha iyi bir yaklaşımdır.
+**Nedeni:**
+1. `TagModule` bileşeni import edilmemiş
+2. `HasPermissionDirective` import edilmiş ancak HTML'de kullanılmamış
+3. Bileşen hem standalone olarak tanımlanmış hem de NgModule içinde declarations'a eklenmiş
+4. `getStatusSeverity` metodunun dönüş tipi ile PrimeNG'nin beklediği tip uyuşmuyor
+5. `TagSeverity` tipinde tanımlanan `'warning'` değeri, PrimeNG'nin beklediği `'warn'` değeriyle uyuşmuyor
+
+**Çözüm:**
+1. `TagModule` bileşenini import listesine eklemek:
+```typescript
+import { TagModule } from 'primeng/tag';
+
+@Component({
+  // ...
+  imports: [
+    // ...
+    TagModule
+  ],
+})
+```
+
+2. Kullanılmayan `HasPermissionDirective` import'unu kaldırmak:
+```typescript
+// Kaldırıldı
+// import { HasPermissionDirective } from '../../../shared/directives/has-permission.directive';
+```
+
+3. Bileşeni NgModule'den kaldırmak (çünkü standalone olarak tanımlanmış):
+```typescript
+@NgModule({
+  // declarations ve exports kaldırıldı
+  imports: [
+    // ...
+  ],
+  providers: [
+    // ...
+  ]
+})
+```
+
+4. `getStatusSeverity` metodunu doğru tip dönüşü sağlayacak şekilde güncellemek:
+```typescript
+// PrimeNG Tag bileşeni için geçerli severity tipleri
+type TagSeverity = 'success' | 'info' | 'warn' | 'danger' | 'secondary' | 'contrast' | undefined;
+
+// ...
+
+getStatusSeverity(isActive: boolean): TagSeverity {
+  return isActive ? 'success' : 'danger';
+}
+```
+
+5. `TagSeverity` tipini PrimeNG'nin beklediği değerlere göre düzeltmek:
+```typescript
+// 'warning' yerine 'warn' kullanılmalı
+type TagSeverity = 'success' | 'info' | 'warn' | 'danger' | 'secondary' | 'contrast' | undefined;
+```
+
+**Önemli Notlar:**
+- PrimeNG bileşenlerini kullanırken, bileşenlerin beklediği prop tipleri ve değerlerini doğru şekilde tanımlamak önemlidir
+- Standalone bileşenler, NgModule içinde declarations ve exports listelerine eklenmemelidir
+- Kullanılmayan importlar kaldırılmalıdır
+- PrimeNG'nin Tag bileşeni için severity değerleri: 'success', 'info', 'warn', 'danger', 'secondary', 'contrast'
+
+**Gelecek İyileştirmeler:**
+1. Tip güvenliği için PrimeNG'nin kendi tip tanımlarını kullanmak
+2. Standalone bileşenler için NgModule kullanımını tamamen kaldırmak
+3. Bileşen testleri eklemek
+4. Hata durumlarını daha iyi yönetmek için hata sınırları (error boundaries) eklemek

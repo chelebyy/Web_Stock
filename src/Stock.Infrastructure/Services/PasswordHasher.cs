@@ -20,7 +20,7 @@ namespace Stock.Infrastructure.Services
             {
                 _logger.LogInformation($"Şifre hash'leniyor... Work Factor: {WORK_FACTOR}");
                 
-                var hashedPassword = BCrypt.Net.BCrypt.EnhancedHashPassword(password, WORK_FACTOR);
+                var hashedPassword = BCrypt.Net.BCrypt.HashPassword(password, WORK_FACTOR);
                 
                 _logger.LogInformation($"Şifre başarıyla hash'lendi. Hash: {hashedPassword}");
                 _logger.LogInformation($"Hash formatı: {(hashedPassword.StartsWith("$2") ? "BCrypt" : "Bilinmeyen")}");
@@ -42,9 +42,13 @@ namespace Stock.Infrastructure.Services
                 _logger.LogInformation("Şifre doğrulanıyor...");
                 _logger.LogInformation($"Hash formatı: {(passwordHash.StartsWith("$2") ? "BCrypt" : "Bilinmeyen")}");
                 _logger.LogInformation($"Hash uzunluğu: {passwordHash.Length}");
-                _logger.LogInformation($"Work Factor: {passwordHash.Split('$')[2]}");
                 
-                var result = BCrypt.Net.BCrypt.EnhancedVerify(password, passwordHash);
+                if (passwordHash.Split('$').Length > 2)
+                {
+                    _logger.LogInformation($"Work Factor: {passwordHash.Split('$')[2]}");
+                }
+                
+                var result = BCrypt.Net.BCrypt.Verify(password, passwordHash);
                 
                 _logger.LogInformation($"Şifre doğrulama sonucu: {result}");
                 return result;

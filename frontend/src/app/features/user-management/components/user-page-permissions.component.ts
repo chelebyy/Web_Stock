@@ -561,40 +561,47 @@ export class UserPagePermissionsComponent implements OnInit {
   }
   
   groupPermissions(): void {
-    console.log('groupPermissions çağrıldı, allPermissions:', this.allPermissions);
+    // Önce tüm izinleri gruplarına göre ayır
+    const groupedPermissions: { [key: string]: Permission[] } = {};
     
-    // İzinleri gruplarına göre ayır
-    const groups: { [key: string]: Permission[] } = {};
-    
-    if (!this.allPermissions || !Array.isArray(this.allPermissions)) {
-      console.error('allPermissions dizi değil veya boş:', this.allPermissions);
-      this.permissionGroups = [];
-      return;
-    }
-    
-    this.allPermissions.forEach(permission => {
-      if (!permission.group) {
-        console.warn('Grup bilgisi olmayan izin:', permission);
-        permission.group = 'Diğer';
-      }
-      
-      if (!groups[permission.group]) {
-        groups[permission.group] = [];
-      }
-      groups[permission.group].push(permission);
+    // Henüz oluşturulmamış sayfaların izinlerini filtrele
+    const filteredPermissions = this.allPermissions.filter(permission => {
+      // Henüz oluşturulmamış sayfaların izinlerini filtrele
+      return !(
+        permission.name.startsWith('Pages.Reports') ||
+        permission.name.startsWith('Pages.Settings') ||
+        permission.name.startsWith('Pages.Egitim') ||
+        permission.name.startsWith('Pages.StockManagement') ||
+        permission.group === 'Stok Yönetimi'
+      );
     });
     
-    // Grupları diziye dönüştür
-    this.permissionGroups = Object.keys(groups).map(group => ({
-      group,
-      permissions: groups[group],
-      expanded: true // Başlangıçta tüm grupları açık göster
-    }));
+    // Filtrelenmiş izinleri gruplarına göre ayır
+    filteredPermissions.forEach(permission => {
+      if (!groupedPermissions[permission.group]) {
+        groupedPermissions[permission.group] = [];
+      }
+      groupedPermissions[permission.group].push(permission);
+    });
     
-    // Grupları alfabetik sırala
+    // Grupları PermissionGroup dizisine dönüştür
+    this.permissionGroups = Object.keys(groupedPermissions).map(group => {
+      return {
+        group,
+        permissions: groupedPermissions[group],
+        expanded: group === 'Sayfa Erişimi' // Sayfa Erişimi grubunu varsayılan olarak aç
+      };
+    });
+    
+    // Grupları alfabetik olarak sırala
     this.permissionGroups.sort((a, b) => a.group.localeCompare(b.group));
     
-    console.log('Oluşturulan izin grupları:', this.permissionGroups);
+    // Sayfa Erişimi grubunu en üste taşı
+    const pageAccessIndex = this.permissionGroups.findIndex(g => g.group === 'Sayfa Erişimi');
+    if (pageAccessIndex > 0) {
+      const pageAccessGroup = this.permissionGroups.splice(pageAccessIndex, 1)[0];
+      this.permissionGroups.unshift(pageAccessGroup);
+    }
   }
 
   toggleGroup(group: PermissionGroup): void {
