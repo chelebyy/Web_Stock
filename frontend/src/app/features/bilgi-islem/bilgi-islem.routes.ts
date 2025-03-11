@@ -8,8 +8,7 @@ export const BILGI_ISLEM_ROUTES: Routes = [
     loadComponent: () => import('./components/bilgi-islem.component').then(m => m.BilgiIslemComponent),
     canActivate: [AuthGuard, PermissionGuard],
     data: { 
-      requiresAdmin: true,
-      permissions: ['Pages.BilgiIslem']
+      permissions: ['Pages.BilgiIslem.View']
     }
   },
   {

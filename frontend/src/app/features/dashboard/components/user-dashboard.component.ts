@@ -65,6 +65,7 @@ export class UserDashboardComponent implements OnInit {
 
   // Sayfa erişim yetkileri
   hasITAccess: boolean = false;
+  hasAdminDashboardAccess: boolean = false;
 
   constructor(
     private router: Router,
@@ -82,7 +83,10 @@ export class UserDashboardComponent implements OnInit {
   // Kullanıcı izinlerini kontrol eden metot
   checkPermissions(): void {
     // Bilgi İşlem sayfasına erişim kontrolü
-    this.hasITAccess = this.authService.hasPermission('IT.Access');
+    this.hasITAccess = this.authService.hasPermission('Pages.BilgiIslem.View');
+    
+    // Admin paneline erişim kontrolü
+    this.hasAdminDashboardAccess = this.authService.hasPermission('Pages.AdminDashboard');
     
     // Kullanıcı adına göre de kontrol edebiliriz
     const currentUser = this.authService.getCurrentUser();
@@ -283,5 +287,16 @@ export class UserDashboardComponent implements OnInit {
   logout(): void {
     this.authService.logout();
     this.router.navigate(['/login']);
+  }
+
+  // Admin paneline yönlendirme metodu
+  navigateToAdminDashboard(): void {
+    this.router.navigate(['/dashboard/admin-dashboard']);
+    
+    // Aktivitelere ekle
+    this.recentActivities.unshift({ action: 'Admin paneline erişildi', date: new Date() });
+    if (this.recentActivities.length > 5) {
+      this.recentActivities.pop();
+    }
   }
 }
