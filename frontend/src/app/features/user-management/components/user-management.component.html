@@ -31,6 +31,11 @@
           </select>
         </div>
         
+        <!-- Yenileme Butonu -->
+        <button pButton pRipple icon="pi pi-refresh" class="p-button-outlined p-button-secondary refresh-button" 
+                (click)="loadUsers()" pTooltip="Kullanıcı Listesini Yenile"
+                style="height: 36px !important; margin-right: 12px !important;"></button>
+        
         <button pButton pRipple icon="pi pi-plus" label="Yeni Kullanıcı" class="p-button-primary create-button" 
                 (click)="openNewUserDialog()" 
                 style="height: 36px !important; display: flex !important; align-items: center !important; justify-content: center !important; padding: 0 1.25rem !important;"></button>
@@ -73,10 +78,7 @@
         </div>
         <div class="row-cell sicil-cell">{{ user.sicil }}</div>
         <div class="row-cell permissions-cell">
-          <span class="permission-badge" [ngClass]="{
-            'admin-badge': user.permissions === 'Admin',
-            'contributor-badge': user.permissions === 'Contributor'
-          }">
+          <span class="permission-badge" [ngClass]="getRoleColorClass(user.permissions)">
             {{ user.permissions === 'Admin' ? 'Yönetici' : 
                user.permissions === 'Contributor' ? 'Kullanıcı' : 
                user.permissions }}

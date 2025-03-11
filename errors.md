@@ -2377,7 +2377,7 @@ auth.service.ts:69 Yönlendirme başarılı
 Hata, standart kullanıcıların `Pages.UserDashboard` iznine sahip olmamasından kaynaklanıyordu. Bu, backend'deki `SeedRolePermissionsAsync` metodunda standart kullanıcı rolüne bu iznin verilmemesinden dolayı oluşuyordu.
 
 ### Analiz
-1. Backend'de `SeedRolePermissionsAsync` metodunda standart kullanıcı rolüne `Pages.UserDashboard` izni atanmamıştı.
+1. Backend'de `SeedRolePermissionsAsync` metodunda standart kullanıcı rolüne `Pages.UserDashboard` iznini eklemek.
 2. Frontend'de `UserDashboardComponent` için rota tanımında `requiredPermission: 'Pages.UserDashboard'` şartı bulunuyordu.
 3. `AuthGuard` sınıfı, bu izni kontrol ediyor ve yoksa erişimi reddediyordu.
 4. Kullanıcılar için dashboard erişimi olmadığından, sürekli login sayfasına yönlendiriliyorlardı.
@@ -4525,3 +4525,92 @@ this.roleService.deleteRole(this.roleToDelete.id).subscribe({
 3. Signal API kullanıldığında, veri değişikliklerinden sonra signal'ları güncellemek gerekir
 4. Başarılı işlemlerden sonra kullanıcıya görsel geri bildirim vermek ve veri listesini güncellemek iyi bir pratiktir
 5. Rol ekleme, güncelleme ve silme işlemlerinde aynı yenileme mantığını tutarlı bir şekilde uygulamak gerekir
+```
+
+# Kullanıcı Yönetimi Sayfası İyileştirmeleri
+
+## Rol Renklendirme Özelliği
+
+**Sorun:**
+Kullanıcı yönetimi sayfasında, izinler sütununda sadece "Yönetici" rolü kırmızı renkte görünüyordu, diğer roller için renk ataması yapılmamıştı. Bu durum, farklı rollerin görsel olarak ayırt edilmesini zorlaştırıyordu.
+
+**Çözüm:**
+1. Her rol için otomatik renk ataması yapan bir sistem geliştirildi:
+   - Önceden tanımlanmış roller (Admin, Contributor) için sabit renkler korundu
+   - Diğer roller için rol adına göre otomatik renk ataması yapıldı
+   - 10 farklı renk sınıfı tanımlandı (mavi, yeşil, mor, turuncu, turkuaz, pembe, indigo, amber, camgöbeği, limon)
+   - Rol adının hash değeri hesaplanarak tutarlı bir renk seçimi sağlandı
+
+**Teknik Detaylar:**
+1. `getRoleColorClass` metodu eklendi:
+```typescript
+getRoleColorClass(roleName: string): string {
+  // Önceden tanımlanmış roller için sabit renkler
+  if (roleName === 'Admin') return 'admin-badge';
+  if (roleName === 'Contributor') return 'contributor-badge';
+  
+  // Diğer roller için rol adına göre otomatik renk ataması
+  const hash = this.hashString(roleName);
+  const colorClasses = ['blue-badge', 'green-badge', 'purple-badge', /* ... */];
+  const colorIndex = Math.abs(hash) % colorClasses.length;
+  return colorClasses[colorIndex];
+}
+```
+
+2. HTML şablonunda badge sınıfı dinamik olarak atandı:
+```html
+<span class="permission-badge" [ngClass]="getRoleColorClass(user.permissions)">
+  {{ user.permissions }}
+</span>
+```
+
+3. SCSS dosyasına 10 farklı renk sınıfı eklendi:
+```scss
+&.blue-badge {
+  background-color: rgba(33, 150, 243, 0.1);
+  color: #2196f3; // Mavi
+}
+// Diğer renk sınıfları...
+```
+
+**Sonuç:**
+- Her rol için otomatik olarak farklı bir renk atanıyor
+- Aynı rol adı her zaman aynı renge sahip oluyor (tutarlılık)
+- Kullanıcılar farklı rolleri görsel olarak daha kolay ayırt edebiliyor
+- Yeni roller eklendiğinde manuel renk tanımlaması yapmaya gerek kalmıyor
+```
+
+## Kullanıcı Yönetimi Sayfasında Rol Görüntüleme Sorunu
+
+**Sorun:**
+Kullanıcı yönetimi sayfasında, kullanıcılara özel roller (örneğin "BT Yönetici") atandığı halde, bu roller "Kullanıcı" olarak görüntüleniyordu. Özel roller doğru şekilde görüntülenmiyordu.
+
+**Çözüm:**
+1. `getUserPermissionLabel` metodu düzeltildi:
+   - Rol ID'si ile eşleşen rolü bulmak için `this.roles.find(r => r.value === roleId)` kullanıldı
+   - Bulunan rolün `label` özelliği döndürüldü
+   
+2. Rol yükleme sırası değiştirildi:
+   - Önce roller yükleniyor, sonra kullanıcılar yükleniyor
+   - `loadRoles` metodu içinde, roller yüklendikten sonra `loadUsers` çağrılıyor
+   
+3. Kullanıcı listesini yenilemek için bir buton eklendi:
+   - Kullanıcı arayüzüne "Kullanıcı Listesini Yenile" butonu eklendi
+   - Bu buton, kullanıcı verilerini yeniden yükleyerek güncel rol bilgilerini gösterir
+
+**Teknik Detaylar:**
+```typescript
+// Düzeltilmiş getUserPermissionLabel metodu
+getUserPermissionLabel(isAdmin: boolean, roleId: number | null): string {
+  if (isAdmin) return 'Admin';
+  if (!roleId) return 'Kullanıcı';
+  
+  const role = this.roles.find(r => r.value === roleId);
+  return role ? role.label : 'Kullanıcı';
+}
+```
+
+**Beklenen Sonuç:**
+- Kullanıcılara atanan özel roller (örneğin "BT Yönetici") artık doğru şekilde görüntüleniyor
+- Rol değişiklikleri, kullanıcı listesi yenilendiğinde hemen görüntüleniyor
+- Kullanıcı deneyimi iyileştirildi, roller doğru şekilde temsil ediliyor

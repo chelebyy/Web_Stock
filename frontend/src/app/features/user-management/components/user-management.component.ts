@@ -409,26 +409,22 @@ export class UserManagementComponent implements OnInit, AfterViewInit {
   ) {}
 
   ngOnInit() {
-    // Giriş durumunu kontrol et
-    const isLoggedIn = this.authService.isLoggedIn();
-    const token = this.authService.getToken();
-    console.log('Giriş durumu:', { isLoggedIn, hasToken: !!token });
+    console.log('UserManagementComponent initialized');
     
-    if (!isLoggedIn) {
-      console.error('Kullanıcı girişi yapılmamış! Lütfen önce giriş yapın.');
-      this.messageService.add({
-        severity: 'error',
-        summary: 'Hata',
-        detail: 'Oturum açık değil. Lütfen giriş yapın.'
-      });
-      // Giriş sayfasına yönlendir
-      this.router.navigate(['/login']);
-      return;
-    }
-    
-    this.initForm();
-    this.loadUsers();
+    // Önce rolleri yükle
     this.loadRoles();
+    
+    // Kullanıcıları yükle - artık loadRoles içinde çağrılıyor
+    // this.loadUsers();
+    
+    // Form başlatma
+    this.initForm();
+    
+    // Placeholder görünürlüğünü artır
+    this.enhancePlaceholderVisibility();
+    
+    // Döküman tıklamalarını dinle (dropdown'ları kapatmak için)
+    document.addEventListener('click', this.onDocumentClick.bind(this));
   }
 
   ngAfterViewInit() {
@@ -530,6 +526,7 @@ export class UserManagementComponent implements OnInit, AfterViewInit {
         if (data && Array.isArray(data)) {
           this.users = data.map(user => {
             console.log('Kullanıcı ID tipi:', typeof user.id, 'Değer:', user.id);
+            console.log('Kullanıcı rol bilgisi:', user.roleId, 'Rol adı:', this.getRoleName(user.roleId || null));
             return {
               id: user.id,
               fullName: user.firstName && user.lastName ? `${user.firstName} ${user.lastName}` : user.username,
@@ -785,8 +782,8 @@ export class UserManagementComponent implements OnInit, AfterViewInit {
     if (isAdmin) return 'Admin';
     if (!roleId) return 'Kullanıcı';
     
-    const role = this.roles.find(r => r.id === roleId);
-    return role ? role.name : 'Kullanıcı';
+    const role = this.roles.find(r => r.value === roleId);
+    return role ? role.label : 'Kullanıcı';
   }
 
   generateId(): number {
@@ -876,8 +873,11 @@ export class UserManagementComponent implements OnInit, AfterViewInit {
     // Şimdilik statik veriler kullanıyoruz
     this.roleService.getRoles().subscribe({
       next: (roles) => {
+        console.log('API\'den gelen roller:', roles);
+        
         // API'den gelen roller için
         this.roles = roles.map(role => {
+          console.log('İşlenen rol:', role);
           return {
             label: role.name,
             value: role.id
@@ -892,6 +892,10 @@ export class UserManagementComponent implements OnInit, AfterViewInit {
         
         console.log('Roller yüklendi:', this.roles);
         console.log('Rol filtre seçenekleri:', this.roleFilterOptions);
+        
+        // Rolleri yükledikten sonra kullanıcıları yeniden yükle
+        // Bu, kullanıcıların doğru rol bilgilerini almasını sağlar
+        this.loadUsers();
       },
       error: (err) => {
         // Hata durumunda
@@ -1164,5 +1168,45 @@ export class UserManagementComponent implements OnInit, AfterViewInit {
     
     const role = this.roles.find(r => r.id === roleId);
     return role ? role.name : 'Bilinmeyen Rol';
+  }
+
+  // Rol adına göre renk sınıfı döndüren yardımcı metot
+  getRoleColorClass(roleName: string): string {
+    // Önceden tanımlanmış roller için sabit renkler
+    if (roleName === 'Admin') return 'admin-badge';
+    if (roleName === 'Contributor') return 'contributor-badge';
+    
+    // Diğer roller için rol adına göre otomatik renk ataması
+    // Rol adının hash değerini hesaplayarak tutarlı bir renk elde ediyoruz
+    const hash = this.hashString(roleName);
+    
+    // Önceden tanımlanmış renk sınıfları
+    const colorClasses = [
+      'blue-badge',    // Mavi
+      'green-badge',   // Yeşil
+      'purple-badge',  // Mor
+      'orange-badge',  // Turuncu
+      'teal-badge',    // Turkuaz
+      'pink-badge',    // Pembe
+      'indigo-badge',  // İndigo
+      'amber-badge',   // Amber
+      'cyan-badge',    // Camgöbeği
+      'lime-badge'     // Limon
+    ];
+    
+    // Hash değerine göre renk sınıfı seçimi
+    const colorIndex = Math.abs(hash) % colorClasses.length;
+    return colorClasses[colorIndex];
+  }
+  
+  // String için basit bir hash fonksiyonu
+  private hashString(str: string): number {
+    let hash = 0;
+    for (let i = 0; i < str.length; i++) {
+      const char = str.charCodeAt(i);
+      hash = ((hash << 5) - hash) + char;
+      hash = hash & hash; // 32-bit integer'a dönüştür
+    }
+    return hash;
   }
 }

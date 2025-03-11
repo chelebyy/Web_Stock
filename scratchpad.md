@@ -269,6 +269,13 @@
 
 ## Kullanıcı Yönetimi Arayüzü İyileştirmeleri
 
+### Planlanan İyileştirmeler
+- [ ] Kullanıcı tablosunun responsive tasarımının iyileştirilmesi
+- [ ] Kullanıcı formunun doğrulama mesajlarının iyileştirilmesi
+- [ ] Kullanıcı izinleri yönetimi arayüzünün iyileştirilmesi
+- [ ] Arama kutusunun geliştirilmesi (anlık arama, filtreleme seçenekleri)
+- [ ] Kullanıcı listesinin performansının iyileştirilmesi (lazy loading, sanal kaydırma)
+
 ### Tamamlanan İyileştirmeler
 - [X] Dropdown'lar ve butonlar için tutarlı yükseklik (36px) belirlendi
 - [X] Rol dropdown'ı basit HTML `<select>` elementine dönüştürüldü
@@ -284,13 +291,15 @@
 - [X] Rol filtreleme dropdown'ındaki çift "Tümü" seçeneği sorunu çözüldü
 - [X] Rol filtreleme işlevselliği düzeltildi (string/number dönüşüm sorunu)
 - [X] Login sayfasında şifre alanının arka plan sorunu çözüldü, şifre metni artık görünür durumda
-
-### Planlanan İyileştirmeler
-- [ ] Kullanıcı tablosunun responsive tasarımının iyileştirilmesi
-- [ ] Kullanıcı formunun doğrulama mesajlarının iyileştirilmesi
-- [ ] Kullanıcı izinleri yönetimi arayüzünün iyileştirilmesi
-- [ ] Arama kutusunun geliştirilmesi (anlık arama, filtreleme seçenekleri)
-- [ ] Kullanıcı listesinin performansının iyileştirilmesi (lazy loading, sanal kaydırma)
+- [X] Her rol için otomatik renk ataması yapan sistem geliştirildi
+  - Önceden tanımlanmış roller (Admin, Contributor) için sabit renkler korundu
+  - Diğer roller için rol adına göre otomatik renk ataması yapıldı
+  - 10 farklı renk sınıfı tanımlandı (mavi, yeşil, mor, turuncu, turkuaz, pembe, indigo, amber, camgöbeği, limon)
+  - Rol adının hash değeri hesaplanarak tutarlı bir renk seçimi sağlandı
+- [X] Kullanıcı yönetimi sayfasında özel rollerin doğru görüntülenmesi sağlandı
+  - getUserPermissionLabel metodu düzeltildi
+  - Rol yükleme sırası değiştirildi (önce roller, sonra kullanıcılar)
+  - Kullanıcı listesini yenilemek için buton eklendi
 
 ### Öğrenilen Dersler
 - Tarayıcı önbelleğini temizlemek (Ctrl+F5 veya Cmd+Shift+R) stil değişikliklerinin görünmesini sağlayabilir
