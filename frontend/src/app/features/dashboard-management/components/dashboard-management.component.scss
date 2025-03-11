@@ -125,5 +125,57 @@
     .mr-2 {
       margin-right: 0.5rem;
     }
+    
+    /* Eklenen tablo stilleri - Koyu temadan açık temaya düzeltme */
+    .p-datatable {
+      background-color: #ffffff !important;
+      color: #333333 !important;
+      
+      .p-datatable-wrapper {
+        background-color: #ffffff !important;
+      }
+      
+      .p-datatable-tbody > tr {
+        background-color: #ffffff !important;
+        color: #333333 !important;
+        
+        &:nth-child(even) {
+          background-color: #f8f9fa !important;
+        }
+        
+        &:hover {
+          background-color: #e9ecef !important;
+        }
+        
+        > td {
+          background-color: inherit !important;
+          color: #333333 !important;
+          border-color: #e9ecef !important;
+          padding: 0.75rem 1rem !important;
+        }
+      }
+      
+      .p-datatable-thead > tr > th {
+        background-color: #f8f9fa !important;
+        color: #333333 !important;
+        border-color: #e9ecef !important;
+        font-weight: 600 !important;
+        padding: 0.75rem 1rem !important;
+      }
+      
+      .p-paginator {
+        background-color: #ffffff !important;
+        color: #333333 !important;
+        
+        .p-paginator-pages .p-paginator-page {
+          color: #333333 !important;
+          
+          &.p-highlight {
+            background-color: #e6f7ff !important;
+            color: #0077cc !important;
+          }
+        }
+      }
+    }
   }
 } 

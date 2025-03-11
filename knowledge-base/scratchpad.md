@@ -883,3 +883,39 @@ Dashboard Management modülünde karşılaşılan hataları düzeltmek.
 - Standalone bileşenler, NgModule içinde declarations ve exports listelerine eklenmemelidir
 - Kullanılmayan importlar kaldırılmalıdır
 - PrimeNG'nin Tag bileşeni için severity değerleri: 'success', 'info', 'warn', 'danger', 'secondary', 'contrast'
+
+## Görev: PrimeNG Tablo Bileşenleri Koyu Tema Sorunlarının Çözümü
+
+### Görev Tanımı
+Dashboard Management ve diğer sayfalarda PrimeNG tablo bileşenlerinin (p-table) koyu tema sorunlarını çözmek.
+
+### İlerleme
+[X] Sorun tespit edildi: Tablo arka planı koyu, metin rengi koyu olduğu için içerik görünmüyor
+[X] Dashboard Management bileşeni için özel tablo stilleri eklendi
+[X] Global stil dosyasına tüm PrimeNG tablolarını etkileyecek düzeltmeler eklendi
+[X] Yüksek özgüllükte CSS seçiciler kullanılarak mevcut stillerin üzerine yazıldı
+[X] Bilgi tabanı dosyaları güncellendi (errors.md ve scratchpad.md)
+
+### Yapılan Değişiklikler
+1. `frontend/src/app/features/dashboard-management/components/dashboard-management.component.scss` dosyasına tablo stilleri eklendi:
+   - Tablo arka planını beyaza (#ffffff) çevirdik
+   - Metin rengini koyu (#333333) yaptık
+   - Satır ve hücre renklerini düzenledik
+   - Çizgili tablo ve hover efektlerini koruduk
+
+2. `frontend/src/styles.scss` dosyasına global tablo düzeltmeleri eklendi:
+   - Daha spesifik CSS seçiciler kullanıldı
+   - !important ile zorlayıcı stil geçersiz kılma uygulandı
+   - Tablo içi metinleri görünür yapacak düzeltmeler eklendi
+
+### Sonraki Adımlar
+- Değişikliklerin tüm sayfalardaki tablolarda düzgün çalıştığını test etmek
+- Diğer PrimeNG bileşenlerinde benzer sorunlar olup olmadığını kontrol etmek
+- Tema yönetimi için daha iyi bir yapı oluşturmak planlanabilir
+
+### Öğrenilen Dersler
+- PrimeNG bileşenlerinde tema değişikliği yaparken CSS özgüllük kurallarını dikkate almak önemlidir
+- Hem bileşen düzeyinde hem de global düzeyde stil tanımlamaları yapmak gerekebilir
+- CSS seçicilerin özgüllüğü yeterli değilse !important kullanmak gerekebilir
+- Bir bileşen içindeki renk ve tema sorunlarını çözmek için hem wrapper hem de iç elementlerin stillerini değiştirmek gerekir
+- PrimeNG bileşenlerinde tema değişikliği yaparken, bileşenin iç yapısını anlamak önemlidir

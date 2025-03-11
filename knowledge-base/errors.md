@@ -38,6 +38,7 @@ Bu dosya, proje geliştirme sürecinde karşılaşılan hataları ve çözümler
 - [Bilgi İşlem Sayfası Erişim İzinleri Sorunu](#bilgi-işlem-sayfası-erişim-izinleri-sorunu)
 - [Admin Dashboard Yönetimi Modülü Sorunu](#admin-dashboard-yönetimi-modülü-sorunu)
 - [Dashboard Management Modülü Hataları](#dashboard-management-modülü-hataları)
+- [PrimeNG Tablo Bileşenleri Koyu Tema Sorunları](#primeNG-tablo-bileşenleri-koyu-tema-sorunları)
 
 ## Kullanıcı Aktivitesi Grafiği Yerine Log Kaydetme Sistemi
 
@@ -1976,3 +1977,91 @@ type TagSeverity = 'success' | 'info' | 'warn' | 'danger' | 'secondary' | 'contr
 2. Standalone bileşenler için NgModule kullanımını tamamen kaldırmak
 3. Bileşen testleri eklemek
 4. Hata durumlarını daha iyi yönetmek için hata sınırları (error boundaries) eklemek
+
+## PrimeNG Tablo Bileşenleri Koyu Tema Sorunları
+
+**Tarih:** 2025-03-11
+
+### Sorun
+Dashboard Management ve diğer sayfalarda PrimeNG tablo bileşenleri (p-table) koyu renkli bir temada görünüyor. Koyu arka plan üzerinde koyu renkli yazılar olduğundan, tablodaki metinler sadece mouse ile seçildiğinde görünür hale geliyor. Bu durum kullanıcı deneyimini olumsuz etkiliyor.
+
+### Nedeni
+1. PrimeNG'nin varsayılan tema dosyalarının uygulamaya düzgün entegre edilmemesi
+2. Mevcut CSS seçicilerinin tablo bileşenleri için koyu tema uygulaması
+3. Global ve bileşen düzeyindeki stil çakışmaları
+4. CSS spesifik seçici önceliklerinin yeterli olmaması
+
+### Çözüm
+1. Dashboard Management bileşeni için özel tablo stilleri tanımlandı:
+```scss
+::ng-deep {
+  // Diğer stiller...
+  
+  /* Tablo stilleri - Koyu temadan açık temaya düzeltme */
+  .p-datatable {
+    background-color: #ffffff !important;
+    color: #333333 !important;
+    
+    .p-datatable-wrapper {
+      background-color: #ffffff !important;
+    }
+    
+    .p-datatable-tbody > tr {
+      background-color: #ffffff !important;
+      color: #333333 !important;
+      
+      &:nth-child(even) {
+        background-color: #f8f9fa !important;
+      }
+      
+      > td {
+        background-color: inherit !important;
+        color: #333333 !important;
+        border-color: #e9ecef !important;
+      }
+    }
+    
+    // Diğer tablo stil düzeltmeleri...
+  }
+}
+```
+
+2. Global stil dosyasına (styles.scss) tüm PrimeNG tablolarını etkileyecek düzeltmeler eklendi:
+```scss
+/* PrimeNG Tablo Stillerini Düzeltme - Koyu temadan açık temaya geçiş */
+body .p-datatable,
+html body .p-datatable,
+.p-datatable {
+  background-color: #ffffff !important;
+  color: #333333 !important;
+  
+  // Diğer tablo stil düzeltmeleri...
+}
+
+/* Tablo içi elementi zorlayıcı stil düzeltmeleri */
+.p-datatable tbody tr td,
+.p-datatable tbody tr td *,
+.p-datatable-tbody > tr > td,
+.p-datatable-tbody > tr > td *,
+// Diğer spesifik seçiciler...
+{
+  color: #333333 !important;
+  background-color: inherit !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+}
+```
+
+### Öğrenilen Dersler
+1. PrimeNG tema dosyalarının doğru şekilde yapılandırılması önemlidir
+2. Bileşenin temasını değiştirmek için yeterince spesifik CSS seçiciler kullanılmalıdır
+3. Stil çakışmaları olduğunda `!important` kullanmak gerekebilir
+4. Tablo bileşenleri için hem wrapper hem de içerik elementlerinin stillerini düzeltmek önemlidir
+5. CSS özgüllük (specificity) kurallarını anlamak gerekir
+6. Global stil dosyası ve bileşen stilleri arasındaki ilişki dikkate alınmalıdır
+
+### Gelecek İyileştirmeler
+1. `!important` kullanımını azaltmak için daha iyi bir tema yönetimi oluşturmak
+2. PrimeNG tema dosyalarını doğrudan projeye dahil etmek
+3. Aydınlık/karanlık tema geçişi için daha yapılandırılmış bir sistem kurmak
+4. CSS değişkenleri kullanarak tema yönetimini kolaylaştırmak
