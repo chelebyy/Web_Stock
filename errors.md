@@ -4614,3 +4614,98 @@ getUserPermissionLabel(isAdmin: boolean, roleId: number | null): string {
 - Kullanıcılara atanan özel roller (örneğin "BT Yönetici") artık doğru şekilde görüntüleniyor
 - Rol değişiklikleri, kullanıcı listesi yenilendiğinde hemen görüntüleniyor
 - Kullanıcı deneyimi iyileştirildi, roller doğru şekilde temsil ediliyor
+```
+
+# BCrypt Şifre Doğrulama Sorunu
+
+## Giriş Yapamama Sorunu
+
+**Sorun:**
+Kullanıcılar A001 sicil numarası ve admin123 şifresi ile giriş yapamıyor. Backend loglarında "Şifre doğrulama sonucu: False" hatası görülüyor.
+
+**Nedeni:**
+BCrypt.Net-Next kütüphanesinin EnhancedHashPassword ve EnhancedVerify metotları yerine standart HashPassword ve Verify metotları kullanılması gerekiyor. Enhanced metotlar UTF-8 kodlaması kullanırken, veritabanındaki mevcut hashler standart metotlarla oluşturulmuş.
+
+**Çözüm:**
+1. PasswordHasher sınıfında EnhancedHashPassword yerine HashPassword kullanıldı
+2. PasswordHasher sınıfında EnhancedVerify yerine Verify kullanıldı
+3. BCrypt.Net-Next paketi 4.0.3 sürümüne güncellendi
+
+**Teknik Detaylar:**
+```csharp
+// Önceki kod
+var hashedPassword = BCrypt.Net.BCrypt.EnhancedHashPassword(password, WORK_FACTOR);
+var result = BCrypt.Net.BCrypt.EnhancedVerify(password, passwordHash);
+
+// Yeni kod
+var hashedPassword = BCrypt.Net.BCrypt.HashPassword(password, WORK_FACTOR);
+var result = BCrypt.Net.BCrypt.Verify(password, passwordHash);
+```
+
+**Sonuç:**
+Kullanıcılar artık A001 sicil numarası ve admin123 şifresi ile başarıyla giriş yapabiliyorlar.
+
+**Öğrenilen Dersler:**
+1. BCrypt.Net-Next kütüphanesinin farklı metotları farklı kodlama kullanabilir
+2. Şifre doğrulama sorunlarında hash algoritması ve kodlama uyumsuzluğu kontrol edilmeli
+3. Detaylı loglama, sorunun teşhisinde kritik öneme sahip
+```
+
+# Şifre Doğrulama Sorunu
+
+## Sorun
+- Kullanıcı girişi yapılırken şifre doğrulama hatası oluşuyordu. Konsol çıktılarında token bulunamadığı görülüyordu.
+- Kullanıcı giriş bilgileri (sicil: 'A001', şifre: 'admin123') doğru olmasına rağmen giriş yapılamıyordu.
+
+## Nedeni
+- BCrypt.Net-Next kütüphanesinin 4.0.3 versiyonunda `EnhancedHashPassword` ve `HashPassword` metotları farklı hash formatları üretmektedir.
+- Admin kullanıcısı oluşturulurken `EnhancedHashPassword` metodu kullanılırken, şifre doğrulama sırasında `Verify` metodu kullanılıyordu.
+- Bu iki metot arasındaki uyumsuzluk nedeniyle şifre doğrulama işlemi başarısız oluyordu.
+
+## Çözüm
+1. `CreateAdminUser.cs` dosyasında admin kullanıcısı oluşturulurken kullanılan şifre hashleme metodu `EnhancedHashPassword` yerine `HashPassword` olarak değiştirildi.
+2. Program.cs dosyasında `CreateAdminUser.InitializeAsync` metodu çağrılarak mevcut admin kullanıcısının şifresi güncellendi.
+3. Ayrıca, Program.cs dosyasında erişilebilirlik sorunu çözmek için Program sınıfı public olarak tanımlandı.
+
+## Teknik Detaylar
+- Önceki kod:
+```csharp
+var passwordHash = BCrypt.Net.BCrypt.EnhancedHashPassword("Admin123", 13);
+```
+
+- Yeni kod:
+```csharp
+var passwordHash = BCrypt.Net.BCrypt.HashPassword("admin123", 11);
+```
+
+- Program.cs'de yapılan değişiklikler:
+```csharp
+public class Program
+{
+    public static void Main(string[] args)
+    {
+        // ...
+        using (var scope = app.Services.CreateScope())
+        {
+            var services = scope.ServiceProvider;
+            try
+            {
+                var logger = services.GetRequiredService<ILogger<Program>>();
+                CreateAdminUser.InitializeAsync(services, logger).Wait();
+            }
+            catch (Exception ex)
+            {
+                var logger = services.GetRequiredService<ILogger<Program>>();
+                logger.LogError(ex, "Admin kullanıcısı oluşturulurken bir hata oluştu.");
+            }
+        }
+        // ...
+    }
+}
+```
+
+## Öğrenilen Dersler
+- BCrypt.Net-Next kütüphanesinin farklı hashleme metotları arasındaki farkları anlamak önemlidir.
+- Şifre hashleme ve doğrulama işlemlerinde tutarlı metotlar kullanılmalıdır.
+- Hata ayıklama için detaylı loglama çok faydalıdır.
+- Statik sınıflar tür bağımsız değişkeni olarak kullanılamaz, bu nedenle ILogger<CreateAdminUser> yerine ILogger<Program> kullanılmalıdır.
