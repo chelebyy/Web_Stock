@@ -4,34 +4,43 @@
   <div class="header">
     <div class="title">
       <h1>Dashboard Yönetimi</h1>
-      <p>Dashboard sayfalarını ve erişim izinlerini yönetin</p>
+      <p>Admin dashboard'da bulunan sayfalara erişim izinlerini yönetin</p>
     </div>
     <div class="actions">
-      <button pButton pRipple label="Yeni Sayfa" icon="pi pi-plus" class="p-button-success" (click)="openNew()"></button>
+      <p-button label="Geri Dön" icon="pi pi-arrow-left" variant="outlined" severity="info" (onClick)="navigateTo('/dashboard/admin-dashboard')"></p-button>
     </div>
   </div>
   
   <div class="content">
     <p-card styleClass="dashboard-pages-card">
+      <div *ngIf="loading" class="custom-loading-overlay">
+        <div class="custom-loading-container">
+          <i class="pi pi-spin pi-spinner"></i>
+          <span>Lütfen bekleyin...</span>
+        </div>
+      </div>
       <p-table 
-        [value]="dashboardPages" 
+        [value]="filteredDashboardPages" 
         [paginator]="true" 
         [rows]="10" 
         [loading]="loading"
+        [showLoader]="false"
         styleClass="p-datatable-gridlines p-datatable-striped" 
         [tableStyle]="{'min-width': '50rem'}"
         [rowHover]="true"
         dataKey="id"
         [showCurrentPageReport]="true"
-        currentPageReportTemplate="Toplam {totalRecords} sayfadan {first} - {last} arası gösteriliyor"
-        [rowsPerPageOptions]="[5, 10, 25]">
+        currentPageReportTemplate="Toplam {totalRecords} sayfadan {first} - {last} arası gösteriliyor">
         
         <ng-template pTemplate="caption">
           <div class="table-header">
-            <span class="p-input-icon-left">
-              <i class="pi pi-search"></i>
-              <input pInputText type="text" placeholder="Ara..." />
-            </span>
+            <div class="search-container">
+              <span class="p-input-icon-left">
+                <i class="pi pi-search"></i>
+                <input pInputText type="text" placeholder="Sayfa adı, açıklama, rota..." [(ngModel)]="searchText" (input)="onSearch($event)" class="search-input" />
+              </span>
+              <button *ngIf="searchText" pButton pRipple type="button" icon="pi pi-times" class="p-button-rounded p-button-text p-button-sm clear-button" (click)="clearSearch()" pTooltip="Aramayı temizle"></button>
+            </div>
           </div>
         </ng-template>
         
@@ -62,9 +71,7 @@
             </td>
             <td>
               <div class="action-buttons">
-                <button pButton pRipple icon="pi pi-pencil" class="p-button-rounded p-button-success p-button-sm mr-2" (click)="editPage(page)"></button>
-                <button pButton pRipple icon="pi pi-trash" class="p-button-rounded p-button-danger p-button-sm mr-2" (click)="deletePage(page)"></button>
-                <button pButton pRipple icon="pi pi-external-link" class="p-button-rounded p-button-info p-button-sm" (click)="navigateTo(page.route)"></button>
+                <button pButton pRipple icon="pi pi-pencil" class="p-button-rounded p-button-success p-button-sm" (click)="editPage(page)"></button>
               </div>
             </td>
           </tr>
@@ -73,21 +80,14 @@
         <ng-template pTemplate="emptymessage">
           <tr>
             <td colspan="7" class="text-center">
-              <div class="empty-message">
-                <i class="pi pi-info-circle empty-icon"></i>
-                <p>Henüz dashboard sayfası bulunmuyor.</p>
-                <button pButton pRipple label="Yeni Sayfa Ekle" icon="pi pi-plus" class="p-button-success" (click)="openNew()"></button>
-              </div>
-            </td>
-          </tr>
-        </ng-template>
-        
-        <ng-template pTemplate="loadingbody">
-          <tr>
-            <td colspan="7" class="text-center">
-              <div class="loading-message">
-                <i class="pi pi-spin pi-spinner loading-icon"></i>
-                <p>Yükleniyor...</p>
+              <div class="empty-container">
+                <div class="empty-icon-container">
+                  <i class="pi pi-info-circle"></i>
+                </div>
+                <div class="empty-text">
+                  <h3>Henüz dashboard sayfası bulunmuyor</h3>
+                  <p>Sistem yöneticisi ile iletişime geçerek dashboard sayfası ekletebilirsiniz</p>
+                </div>
               </div>
             </td>
           </tr>
@@ -102,7 +102,8 @@
     [style]="{width: '450px'}" 
     [header]="dialogHeader" 
     [modal]="true" 
-    styleClass="p-fluid">
+    styleClass="p-fluid"
+    [baseZIndex]="10000">
     
     <ng-template pTemplate="content">
       <div class="field">
@@ -132,7 +133,12 @@
           [showClear]="true"
           optionLabel="label" 
           optionValue="value"
-          [style]="{'width':'100%'}"
+          [style]="{'width':'100%', 'background-color': 'white'}"
+          appendTo="body"
+          [autoZIndex]="true"
+          [baseZIndex]="10000"
+          styleClass="dashboard-permission-dropdown"
+          [panelStyleClass]="'dashboard-permission-dropdown-panel'"
           required>
         </p-dropdown>
         <small class="p-error" *ngIf="!page.requiredPermission && displayDialog">Gerekli izin zorunludur.</small>
@@ -149,4 +155,4 @@
       <button pButton pRipple label="Kaydet" icon="pi pi-check" class="p-button-text" (click)="savePage()"></button>
     </ng-template>
   </p-dialog>
-</div> 
+</div>

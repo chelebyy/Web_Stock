@@ -35,6 +35,7 @@ Bu dosya, proje geliştirme sürecinde karşılaşılan hataları ve çözümler
 - [Login Sayfası Tasarım Sorunları ve Çözümleri](#login-sayfası-tasarım-sorunları-ve-çözümleri)
 - [Kullanıcı Yönetimi Rol Filtreleme Sorunu](#kullanıcı-yönetimi-rol-filtreleme-sorunu)
 - [Login Sayfası Şifre Alanı Arka Plan Sorunu](#login-sayfası-şifre-alanı-arka-plan-sorunu)
+- [PrimeNG Tablo Bileşeni Siyah Arka Plan Sorunu](#primeng-tablo-bileşeni-siyah-arka-plan-sorunu)
 
 ## Kullanıcı Oluşturma Hataları
 
@@ -2362,7 +2363,7 @@ dotnet ef database update
 ## Kullanıcı Dashboard Erişim Sorunları
 
 ### Sorun
-Kullanıcılar giriş yaptıktan sonra, dashboard sayfasına erişmeye çalıştıklarında şu hatalar görülüyordu:
+Kullanıcılar giriş yaptıktan sonra, dashboard sayfasına erişmeye çalıştıklarında şu hatalar gözlemlüyordu:
 
 ```
 Login isteği gönderiliyor: {sicil: 'U001', password: '123456'}
@@ -4709,3 +4710,140 @@ public class Program
 - Şifre hashleme ve doğrulama işlemlerinde tutarlı metotlar kullanılmalıdır.
 - Hata ayıklama için detaylı loglama çok faydalıdır.
 - Statik sınıflar tür bağımsız değişkeni olarak kullanılamaz, bu nedenle ILogger<CreateAdminUser> yerine ILogger<Program> kullanılmalıdır.
+
+## PrimeNG Tablo Bileşeni Siyah Arka Plan Sorunu
+
+**Tarih:** 10.06.2025
+
+**Hata Açıklaması:**
+Dashboard yönetimi sayfasında, PrimeNG'nin p-table bileşeni yükleme durumunda siyah arka plan gösteriyordu. Ayrıca, yükleme ekranında iki adet "Lütfen bekleyin" mesajı görünüyordu.
+
+**Hata Detayı:**
+PrimeNG'nin tablo bileşeni, varsayılan olarak koyu tema kullanıyor ve yükleme durumunda siyah arka plan gösteriyor. Ayrıca, hem özel yükleme göstergesi hem de PrimeNG'nin varsayılan yükleme göstergesi aynı anda görüntüleniyordu.
+
+**Çözüm:**
+1. PrimeNG'nin varsayılan yükleme göstergesini devre dışı bırakmak için `[showLoader]="false"` özelliği eklendi.
+2. Özel bir yükleme göstergesi oluşturuldu ve `*ngIf="loading"` ile kontrol edildi.
+3. CSS dosyasında `.p-datatable-loading-overlay` sınıfının arka plan rengini açık renge değiştirmek için aşağıdaki stil eklendi:
+```css
+.p-datatable.p-datatable-loading .p-datatable-loading-overlay {
+  background-color: rgba(255, 255, 255, 0.8) !important;
+}
+```
+4. Özel yükleme göstergesi için CSS stilleri eklendi:
+```css
+.custom-loading-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(255, 255, 255, 0.8);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 10;
+}
+
+.custom-loading-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background-color: #ffffff;
+  padding: 2rem;
+  border-radius: 8px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+```
+5. HTML dosyasından `loadingbody` template'i tamamen kaldırıldı.
+6. Yükleme süresini 200ms'ye düşürerek kullanıcı deneyimi iyileştirildi.
+7. Dropdown menüsü için özel CSS sınıfları eklendi ve `panelStyleClass` özelliği kullanıldı.
+8. Dropdown menüsünün arka plan rengi, metin rengi ve boyutları CSS ile düzeltildi.
+9. Dropdown'un sayfa içinde düzgün görüntülenmesi için `appendTo="body"` özelliği eklendi.
+10. TypeScript dosyasında `ngAfterViewInit` lifecycle hook'u kullanılarak dropdown stillerini programatik olarak ayarlayan kod eklendi.
+
+### Öğrenilen Dersler
+1. PrimeNG'nin varsayılan stillerini override etmek için `::ng-deep` kullanılabilir, ancak bu yaklaşım Angular tarafından önerilmez ve gelecekte kaldırılabilir.
+2. Özel yükleme göstergeleri oluşturmak, varsayılan göstergeleri kullanmaktan daha fazla kontrol sağlar.
+3. Tek bir yükleme göstergesi kullanmak, kullanıcı deneyimini iyileştirir ve kafa karışıklığını önler.
+4. Yükleme süresi mümkün olduğunca kısa tutularak kullanıcı deneyimi iyileştirilebilir.
+5. Dropdown menülerinin düzgün görüntülenmesi için `appendTo="body"` özelliği kullanılmalıdır.
+6. Dropdown menülerinin stillerini ayarlamak için hem CSS hem de programatik yaklaşımlar birlikte kullanılabilir.
+7. `!important` kullanımı genellikle kaçınılması gereken bir yaklaşımdır, ancak üçüncü parti kütüphanelerin stillerini override etmek için bazen gereklidir.
+8. PrimeNG bileşenlerinin CSS sınıf yapısını anlamak, doğru stil hedeflemesi için önemlidir.
+9. Kompleks UI bileşenlerinde, tarayıcı geliştirici araçları kullanılarak elemanların DOM yapısı ve uygulanan stiller incelenmelidir.
+
+### İlgili Dosyalar
+- `frontend/src/app/features/dashboard-management/components/dashboard-management.component.html`
+- `frontend/src/app/features/dashboard-management/components/dashboard-management.component.scss`
+- `frontend/src/app/features/dashboard-management/components/dashboard-management.component.ts`
+
+**Kod Örneği:**
+```html
+<!-- HTML -->
+<p-card styleClass="dashboard-pages-card">
+  <div *ngIf="loading" class="custom-loading-overlay">
+    <div class="custom-loading-container">
+      <i class="pi pi-spin pi-spinner"></i>
+      <span>Lütfen bekleyin...</span>
+    </div>
+  </div>
+  <p-table 
+    [value]="filteredDashboardPages" 
+    [loading]="loading"
+    [showLoader]="false"
+    ...>
+    <!-- Tablo içeriği -->
+  </p-table>
+</p-card>
+```
+
+```scss
+// SCSS
+.custom-loading-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(255, 255, 255, 0.8);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 10;
+}
+
+.custom-loading-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background-color: #ffffff;
+  padding: 2rem;
+  border-radius: 8px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  
+  i {
+    font-size: 2.5rem;
+    color: #4caf50;
+    margin-bottom: 1rem;
+    animation: spin 1s linear infinite;
+  }
+  
+  span {
+    font-size: 1.1rem;
+    color: #495057;
+    font-weight: 500;
+  }
+}
+```
+
+```typescript
+// TypeScript
+loadDashboardPages(): void {
+  // Gerçek uygulamada API'den veri çekilecek
+  setTimeout(() => {
+    // Veri yükleme işlemleri...
+    this.loading = false;
+  }, 200); // Yükleme süresini kısa tutarak kullanıcı deneyimini iyileştir
+}
+```

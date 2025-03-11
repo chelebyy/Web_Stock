@@ -40,6 +40,15 @@
 - "İzinleri Yönet" butonunda sadece anahtar ikonunun görünmesi sağlandı
 - Kullanıcı ve rol yönetimi sayfalarındaki silme onay dialogu sorunu çözüldü (HTML sanitization sorunu)
 - Rol yönetimi sayfasında rol ekleme, güncelleme ve silme işlemlerinden sonra sayfa otomatik olarak yenileniyor
+- Kullanıcı dashboard sayfasının belgeleri knowledge-base/user_dashboard_knowledge_base.md dosyasına eklendi
+- Kullanıcıların dashboard erişim sorunu çözüldü, yeni knowledge base dosyası oluşturuldu: knowledge-base/auth_knowledge_base.md
+- Dashboard yönetimi sayfasındaki PrimeNG tablo bileşeninin siyah arka plan sorunu çözüldü
+- Dashboard yönetimi sayfasında yükleme ekranındaki çift "Lütfen bekleyin..." mesajı sorunu çözüldü
+- Dashboard yönetimi sayfasının tasarımı modernize edildi (tablo stilleri, boş durum mesajı, kart tasarımı, başlık stilleri)
+- Dashboard yönetimi sayfasının yükleme süresi 1000ms'den 500ms'ye düşürülerek kullanıcı deneyimi iyileştirildi
+- Dashboard yönetimi sayfasındaki PrimeNG dropdown bileşeninin siyah arka plan sorunu çözüldü
+- Dashboard yönetimi sayfasında dropdown açıldığında sayfa yukarı kayma sorunu çözüldü
+- Dashboard yönetimi sayfasında dropdown panelinin sayfaya sığmama sorunu çözüldü
 
 ## Clean Architecture Geçişi
 
@@ -258,6 +267,12 @@
 - "İzinleri Yönet" butonunda sadece anahtar ikonunun görünmesi sağlandı
 - Kullanıcı ve rol yönetimi sayfalarındaki silme onay dialogu sorunu çözüldü (HTML sanitization sorunu)
 - Rol yönetimi sayfasında rol ekleme, güncelleme ve silme işlemlerinden sonra sayfa otomatik olarak yenileniyor
+- Dashboard yönetimi sayfasındaki PrimeNG tablo bileşeninin siyah arka plan sorunu çözüldü
+- Dashboard yönetimi sayfasında yükleme ekranındaki çift "Lütfen bekleyin..." mesajı sorunu çözüldü
+- Dashboard yönetimi sayfasının tasarımı modernize edildi (tablo stilleri, boş durum mesajı, kart tasarımı, başlık stilleri)
+- Dashboard yönetimi sayfasının yükleme süresi 1000ms'den 500ms'ye düşürülerek kullanıcı deneyimi iyileştirildi
+- Dashboard yönetimi sayfasındaki PrimeNG dropdown bileşeninin siyah arka plan sorunu çözüldü
+- Dashboard yönetimi sayfasında dropdown açıldığında sayfa yukarı kayma sorunu çözüldü
 
 ## Gelecek Adımlar
 1. GitHub'a son değişiklikleri push etmek
@@ -301,22 +316,15 @@
   - Rol yükleme sırası değiştirildi (önce roller, sonra kullanıcılar)
   - Kullanıcı listesini yenilemek için buton eklendi
 
-### Öğrenilen Dersler
-- Tarayıcı önbelleğini temizlemek (Ctrl+F5 veya Cmd+Shift+R) stil değişikliklerinin görünmesini sağlayabilir
-- Karmaşık UI bileşenleri yerine basit HTML elementleri kullanmak bazen daha iyi sonuç verebilir
-- Inline stiller, CSS seçici özgüllük sorunlarını aşmak için kullanılabilir
-- Tutarlı bir UI için tüm benzer elementlerin aynı yüksekliğe sahip olması önemlidir
-- !important kullanımı genellikle kaçınılması gereken bir pratik olsa da, üçüncü taraf kütüphanelerin stillerini geçersiz kılmak için bazen gereklidir
-- Butonlar için sabit boyutlar belirlemek, içerik değiştiğinde düzenin bozulmasını önler
-- Tooltip'ler, buton üzerinde gösterilemeyen metinler için iyi bir alternatiftir
-- `overflow: hidden` özelliği, taşan içeriği gizlemek için kullanılabilir
-- Tooltip pozisyonunu belirlemek, kullanıcı deneyimini iyileştirir
-- Global tooltip stilleri, tüm uygulamada tutarlı bir görünüm sağlar
-- PrimeNG'nin 'appendTo="body"' özelliği, dropdown menüsünün component dışında render edilmesine neden olur
-- Component-scoped CSS'ler, body'e eklenmiş elemanları etkilemez
-- CSS değişkenleri (--dropdown-width gibi), farklı DOM konumları arasında veri paylaşımı sağlayabilir
-- PrimeNG bileşenlerinin DOM yapısını anlamak, doğru stil hedeflemesi için önemlidir
-- Angular'da stil değişikliği sorunlarında, uygulamayı yeniden derlemek veya önbelleği temizlemek gerekebilir
+### Öğrenilen Dersler (Dashboard Yönetimi Sayfası)
+- PrimeNG tablo bileşeninin varsayılan yükleme göstergesini devre dışı bırakmak için `[showLoader]="false"` özelliği kullanılabilir
+- Özel yükleme göstergeleri oluşturmak, daha iyi bir kullanıcı deneyimi sağlar ve tema ile uyumlu olmasını garantiler
+- PrimeNG bileşenlerinin varsayılan stillerini override etmek için `!important` kullanmak gerekebilir
+- Yükleme süresi kısa tutularak kullanıcı deneyimi iyileştirilebilir
+- Boş durum mesajları, kullanıcıya ne yapması gerektiğini açıkça belirtmelidir
+- Tablo başlıklarının ve içeriğinin okunabilirliği için uygun renk kontrastı sağlanmalıdır
+- Kart bileşenlerinde border-radius ve gölge efektleri kullanarak modern bir görünüm elde edilebilir
+- Tutarlı renk şeması ve tipografi kullanımı, kullanıcı arayüzünün profesyonel görünmesini sağlar
 
 ## Belge Referansları
 - [Hata Kayıtları ve Çözümleri](errors.md)
@@ -432,5 +440,19 @@ Kullanıcı yönetimi sayfasındaki checkbox'lar artık işlevsel hale geldi. Ku
 - Şifre hashleme ve doğrulama işlemlerinde tutarlı metotlar kullanılmalıdır
 - Hata ayıklama için detaylı loglama çok faydalıdır
 - Statik sınıflar tür bağımsız değişkeni olarak kullanılamaz
+
+### PrimeNG Bileşenleri ve Stil Sorunları
+- PrimeNG dropdown bileşenlerinin düzgün görüntülenmesi için `appendTo="body"` özelliği kullanılmalıdır
+- Dropdown panellerinin z-index değerlerini kontrol etmek için `[autoZIndex]="true"` ve `[baseZIndex]="9999"]` özellikleri kullanılmalıdır
+- Dropdown panellerinin stillerini özelleştirmek için `[panelStyleClass]` özelliği kullanılmalıdır
+- PrimeNG bileşenlerinin varsayılan stillerini override etmek için `!important` kullanmak gerekebilir
+- Uzun metinlerin dropdown içinde düzgün görüntülenmesi için `white-space: normal` ve `word-break: break-word` özellikleri kullanılmalıdır
+- Dialog kapatıldığında dropdown panellerinin de kapanmasını sağlamak için özel bir metot eklenmelidir
+- Programatik olarak DOM elemanlarının stillerini değiştirmek için `ngAfterViewInit` lifecycle hook'u kullanılabilir
+- Dropdown panellerinin boyutlarını sınırlamak için `max-width` ve `max-height` özellikleri kullanılmalıdır
+- Dropdown panelinin konumunu sabitlemek için `position: fixed` özelliği kullanılmalıdır
+- PrimeNG tablo bileşeninin yükleme ekranında siyah arka plan sorununu çözmek için `.p-datatable-loading-overlay` sınıfının arka plan rengini değiştirmek gerekir
+- Tablo yükleme simgesinin rengini değiştirmek için `.p-datatable-loading-icon` sınıfının rengini değiştirmek gerekir
+- Yükleme süresini kısa tutarak kullanıcı deneyimini iyileştirmek önemlidir
 
 
