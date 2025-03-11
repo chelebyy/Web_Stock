@@ -1,5 +1,39 @@
 # Scratchpad
 
+## Görev: Bilgi İşlem Sayfası Erişim İzinleri Düzeltmesi
+
+### Görev Tanımı
+Bilgi İşlem sayfasına erişim izinleri ile ilgili tutarsızlığı düzeltmek.
+
+### İlerleme
+[X] Sorun tespit edildi: Dashboard bileşeninde `IT.Access` izni kontrol edilirken, rota tanımında `Pages.BilgiIslem.View` izni kullanılıyor
+[X] Bilgi İşlem rotası incelendi ve `requiresAdmin: true` parametresi kaldırıldı
+[X] Dashboard bileşenindeki izin kontrolü `Pages.BilgiIslem.View` olarak güncellendi
+[X] Değişiklikler GitHub'a push edildi
+[X] Bilgi tabanı dosyaları güncellendi
+
+### Yapılan Değişiklikler
+1. `frontend/src/app/features/bilgi-islem/bilgi-islem.routes.ts` dosyasında:
+   - Rota tanımından `requiresAdmin: true` parametresi kaldırıldı
+   - İzin adı `Pages.BilgiIslem` yerine `Pages.BilgiIslem.View` olarak güncellendi
+
+2. `frontend/src/app/features/dashboard/components/user-dashboard.component.ts` dosyasında:
+   - `checkPermissions` metodunda Bilgi İşlem sayfası için izin kontrolü `IT.Access` yerine `Pages.BilgiIslem.View` olarak güncellendi
+
+3. Bilgi tabanı dosyaları güncellendi:
+   - `knowledge-base/feature_modules/bilgi_islem_module.md` dosyasına yeni bölüm eklendi
+   - `knowledge-base/errors.md` dosyasına yeni hata ve çözüm eklendi
+   - `knowledge-base/scratchpad.md` dosyası güncellendi
+
+### Sonraki Adımlar
+- Değişikliklerin test edilmesi
+- B001 kullanıcısının Bilgi İşlem sayfasına erişiminin kontrol edilmesi
+
+### Öğrenilen Dersler
+- İzin kontrollerinin tüm uygulama genelinde tutarlı olması önemlidir
+- Rota tanımları ve bileşen izin kontrolleri arasında uyumsuzluk olmamalıdır
+- Gereksiz admin kısıtlamaları, izin tabanlı erişim kontrolünün etkinliğini azaltabilir
+
 ## Görev: Angular 19 ve PrimeNG 19 Güncellemesi
 
 ### Görev Tanımı
@@ -807,3 +841,38 @@ Bu acil çözüm ile rol yönetimi sayfasına erişim sorunu giderildi. Kullanı
 - [ ] Backend tarafında token yapısının standardize edilmesi
 - [ ] İzin kontrolü mekanizmasının daha güvenli ve tutarlı hale getirilmesi
 - [ ] Özel durumlar yerine daha genel ve güvenli bir yetkilendirme mekanizması geliştirilmesi
+
+## Admin Kullanıcılar İçin İzin Kontrolü Düzeltmesi
+
+**Tarih:** 11.03.2024
+
+### Görev Tanımı
+B001 kullanıcısı admin paneline erişebiliyor ancak Kullanıcı Yönetimi ve Rol Yönetimi gibi izin verilmemiş modüller de görünüyor. Kullanıcı bu modüllere erişim izni olmadığı halde modülleri görebiliyor. Bu sorunu çözmek için izin kontrolü mekanizmasını düzeltmemiz gerekiyor.
+
+### İlerleme
+- [X] Sorunun kaynağını tespit ettik: HasPermissionDirective ve AuthService'deki hasPermission metodunda, admin kullanıcılar için izin kontrolü yapılmadan otomatik olarak tüm izinlere sahip olduğu varsayılıyordu.
+- [X] HasPermissionDirective'de admin kullanıcılar için otomatik izin veren kontrolü kaldırdık.
+- [X] AuthService'deki hasPermission metodunda admin kullanıcılar için otomatik izin veren kontrolü kaldırdık.
+- [X] Değişiklikleri GitHub'a gönderdik.
+- [X] Errors.md dosyasına sorunu ve çözümü ekledik.
+- [X] Scratchpad.md dosyasını güncelledik.
+
+### Yapılan Değişiklikler
+1. `frontend/src/app/shared/directives/has-permission.directive.ts`:
+   - Admin kullanıcılar için otomatik izin veren kontrolü kaldırdık.
+
+2. `frontend/src/app/core/authentication/auth.service.ts`:
+   - hasPermission metodunda admin kullanıcılar için otomatik izin veren kontrolü kaldırdık.
+
+3. Bilgi tabanı güncellemeleri:
+   - `errors.md` dosyasına sorunu ve çözümü ekledik
+   - `scratchpad.md` dosyasını güncelledik.
+
+### Sonraki Adımlar
+- [ ] Değişiklikleri test et ve B001 kullanıcısının artık sadece izin verilen modülleri görebildiğini doğrula.
+- [ ] Diğer admin kullanıcılarının izinlerini kontrol et ve gerekirse düzenle.
+
+### Öğrenilen Dersler
+1. Admin kullanıcılar için bile detaylı izin kontrolü yapılmalıdır. Tüm admin kullanıcıların tüm modüllere erişim izni olmamalıdır.
+2. İzin kontrolü, kullanıcının rolüne (admin olup olmadığına) değil, sahip olduğu izinlere göre yapılmalıdır.
+3. Kullanıcıların izinlerini detaylı bir şekilde yönetmek, güvenlik açısından daha iyi bir yaklaşımdır.
