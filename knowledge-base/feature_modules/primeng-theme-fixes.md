@@ -298,4 +298,116 @@ Bu sorunu çözmek için:
 
 Bu ek düzeltmelerle, dialog ve tabview bileşenlerinin siyah arka plan sorunu tamamen çözülmüştür. Artık tüm bileşenler beyaz arka plana ve koyu metin rengine sahiptir, bu da içeriğin daha okunabilir olmasını sağlar.
 
+PrimeNG'nin Lara temasına geçiş ve özel stil düzeltmeleri ile bileşenlerin arka plan ve metin rengi sorunları çözülmüştür. Bu değişiklikler, kullanıcı deneyimini iyileştirmiş ve uygulamanın görsel tutarlılığını artırmıştır.
+
+## Sayfa Düzenle Diyalogu İçin Ek Düzeltmeler (2025-03-10)
+
+Daha önceki düzeltmelere rağmen, "Sayfa Düzenle" diyalogu hala siyah arka plana sahipti. Bu sorunu çözmek için daha spesifik ve güçlü CSS seçiciler eklenmiştir.
+
+### HTML Öneki Kullanımı
+
+CSS seçicilerin özgüllüğünü artırmak için `html body` öneki kullanılmıştır:
+
+```scss
+/* Sayfa Düzenle Diyalogu İçin Özel Düzeltmeler */
+html body .p-dialog-mask,
+html body .p-dialog-mask.p-component-overlay {
+  background-color: rgba(0, 0, 0, 0.4) !important;
+}
+
+html body .p-dialog,
+html body .p-dialog-mask .p-dialog,
+html body .p-dialog-mask .p-component,
+html body .p-dialog.dashboard-edit-dialog,
+html body .p-dialog-mask .p-dialog.dashboard-edit-dialog {
+  background-color: #ffffff !important;
+  color: #333333 !important;
+  border-radius: 6px !important;
+  box-shadow: 0 3px 6px rgba(0, 0, 0, 0.16), 0 3px 6px rgba(0, 0, 0, 0.23) !important;
+}
+```
+
+### Dialog Bileşeninin Farklı Bölümleri İçin Düzeltmeler
+
+Dialog başlığı, içeriği ve alt kısmı için ayrı ayrı stil tanımlanmıştır:
+
+```scss
+html body .p-dialog .p-dialog-header,
+html body .p-dialog-mask .p-dialog .p-dialog-header {
+  background-color: #ffffff !important;
+  color: #333333 !important;
+  border-bottom: 1px solid #e9ecef !important;
+  padding: 1.25rem !important;
+}
+
+html body .p-dialog .p-dialog-content,
+html body .p-dialog-mask .p-dialog .p-dialog-content {
+  background-color: #ffffff !important;
+  color: #333333 !important;
+  padding: 1.25rem !important;
+}
+
+html body .p-dialog .p-dialog-footer,
+html body .p-dialog-mask .p-dialog .p-dialog-footer {
+  background-color: #ffffff !important;
+  color: #333333 !important;
+  border-top: 1px solid #e9ecef !important;
+  padding: 1.25rem !important;
+}
+```
+
+### Dialog İçindeki TabView Bileşeni İçin Düzeltmeler
+
+Dialog içindeki TabView bileşeni için daha spesifik seçiciler kullanılmıştır:
+
+```scss
+html body .p-dialog .p-tabview,
+html body .p-dialog-mask .p-dialog .p-tabview {
+  background-color: #ffffff !important;
+  color: #333333 !important;
+}
+
+html body .p-dialog .p-tabview .p-tabview-nav,
+html body .p-dialog-mask .p-dialog .p-tabview .p-tabview-nav {
+  background-color: #ffffff !important;
+  border-color: #e9ecef !important;
+}
+
+html body .p-dialog .p-tabview .p-tabview-nav li .p-tabview-nav-link,
+html body .p-dialog-mask .p-dialog .p-tabview .p-tabview-nav li .p-tabview-nav-link {
+  background-color: #f8f9fa !important;
+  color: #6c757d !important;
+  border-color: #e9ecef !important;
+}
+
+html body .p-dialog .p-tabview .p-tabview-nav li.p-highlight .p-tabview-nav-link,
+html body .p-dialog-mask .p-dialog .p-tabview .p-tabview-nav li.p-highlight .p-tabview-nav-link {
+  background-color: #ffffff !important;
+  color: #3B82F6 !important;
+  border-color: #3B82F6 !important;
+}
+
+html body .p-dialog .p-tabview .p-tabview-panels,
+html body .p-dialog-mask .p-dialog .p-tabview .p-tabview-panels {
+  background-color: #ffffff !important;
+  color: #333333 !important;
+  padding: 1.25rem 0 !important;
+}
+```
+
+## CSS Seçici Özgüllüğü Hakkında Ek Bilgiler
+
+PrimeNG bileşenlerinin stillerini düzeltirken, CSS seçici özgüllüğü (specificity) kritik öneme sahiptir. Bazı durumlarda, tema değişikliği ve genel stil düzeltmeleri yeterli olmayabilir. Bu gibi durumlarda:
+
+1. `html body` gibi ön ekler kullanarak seçicilerin özgüllüğünü artırın
+2. Daha uzun ve spesifik seçici zincirleri kullanın (örneğin, `html body .p-dialog-mask .p-dialog .p-tabview .p-tabview-nav li .p-tabview-nav-link`)
+3. `!important` kullanarak stil önceliğini artırın
+4. Bileşenlerin farklı bölümleri için ayrı ayrı stil tanımlayın
+
+Bu yaklaşımlar, PrimeNG'nin kendi stillerini geçersiz kılmak için gereklidir ve bileşenlerin doğru şekilde görüntülenmesini sağlar.
+
+## Sonuç
+
+Bu ek düzeltmelerle, dialog ve tabview bileşenlerinin siyah arka plan sorunu tamamen çözülmüştür. Artık tüm bileşenler beyaz arka plana ve koyu metin rengine sahiptir, bu da içeriğin daha okunabilir olmasını sağlar.
+
 PrimeNG'nin Lara temasına geçiş ve özel stil düzeltmeleri ile bileşenlerin arka plan ve metin rengi sorunları çözülmüştür. Bu değişiklikler, kullanıcı deneyimini iyileştirmiş ve uygulamanın görsel tutarlılığını artırmıştır. 

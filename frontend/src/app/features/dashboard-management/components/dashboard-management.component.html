@@ -102,27 +102,27 @@
     [style]="{width: '650px'}" 
     [header]="dialogHeader" 
     [modal]="true" 
-    styleClass="p-fluid dashboard-edit-dialog"
+    styleClass="p-fluid dashboard-edit-dialog lara-dialog"
     [baseZIndex]="10000">
     
     <ng-template pTemplate="content">
-      <p-tabView [(activeIndex)]="activeTabIndex">
+      <p-tabView [(activeIndex)]="activeTabIndex" styleClass="lara-tabview">
         <!-- Sayfa Bilgileri Sekmesi -->
         <p-tabPanel header="Sayfa Bilgileri">
           <div class="field">
             <label for="name">Sayfa Adı*</label>
-            <input type="text" pInputText id="name" [(ngModel)]="page.name" required autofocus />
+            <input type="text" pInputText id="name" [(ngModel)]="page.name" required autofocus class="lara-input" />
             <small class="p-error" *ngIf="!page.name && displayDialog">Sayfa adı zorunludur.</small>
           </div>
           
           <div class="field">
             <label for="description">Açıklama</label>
-            <input type="text" pInputText id="description" [(ngModel)]="page.description" />
+            <input type="text" pInputText id="description" [(ngModel)]="page.description" class="lara-input" />
           </div>
           
           <div class="field">
             <label for="route">Rota*</label>
-            <input type="text" pInputText id="route" [(ngModel)]="page.route" required />
+            <input type="text" pInputText id="route" [(ngModel)]="page.route" required class="lara-input" />
             <small class="p-error" *ngIf="!page.route && displayDialog">Rota zorunludur.</small>
           </div>
           
@@ -136,19 +136,19 @@
               [showClear]="true"
               optionLabel="label" 
               optionValue="value"
-              [style]="{'width':'100%', 'background-color': 'white'}"
+              [style]="{'width':'100%'}"
               appendTo="body"
               [autoZIndex]="true"
               [baseZIndex]="10000"
-              styleClass="dashboard-permission-dropdown"
-              [panelStyleClass]="'dashboard-permission-dropdown-panel'"
+              styleClass="lara-dropdown"
+              [panelStyleClass]="'lara-dropdown-panel'"
               required>
             </p-dropdown>
             <small class="p-error" *ngIf="!page.requiredPermission && displayDialog">Gerekli izin zorunludur.</small>
           </div>
           
           <div class="field-checkbox">
-            <p-checkbox [(ngModel)]="page.isActive" [binary]="true" inputId="isActive"></p-checkbox>
+            <p-checkbox [(ngModel)]="page.isActive" [binary]="true" inputId="isActive" styleClass="lara-checkbox"></p-checkbox>
             <label for="isActive">Aktif</label>
           </div>
         </p-tabPanel>
