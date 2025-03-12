@@ -1,7 +1,7 @@
-@import "@angular/material/prebuilt-themes/indigo-pink.css";
-@import "primeicons/primeicons.css";
-@import "./app/features/dashboard/shared/styles/dashboard-icons.scss";
-@import "./app/features/bilgi-islem/shared/styles/bilgi-islem-icons.scss";
+@use "@angular/material/prebuilt-themes/indigo-pink.css";
+@use "primeicons/primeicons.css";
+@use "./app/features/dashboard/shared/styles/dashboard-icons.scss";
+@use "./app/features/bilgi-islem/shared/styles/bilgi-islem-icons.scss";
 
 /* PrimeNG 19 Tema Ayarları */
 :root {

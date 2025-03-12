@@ -1,1 +1,131 @@
- 
+/* Dashboard Modülü İkon Stilleri */
+
+/* Kalem (Düzenle) İkonu */
+.dashboard-edit-icon {
+  &.p-button {
+    width: 2.5rem;
+    height: 2.5rem;
+    border-radius: 50%;
+    background: #4caf50;
+    border: none;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 5px rgba(76, 175, 80, 0.3);
+    
+    &:hover {
+      background: #45a049;
+      transform: translateY(-3px);
+      box-shadow: 0 4px 8px rgba(76, 175, 80, 0.4);
+    }
+    
+    &:active {
+      transform: translateY(-1px);
+      box-shadow: 0 2px 4px rgba(76, 175, 80, 0.3);
+    }
+    
+    .p-button-icon {
+      color: white;
+      font-size: 1rem;
+      text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+    }
+  }
+}
+
+/* Çöp Kutusu (Sil) İkonu */
+.dashboard-delete-icon {
+  &.p-button {
+    width: 2.5rem;
+    height: 2.5rem;
+    border-radius: 50%;
+    background: #f44336;
+    border: none;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 5px rgba(244, 67, 54, 0.3);
+    
+    &:hover {
+      background: #e53935;
+      transform: translateY(-3px);
+      box-shadow: 0 4px 8px rgba(244, 67, 54, 0.4);
+    }
+    
+    &:active {
+      transform: translateY(-1px);
+      box-shadow: 0 2px 4px rgba(244, 67, 54, 0.3);
+    }
+    
+    .p-button-icon {
+      color: white;
+      font-size: 1rem;
+      text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+    }
+  }
+}
+
+/* İzin (Anahtar) İkonu */
+.dashboard-permission-icon {
+  &.p-button {
+    width: 2.5rem;
+    height: 2.5rem;
+    border-radius: 50%;
+    background: #2196f3;
+    border: none;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 5px rgba(33, 150, 243, 0.3);
+    
+    &:hover {
+      background: #1e88e5;
+      transform: translateY(-3px);
+      box-shadow: 0 4px 8px rgba(33, 150, 243, 0.4);
+    }
+    
+    &:active {
+      transform: translateY(-1px);
+      box-shadow: 0 2px 4px rgba(33, 150, 243, 0.3);
+    }
+    
+    .p-button-icon {
+      color: white;
+      font-size: 1rem;
+      text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+    }
+  }
+}
+
+/* Artı (Ekle) İkonu */
+.dashboard-add-icon {
+  &.p-button {
+    width: 2.5rem;
+    height: 2.5rem;
+    border-radius: 50%;
+    background: #ff9800;
+    border: none;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 5px rgba(255, 152, 0, 0.3);
+    
+    &:hover {
+      background: #f57c00;
+      transform: translateY(-3px);
+      box-shadow: 0 4px 8px rgba(255, 152, 0, 0.4);
+    }
+    
+    &:active {
+      transform: translateY(-1px);
+      box-shadow: 0 2px 4px rgba(255, 152, 0, 0.3);
+    }
+    
+    .p-button-icon {
+      color: white;
+      font-size: 1rem;
+      text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+    }
+  }
+}
+
+/* Tooltip Stilleri */
+.dashboard-tooltip {
+  font-size: 0.85rem;
+  padding: 0.5rem 0.75rem;
+  background: rgba(0, 0, 0, 0.8);
+  color: white;
+  border-radius: 4px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+} 
