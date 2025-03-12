@@ -2631,3 +2631,126 @@ body .p-dropdown-panel {
   border-color: #e9ecef !important;
   padding: 1.25rem !important;
 }
+
+/* PrimeNG Tema Düzeltmeleri - Sayfa Düzenle Diyalogu */
+body .p-dialog,
+body .p-dialog-mask .p-dialog,
+body .p-dialog-mask .p-component,
+body .p-dialog.dashboard-edit-dialog,
+body .p-dialog-mask .p-dialog.dashboard-edit-dialog,
+body .p-tabview,
+body .p-tabview .p-tabview-panels,
+body .p-tabview .p-tabview-nav,
+body .p-tabview .p-tabview-nav li .p-tabview-nav-link {
+  background-color: #ffffff !important;
+  color: #333333 !important;
+}
+
+body .p-dialog .p-dialog-header,
+body .p-dialog .p-dialog-content,
+body .p-dialog .p-dialog-footer,
+body .p-dialog-mask .p-dialog .p-dialog-header,
+body .p-dialog-mask .p-dialog .p-dialog-content,
+body .p-dialog-mask .p-dialog .p-dialog-footer {
+  background-color: #ffffff !important;
+  color: #333333 !important;
+  border-color: #e9ecef !important;
+}
+
+body .p-dialog .p-tabview,
+body .p-dialog .p-tabview .p-tabview-panels,
+body .p-dialog .p-tabview .p-tabview-nav,
+body .p-dialog .p-tabview .p-tabview-nav li .p-tabview-nav-link {
+  background-color: #ffffff !important;
+  color: #333333 !important;
+}
+
+body .p-dialog input,
+body .p-dialog .p-inputtext,
+body .p-dialog .p-dropdown,
+body .p-dialog .p-multiselect {
+  background-color: #ffffff !important;
+  color: #333333 !important;
+  border: 1px solid #ced4da !important;
+}
+
+body .p-dialog label {
+  color: #333333 !important;
+}
+
+/* TabView Düzeltmeleri */
+
+/* Sayfa Düzenle Diyalogu İçin Özel Düzeltmeler */
+html body .p-dialog-mask,
+html body .p-dialog-mask.p-component-overlay {
+  background-color: rgba(0, 0, 0, 0.4) !important;
+}
+
+html body .p-dialog,
+html body .p-dialog-mask .p-dialog,
+html body .p-dialog-mask .p-component,
+html body .p-dialog.dashboard-edit-dialog,
+html body .p-dialog-mask .p-dialog.dashboard-edit-dialog {
+  background-color: #ffffff !important;
+  color: #333333 !important;
+  border-radius: 6px !important;
+  box-shadow: 0 3px 6px rgba(0, 0, 0, 0.16), 0 3px 6px rgba(0, 0, 0, 0.23) !important;
+}
+
+html body .p-dialog .p-dialog-header,
+html body .p-dialog-mask .p-dialog .p-dialog-header {
+  background-color: #ffffff !important;
+  color: #333333 !important;
+  border-bottom: 1px solid #e9ecef !important;
+  padding: 1.25rem !important;
+}
+
+html body .p-dialog .p-dialog-content,
+html body .p-dialog-mask .p-dialog .p-dialog-content {
+  background-color: #ffffff !important;
+  color: #333333 !important;
+  padding: 1.25rem !important;
+}
+
+html body .p-dialog .p-dialog-footer,
+html body .p-dialog-mask .p-dialog .p-dialog-footer {
+  background-color: #ffffff !important;
+  color: #333333 !important;
+  border-top: 1px solid #e9ecef !important;
+  padding: 1.25rem !important;
+}
+
+html body .p-dialog .p-tabview,
+html body .p-dialog-mask .p-dialog .p-tabview {
+  background-color: #ffffff !important;
+  color: #333333 !important;
+}
+
+html body .p-dialog .p-tabview .p-tabview-nav,
+html body .p-dialog-mask .p-dialog .p-tabview .p-tabview-nav {
+  background-color: #ffffff !important;
+  border-color: #e9ecef !important;
+}
+
+html body .p-dialog .p-tabview .p-tabview-nav li .p-tabview-nav-link,
+html body .p-dialog-mask .p-dialog .p-tabview .p-tabview-nav li .p-tabview-nav-link {
+  background-color: #f8f9fa !important;
+  color: #6c757d !important;
+  border-color: #e9ecef !important;
+}
+
+html body .p-dialog .p-tabview .p-tabview-nav li.p-highlight .p-tabview-nav-link,
+html body .p-dialog-mask .p-dialog .p-tabview .p-tabview-nav li.p-highlight .p-tabview-nav-link {
+  background-color: #ffffff !important;
+  color: #3B82F6 !important;
+  border-color: #3B82F6 !important;
+}
+
+html body .p-dialog .p-tabview .p-tabview-panels,
+html body .p-dialog-mask .p-dialog .p-tabview .p-tabview-panels {
+  background-color: #ffffff !important;
+  color: #333333 !important;
+  padding: 1.25rem 0 !important;
+}
+
+/* TabView Düzeltmeleri */
