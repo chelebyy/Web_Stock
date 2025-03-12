@@ -455,4 +455,38 @@ Kullanıcı yönetimi sayfasındaki checkbox'lar artık işlevsel hale geldi. Ku
 - Tablo yükleme simgesinin rengini değiştirmek için `.p-datatable-loading-icon` sınıfının rengini değiştirmek gerekir
 - Yükleme süresini kısa tutarak kullanıcı deneyimini iyileştirmek önemlidir
 
+## PrimeNG Tema Düzeltmeleri (2025-03-10)
+
+### Yapılan Değişiklikler
+
+1. **Tema Değişikliği:**
+   - PrimeNG'nin Aura temasından Lara temasına geçiş yapıldı.
+   - `app.config.ts` dosyasında tema değişikliği yapıldı.
+
+2. **Global Stil Düzeltmeleri:**
+   - Dialog bileşeni için beyaz arka plan ve koyu metin rengi ayarlandı.
+   - TabView bileşeni için beyaz arka plan ve koyu metin rengi ayarlandı.
+   - Z-index değerleri düzenlendi.
+
+3. **Özel Bileşen Stilleri:**
+   - Dashboard düzenleme diyalogu için özel stil sınıfı oluşturuldu.
+   - Dialog içindeki form elemanları için stil düzeltmeleri yapıldı.
+
+### Sonuçlar
+
+- Dialog ve TabView bileşenlerinin arka plan rengi beyaz, metin rengi koyu olarak düzeltildi.
+- İçerikler daha okunabilir hale geldi.
+- Kullanıcı deneyimi iyileştirildi.
+
+### Dokümantasyon
+
+- PrimeNG tema düzeltmeleri hakkında detaylı bilgi için [PrimeNG Tema Düzeltmeleri](knowledge-base/feature_modules/primeng-theme-fixes.md) dokümanı oluşturuldu.
+- Hata ve çözüm bilgileri `errors.md` dosyasına eklendi.
+
+### Sonraki Adımlar
+
+- Diğer PrimeNG bileşenlerinin (DataTable, MultiSelect, vb.) stil sorunları kontrol edilecek.
+- Gerekirse diğer bileşenler için de özel stil düzeltmeleri yapılacak.
+- Tema değişikliğinin tüm uygulama üzerindeki etkisi test edilecek.
+
 
