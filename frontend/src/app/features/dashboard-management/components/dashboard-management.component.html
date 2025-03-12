@@ -144,6 +144,51 @@
         <small class="p-error" *ngIf="!page.requiredPermission && displayDialog">Gerekli izin zorunludur.</small>
       </div>
       
+      <!-- İzin Verilen Kullanıcılar -->
+      <div class="field">
+        <label for="allowedUsers">İzin Verilen Kullanıcılar</label>
+        <p-multiSelect
+          id="allowedUsers"
+          [options]="userOptions"
+          [(ngModel)]="page.allowedUserIds"
+          placeholder="Kullanıcı seçin"
+          optionLabel="label"
+          optionValue="value"
+          [style]="{'width':'100%', 'background-color': 'white'}"
+          appendTo="body"
+          [autoZIndex]="true"
+          [baseZIndex]="10000"
+          styleClass="dashboard-users-multiselect"
+          [panelStyleClass]="'dashboard-users-multiselect-panel'"
+          [filter]="true"
+          filterPlaceHolder="Kullanıcı ara..."
+          [showToggleAll]="true"
+          [virtualScroll]="true"
+          [itemSize]="38"
+          [maxSelectedLabels]="3"
+          selectedItemsLabel="{0} kullanıcı seçildi"
+          defaultLabel="Kullanıcı seçin"
+          display="chip">
+          <ng-template let-user pTemplate="item">
+            <div class="user-item">
+              <span class="user-name">{{ user.label }}</span>
+              <span class="user-sicil">({{ user.sicil }})</span>
+            </div>
+          </ng-template>
+          <ng-template let-value pTemplate="selectedItems">
+            <div *ngIf="value" class="selected-users-container">
+              <div *ngFor="let user of value | slice:0:3" class="selected-user-chip">
+                {{ getUserLabelById(user) }}
+              </div>
+              <div *ngIf="value.length > 3" class="more-users-chip">
+                +{{ value.length - 3 }} daha
+              </div>
+            </div>
+          </ng-template>
+        </p-multiSelect>
+        <small class="p-help-text">Bu sayfaya erişim izni verilecek kullanıcıları seçin. Boş bırakırsanız, gerekli izne sahip tüm kullanıcılar erişebilir.</small>
+      </div>
+      
       <div class="field-checkbox">
         <p-checkbox [(ngModel)]="page.isActive" [binary]="true" inputId="isActive"></p-checkbox>
         <label for="isActive">Aktif</label>

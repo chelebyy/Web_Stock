@@ -14,6 +14,9 @@ import { TagModule } from 'primeng/tag';
 import { TooltipModule } from 'primeng/tooltip';
 import { AuthService } from '../../../core/authentication/auth.service';
 import { Router } from '@angular/router';
+import { UserService } from '../../user-management/services/user.service';
+import { MultiSelectModule } from 'primeng/multiselect';
+import { User } from '../../../shared/models/user.model';
 
 // PrimeNG Tag bileşeni için geçerli severity tipleri
 type TagSeverity = 'success' | 'info' | 'warn' | 'danger' | 'secondary' | 'contrast' | undefined;
@@ -25,8 +28,16 @@ interface DashboardPage {
   route: string;
   isActive: boolean;
   requiredPermission: string;
+  allowedUsers?: User[]; // İzin verilen kullanıcılar
+  allowedUserIds?: number[]; // İzin verilen kullanıcı ID'leri
   createdAt: Date;
   updatedAt: Date;
+}
+
+interface UserSelectItem {
+  label: string;
+  value: number;
+  sicil: string;
 }
 
 @Component({
@@ -46,7 +57,8 @@ interface DashboardPage {
     DialogModule,
     CheckboxModule,
     TagModule,
-    TooltipModule
+    TooltipModule,
+    MultiSelectModule
   ],
   providers: [MessageService]
 })
@@ -74,6 +86,7 @@ export class DashboardManagementComponent implements OnInit, AfterViewInit {
     route: '',
     isActive: true,
     requiredPermission: '',
+    allowedUserIds: [],
     createdAt: new Date(),
     updatedAt: new Date()
   };
@@ -86,22 +99,31 @@ export class DashboardManagementComponent implements OnInit, AfterViewInit {
   
   // İzin seçenekleri
   permissionOptions: any[] = [];
+  
+  // Kullanıcı seçenekleri
+  userOptions: UserSelectItem[] = [];
+  
+  // Tüm kullanıcılar
+  users: User[] = [];
 
   constructor(
     private messageService: MessageService,
     private authService: AuthService,
-    private router: Router
+    private router: Router,
+    private userService: UserService
   ) { }
 
   ngOnInit(): void {
     this.loadDashboardPages();
     this.loadPermissionOptions();
+    this.loadUsers();
   }
 
   ngAfterViewInit(): void {
     // Dropdown panel stillerini programatik olarak ayarla
     setTimeout(() => {
       this.updateDropdownPanelStyles();
+      this.updateMultiSelectPanelStyles();
     }, 100);
   }
 
@@ -137,6 +159,30 @@ export class DashboardManagementComponent implements OnInit, AfterViewInit {
     });
   }
 
+  // Kullanıcıları yükle
+  loadUsers(): void {
+    this.userService.getUsers().subscribe({
+      next: (users) => {
+        this.users = users;
+        // Kullanıcı seçeneklerini oluştur
+        this.userOptions = users.map(user => ({
+          label: `${user.firstName || ''} ${user.lastName || ''} (${user.sicil})`,
+          value: user.id || 0,
+          sicil: user.sicil
+        }));
+        console.log('Kullanıcılar yüklendi:', this.userOptions);
+      },
+      error: (error) => {
+        console.error('Kullanıcıları yüklerken hata oluştu:', error);
+        this.messageService.add({
+          severity: 'error',
+          summary: 'Hata',
+          detail: 'Kullanıcılar yüklenirken bir hata oluştu.'
+        });
+      }
+    });
+  }
+
   // Dashboard sayfalarını yükle
   loadDashboardPages(): void {
     // Gerçek uygulamada API'den veri çekilecek
@@ -149,6 +195,7 @@ export class DashboardManagementComponent implements OnInit, AfterViewInit {
           route: '/dashboard/admin-dashboard',
           isActive: true,
           requiredPermission: 'Pages.AdminDashboard',
+          allowedUserIds: [],
           createdAt: new Date('2025-01-01'),
           updatedAt: new Date('2025-01-01')
         },
@@ -159,6 +206,7 @@ export class DashboardManagementComponent implements OnInit, AfterViewInit {
           route: '/user-management',
           isActive: true,
           requiredPermission: 'Pages.UserManagement',
+          allowedUserIds: [],
           createdAt: new Date('2025-01-01'),
           updatedAt: new Date('2025-01-01')
         },
@@ -286,6 +334,7 @@ export class DashboardManagementComponent implements OnInit, AfterViewInit {
       route: '',
       isActive: true,
       requiredPermission: '',
+      allowedUserIds: [],
       createdAt: new Date(),
       updatedAt: new Date()
     };
@@ -295,12 +344,18 @@ export class DashboardManagementComponent implements OnInit, AfterViewInit {
     // Dropdown stillerini düzenle
     setTimeout(() => {
       this.updateDropdownPanelStyles();
+      this.updateMultiSelectPanelStyles();
     }, 100);
+  }
+
+  // Kullanıcı ID'sine göre etiket getir
+  getUserLabelById(userId: number): string {
+    const user = this.userOptions.find(u => u.value === userId);
+    return user ? user.label : '';
   }
 
   // Dashboard sayfası düzenle
   editPage(page: DashboardPage): void {
-    // Seçilen sayfanın kopyasını oluştur
     this.page = { ...page };
     this.dialogHeader = 'Dashboard Sayfası Düzenle';
     this.displayDialog = true;
@@ -308,6 +363,7 @@ export class DashboardManagementComponent implements OnInit, AfterViewInit {
     // Dropdown stillerini düzenle
     setTimeout(() => {
       this.updateDropdownPanelStyles();
+      this.updateMultiSelectPanelStyles();
     }, 100);
   }
 
@@ -353,9 +409,8 @@ export class DashboardManagementComponent implements OnInit, AfterViewInit {
     });
   }
 
-  // Dashboard sayfası kaydet
+  // Sayfayı kaydet
   savePage(): void {
-    // Form doğrulama
     if (!this.page.name || !this.page.route || !this.page.requiredPermission) {
       this.messageService.add({
         severity: 'error',
@@ -365,51 +420,47 @@ export class DashboardManagementComponent implements OnInit, AfterViewInit {
       return;
     }
 
-    // Yeni kayıt mı, güncelleme mi?
+    // Yeni sayfa ekleme
     if (this.page.id === 0) {
-      // Yeni kayıt
-      // Gerçek uygulamada API'ye kayıt isteği gönderilecek
-      // Şimdilik yerel listeye ekliyoruz
+      // Gerçek uygulamada API'ye gönderilecek
       this.page.id = this.dashboardPages.length + 1;
       this.page.createdAt = new Date();
       this.page.updatedAt = new Date();
-      this.dashboardPages.push({ ...this.page });
-      
-      // Filtrelenmiş listeyi güncelle
-      this.filteredDashboardPages = [...this.dashboardPages];
-      
+      this.dashboardPages.push(this.page);
       this.messageService.add({
         severity: 'success',
         summary: 'Başarılı',
-        detail: `"${this.page.name}" sayfası başarıyla eklendi.`
+        detail: 'Dashboard sayfası başarıyla eklendi.'
       });
-    } else {
-      // Güncelleme
-      // Gerçek uygulamada API'ye güncelleme isteği gönderilecek
-      // Şimdilik yerel listeyi güncelliyoruz
-      this.page.updatedAt = new Date();
+    } 
+    // Mevcut sayfayı güncelleme
+    else {
+      // Gerçek uygulamada API'ye gönderilecek
       const index = this.dashboardPages.findIndex(p => p.id === this.page.id);
       if (index !== -1) {
-        this.dashboardPages[index] = { ...this.page };
-        
-        // Filtrelenmiş listeyi güncelle
-        this.filteredDashboardPages = [...this.dashboardPages];
-        
-        // Eğer arama yapılmışsa, filtrelemeyi tekrar uygula
-        if (this.searchText) {
-          this.onSearch({ target: { value: this.searchText } } as unknown as Event);
-        }
+        this.page.updatedAt = new Date();
+        this.dashboardPages[index] = this.page;
+        this.messageService.add({
+          severity: 'success',
+          summary: 'Başarılı',
+          detail: 'Dashboard sayfası başarıyla güncellendi.'
+        });
       }
-      
-      this.messageService.add({
-        severity: 'success',
-        summary: 'Başarılı',
-        detail: `"${this.page.name}" sayfası başarıyla güncellendi.`
-      });
     }
 
-    // Dialog kapat
+    this.filteredDashboardPages = [...this.dashboardPages];
     this.displayDialog = false;
+    this.page = {
+      id: 0,
+      name: '',
+      description: '',
+      route: '',
+      isActive: true,
+      requiredPermission: '',
+      allowedUserIds: [],
+      createdAt: new Date(),
+      updatedAt: new Date()
+    };
   }
 
   // Sayfaya git
@@ -417,25 +468,23 @@ export class DashboardManagementComponent implements OnInit, AfterViewInit {
     this.router.navigate([route]);
   }
 
-  // Durum etiketi getir
-  getStatusSeverity(isActive: boolean): TagSeverity {
-    return isActive ? 'success' : 'danger';
-  }
-
-  // Durum etiketi metni getir
+  // Durum etiketi
   getStatusLabel(isActive: boolean): string {
     return isActive ? 'Aktif' : 'Pasif';
   }
 
-  // Arama işlevi
+  // Durum severity
+  getStatusSeverity(isActive: boolean): TagSeverity {
+    return isActive ? 'success' : 'danger';
+  }
+
+  // Arama işlemi
   onSearch(event: Event): void {
-    const searchValue = (event.target as HTMLInputElement).value.toLowerCase();
-    this.searchText = searchValue;
-    
+    const searchValue = this.searchText.toLowerCase();
     if (searchValue) {
       this.filteredDashboardPages = this.dashboardPages.filter(page => 
         page.name.toLowerCase().includes(searchValue) ||
-        page.description.toLowerCase().includes(searchValue) ||
+        (page.description && page.description.toLowerCase().includes(searchValue)) ||
         page.route.toLowerCase().includes(searchValue) ||
         page.requiredPermission.toLowerCase().includes(searchValue)
       );
@@ -444,9 +493,29 @@ export class DashboardManagementComponent implements OnInit, AfterViewInit {
     }
   }
 
-  // Arama alanını temizle
+  // Aramayı temizle
   clearSearch(): void {
     this.searchText = '';
     this.filteredDashboardPages = [...this.dashboardPages];
+  }
+
+  // MultiSelect panel stillerini güncelle
+  updateMultiSelectPanelStyles(): void {
+    const multiSelectPanels = document.querySelectorAll('.dashboard-users-multiselect-panel');
+    multiSelectPanels.forEach(panel => {
+      if (panel instanceof HTMLElement) {
+        panel.style.backgroundColor = '#ffffff';
+        panel.style.color = '#333333';
+        panel.style.maxHeight = '300px';
+        panel.style.overflowY = 'auto';
+        panel.style.maxWidth = '450px';
+        panel.style.width = 'auto';
+        panel.style.zIndex = '10001';
+        panel.style.position = 'fixed';
+        panel.style.boxShadow = '0 2px 12px rgba(0, 0, 0, 0.1)';
+        panel.style.border = '1px solid #ced4da';
+        panel.style.borderRadius = '4px';
+      }
+    });
   }
 } 

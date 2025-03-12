@@ -436,6 +436,124 @@
         }
       }
     }
+    
+    /* MultiSelect Stilleri */
+    .dashboard-users-multiselect {
+      width: 100%;
+      
+      .p-multiselect-label {
+        color: #333333 !important;
+        font-weight: 500 !important;
+        padding: 0.75rem 0.75rem !important;
+        background-color: white !important;
+      }
+      
+      .p-multiselect-trigger {
+        color: #64748b !important;
+        background-color: transparent !important;
+      }
+      
+      &.p-multiselect-chip {
+        .p-multiselect-token {
+          background-color: #e6f7ff !important;
+          color: #0077cc !important;
+          margin-right: 0.5rem !important;
+          padding: 0.25rem 0.5rem !important;
+          border-radius: 4px !important;
+          
+          .p-multiselect-token-icon {
+            color: #0077cc !important;
+            margin-left: 0.5rem !important;
+            
+            &:hover {
+              color: #005fa3 !important;
+            }
+          }
+        }
+      }
+    }
+    
+    .dashboard-users-multiselect-panel {
+      background-color: white !important;
+      color: #333333 !important;
+      border: 1px solid #ced4da !important;
+      border-radius: 4px !important;
+      box-shadow: 0 2px 12px rgba(0, 0, 0, 0.1) !important;
+      max-width: 450px !important;
+      width: auto !important;
+      max-height: 300px !important;
+      overflow-y: auto !important;
+      position: fixed !important;
+      z-index: 10001 !important;
+      
+      .p-multiselect-header {
+        padding: 0.75rem 1rem !important;
+        border-bottom: 1px solid #e9ecef !important;
+        background-color: #f8f9fa !important;
+        
+        .p-multiselect-filter-container {
+          margin-bottom: 0.5rem !important;
+          
+          .p-inputtext {
+            padding: 0.5rem 0.75rem !important;
+            width: 100% !important;
+            border: 1px solid #ced4da !important;
+            border-radius: 4px !important;
+            
+            &:focus {
+              border-color: #93c5fd !important;
+              box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.25) !important;
+            }
+          }
+        }
+        
+        .p-checkbox {
+          margin-right: 0.5rem !important;
+          
+          .p-checkbox-box {
+            border: 1px solid #ced4da !important;
+            
+            &.p-highlight {
+              background-color: #3B82F6 !important;
+              border-color: #3B82F6 !important;
+            }
+          }
+        }
+      }
+      
+      .p-multiselect-items {
+        padding: 0.5rem 0 !important;
+        
+        .p-multiselect-item {
+          padding: 0.75rem 1rem !important;
+          color: #333333 !important;
+          background-color: white !important;
+          border-bottom: 1px solid rgba(0, 0, 0, 0.05) !important;
+          
+          &:hover {
+            background-color: #f8f9fa !important;
+          }
+          
+          &.p-highlight {
+            background-color: #e6f7ff !important;
+            color: #0077cc !important;
+          }
+          
+          .p-checkbox {
+            margin-right: 0.75rem !important;
+            
+            .p-checkbox-box {
+              border: 1px solid #ced4da !important;
+              
+              &.p-highlight {
+                background-color: #3B82F6 !important;
+                border-color: #3B82F6 !important;
+              }
+            }
+          }
+        }
+      }
+    }
   }
 }
 
@@ -535,4 +653,54 @@
 ::ng-deep body .p-dropdown-panel.dashboard-permission-dropdown-panel .p-dropdown-items .p-dropdown-item.p-highlight {
   background-color: #e6f7ff !important;
   color: #0077cc !important;
+}
+
+.user-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  
+  .user-name {
+    font-weight: 500;
+    color: #333333;
+  }
+  
+  .user-sicil {
+    color: #64748b;
+    font-size: 0.9rem;
+  }
+}
+
+.selected-users-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  
+  .selected-user-chip {
+    background-color: #e6f7ff;
+    color: #0077cc;
+    padding: 0.25rem 0.5rem;
+    border-radius: 4px;
+    font-size: 0.9rem;
+    max-width: 150px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  
+  .more-users-chip {
+    background-color: #f1f5f9;
+    color: #64748b;
+    padding: 0.25rem 0.5rem;
+    border-radius: 4px;
+    font-size: 0.9rem;
+  }
+}
+
+.p-help-text {
+  display: block;
+  color: #64748b;
+  font-size: 0.85rem;
+  margin-top: 0.5rem;
+  font-style: italic;
 }
