@@ -5,20 +5,20 @@ button.p-button.p-button-rounded.p-button-text.p-button-info.dashboard-edit-icon
   width: 2.5rem !important;
   height: 2.5rem !important;
   border-radius: 50% !important;
-  background: #4caf50 !important;
+  background: #26c6da !important;
   border: none !important;
   transition: all 0.3s ease !important;
-  box-shadow: 0 2px 5px rgba(76, 175, 80, 0.3) !important;
+  box-shadow: 0 3px 10px rgba(38, 198, 218, 0.4) !important;
   
   &:hover {
-    background: #45a049 !important;
+    background: #00acc1 !important;
     transform: translateY(-3px) !important;
-    box-shadow: 0 4px 8px rgba(76, 175, 80, 0.4) !important;
+    box-shadow: 0 5px 15px rgba(38, 198, 218, 0.5) !important;
   }
   
   &:active {
     transform: translateY(-1px) !important;
-    box-shadow: 0 2px 4px rgba(76, 175, 80, 0.3) !important;
+    box-shadow: 0 3px 8px rgba(38, 198, 218, 0.4) !important;
   }
   
   .p-button-icon {
@@ -33,20 +33,20 @@ button.p-button.p-button-rounded.p-button-text.p-button-danger.dashboard-delete-
   width: 2.5rem !important;
   height: 2.5rem !important;
   border-radius: 50% !important;
-  background: #f44336 !important;
+  background: #ef5350 !important;
   border: none !important;
   transition: all 0.3s ease !important;
-  box-shadow: 0 2px 5px rgba(244, 67, 54, 0.3) !important;
+  box-shadow: 0 3px 10px rgba(239, 83, 80, 0.4) !important;
   
   &:hover {
     background: #e53935 !important;
     transform: translateY(-3px) !important;
-    box-shadow: 0 4px 8px rgba(244, 67, 54, 0.4) !important;
+    box-shadow: 0 5px 15px rgba(239, 83, 80, 0.5) !important;
   }
   
   &:active {
     transform: translateY(-1px) !important;
-    box-shadow: 0 2px 4px rgba(244, 67, 54, 0.3) !important;
+    box-shadow: 0 3px 8px rgba(239, 83, 80, 0.4) !important;
   }
   
   .p-button-icon {
@@ -61,20 +61,20 @@ button.p-button.p-button-rounded.p-button-text.p-button-success.dashboard-permis
   width: 2.5rem !important;
   height: 2.5rem !important;
   border-radius: 50% !important;
-  background: #2196f3 !important;
+  background: #42a5f5 !important;
   border: none !important;
   transition: all 0.3s ease !important;
-  box-shadow: 0 2px 5px rgba(33, 150, 243, 0.3) !important;
+  box-shadow: 0 3px 10px rgba(66, 165, 245, 0.4) !important;
   
   &:hover {
     background: #1e88e5 !important;
     transform: translateY(-3px) !important;
-    box-shadow: 0 4px 8px rgba(33, 150, 243, 0.4) !important;
+    box-shadow: 0 5px 15px rgba(66, 165, 245, 0.5) !important;
   }
   
   &:active {
     transform: translateY(-1px) !important;
-    box-shadow: 0 2px 4px rgba(33, 150, 243, 0.3) !important;
+    box-shadow: 0 3px 8px rgba(66, 165, 245, 0.4) !important;
   }
   
   .p-button-icon {
@@ -89,20 +89,20 @@ button.p-button.p-button-rounded.p-button-text.p-button-warning.dashboard-add-ic
   width: 2.5rem !important;
   height: 2.5rem !important;
   border-radius: 50% !important;
-  background: #ff9800 !important;
+  background: #ffb74d !important;
   border: none !important;
   transition: all 0.3s ease !important;
-  box-shadow: 0 2px 5px rgba(255, 152, 0, 0.3) !important;
+  box-shadow: 0 3px 10px rgba(255, 183, 77, 0.4) !important;
   
   &:hover {
-    background: #f57c00 !important;
+    background: #ffa726 !important;
     transform: translateY(-3px) !important;
-    box-shadow: 0 4px 8px rgba(255, 152, 0, 0.4) !important;
+    box-shadow: 0 5px 15px rgba(255, 183, 77, 0.5) !important;
   }
   
   &:active {
     transform: translateY(-1px) !important;
-    box-shadow: 0 2px 4px rgba(255, 152, 0, 0.3) !important;
+    box-shadow: 0 3px 8px rgba(255, 183, 77, 0.4) !important;
   }
   
   .p-button-icon {
@@ -116,8 +116,8 @@ button.p-button.p-button-rounded.p-button-text.p-button-warning.dashboard-add-ic
 .dashboard-tooltip {
   font-size: 0.85rem;
   padding: 0.5rem 0.75rem;
-  background: rgba(0, 0, 0, 0.8);
+  background: rgba(33, 33, 33, 0.9);
   color: white;
   border-radius: 4px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 3px 12px rgba(0, 0, 0, 0.2);
 } 
