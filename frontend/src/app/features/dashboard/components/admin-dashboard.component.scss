@@ -1,5 +1,5 @@
-@use '../../../../../assets/sakai-layout/variables/variables' as *;
-@use '../../../../../assets/sakai-layout/mixins' as *;
+@use 'src/assets/sakai-layout/variables/variables' as *;
+@use 'src/assets/sakai-layout/mixins' as *;
 
 .dashboard-container {
   display: flex;
@@ -1597,5 +1597,31 @@
     display: flex;
     justify-content: flex-end;
     gap: 0.5rem;
+  }
+}
+
+/* Responsive Styles */
+@media screen and (max-width: 992px) {
+  .sakai-dashboard {
+    padding: 1.5rem;
+    
+    .dashboard-header {
+      flex-direction: column;
+      align-items: flex-start;
+      
+      .dashboard-title {
+        margin-bottom: 1rem;
+      }
+    }
+  }
+}
+
+@media screen and (max-width: 768px) {
+  .sakai-dashboard {
+    padding: 1rem;
+    
+    .dashboard-content {
+      grid-template-columns: 1fr;
+    }
   }
 }

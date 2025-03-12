@@ -323,14 +323,14 @@
         <div class="recent-activities-title">Son Aktiviteler</div>
         <div class="activity-list">
           <div class="activity-item" *ngFor="let log of userActivityLogs">
-            <i class="activity-icon pi" [ngClass]="getActivityIconClass(log.action)"></i>
+            <i class="activity-icon" [ngClass]="getActivityIconClass(log)"></i>
             <div class="activity-content">
-              <div class="activity-message">{{ log.message }}</div>
+              <div class="activity-message">{{ log.message || log.description }}</div>
               <div class="activity-time">{{ log.timestamp | date:'dd.MM.yyyy HH:mm' }}</div>
             </div>
           </div>
           <div class="activity-item" *ngIf="userActivityLogs.length === 0">
-            <i class="activity-icon pi pi-info-circle info"></i>
+            <i class="activity-icon pi pi-info-circle text-blue-500"></i>
             <div class="activity-content">
               <div class="activity-message">Henüz aktivite kaydı bulunmuyor.</div>
               <div class="activity-time">-</div>

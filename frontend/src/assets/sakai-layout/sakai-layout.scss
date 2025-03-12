@@ -1,5 +1,5 @@
-@use './variables/variables' as *;
-@use './mixins' as *;
+@use './variables/variables' as vars;
+@use './mixins' as mixins;
 @use './core';
 @use './typography';
 @use './main';
@@ -14,10 +14,10 @@
 
 // Temel Stiller
 .sakai-layout {
-  font-family: $fontFamily;
-  font-size: $fontSize;
-  color: $textColor;
-  background-color: $bodyBgColor;
+  font-family: vars.$fontFamily;
+  font-size: vars.$fontSize;
+  color: vars.$textColor;
+  background-color: vars.$bodyBgColor;
   margin: 0;
   padding: 0;
   min-height: 100vh;
@@ -60,7 +60,7 @@
   
   a {
     text-decoration: none;
-    color: $primaryColor;
+    color: vars.$primaryColor;
     
     &:hover {
       text-decoration: underline;
@@ -69,20 +69,20 @@
   
   // Kart Stili
   .sakai-card {
-    background-color: $cardBgColor;
-    border: $cardBorder;
-    border-radius: $borderRadius;
-    @include shadow(1);
+    background-color: vars.$cardBgColor;
+    border: vars.$cardBorder;
+    border-radius: vars.$borderRadius;
+    @include mixins.shadow(1);
     padding: 1.5rem;
     margin-bottom: 1.5rem;
     
     &:hover {
-      @include shadow(2);
-      @include transition(box-shadow);
+      @include mixins.shadow(2);
+      @include mixins.transition(box-shadow);
     }
     
     .sakai-card-header {
-      @include flex-between;
+      @include mixins.flex-between;
       margin-bottom: 1rem;
       
       .sakai-card-title {
@@ -97,7 +97,7 @@
     }
     
     .sakai-card-footer {
-      @include flex-between;
+      @include mixins.flex-between;
       margin-top: 1rem;
     }
   }
@@ -107,7 +107,7 @@
     padding: 2rem;
     
     .dashboard-header {
-      @include flex-between;
+      @include mixins.flex-between;
       margin-bottom: 2rem;
       
       .dashboard-title {
@@ -117,7 +117,7 @@
       }
       
       .user-profile {
-        @include flex;
+        @include mixins.flex;
         align-items: center;
         
         .user-avatar {
@@ -135,48 +135,48 @@
           
           .user-role {
             font-size: 0.875rem;
-            color: $textSecondaryColor;
+            color: vars.$textSecondaryColor;
           }
         }
       }
     }
     
     .dashboard-content {
-      @include grid(3, 2rem);
+      @include mixins.grid(3, 2rem);
       
-      @include responsive('lg') {
-        @include grid(2, 1.5rem);
+      @include mixins.responsive('lg') {
+        @include mixins.grid(2, 1.5rem);
       }
       
-      @include responsive('md') {
-        @include grid(1, 1rem);
+      @include mixins.responsive('md') {
+        @include mixins.grid(1, 1rem);
       }
       
       .admin-modules {
-        @include grid(2, 1.5rem);
+        @include mixins.grid(2, 1.5rem);
         grid-column: span 2;
         
-        @include responsive('lg') {
+        @include mixins.responsive('lg') {
           grid-column: span 1;
         }
         
         .admin-card {
-          background-color: $cardBgColor;
-          border-radius: $borderRadius;
-          @include shadow(1);
+          background-color: vars.$cardBgColor;
+          border-radius: vars.$borderRadius;
+          @include mixins.shadow(1);
           padding: 1.5rem;
-          @include flex-column;
+          @include mixins.flex-column;
           
           &:hover {
-            @include shadow(2);
-            @include transition(box-shadow);
+            @include mixins.shadow(2);
+            @include mixins.transition(box-shadow);
             transform: translateY(-3px);
-            @include transition(transform);
+            @include mixins.transition(transform);
           }
           
           .admin-card-icon {
             font-size: 2rem;
-            color: $primaryColor;
+            color: vars.$primaryColor;
             margin-bottom: 1rem;
           }
           
@@ -187,7 +187,7 @@
           }
           
           .admin-card-description {
-            color: $textSecondaryColor;
+            color: vars.$textSecondaryColor;
             margin-bottom: 1rem;
           }
         }
@@ -197,9 +197,9 @@
         grid-column: span 1;
         
         .quick-access {
-          background-color: $cardBgColor;
-          border-radius: $borderRadius;
-          @include shadow(1);
+          background-color: vars.$cardBgColor;
+          border-radius: vars.$borderRadius;
+          @include mixins.shadow(1);
           padding: 1.5rem;
           margin-bottom: 1.5rem;
           
@@ -210,13 +210,13 @@
           }
           
           .quick-access-items {
-            @include flex-column;
+            @include mixins.flex-column;
             
             .quick-access-item {
-              @include flex;
+              @include mixins.flex;
               align-items: center;
               padding: 0.75rem 0;
-              border-bottom: 1px solid $borderColor;
+              border-bottom: 1px solid vars.$borderColor;
               
               &:last-child {
                 border-bottom: none;
@@ -224,7 +224,7 @@
               
               .quick-access-icon {
                 font-size: 1.25rem;
-                color: $primaryColor;
+                color: vars.$primaryColor;
                 margin-right: 0.75rem;
               }
               
@@ -236,9 +236,9 @@
         }
         
         .recent-activities {
-          background-color: $cardBgColor;
-          border-radius: $borderRadius;
-          @include shadow(1);
+          background-color: vars.$cardBgColor;
+          border-radius: vars.$borderRadius;
+          @include mixins.shadow(1);
           padding: 1.5rem;
           
           .recent-activities-title {
@@ -248,10 +248,10 @@
           }
           
           .activity-item {
-            @include flex;
+            @include mixins.flex;
             align-items: center;
             padding: 0.75rem 0;
-            border-bottom: 1px solid $borderColor;
+            border-bottom: 1px solid vars.$borderColor;
             
             &:last-child {
               border-bottom: none;
@@ -274,12 +274,12 @@
               }
               
               &.info {
-                color: $primaryColor;
+                color: vars.$primaryColor;
               }
             }
             
             .activity-content {
-              @include flex-column;
+              @include mixins.flex-column;
               
               .activity-message {
                 font-weight: 500;
@@ -287,7 +287,7 @@
               
               .activity-time {
                 font-size: 0.875rem;
-                color: $textSecondaryColor;
+                color: vars.$textSecondaryColor;
               }
             }
           }
@@ -298,7 +298,7 @@
 }
 
 // Responsive Stiller
-@include responsive('md') {
+@include mixins.responsive('md') {
   .sakai-layout {
     .sakai-dashboard {
       padding: 1.5rem;
@@ -315,7 +315,7 @@
   }
 }
 
-@include responsive('sm') {
+@include mixins.responsive('sm') {
   .sakai-layout {
     .sakai-dashboard {
       padding: 1rem;

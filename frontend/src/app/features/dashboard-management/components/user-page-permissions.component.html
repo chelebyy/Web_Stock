@@ -1,0 +1,134 @@
+<div class="container">
+  <div class="header">
+    <h2><i class="pi pi-shield mr-2"></i>{{ pageName }} - İzin Yönetimi</h2>
+    <button pButton type="button" icon="pi pi-arrow-left" label="Geri Dön" class="p-button-outlined" (click)="navigateBack()"></button>
+  </div>
+
+  <p-toast position="top-right"></p-toast>
+
+  <p-tabView [(activeIndex)]="activeTabIndex" (activeIndexChange)="onTabChange($event)">
+    <!-- Kullanıcılar Sekmesi -->
+    <p-tabPanel header="Kullanıcılar">
+      <div class="search-bar">
+        <span class="p-input-icon-left">
+          <i class="pi pi-search"></i>
+          <input pInputText type="text" [(ngModel)]="usersSearchText" (input)="searchUsers($event)" placeholder="Kullanıcı ara..." />
+        </span>
+        <button *ngIf="usersSearchText" pButton type="button" icon="pi pi-times" class="p-button-text" (click)="clearUsersSearch()"></button>
+      </div>
+
+      <p-table [value]="filteredUsers" [loading]="loading" [paginator]="true" [rows]="10" [showCurrentPageReport]="true"
+        currentPageReportTemplate="{first} - {last} / {totalRecords} kullanıcı" [rowsPerPageOptions]="[10,25,50]"
+        styleClass="p-datatable-striped p-datatable-sm">
+        <ng-template pTemplate="header">
+          <tr>
+            <th>Ad Soyad</th>
+            <th>Sicil</th>
+            <th>Durum</th>
+            <th style="width: 130px">İşlemler</th>
+          </tr>
+        </ng-template>
+        <ng-template pTemplate="body" let-user>
+          <tr>
+            <td>
+              <span class="font-medium">{{ user.fullName }}</span>
+            </td>
+            <td>{{ user.sicil }}</td>
+            <td>
+              <p-tag [value]="user.hasPagePermission ? 'Aktif' : 'Pasif'" 
+                     [severity]="user.hasPagePermission ? 'success' : 'danger'"
+                     [pTooltip]="user.hasPagePermission ? 'Bu kullanıcıya izin verilmiş' : 'Bu kullanıcıya henüz izin verilmemiş'"
+                     tooltipPosition="top"
+                     styleClass="custom-tag"
+                     [style]="user.hasPagePermission ? 
+                              {'background-color': '#22c55e', 'color': 'white', 'border': '1px solid #16a34a'} : 
+                              {'background-color': '#ef4444', 'color': 'white', 'border': '1px solid #dc2626'}"></p-tag>
+            </td>
+            <td>
+              <button *ngIf="!user.hasPagePermission" pButton type="button" 
+                label="İzin Ver"
+                icon="pi pi-plus"
+                class="p-button-outlined p-button-success"
+                [disabled]="!user.isActive || processing"
+                (click)="grantPermission(user)"
+                pTooltip="Bu kullanıcıya sayfa izni ver"
+                tooltipPosition="left"></button>
+              
+              <p-tag *ngIf="user.hasPagePermission" 
+                severity="success" 
+                icon="pi pi-check"
+                value="İzin Verildi"
+                styleClass="custom-tag"
+                [style]="{'background-color': '#22c55e', 'color': 'white', 'border': '1px solid #16a34a'}"></p-tag>
+            </td>
+          </tr>
+        </ng-template>
+        <ng-template pTemplate="emptymessage">
+          <tr>
+            <td colspan="4">
+              <div class="empty-message">
+                <i class="pi pi-info-circle"></i>
+                <span>{{ loading ? 'Kullanıcılar yükleniyor...' : 'Kullanıcı bulunamadı.' }}</span>
+              </div>
+            </td>
+          </tr>
+        </ng-template>
+      </p-table>
+    </p-tabPanel>
+
+    <!-- İzinler Sekmesi -->
+    <p-tabPanel header="İzinler">
+      <div class="search-bar">
+        <span class="p-input-icon-left">
+          <i class="pi pi-search"></i>
+          <input pInputText type="text" [(ngModel)]="permissionsSearchText" (input)="searchPermissions($event)" placeholder="İzin ara..." />
+        </span>
+        <button *ngIf="permissionsSearchText" pButton type="button" icon="pi pi-times" class="p-button-text" (click)="clearPermissionsSearch()"></button>
+      </div>
+
+      <p-table [value]="filteredPagePermissions" [loading]="loading" [paginator]="true" [rows]="10" [showCurrentPageReport]="true"
+        currentPageReportTemplate="{first} - {last} / {totalRecords} izin" [rowsPerPageOptions]="[10,25,50]"
+        styleClass="p-datatable-striped p-datatable-sm">
+        <ng-template pTemplate="header">
+          <tr>
+            <th>Ad Soyad</th>
+            <th>Sicil</th>
+            <th>İzin Tarihi</th>
+            <th style="width: 100px">İşlemler</th>
+          </tr>
+        </ng-template>
+        <ng-template pTemplate="body" let-permission>
+          <tr>
+            <td>
+              <span class="font-medium">{{ permission.fullName }}</span>
+            </td>
+            <td>{{ permission.sicil }}</td>
+            <td>
+              <span class="permission-date">
+                <i class="pi pi-calendar mr-2"></i>
+                {{ permission.grantedAt | date:'dd.MM.yyyy HH:mm' }}
+              </span>
+            </td>
+            <td>
+              <button pButton type="button" icon="pi pi-trash" class="p-button-danger p-button-rounded"
+                [disabled]="processing"
+                (click)="revokePermission(permission)"
+                pTooltip="Bu kullanıcının sayfa iznini kaldır"
+                tooltipPosition="left"></button>
+            </td>
+          </tr>
+        </ng-template>
+        <ng-template pTemplate="emptymessage">
+          <tr>
+            <td colspan="4">
+              <div class="empty-message">
+                <i class="pi pi-info-circle"></i>
+                <span>{{ loading ? 'İzinler yükleniyor...' : 'İzin bulunamadı.' }}</span>
+              </div>
+            </td>
+          </tr>
+        </ng-template>
+      </p-table>
+    </p-tabPanel>
+  </p-tabView>
+</div> 

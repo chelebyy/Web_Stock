@@ -744,29 +744,35 @@ export class AdminDashboardComponent implements OnInit {
     this.router.navigate([route]);
   }
 
-  getActivityIconClass(action: string): string {
-    if (!action) return 'pi-info-circle info';
-    
-    action = action.toLowerCase();
-    
-    if (action.includes('login') || action.includes('giriş')) {
-      return 'pi-sign-in info';
-    } else if (action.includes('logout') || action.includes('çıkış')) {
-      return 'pi-sign-out info';
-    } else if (action.includes('create') || action.includes('add') || action.includes('ekle')) {
-      return 'pi-plus-circle success';
-    } else if (action.includes('update') || action.includes('edit') || action.includes('düzenle')) {
-      return 'pi-pencil info';
-    } else if (action.includes('delete') || action.includes('remove') || action.includes('sil')) {
-      return 'pi-trash danger';
-    } else if (action.includes('error') || action.includes('fail') || action.includes('hata')) {
-      return 'pi-exclamation-triangle danger';
-    } else if (action.includes('warning') || action.includes('uyarı')) {
-      return 'pi-exclamation-circle warning';
-    } else if (action.includes('view') || action.includes('görüntüle')) {
-      return 'pi-eye info';
-    } else {
-      return 'pi-info-circle info';
+  // Aktivite ikonunu belirle
+  getActivityIconClass(log: UserActivityLog): string {
+    // Önce action alanını kontrol et
+    if (log.action) {
+      const action = log.action.toLowerCase();
+      
+      if (action.includes('login')) return 'pi pi-sign-in text-blue-500';
+      if (action.includes('logout')) return 'pi pi-sign-out text-purple-500';
+      if (action.includes('create') || action.includes('add')) return 'pi pi-plus-circle text-green-500';
+      if (action.includes('update') || action.includes('edit')) return 'pi pi-pencil text-orange-500';
+      if (action.includes('delete') || action.includes('remove')) return 'pi pi-trash text-red-500';
+      if (action.includes('error')) return 'pi pi-exclamation-circle text-red-500';
+      if (action.includes('warning')) return 'pi pi-exclamation-triangle text-yellow-500';
+      if (action.includes('view')) return 'pi pi-eye text-blue-500';
     }
+    
+    // Action yoksa activityType'a bak
+    const activityType = log.activityType.toLowerCase();
+    
+    if (activityType.includes('login')) return 'pi pi-sign-in text-blue-500';
+    if (activityType.includes('logout')) return 'pi pi-sign-out text-purple-500';
+    if (activityType.includes('create') || activityType.includes('add')) return 'pi pi-plus-circle text-green-500';
+    if (activityType.includes('update') || activityType.includes('edit')) return 'pi pi-pencil text-orange-500';
+    if (activityType.includes('delete') || activityType.includes('remove')) return 'pi pi-trash text-red-500';
+    if (activityType.includes('error')) return 'pi pi-exclamation-circle text-red-500';
+    if (activityType.includes('warning')) return 'pi pi-exclamation-triangle text-yellow-500';
+    if (activityType.includes('view')) return 'pi pi-eye text-blue-500';
+    
+    // Varsayılan ikon
+    return 'pi pi-info-circle text-blue-500';
   }
 }
