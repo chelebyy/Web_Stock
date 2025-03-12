@@ -8,12 +8,12 @@ button.p-button.p-button-rounded.p-button-text.p-button-info.dashboard-edit-icon
   background: #26c6da !important;
   border: none !important;
   transition: all 0.3s ease !important;
-  box-shadow: 0 3px 10px rgba(38, 198, 218, 0.4) !important;
+  box-shadow: 0 4px 12px rgba(38, 198, 218, 0.5) !important;
   
   &:hover {
     background: #00acc1 !important;
     transform: translateY(-3px) !important;
-    box-shadow: 0 5px 15px rgba(38, 198, 218, 0.5) !important;
+    box-shadow: 0 6px 16px rgba(38, 198, 218, 0.6) !important;
   }
   
   &:active {
@@ -23,8 +23,8 @@ button.p-button.p-button-rounded.p-button-text.p-button-info.dashboard-edit-icon
   
   .p-button-icon {
     color: white !important;
-    font-size: 1rem !important;
-    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1) !important;
+    font-size: 1.1rem !important;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2) !important;
   }
 }
 
@@ -36,12 +36,12 @@ button.p-button.p-button-rounded.p-button-text.p-button-danger.dashboard-delete-
   background: #ef5350 !important;
   border: none !important;
   transition: all 0.3s ease !important;
-  box-shadow: 0 3px 10px rgba(239, 83, 80, 0.4) !important;
+  box-shadow: 0 4px 12px rgba(239, 83, 80, 0.5) !important;
   
   &:hover {
     background: #e53935 !important;
     transform: translateY(-3px) !important;
-    box-shadow: 0 5px 15px rgba(239, 83, 80, 0.5) !important;
+    box-shadow: 0 6px 16px rgba(239, 83, 80, 0.6) !important;
   }
   
   &:active {
@@ -51,8 +51,8 @@ button.p-button.p-button-rounded.p-button-text.p-button-danger.dashboard-delete-
   
   .p-button-icon {
     color: white !important;
-    font-size: 1rem !important;
-    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1) !important;
+    font-size: 1.1rem !important;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2) !important;
   }
 }
 
@@ -64,12 +64,12 @@ button.p-button.p-button-rounded.p-button-text.p-button-success.dashboard-permis
   background: #42a5f5 !important;
   border: none !important;
   transition: all 0.3s ease !important;
-  box-shadow: 0 3px 10px rgba(66, 165, 245, 0.4) !important;
+  box-shadow: 0 4px 12px rgba(66, 165, 245, 0.5) !important;
   
   &:hover {
     background: #1e88e5 !important;
     transform: translateY(-3px) !important;
-    box-shadow: 0 5px 15px rgba(66, 165, 245, 0.5) !important;
+    box-shadow: 0 6px 16px rgba(66, 165, 245, 0.6) !important;
   }
   
   &:active {
@@ -79,8 +79,8 @@ button.p-button.p-button-rounded.p-button-text.p-button-success.dashboard-permis
   
   .p-button-icon {
     color: white !important;
-    font-size: 1rem !important;
-    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1) !important;
+    font-size: 1.1rem !important;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2) !important;
   }
 }
 
@@ -92,12 +92,12 @@ button.p-button.p-button-rounded.p-button-text.p-button-warning.dashboard-add-ic
   background: #ffb74d !important;
   border: none !important;
   transition: all 0.3s ease !important;
-  box-shadow: 0 3px 10px rgba(255, 183, 77, 0.4) !important;
+  box-shadow: 0 4px 12px rgba(255, 183, 77, 0.5) !important;
   
   &:hover {
     background: #ffa726 !important;
     transform: translateY(-3px) !important;
-    box-shadow: 0 5px 15px rgba(255, 183, 77, 0.5) !important;
+    box-shadow: 0 6px 16px rgba(255, 183, 77, 0.6) !important;
   }
   
   &:active {
@@ -107,8 +107,8 @@ button.p-button.p-button-rounded.p-button-text.p-button-warning.dashboard-add-ic
   
   .p-button-icon {
     color: white !important;
-    font-size: 1rem !important;
-    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1) !important;
+    font-size: 1.1rem !important;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2) !important;
   }
 }
 

@@ -246,22 +246,6 @@
       margin-right: 0.5rem;
     }
     
-    /* Kalem ikonu için özel PrimeNG stilleri */
-    .p-button.p-button-success.edit-button {
-      background: linear-gradient(145deg, #4caf50, #43a047);
-      border: none;
-      
-      &:hover {
-        background: linear-gradient(145deg, #43a047, #388e3c);
-        animation: pulse 1.5s infinite;
-      }
-      
-      .p-button-icon {
-        font-size: 1rem;
-        text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
-      }
-    }
-    
     /* Eklenen tablo stilleri - Koyu temadan açık temaya düzeltme */
     .p-datatable {
       background-color: #ffffff !important;
