@@ -21,6 +21,8 @@ import { DialogModule } from 'primeng/dialog';
 import { HostListener } from '@angular/core';
 import { DragDropModule } from '@angular/cdk/drag-drop';
 import { HasPermissionDirective } from '../../../shared/directives/has-permission.directive';
+import { MenuItem } from 'primeng/api';
+import { MenuModule } from 'primeng/menu';
 
 // PrimeNG Tag bileşeni için geçerli severity tipleri
 type TagSeverity = 'success' | 'info' | 'warning' | 'danger' | 'secondary' | 'contrast' | undefined;
@@ -47,7 +49,8 @@ type TagSeverity = 'success' | 'info' | 'warning' | 'danger' | 'secondary' | 'co
         CalendarModule,
         DialogModule,
         DragDropModule,
-        HasPermissionDirective
+        HasPermissionDirective,
+        MenuModule
     ],
     providers: [MessageService]
 })
@@ -150,6 +153,8 @@ export class AdminDashboardComponent implements OnInit {
   hasDashboardManagementAccess: boolean = false;
   hasPageManagementAccess: boolean = false;
 
+  userMenuItems: MenuItem[] = [];
+
   constructor(
     private router: Router,
     public authService: AuthService,
@@ -190,6 +195,8 @@ export class AdminDashboardComponent implements OnInit {
       description: 'Yönetim paneline erişim sağlandı',
       status: 'info'
     }).subscribe();
+
+    this.initUserMenuItems();
   }
 
   // İzinleri kontrol et
@@ -669,7 +676,7 @@ export class AdminDashboardComponent implements OnInit {
   // Sidebar navigasyon fonksiyonları
   navigateToProfile(): void {
     this.activeMenuItem = 'profile';
-    this.router.navigate(['/admin/profile']);
+    this.router.navigate(['/dashboard/profile']);
   }
 
   navigateToSettings(): void {
@@ -708,5 +715,58 @@ export class AdminDashboardComponent implements OnInit {
     // Gerçek uygulamada bu fonksiyon kullanıcının profil resmini API'den alabilir
     // Şimdilik varsayılan resmi kullanıyoruz
     this.profileImageUrl = 'assets/images/default-avatar.png';
+  }
+
+  initUserMenuItems(): void {
+    this.userMenuItems = [
+      {
+        label: 'Profil',
+        icon: 'pi pi-user',
+        command: () => this.navigateToProfile()
+      },
+      {
+        label: 'Şifre Değiştir',
+        icon: 'pi pi-key',
+        command: () => this.showPasswordChange = true
+      },
+      {
+        separator: true
+      },
+      {
+        label: 'Çıkış',
+        icon: 'pi pi-sign-out',
+        command: () => this.logout()
+      }
+    ];
+  }
+
+  navigateTo(route: string): void {
+    this.router.navigate([route]);
+  }
+
+  getActivityIconClass(action: string): string {
+    if (!action) return 'pi-info-circle info';
+    
+    action = action.toLowerCase();
+    
+    if (action.includes('login') || action.includes('giriş')) {
+      return 'pi-sign-in info';
+    } else if (action.includes('logout') || action.includes('çıkış')) {
+      return 'pi-sign-out info';
+    } else if (action.includes('create') || action.includes('add') || action.includes('ekle')) {
+      return 'pi-plus-circle success';
+    } else if (action.includes('update') || action.includes('edit') || action.includes('düzenle')) {
+      return 'pi-pencil info';
+    } else if (action.includes('delete') || action.includes('remove') || action.includes('sil')) {
+      return 'pi-trash danger';
+    } else if (action.includes('error') || action.includes('fail') || action.includes('hata')) {
+      return 'pi-exclamation-triangle danger';
+    } else if (action.includes('warning') || action.includes('uyarı')) {
+      return 'pi-exclamation-circle warning';
+    } else if (action.includes('view') || action.includes('görüntüle')) {
+      return 'pi-eye info';
+    } else {
+      return 'pi-info-circle info';
+    }
   }
 }

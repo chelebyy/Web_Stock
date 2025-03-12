@@ -1,0 +1,324 @@
+@use './variables/variables' as *;
+@use './mixins' as *;
+@use './core';
+@use './typography';
+@use './main';
+@use './topbar';
+@use './menu';
+@use './footer';
+@use './responsive';
+@use './utils';
+@use './preloading'; 
+
+// Sakai Tema Ana Stil Dosyası
+
+// Temel Stiller
+.sakai-layout {
+  font-family: $fontFamily;
+  font-size: $fontSize;
+  color: $textColor;
+  background-color: $bodyBgColor;
+  margin: 0;
+  padding: 0;
+  min-height: 100vh;
+  
+  // Tipografi
+  h1, h2, h3, h4, h5, h6 {
+    margin: 1.5rem 0 1rem 0;
+    font-weight: 600;
+    line-height: 1.2;
+  }
+  
+  h1 {
+    font-size: 2.5rem;
+  }
+  
+  h2 {
+    font-size: 2rem;
+  }
+  
+  h3 {
+    font-size: 1.75rem;
+  }
+  
+  h4 {
+    font-size: 1.5rem;
+  }
+  
+  h5 {
+    font-size: 1.25rem;
+  }
+  
+  h6 {
+    font-size: 1rem;
+  }
+  
+  p {
+    line-height: 1.5;
+    margin: 0 0 1rem 0;
+  }
+  
+  a {
+    text-decoration: none;
+    color: $primaryColor;
+    
+    &:hover {
+      text-decoration: underline;
+    }
+  }
+  
+  // Kart Stili
+  .sakai-card {
+    background-color: $cardBgColor;
+    border: $cardBorder;
+    border-radius: $borderRadius;
+    @include shadow(1);
+    padding: 1.5rem;
+    margin-bottom: 1.5rem;
+    
+    &:hover {
+      @include shadow(2);
+      @include transition(box-shadow);
+    }
+    
+    .sakai-card-header {
+      @include flex-between;
+      margin-bottom: 1rem;
+      
+      .sakai-card-title {
+        font-size: 1.25rem;
+        font-weight: 600;
+        margin: 0;
+      }
+    }
+    
+    .sakai-card-content {
+      margin-bottom: 1rem;
+    }
+    
+    .sakai-card-footer {
+      @include flex-between;
+      margin-top: 1rem;
+    }
+  }
+  
+  // Dashboard Stili
+  .sakai-dashboard {
+    padding: 2rem;
+    
+    .dashboard-header {
+      @include flex-between;
+      margin-bottom: 2rem;
+      
+      .dashboard-title {
+        font-size: 1.5rem;
+        font-weight: 600;
+        margin: 0;
+      }
+      
+      .user-profile {
+        @include flex;
+        align-items: center;
+        
+        .user-avatar {
+          width: 40px;
+          height: 40px;
+          border-radius: 50%;
+          margin-right: 0.5rem;
+          object-fit: cover;
+        }
+        
+        .user-info {
+          .user-name {
+            font-weight: 600;
+          }
+          
+          .user-role {
+            font-size: 0.875rem;
+            color: $textSecondaryColor;
+          }
+        }
+      }
+    }
+    
+    .dashboard-content {
+      @include grid(3, 2rem);
+      
+      @include responsive('lg') {
+        @include grid(2, 1.5rem);
+      }
+      
+      @include responsive('md') {
+        @include grid(1, 1rem);
+      }
+      
+      .admin-modules {
+        @include grid(2, 1.5rem);
+        grid-column: span 2;
+        
+        @include responsive('lg') {
+          grid-column: span 1;
+        }
+        
+        .admin-card {
+          background-color: $cardBgColor;
+          border-radius: $borderRadius;
+          @include shadow(1);
+          padding: 1.5rem;
+          @include flex-column;
+          
+          &:hover {
+            @include shadow(2);
+            @include transition(box-shadow);
+            transform: translateY(-3px);
+            @include transition(transform);
+          }
+          
+          .admin-card-icon {
+            font-size: 2rem;
+            color: $primaryColor;
+            margin-bottom: 1rem;
+          }
+          
+          .admin-card-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+          }
+          
+          .admin-card-description {
+            color: $textSecondaryColor;
+            margin-bottom: 1rem;
+          }
+        }
+      }
+      
+      .dashboard-sidebar {
+        grid-column: span 1;
+        
+        .quick-access {
+          background-color: $cardBgColor;
+          border-radius: $borderRadius;
+          @include shadow(1);
+          padding: 1.5rem;
+          margin-bottom: 1.5rem;
+          
+          .quick-access-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+          }
+          
+          .quick-access-items {
+            @include flex-column;
+            
+            .quick-access-item {
+              @include flex;
+              align-items: center;
+              padding: 0.75rem 0;
+              border-bottom: 1px solid $borderColor;
+              
+              &:last-child {
+                border-bottom: none;
+              }
+              
+              .quick-access-icon {
+                font-size: 1.25rem;
+                color: $primaryColor;
+                margin-right: 0.75rem;
+              }
+              
+              .quick-access-label {
+                font-weight: 500;
+              }
+            }
+          }
+        }
+        
+        .recent-activities {
+          background-color: $cardBgColor;
+          border-radius: $borderRadius;
+          @include shadow(1);
+          padding: 1.5rem;
+          
+          .recent-activities-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+          }
+          
+          .activity-item {
+            @include flex;
+            align-items: center;
+            padding: 0.75rem 0;
+            border-bottom: 1px solid $borderColor;
+            
+            &:last-child {
+              border-bottom: none;
+            }
+            
+            .activity-icon {
+              font-size: 1.25rem;
+              margin-right: 0.75rem;
+              
+              &.success {
+                color: #22C55E;
+              }
+              
+              &.warning {
+                color: #F59E0B;
+              }
+              
+              &.danger {
+                color: #EF4444;
+              }
+              
+              &.info {
+                color: $primaryColor;
+              }
+            }
+            
+            .activity-content {
+              @include flex-column;
+              
+              .activity-message {
+                font-weight: 500;
+              }
+              
+              .activity-time {
+                font-size: 0.875rem;
+                color: $textSecondaryColor;
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
+
+// Responsive Stiller
+@include responsive('md') {
+  .sakai-layout {
+    .sakai-dashboard {
+      padding: 1.5rem;
+      
+      .dashboard-header {
+        flex-direction: column;
+        align-items: flex-start;
+        
+        .dashboard-title {
+          margin-bottom: 1rem;
+        }
+      }
+    }
+  }
+}
+
+@include responsive('sm') {
+  .sakai-layout {
+    .sakai-dashboard {
+      padding: 1rem;
+    }
+  }
+} 

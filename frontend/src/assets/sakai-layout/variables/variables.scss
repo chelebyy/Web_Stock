@@ -1,0 +1,58 @@
+// Sakai Tema Değişkenleri
+
+// Renkler
+$primaryColor: #3B82F6 !default;
+$primaryLightColor: #BFDBFE !default;
+$primaryDarkColor: #2563EB !default;
+$primaryDarkerColor: #1D4ED8 !default;
+$primaryTextColor: #FFFFFF !default;
+
+$highlightBg: rgba($primaryColor, .15) !default;
+$highlightTextColor: $primaryTextColor !default;
+
+// Tipografi
+$fontFamily: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol" !default;
+$fontSize: 1rem !default;
+$textColor: #495057 !default;
+$textSecondaryColor: #6c757d !default;
+
+// Gölgeler
+$boxShadow: 0 2px 12px 0 rgba(0, 0, 0, 0.1) !default;
+
+// Kenar Yuvarlaklığı
+$borderRadius: 4px !default;
+
+// Geçişler
+$transitionDuration: .2s !default;
+
+// Arkaplan Renkleri
+$bodyBgColor: #f8f9fa !default;
+$maskBgColor: rgba(0, 0, 0, 0.4) !default;
+
+// Kenarlık Renkleri
+$borderColor: #dee2e6 !default;
+
+// Kart Stilleri
+$cardBgColor: #ffffff !default;
+$cardBorder: 0 none !default;
+
+// Menü Stilleri
+$menuBgColor: #ffffff !default;
+$menuItemTextColor: $textColor !default;
+$menuItemHoverBgColor: #f8f9fa !default;
+$menuItemHoverTextColor: $primaryColor !default;
+$menuItemActiveBgColor: #EFF6FF !default;
+$menuItemActiveTextColor: $primaryColor !default;
+
+// Topbar Stilleri
+$topbarBgColor: $primaryColor !default;
+$topbarTextColor: $primaryTextColor !default;
+
+// Responsive Breakpoint'ler
+$breakpoints: (
+  'sm': 576px,
+  'md': 768px,
+  'lg': 992px,
+  'xl': 1200px,
+  'xxl': 1400px
+) !default; 

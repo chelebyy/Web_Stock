@@ -206,275 +206,299 @@
     }
   }
   
-  // TabView Stilleri
-  ::ng-deep .p-tabview {
-    .p-tabview-nav {
-      border-bottom: 1px solid #dee2e6;
+  ::ng-deep {
+    .p-dialog .p-dialog-header {
+      padding: 1.5rem 1.5rem 0.5rem;
+    }
+    
+    .p-dialog .p-dialog-content {
+      padding: 0 1.5rem 1.5rem;
+    }
+    
+    .p-dialog .p-dialog-footer {
+      padding: 0 1.5rem 1.5rem;
+      text-align: right;
+    }
+    
+    .p-tag {
+      font-size: 0.75rem;
+      font-weight: 500;
+    }
+    
+    .p-datatable .p-datatable-header {
+      background: transparent;
+      border: none;
+      padding: 1rem;
+    }
+    
+    .p-datatable .p-datatable-thead > tr > th {
+      background: var(--surface-card);
+      color: var(--text-color);
+      font-weight: 600;
+    }
+    
+    .p-button-sm {
+      width: 2rem;
+      height: 2rem;
+    }
+    
+    .mr-2 {
+      margin-right: 0.5rem;
+    }
+    
+    /* Eklenen tablo stilleri - Koyu temadan açık temaya düzeltme */
+    .p-datatable {
+      background-color: #ffffff !important;
+      color: #333333 !important;
+      border-radius: 8px;
+      overflow: hidden;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
       
-      li {
-        margin-right: 0.25rem;
-        
-        .p-tabview-nav-link {
-          padding: 1rem 1.5rem;
-          font-weight: 500;
-          color: #6c757d;
-          border: 1px solid transparent;
-          border-top-left-radius: 4px;
-          border-top-right-radius: 4px;
-          transition: all 0.2s;
-          
-          &:not(.p-disabled):focus {
-            box-shadow: none;
-          }
-          
-          &:hover {
-            background-color: #f8f9fa;
-            color: #495057;
-          }
-        }
-        
-        &.p-highlight .p-tabview-nav-link {
-          background-color: #ffffff;
-          color: #3B82F6;
-          border-color: #dee2e6;
-          border-bottom-color: #ffffff;
-          
-          &:focus {
-            box-shadow: none;
-          }
-        }
+      .p-datatable-wrapper {
+        background-color: #ffffff !important;
       }
-    }
-    
-    .p-tabview-panels {
-      padding: 1.5rem;
-      background-color: #ffffff;
-      border: 1px solid #dee2e6;
-      border-top: none;
-      border-bottom-left-radius: 4px;
-      border-bottom-right-radius: 4px;
-    }
-  }
-  
-  // Kullanıcı Sekmesi Stilleri
-  .user-tab-description, .permissions-tab-description {
-    margin-bottom: 1.5rem;
-    padding: 1rem;
-    background-color: #f8f9fa;
-    border-radius: 4px;
-    border-left: 4px solid #3B82F6;
-    
-    p {
-      margin: 0;
-      color: #495057;
-      font-size: 0.95rem;
-      line-height: 1.5;
-    }
-  }
-  
-  .user-list-container {
-    margin-bottom: 1.5rem;
-    
-    .user-search {
-      margin-bottom: 1rem;
       
-      .search-input {
-        width: 100%;
-        padding: 0.75rem 1rem 0.75rem 2.5rem;
-        border-radius: 4px;
-      }
-    }
-    
-    .user-list {
-      max-height: 400px;
-      overflow-y: auto;
-      border: 1px solid #dee2e6;
-      border-radius: 4px;
-      
-      .user-item {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        padding: 1rem;
-        border-bottom: 1px solid #f1f5f9;
-        background-color: #ffffff;
-        transition: all 0.2s ease;
+      .p-datatable-tbody > tr {
+        background-color: #ffffff !important;
+        color: #333333 !important;
+        transition: background-color 0.2s;
+        
+        &:nth-child(even) {
+          background-color: #f8f9fa !important;
+        }
         
         &:hover {
-          background-color: #f8f9fa;
+          background-color: #e9ecef !important;
         }
         
-        &:last-child {
-          border-bottom: none;
+        > td {
+          background-color: inherit !important;
+          color: #333333 !important;
+          border-color: #e9ecef !important;
+          padding: 0.75rem 1rem !important;
+        }
+      }
+      
+      .p-datatable-thead > tr > th {
+        background-color: #f8f9fa !important;
+        color: #333333 !important;
+        border-color: #e9ecef !important;
+        font-weight: 600 !important;
+        padding: 0.75rem 1rem !important;
+        text-transform: uppercase;
+        font-size: 0.85rem;
+        letter-spacing: 0.5px;
+        
+        .p-column-title {
+          font-weight: 600;
         }
         
-        .user-info {
-          display: flex;
-          align-items: center;
-          gap: 1rem;
+        .p-sortable-column-icon {
+          color: #6c757d !important;
+          font-size: 0.8rem;
+        }
+        
+        &:hover {
+          background-color: #e9ecef !important;
+        }
+        
+        &.p-highlight {
+          background-color: #f8f9fa !important;
+          color: #0077cc !important;
           
-          .avatar-container {
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            overflow: hidden;
-            background-color: #e2e8f0;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            
-            .avatar-image {
-              width: 100%;
-              height: 100%;
-              object-fit: cover;
-            }
+          .p-sortable-column-icon {
+            color: #0077cc !important;
           }
+        }
+      }
+      
+      .p-paginator {
+        background-color: #ffffff !important;
+        color: #333333 !important;
+        border-top: 1px solid #e9ecef;
+        padding: 1rem;
+        
+        .p-paginator-pages .p-paginator-page {
+          color: #333333 !important;
+          border-radius: 4px;
           
-          .user-details {
-            .user-name {
-              font-size: 1rem;
-              font-weight: 500;
-              color: #334155;
-              margin-bottom: 0.25rem;
-            }
-            
-            .user-sicil {
-              font-size: 0.85rem;
-              color: #64748b;
-            }
+          &.p-highlight {
+            background-color: #e6f7ff !important;
+            color: #0077cc !important;
           }
         }
         
-        .user-actions {
-          .p-button-success {
-            color: #22c55e;
-            
-            &:hover {
-              background-color: rgba(34, 197, 94, 0.1);
-            }
+        .p-paginator-first,
+        .p-paginator-prev,
+        .p-paginator-next,
+        .p-paginator-last {
+          color: #6c757d !important;
+          border-radius: 4px;
+          
+          &:not(.p-disabled):hover {
+            background-color: #e9ecef !important;
+            color: #495057 !important;
           }
         }
       }
       
-      .empty-user-list {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
-        padding: 3rem 0;
-        
-        .empty-icon {
-          font-size: 2.5rem;
-          color: #94a3b8;
-          margin-bottom: 1rem;
+      &.p-datatable-loading {
+        .p-datatable-tbody {
+          background-color: #ffffff !important;
         }
         
-        p {
-          color: #64748b;
-          font-size: 1rem;
+        .p-datatable-loading-overlay {
+          background-color: rgba(255, 255, 255, 0.9) !important;
+          z-index: 1000 !important;
+        }
+        
+        .p-datatable-loading-icon {
+          color: #4caf50 !important;
         }
       }
-    }
-  }
-  
-  // İzinler Sekmesi Stilleri
-  .page-users-container {
-    .empty-page-users {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      padding: 3rem 0;
-      background-color: #f8f9fa;
-      border-radius: 4px;
       
-      .empty-icon {
-        font-size: 2.5rem;
-        color: #94a3b8;
-        margin-bottom: 1rem;
+      .p-column-title {
+        font-weight: 600;
       }
       
-      p {
-        color: #64748b;
-        font-size: 1rem;
+      .p-sortable-column:hover {
+        background-color: #e9ecef !important;
+      }
+      
+      .p-sortable-column.p-highlight {
+        background-color: #f8f9fa !important;
+        color: #0077cc !important;
+        
+        .p-sortable-column-icon {
+          color: #0077cc !important;
+        }
       }
     }
     
-    .page-users-list {
-      max-height: 400px;
-      overflow-y: auto;
-      border: 1px solid #dee2e6;
-      border-radius: 4px;
+    // Düğme stilleri
+    .p-button {
+      &.p-button-success {
+        background-color: #4caf50 !important;
+        border-color: #4caf50 !important;
+      }
       
-      .page-user-item {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        padding: 1rem;
-        border-bottom: 1px solid #f1f5f9;
-        background-color: #ffffff;
-        transition: all 0.2s ease;
+      &.p-button-info {
+        background-color: #2196f3 !important;
+        border-color: #2196f3 !important;
+      }
+      
+      &.p-button-danger {
+        background-color: #f44336 !important;
+        border-color: #f44336 !important;
+      }
+    }
+    
+    // Tag stilleri
+    .p-tag {
+      &.p-tag-success {
+        background-color: #4caf50 !important;
+      }
+      
+      &.p-tag-danger {
+        background-color: #f44336 !important;
+      }
+    }
+    
+    // Dropdown stili tamamen değiştirildi
+    .p-dropdown-panel {
+      background-color: white !important;
+      color: #333333 !important;
+      border: 1px solid #ced4da !important;
+      border-radius: 4px !important;
+      box-shadow: 0 2px 12px rgba(0, 0, 0, 0.1) !important;
+      z-index: 10001 !important;
+    }
+    
+    .p-dropdown-items {
+      background-color: white !important;
+      padding: 0.5rem 0 !important;
+      
+      .p-dropdown-item {
+        color: #333333 !important;
+        background-color: white !important;
+        padding: 0.75rem 1rem !important;
+        white-space: normal !important;
+        word-break: break-word !important;
         
         &:hover {
-          background-color: #f8f9fa;
+          background-color: #e9ecef !important;
+          color: #333333 !important;
         }
         
-        &:last-child {
-          border-bottom: none;
-        }
-        
-        .user-info {
-          display: flex;
-          align-items: center;
-          gap: 1rem;
-          
-          .avatar-container {
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            overflow: hidden;
-            background-color: #e2e8f0;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            
-            .avatar-image {
-              width: 100%;
-              height: 100%;
-              object-fit: cover;
-            }
-          }
-          
-          .user-details {
-            .user-name {
-              font-size: 1rem;
-              font-weight: 500;
-              color: #334155;
-              margin-bottom: 0.25rem;
-            }
-            
-            .user-sicil {
-              font-size: 0.85rem;
-              color: #64748b;
-            }
-          }
-        }
-        
-        .user-actions {
-          .p-button-danger {
-            color: #ef4444;
-            
-            &:hover {
-              background-color: rgba(239, 68, 68, 0.1);
-            }
-          }
+        &.p-highlight {
+          background-color: #e6f7ff !important;
+          color: #0077cc !important;
         }
       }
     }
   }
 }
 
-// PrimeNG Dropdown Panel Stilleri
+// Global olarak body'ye eklenen dropdown panel için düzeltme
+:host ::ng-deep .dashboard-permission-dropdown-panel {
+  background-color: white !important;
+  color: #333333 !important;
+  border: 1px solid #ced4da !important;
+  border-radius: 4px !important;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.1) !important;
+  max-width: 450px !important;
+  width: auto !important;
+  max-height: 300px !important;
+  overflow-y: auto !important;
+  position: fixed !important;
+  z-index: 10001 !important;
+  
+  .p-dropdown-items {
+    background-color: white !important;
+    padding: 0.5rem 0 !important;
+    
+    .p-dropdown-item {
+      color: #333333 !important;
+      background-color: white !important;
+      padding: 0.75rem 1rem !important;
+      white-space: normal !important;
+      word-break: break-word !important;
+      
+      &:hover {
+        background-color: #e9ecef !important;
+        color: #333333 !important;
+      }
+      
+      &.p-highlight {
+        background-color: #e6f7ff !important;
+        color: #0077cc !important;
+      }
+    }
+  }
+}
+
+:root {
+  --dropdown-panel-bg: white;
+  --dropdown-panel-text: #333333;
+  --dropdown-panel-border: #ced4da;
+}
+
+// Global olarak body'ye eklenmiş dropdown panelleri
+::ng-deep body .p-dropdown-panel.dashboard-permission-dropdown-panel {
+  background-color: var(--dropdown-panel-bg) !important;
+  color: var(--dropdown-panel-text) !important;
+  border: 1px solid var(--dropdown-panel-border) !important;
+  border-radius: 4px !important;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.1) !important;
+  max-width: 450px !important;
+  width: auto !important;
+  max-height: 300px !important;
+  overflow-y: auto !important;
+  position: fixed !important;
+  z-index: 10001 !important;
+  overflow: visible !important; /* Added to fix overflow */
+}
+
 ::ng-deep body .p-dropdown-panel.dashboard-permission-dropdown-panel {
   background-color: white !important;
   color: #333333 !important;

@@ -99,133 +99,55 @@
   <!-- Dashboard Sayfası Ekleme/Düzenleme Dialog -->
   <p-dialog 
     [(visible)]="displayDialog" 
-    [style]="{width: '650px'}" 
+    [style]="{width: '450px'}" 
     [header]="dialogHeader" 
     [modal]="true" 
-    styleClass="p-fluid dashboard-edit-dialog lara-dialog"
+    styleClass="p-fluid"
     [baseZIndex]="10000">
     
     <ng-template pTemplate="content">
-      <p-tabView [(activeIndex)]="activeTabIndex" styleClass="lara-tabview">
-        <!-- Sayfa Bilgileri Sekmesi -->
-        <p-tabPanel header="Sayfa Bilgileri">
-          <div class="field">
-            <label for="name">Sayfa Adı*</label>
-            <input type="text" pInputText id="name" [(ngModel)]="page.name" required autofocus class="lara-input" />
-            <small class="p-error" *ngIf="!page.name && displayDialog">Sayfa adı zorunludur.</small>
-          </div>
-          
-          <div class="field">
-            <label for="description">Açıklama</label>
-            <input type="text" pInputText id="description" [(ngModel)]="page.description" class="lara-input" />
-          </div>
-          
-          <div class="field">
-            <label for="route">Rota*</label>
-            <input type="text" pInputText id="route" [(ngModel)]="page.route" required class="lara-input" />
-            <small class="p-error" *ngIf="!page.route && displayDialog">Rota zorunludur.</small>
-          </div>
-          
-          <div class="field">
-            <label for="requiredPermission">Gerekli İzin*</label>
-            <p-dropdown 
-              id="requiredPermission" 
-              [options]="permissionOptions" 
-              [(ngModel)]="page.requiredPermission" 
-              placeholder="İzin seçin" 
-              [showClear]="true"
-              optionLabel="label" 
-              optionValue="value"
-              [style]="{'width':'100%'}"
-              appendTo="body"
-              [autoZIndex]="true"
-              [baseZIndex]="10000"
-              styleClass="lara-dropdown"
-              [panelStyleClass]="'lara-dropdown-panel'"
-              required>
-            </p-dropdown>
-            <small class="p-error" *ngIf="!page.requiredPermission && displayDialog">Gerekli izin zorunludur.</small>
-          </div>
-          
-          <div class="field-checkbox">
-            <p-checkbox [(ngModel)]="page.isActive" [binary]="true" inputId="isActive" styleClass="lara-checkbox"></p-checkbox>
-            <label for="isActive">Aktif</label>
-          </div>
-        </p-tabPanel>
-        
-        <!-- Kullanıcılar Sekmesi -->
-        <p-tabPanel header="Kullanıcılar">
-          <div class="user-tab-description">
-            <p>KULLANICI SEKMESİNDE BU ALANDA KULLANICILAR GÖRÜNECEK
-            HER KULLANICININ SAĞINDA BİR +(ARTI) İKONU BULUNACAK VE
-            BU İKONA TIKLANDIĞINDAO SAYFAYI GÖRME YETKİSİ OLACAK</p>
-          </div>
-          
-          <div class="user-list-container">
-            <div class="user-search">
-              <span class="p-input-icon-left">
-                <i class="pi pi-search"></i>
-                <input pInputText type="text" placeholder="Kullanıcı ara..." [(ngModel)]="userSearchText" (input)="onUserSearch($event)" class="search-input" />
-              </span>
-            </div>
-            
-            <div class="user-list">
-              <div *ngFor="let user of filteredUsers" class="user-item">
-                <div class="user-info">
-                  <div class="avatar-container">
-                    <img src="assets/images/avatars/default-avatar.png" class="avatar-image" />
-                  </div>
-                  <div class="user-details">
-                    <div class="user-name">{{ user.username }}</div>
-                    <div class="user-sicil">{{ user.sicil }}</div>
-                  </div>
-                </div>
-                <div class="user-actions">
-                  <button pButton pRipple icon="pi pi-plus" class="p-button-rounded p-button-text p-button-success" (click)="addUserToPage(user)" pTooltip="Sayfaya Ekle" tooltipPosition="top"></button>
-                </div>
-              </div>
-              
-              <div *ngIf="filteredUsers.length === 0" class="empty-user-list">
-                <i class="pi pi-users empty-icon"></i>
-                <p>Kullanıcı bulunamadı.</p>
-              </div>
-            </div>
-          </div>
-        </p-tabPanel>
-        
-        <!-- İzinler Sekmesi -->
-        <p-tabPanel header="İzinler">
-          <div class="permissions-tab-description">
-            <p>İZİNLER SEKMESİNE TIKLANDIĞINDA AÇILAN SAYFADA
-            HANGİ KULLANICILARA SAYFAYI GÖRME YETKİSİ VERİLMİŞ
-            O KULLANICILAR GÖRÜLECEK.</p>
-          </div>
-          
-          <div class="page-users-container">
-            <div *ngIf="pageUsers.length === 0" class="empty-page-users">
-              <i class="pi pi-lock empty-icon"></i>
-              <p>Bu sayfaya erişim izni verilen kullanıcı bulunmuyor.</p>
-            </div>
-            
-            <div *ngIf="pageUsers.length > 0" class="page-users-list">
-              <div *ngFor="let user of pageUsers" class="page-user-item">
-                <div class="user-info">
-                  <div class="avatar-container">
-                    <img src="assets/images/avatars/default-avatar.png" class="avatar-image" />
-                  </div>
-                  <div class="user-details">
-                    <div class="user-name">{{ user.username }}</div>
-                    <div class="user-sicil">{{ user.sicil }}</div>
-                  </div>
-                </div>
-                <div class="user-actions">
-                  <button pButton pRipple icon="pi pi-trash" class="p-button-rounded p-button-text p-button-danger" (click)="removeUserFromPage(user)" pTooltip="Kaldır" tooltipPosition="top"></button>
-                </div>
-              </div>
-            </div>
-          </div>
-        </p-tabPanel>
-      </p-tabView>
+      <div class="field">
+        <label for="name">Sayfa Adı*</label>
+        <input type="text" pInputText id="name" [(ngModel)]="page.name" required autofocus />
+        <small class="p-error" *ngIf="!page.name && displayDialog">Sayfa adı zorunludur.</small>
+      </div>
+      
+      <div class="field">
+        <label for="description">Açıklama</label>
+        <input type="text" pInputText id="description" [(ngModel)]="page.description" />
+      </div>
+      
+      <div class="field">
+        <label for="route">Rota*</label>
+        <input type="text" pInputText id="route" [(ngModel)]="page.route" required />
+        <small class="p-error" *ngIf="!page.route && displayDialog">Rota zorunludur.</small>
+      </div>
+      
+      <div class="field">
+        <label for="requiredPermission">Gerekli İzin*</label>
+        <p-dropdown 
+          id="requiredPermission" 
+          [options]="permissionOptions" 
+          [(ngModel)]="page.requiredPermission" 
+          placeholder="İzin seçin" 
+          [showClear]="true"
+          optionLabel="label" 
+          optionValue="value"
+          [style]="{'width':'100%', 'background-color': 'white'}"
+          appendTo="body"
+          [autoZIndex]="true"
+          [baseZIndex]="10000"
+          styleClass="dashboard-permission-dropdown"
+          [panelStyleClass]="'dashboard-permission-dropdown-panel'"
+          required>
+        </p-dropdown>
+        <small class="p-error" *ngIf="!page.requiredPermission && displayDialog">Gerekli izin zorunludur.</small>
+      </div>
+      
+      <div class="field-checkbox">
+        <p-checkbox [(ngModel)]="page.isActive" [binary]="true" inputId="isActive"></p-checkbox>
+        <label for="isActive">Aktif</label>
+      </div>
     </ng-template>
     
     <ng-template pTemplate="footer">

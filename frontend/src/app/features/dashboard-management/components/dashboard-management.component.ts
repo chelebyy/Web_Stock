@@ -12,11 +12,8 @@ import { DialogModule } from 'primeng/dialog';
 import { CheckboxModule } from 'primeng/checkbox';
 import { TagModule } from 'primeng/tag';
 import { TooltipModule } from 'primeng/tooltip';
-import { TabViewModule } from 'primeng/tabview';
 import { AuthService } from '../../../core/authentication/auth.service';
 import { Router } from '@angular/router';
-import { UserService } from '../../user-management/services/user.service';
-import { User } from '../../../shared/models/user.model';
 
 // PrimeNG Tag bileşeni için geçerli severity tipleri
 type TagSeverity = 'success' | 'info' | 'warn' | 'danger' | 'secondary' | 'contrast' | undefined;
@@ -30,7 +27,6 @@ interface DashboardPage {
   requiredPermission: string;
   createdAt: Date;
   updatedAt: Date;
-  users?: User[]; // Sayfaya erişim izni olan kullanıcılar
 }
 
 @Component({
@@ -50,8 +46,7 @@ interface DashboardPage {
     DialogModule,
     CheckboxModule,
     TagModule,
-    TooltipModule,
-    TabViewModule
+    TooltipModule
   ],
   providers: [MessageService]
 })
@@ -80,8 +75,7 @@ export class DashboardManagementComponent implements OnInit, AfterViewInit {
     isActive: true,
     requiredPermission: '',
     createdAt: new Date(),
-    updatedAt: new Date(),
-    users: []
+    updatedAt: new Date()
   };
   
   // Dialog başlığı
@@ -93,32 +87,15 @@ export class DashboardManagementComponent implements OnInit, AfterViewInit {
   // İzin seçenekleri
   permissionOptions: any[] = [];
 
-  // Aktif sekme indeksi
-  activeTabIndex: number = 0;
-
-  // Kullanıcı listesi
-  users: User[] = [];
-
-  // Filtrelenmiş kullanıcı listesi
-  filteredUsers: User[] = [];
-
-  // Kullanıcı arama metni
-  userSearchText: string = '';
-
-  // Sayfa kullanıcıları
-  pageUsers: User[] = [];
-
   constructor(
     private messageService: MessageService,
     private authService: AuthService,
-    private router: Router,
-    private userService: UserService
+    private router: Router
   ) { }
 
   ngOnInit(): void {
     this.loadDashboardPages();
     this.loadPermissionOptions();
-    this.loadUsers();
   }
 
   ngAfterViewInit(): void {
@@ -173,8 +150,7 @@ export class DashboardManagementComponent implements OnInit, AfterViewInit {
           isActive: true,
           requiredPermission: 'Pages.AdminDashboard',
           createdAt: new Date('2025-01-01'),
-          updatedAt: new Date('2025-01-01'),
-          users: []
+          updatedAt: new Date('2025-01-01')
         },
         {
           id: 2,
@@ -184,8 +160,7 @@ export class DashboardManagementComponent implements OnInit, AfterViewInit {
           isActive: true,
           requiredPermission: 'Pages.UserManagement',
           createdAt: new Date('2025-01-01'),
-          updatedAt: new Date('2025-01-01'),
-          users: []
+          updatedAt: new Date('2025-01-01')
         },
         {
           id: 3,
@@ -195,8 +170,7 @@ export class DashboardManagementComponent implements OnInit, AfterViewInit {
           isActive: true,
           requiredPermission: 'Pages.RoleManagement',
           createdAt: new Date('2025-01-01'),
-          updatedAt: new Date('2025-01-01'),
-          users: []
+          updatedAt: new Date('2025-01-01')
         },
         {
           id: 4,
@@ -206,8 +180,7 @@ export class DashboardManagementComponent implements OnInit, AfterViewInit {
           isActive: true,
           requiredPermission: 'Pages.DashboardManagement',
           createdAt: new Date('2025-01-01'),
-          updatedAt: new Date('2025-01-01'),
-          users: []
+          updatedAt: new Date('2025-01-01')
         },
         {
           id: 5,
@@ -217,8 +190,7 @@ export class DashboardManagementComponent implements OnInit, AfterViewInit {
           isActive: true,
           requiredPermission: 'Pages.PageManagement',
           createdAt: new Date('2025-01-01'),
-          updatedAt: new Date('2025-01-01'),
-          users: []
+          updatedAt: new Date('2025-01-01')
         },
         {
           id: 6,
@@ -228,8 +200,7 @@ export class DashboardManagementComponent implements OnInit, AfterViewInit {
           isActive: true,
           requiredPermission: 'Pages.Settings',
           createdAt: new Date('2025-01-01'),
-          updatedAt: new Date('2025-01-01'),
-          users: []
+          updatedAt: new Date('2025-01-01')
         },
         {
           id: 7,
@@ -239,8 +210,7 @@ export class DashboardManagementComponent implements OnInit, AfterViewInit {
           isActive: true,
           requiredPermission: 'Pages.Reports',
           createdAt: new Date('2025-01-01'),
-          updatedAt: new Date('2025-01-01'),
-          users: []
+          updatedAt: new Date('2025-01-01')
         },
         {
           id: 8,
@@ -250,8 +220,7 @@ export class DashboardManagementComponent implements OnInit, AfterViewInit {
           isActive: true,
           requiredPermission: 'Pages.Logs',
           createdAt: new Date('2025-01-01'),
-          updatedAt: new Date('2025-01-01'),
-          users: []
+          updatedAt: new Date('2025-01-01')
         },
         {
           id: 9,
@@ -261,8 +230,7 @@ export class DashboardManagementComponent implements OnInit, AfterViewInit {
           isActive: true,
           requiredPermission: 'Pages.Backup',
           createdAt: new Date('2025-01-01'),
-          updatedAt: new Date('2025-01-01'),
-          users: []
+          updatedAt: new Date('2025-01-01')
         },
         {
           id: 10,
@@ -272,8 +240,7 @@ export class DashboardManagementComponent implements OnInit, AfterViewInit {
           isActive: true,
           requiredPermission: 'Pages.Help',
           createdAt: new Date('2025-01-01'),
-          updatedAt: new Date('2025-01-01'),
-          users: []
+          updatedAt: new Date('2025-01-01')
         },
         {
           id: 11,
@@ -283,236 +250,35 @@ export class DashboardManagementComponent implements OnInit, AfterViewInit {
           isActive: true,
           requiredPermission: 'Pages.ActivityLogs',
           createdAt: new Date('2025-01-01'),
-          updatedAt: new Date('2025-01-01'),
-          users: []
-        },
-        {
-          id: 12,
-          name: 'Bildirimler',
-          description: 'Sistem bildirimlerini görüntüle ve yönet',
-          route: '/admin/notifications',
-          isActive: true,
-          requiredPermission: 'Pages.Notifications',
-          createdAt: new Date('2025-01-01'),
-          updatedAt: new Date('2025-01-01'),
-          users: []
+          updatedAt: new Date('2025-01-01')
         }
       ];
-      
       this.filteredDashboardPages = [...this.dashboardPages];
       this.loading = false;
-    }, 1000);
+    }, 200);
   }
 
   // İzin seçeneklerini yükle
   loadPermissionOptions(): void {
+    // Gerçek uygulamada API'den veri çekilecek
+    // Şimdilik örnek veriler kullanıyoruz
     this.permissionOptions = [
-      { label: 'Pages.AdminDashboard', value: 'Pages.AdminDashboard' },
-      { label: 'Pages.UserManagement', value: 'Pages.UserManagement' },
-      { label: 'Pages.RoleManagement', value: 'Pages.RoleManagement' },
-      { label: 'Pages.DashboardManagement', value: 'Pages.DashboardManagement' },
-      { label: 'Pages.PageManagement', value: 'Pages.PageManagement' },
-      { label: 'Pages.Settings', value: 'Pages.Settings' },
-      { label: 'Pages.Reports', value: 'Pages.Reports' },
-      { label: 'Pages.Logs', value: 'Pages.Logs' },
-      { label: 'Pages.Backup', value: 'Pages.Backup' },
-      { label: 'Pages.Help', value: 'Pages.Help' },
-      { label: 'Pages.ActivityLogs', value: 'Pages.ActivityLogs' },
-      { label: 'Pages.Notifications', value: 'Pages.Notifications' }
+      { label: 'Admin Dashboard', value: 'Pages.AdminDashboard' },
+      { label: 'Kullanıcı Yönetimi', value: 'Pages.UserManagement' },
+      { label: 'Rol Yönetimi', value: 'Pages.RoleManagement' },
+      { label: 'Dashboard Yönetimi', value: 'Pages.DashboardManagement' },
+      { label: 'Sayfa Yönetimi', value: 'Pages.PageManagement' },
+      { label: 'Sistem Ayarları', value: 'Pages.Settings' },
+      { label: 'Raporlar', value: 'Pages.Reports' },
+      { label: 'Sistem Logları', value: 'Pages.Logs' },
+      { label: 'Yedekleme', value: 'Pages.Backup' },
+      { label: 'Yardım', value: 'Pages.Help' },
+      { label: 'Aktivite Logları', value: 'Pages.ActivityLogs' }
     ];
   }
 
-  // Kullanıcıları yükle
-  loadUsers(): void {
-    this.userService.getUsers().subscribe({
-      next: (users) => {
-        this.users = users;
-        this.filteredUsers = [...this.users];
-      },
-      error: (error) => {
-        console.error('Kullanıcıları yüklerken hata oluştu:', error);
-        this.messageService.add({
-          severity: 'error',
-          summary: 'Hata',
-          detail: 'Kullanıcılar yüklenirken bir hata oluştu.'
-        });
-        
-        // Hata durumunda örnek kullanıcılar
-        this.users = [
-          {
-            id: 1,
-            username: 'Admin Kullanıcı',
-            sicil: 'A001',
-            isAdmin: true,
-            createdAt: new Date('2025-01-01')
-          },
-          {
-            id: 2,
-            username: 'Test Kullanıcı',
-            sicil: 'T001',
-            isAdmin: false,
-            createdAt: new Date('2025-01-01')
-          },
-          {
-            id: 3,
-            username: 'Genel Kullanıcı',
-            sicil: 'G001',
-            isAdmin: false,
-            createdAt: new Date('2025-01-01')
-          }
-        ] as User[];
-        
-        this.filteredUsers = [...this.users];
-      }
-    });
-  }
-
-  // Kullanıcı arama
-  onUserSearch(event: any): void {
-    const searchText = this.userSearchText.toLowerCase();
-    
-    if (!searchText) {
-      this.filteredUsers = [...this.users];
-      return;
-    }
-    
-    this.filteredUsers = this.users.filter(user => 
-      user.username.toLowerCase().includes(searchText) ||
-      user.sicil.toLowerCase().includes(searchText)
-    );
-  }
-
-  // Sayfaya kullanıcı ekle
-  addUserToPage(user: User): void {
-    // Kullanıcı zaten ekli mi kontrol et
-    const userExists = this.pageUsers.some(u => u.id === user.id);
-    
-    if (userExists) {
-      this.messageService.add({
-        severity: 'warn',
-        summary: 'Uyarı',
-        detail: `${user.username} kullanıcısı zaten bu sayfaya eklenmiş.`
-      });
-      return;
-    }
-    
-    // Kullanıcıyı sayfaya ekle
-    this.pageUsers.push(user);
-    
-    // Sayfanın users dizisini güncelle
-    this.page.users = [...this.pageUsers];
-    
-    this.messageService.add({
-      severity: 'success',
-      summary: 'Başarılı',
-      detail: `${user.username} kullanıcısı sayfaya eklendi.`
-    });
-  }
-
-  // Sayfadan kullanıcı kaldır
-  removeUserFromPage(user: User): void {
-    // Kullanıcıyı sayfadan kaldır
-    this.pageUsers = this.pageUsers.filter(u => u.id !== user.id);
-    
-    // Sayfanın users dizisini güncelle
-    this.page.users = [...this.pageUsers];
-    
-    this.messageService.add({
-      severity: 'success',
-      summary: 'Başarılı',
-      detail: `${user.username} kullanıcısı sayfadan kaldırıldı.`
-    });
-  }
-
-  // Arama
-  onSearch(event: any): void {
-    const searchText = this.searchText.toLowerCase();
-    
-    if (!searchText) {
-      this.filteredDashboardPages = [...this.dashboardPages];
-      return;
-    }
-    
-    this.filteredDashboardPages = this.dashboardPages.filter(page => 
-      page.name.toLowerCase().includes(searchText) ||
-      page.description.toLowerCase().includes(searchText) ||
-      page.route.toLowerCase().includes(searchText) ||
-      page.requiredPermission.toLowerCase().includes(searchText)
-    );
-  }
-
-  // Aramayı temizle
-  clearSearch(): void {
-    this.searchText = '';
-    this.filteredDashboardPages = [...this.dashboardPages];
-  }
-
-  // Durum etiketi
-  getStatusLabel(isActive: boolean): string {
-    return isActive ? 'Aktif' : 'Pasif';
-  }
-
-  // Durum severity
-  getStatusSeverity(isActive: boolean): TagSeverity {
-    return isActive ? 'success' : 'danger';
-  }
-
-  // Sayfa düzenle
-  editPage(page: DashboardPage): void {
-    this.page = { ...page };
-    this.dialogHeader = 'Sayfa Düzenle';
-    this.displayDialog = true;
-    
-    // Sayfa kullanıcılarını yükle
-    this.pageUsers = page.users || [];
-    
-    // Aktif sekmeyi sıfırla
-    this.activeTabIndex = 0;
-  }
-
-  // Dialog'u gizle
-  hideDialog(): void {
-    this.displayDialog = false;
-  }
-
-  // Sayfa kaydet
-  savePage(): void {
-    if (!this.page.name || !this.page.route || !this.page.requiredPermission) {
-      this.messageService.add({
-        severity: 'error',
-        summary: 'Hata',
-        detail: 'Lütfen zorunlu alanları doldurun.'
-      });
-      return;
-    }
-    
-    if (this.page.id === 0) {
-      // Yeni sayfa ekleme
-      this.page.id = this.generateId();
-      this.page.createdAt = new Date();
-      this.page.updatedAt = new Date();
-      this.dashboardPages.push(this.page);
-      this.messageService.add({
-        severity: 'success',
-        summary: 'Başarılı',
-        detail: 'Sayfa başarıyla eklendi.'
-      });
-    } else {
-      // Mevcut sayfayı güncelleme
-      const index = this.dashboardPages.findIndex(p => p.id === this.page.id);
-      if (index !== -1) {
-        this.page.updatedAt = new Date();
-        this.dashboardPages[index] = this.page;
-        this.messageService.add({
-          severity: 'success',
-          summary: 'Başarılı',
-          detail: 'Sayfa başarıyla güncellendi.'
-        });
-      }
-    }
-    
-    this.filteredDashboardPages = [...this.dashboardPages];
-    this.displayDialog = false;
+  // Yeni dashboard sayfası ekle
+  openNew(): void {
     this.page = {
       id: 0,
       name: '',
@@ -521,20 +287,166 @@ export class DashboardManagementComponent implements OnInit, AfterViewInit {
       isActive: true,
       requiredPermission: '',
       createdAt: new Date(),
-      updatedAt: new Date(),
-      users: []
+      updatedAt: new Date()
     };
+    this.dialogHeader = 'Yeni Dashboard Sayfası Ekle';
+    this.displayDialog = true;
+    
+    // Dropdown stillerini düzenle
+    setTimeout(() => {
+      this.updateDropdownPanelStyles();
+    }, 100);
   }
 
-  // ID oluştur
-  generateId(): number {
-    return this.dashboardPages.length > 0 
-      ? Math.max(...this.dashboardPages.map(page => page.id)) + 1 
-      : 1;
+  // Dashboard sayfası düzenle
+  editPage(page: DashboardPage): void {
+    // Seçilen sayfanın kopyasını oluştur
+    this.page = { ...page };
+    this.dialogHeader = 'Dashboard Sayfası Düzenle';
+    this.displayDialog = true;
+    
+    // Dropdown stillerini düzenle
+    setTimeout(() => {
+      this.updateDropdownPanelStyles();
+    }, 100);
   }
 
-  // Sayfaya yönlendir
+  // Dashboard sayfası sil
+  deletePage(page: DashboardPage): void {
+    // Silme işlemi için onay iste
+    if (confirm(`"${page.name}" sayfasını silmek istediğinize emin misiniz?`)) {
+      // Gerçek uygulamada API'ye silme isteği gönderilecek
+      // Şimdilik yerel listeden çıkarıyoruz
+      this.dashboardPages = this.dashboardPages.filter(p => p.id !== page.id);
+      
+      // Filtrelenmiş listeyi güncelle
+      this.filteredDashboardPages = this.dashboardPages.filter(p => p.id !== page.id);
+      
+      // Eğer arama yapılmışsa, filtrelemeyi tekrar uygula
+      if (this.searchText) {
+        this.onSearch({ target: { value: this.searchText } } as unknown as Event);
+      }
+      
+      this.messageService.add({
+        severity: 'success',
+        summary: 'Başarılı',
+        detail: `"${page.name}" sayfası başarıyla silindi.`
+      });
+    }
+  }
+
+  // Dialog kapatıldığında
+  hideDialog(): void {
+    this.displayDialog = false;
+    
+    // Dropdown panelini kapat
+    this.closeDropdownPanel();
+  }
+
+  // Dropdown panelini kapat
+  closeDropdownPanel(): void {
+    const dropdownPanels = document.querySelectorAll('.p-dropdown-panel');
+    dropdownPanels.forEach(panel => {
+      if (panel instanceof HTMLElement) {
+        panel.style.display = 'none';
+      }
+    });
+  }
+
+  // Dashboard sayfası kaydet
+  savePage(): void {
+    // Form doğrulama
+    if (!this.page.name || !this.page.route || !this.page.requiredPermission) {
+      this.messageService.add({
+        severity: 'error',
+        summary: 'Hata',
+        detail: 'Lütfen tüm zorunlu alanları doldurun.'
+      });
+      return;
+    }
+
+    // Yeni kayıt mı, güncelleme mi?
+    if (this.page.id === 0) {
+      // Yeni kayıt
+      // Gerçek uygulamada API'ye kayıt isteği gönderilecek
+      // Şimdilik yerel listeye ekliyoruz
+      this.page.id = this.dashboardPages.length + 1;
+      this.page.createdAt = new Date();
+      this.page.updatedAt = new Date();
+      this.dashboardPages.push({ ...this.page });
+      
+      // Filtrelenmiş listeyi güncelle
+      this.filteredDashboardPages = [...this.dashboardPages];
+      
+      this.messageService.add({
+        severity: 'success',
+        summary: 'Başarılı',
+        detail: `"${this.page.name}" sayfası başarıyla eklendi.`
+      });
+    } else {
+      // Güncelleme
+      // Gerçek uygulamada API'ye güncelleme isteği gönderilecek
+      // Şimdilik yerel listeyi güncelliyoruz
+      this.page.updatedAt = new Date();
+      const index = this.dashboardPages.findIndex(p => p.id === this.page.id);
+      if (index !== -1) {
+        this.dashboardPages[index] = { ...this.page };
+        
+        // Filtrelenmiş listeyi güncelle
+        this.filteredDashboardPages = [...this.dashboardPages];
+        
+        // Eğer arama yapılmışsa, filtrelemeyi tekrar uygula
+        if (this.searchText) {
+          this.onSearch({ target: { value: this.searchText } } as unknown as Event);
+        }
+      }
+      
+      this.messageService.add({
+        severity: 'success',
+        summary: 'Başarılı',
+        detail: `"${this.page.name}" sayfası başarıyla güncellendi.`
+      });
+    }
+
+    // Dialog kapat
+    this.displayDialog = false;
+  }
+
+  // Sayfaya git
   navigateTo(route: string): void {
     this.router.navigate([route]);
+  }
+
+  // Durum etiketi getir
+  getStatusSeverity(isActive: boolean): TagSeverity {
+    return isActive ? 'success' : 'danger';
+  }
+
+  // Durum etiketi metni getir
+  getStatusLabel(isActive: boolean): string {
+    return isActive ? 'Aktif' : 'Pasif';
+  }
+
+  // Arama işlevi
+  onSearch(event: Event): void {
+    const searchValue = (event.target as HTMLInputElement).value.toLowerCase();
+    this.searchText = searchValue;
+    
+    if (searchValue) {
+      this.filteredDashboardPages = this.dashboardPages.filter(page => 
+        page.name.toLowerCase().includes(searchValue) ||
+        page.description.toLowerCase().includes(searchValue) ||
+        page.route.toLowerCase().includes(searchValue) ||
+        page.requiredPermission.toLowerCase().includes(searchValue)
+      );
+    } else {
+      this.filteredDashboardPages = [...this.dashboardPages];
+    }
+  }
+
+  // Arama alanını temizle
+  clearSearch(): void {
+    this.searchText = '';
+    this.filteredDashboardPages = [...this.dashboardPages];
   }
 } 

@@ -204,3 +204,174 @@
     </div>
   </div>
 </div>
+
+<!-- Sakai teması ile yeni dashboard yapısı -->
+<div class="sakai-dashboard">
+  <div class="dashboard-header">
+    <div class="dashboard-title">
+      <h1>Yönetici Paneli</h1>
+      <p>Hoş geldiniz, {{ username }}! Sistem yönetimi için gerekli tüm araçlara buradan erişebilirsiniz.</p>
+    </div>
+    
+    <div class="user-profile">
+      <img [src]="profileImageUrl" alt="Profil Resmi" class="user-avatar">
+      <div class="user-info">
+        <p-menu #userMenu [model]="userMenuItems" [popup]="true"></p-menu>
+        <button 
+          pButton 
+          type="button" 
+          (click)="userMenu.toggle($event)" 
+          class="p-button-text p-button-rounded"
+          icon="pi pi-user"
+          label="{{ username }}"
+          badge="Admin"
+          badgeClass="p-badge-info">
+        </button>
+      </div>
+    </div>
+  </div>
+  
+  <div class="dashboard-content">
+    <div class="admin-modules">
+      <!-- Kullanıcı Yönetimi -->
+      <div class="admin-card" *hasPermission="'user-management'" (click)="navigateTo('/dashboard/user-management')">
+        <div class="admin-card-icon">
+          <i class="pi pi-users"></i>
+        </div>
+        <div class="admin-card-title">Kullanıcı Yönetimi</div>
+        <div class="admin-card-description">
+          Kullanıcıları ekleyin, düzenleyin, silin ve izinlerini yönetin.
+        </div>
+        <button pButton type="button" label="Yönet" icon="pi pi-arrow-right" iconPos="right" class="p-button-outlined"></button>
+      </div>
+      
+      <!-- Rol Yönetimi -->
+      <div class="admin-card" *hasPermission="'role-management'" (click)="navigateTo('/dashboard/role-management')">
+        <div class="admin-card-icon">
+          <i class="pi pi-shield"></i>
+        </div>
+        <div class="admin-card-title">Rol Yönetimi</div>
+        <div class="admin-card-description">
+          Sistem rollerini ve izinlerini yapılandırın.
+        </div>
+        <button pButton type="button" label="Yönet" icon="pi pi-arrow-right" iconPos="right" class="p-button-outlined"></button>
+      </div>
+      
+      <!-- Dashboard Yönetimi -->
+      <div class="admin-card" *hasPermission="'dashboard-management'" (click)="navigateTo('/dashboard/dashboard-management')">
+        <div class="admin-card-icon">
+          <i class="pi pi-th-large"></i>
+        </div>
+        <div class="admin-card-title">Dashboard Yönetimi</div>
+        <div class="admin-card-description">
+          Dashboard bileşenlerini ve düzenini özelleştirin.
+        </div>
+        <button pButton type="button" label="Yönet" icon="pi pi-arrow-right" iconPos="right" class="p-button-outlined"></button>
+      </div>
+      
+      <!-- Sayfa Yönetimi -->
+      <div class="admin-card" *hasPermission="'page-management'" (click)="navigateTo('/dashboard/page-management')">
+        <div class="admin-card-icon">
+          <i class="pi pi-file"></i>
+        </div>
+        <div class="admin-card-title">Sayfa Yönetimi</div>
+        <div class="admin-card-description">
+          Sistem sayfalarını ve içeriklerini yönetin.
+        </div>
+        <button pButton type="button" label="Yönet" icon="pi pi-arrow-right" iconPos="right" class="p-button-outlined"></button>
+      </div>
+      
+      <!-- Sistem Ayarları -->
+      <div class="admin-card" *hasPermission="'system-settings'" (click)="navigateTo('/dashboard/system-settings')">
+        <div class="admin-card-icon">
+          <i class="pi pi-cog"></i>
+        </div>
+        <div class="admin-card-title">Sistem Ayarları</div>
+        <div class="admin-card-description">
+          Genel sistem ayarlarını ve yapılandırmalarını yönetin.
+        </div>
+        <button pButton type="button" label="Yönet" icon="pi pi-arrow-right" iconPos="right" class="p-button-outlined"></button>
+      </div>
+    </div>
+    
+    <div class="dashboard-sidebar">
+      <!-- Hızlı Erişim -->
+      <div class="quick-access">
+        <div class="quick-access-title">Hızlı Erişim</div>
+        <div class="quick-access-items">
+          <div class="quick-access-item" (click)="navigateTo('/dashboard/reports')">
+            <i class="quick-access-icon pi pi-chart-bar"></i>
+            <span class="quick-access-label">Raporlar</span>
+          </div>
+          <div class="quick-access-item" (click)="navigateTo('/dashboard/logs')">
+            <i class="quick-access-icon pi pi-list"></i>
+            <span class="quick-access-label">Sistem Logları</span>
+          </div>
+          <div class="quick-access-item" (click)="navigateTo('/dashboard/backup')">
+            <i class="quick-access-icon pi pi-database"></i>
+            <span class="quick-access-label">Yedekleme</span>
+          </div>
+          <div class="quick-access-item" (click)="navigateTo('/dashboard/help')">
+            <i class="quick-access-icon pi pi-question-circle"></i>
+            <span class="quick-access-label">Yardım</span>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Son Aktiviteler -->
+      <div class="recent-activities">
+        <div class="recent-activities-title">Son Aktiviteler</div>
+        <div class="activity-list">
+          <div class="activity-item" *ngFor="let log of userActivityLogs">
+            <i class="activity-icon pi" [ngClass]="getActivityIconClass(log.action)"></i>
+            <div class="activity-content">
+              <div class="activity-message">{{ log.message }}</div>
+              <div class="activity-time">{{ log.timestamp | date:'dd.MM.yyyy HH:mm' }}</div>
+            </div>
+          </div>
+          <div class="activity-item" *ngIf="userActivityLogs.length === 0">
+            <i class="activity-icon pi pi-info-circle info"></i>
+            <div class="activity-content">
+              <div class="activity-message">Henüz aktivite kaydı bulunmuyor.</div>
+              <div class="activity-time">-</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Şifre Değiştirme Diyaloğu -->
+<p-dialog 
+  header="Şifre Değiştir" 
+  [(visible)]="showPasswordChange" 
+  [modal]="true" 
+  [draggable]="false" 
+  [resizable]="false"
+  [style]="{width: '450px'}"
+  [closeOnEscape]="true"
+  [dismissableMask]="true">
+  
+  <div class="p-fluid">
+    <div class="p-field mb-3">
+      <label for="currentPassword">Mevcut Şifre</label>
+      <p-password id="currentPassword" [(ngModel)]="currentPassword" [feedback]="false" [toggleMask]="true" styleClass="w-full"></p-password>
+    </div>
+    
+    <div class="p-field mb-3">
+      <label for="newPassword">Yeni Şifre</label>
+      <p-password id="newPassword" [(ngModel)]="newPassword" [toggleMask]="true" styleClass="w-full"></p-password>
+    </div>
+    
+    <div class="p-field mb-3">
+      <label for="confirmPassword">Yeni Şifre (Tekrar)</label>
+      <p-password id="confirmPassword" [(ngModel)]="confirmPassword" [feedback]="false" [toggleMask]="true" styleClass="w-full"></p-password>
+    </div>
+  </div>
+  
+  <ng-template pTemplate="footer">
+    <button pButton type="button" label="İptal" icon="pi pi-times" class="p-button-text" (click)="showPasswordChange = false"></button>
+    <button pButton type="button" label="Değiştir" icon="pi pi-check" class="p-button-primary" (click)="changePassword()"></button>
+  </ng-template>
+</p-dialog>

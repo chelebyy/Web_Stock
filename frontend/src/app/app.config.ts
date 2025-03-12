@@ -7,7 +7,7 @@ import { AuthInterceptor } from './core/http/auth.interceptor';
 import { MessageService } from 'primeng/api';
 import { ToastModule } from 'primeng/toast';
 import { providePrimeNG } from 'primeng/config';
-import Lara from '@primeng/themes/lara';
+import Aura from '@primeng/themes/aura';
 
 export const appConfig: ApplicationConfig = {
   providers: [
@@ -18,7 +18,7 @@ export const appConfig: ApplicationConfig = {
     importProvidersFrom(ToastModule),
     providePrimeNG({
       theme: {
-        preset: Lara
+        preset: Aura
       }
     })
   ]
