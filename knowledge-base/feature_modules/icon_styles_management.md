@@ -111,10 +111,41 @@ Yeni bir modül için özel ikon stilleri eklemek istiyorsanız, aşağıdaki ad
 
 ## Bakım ve Güncellemeler
 
-İkon stillerinde yapılacak değişiklikler, ilgili modülün stil dosyasında yapılmalıdır. Bu şekilde, bir modüldeki değişiklikler diğer modülleri etkilemeyecektir.
+İkon stilleri zaman içinde değişebilir veya yeni ikonlar eklenebilir. Bu durumda aşağıdaki adımları izleyin:
 
-Tüm modüllerde ortak olarak kullanılacak stil değişiklikleri için, her modülün stil dosyasını ayrı ayrı güncellemeniz gerekecektir.
+1. İlgili modülün stil dosyasını bulun (`dashboard-icons.scss` veya `bilgi-islem-icons.scss`)
+2. Yeni ikon stillerini ekleyin veya mevcut stilleri güncelleyin
+3. Değişiklikleri test edin
+4. Değişiklikleri belgelendirin
+
+### Yaygın Sorunlar ve Çözümleri
+
+#### İkon İçinde Gereksiz Metin Görünmesi
+
+**Sorun:** İkon butonlarının içinde gereksiz metin görünebilir. Örneğin, izinleri yönet ikonunun içinde "İzinler" yazısı görünmesi.
+
+**Çözüm:** 
+1. HTML'de buton içindeki gereksiz metin etiketlerini kaldırın:
+```html
+<!-- Hatalı Kullanım -->
+<button pButton pRipple icon="pi pi-key" class="p-button-rounded p-button-text p-button-success dashboard-permission-icon" 
+  (click)="manageUserPermissions(user)" pTooltip="İzinleri Yönet" tooltipPosition="top">
+  <span class="permission-icon-text">İzinler</span>
+</button>
+
+<!-- Doğru Kullanım -->
+<button pButton pRipple icon="pi pi-key" class="p-button-rounded p-button-text p-button-success dashboard-permission-icon" 
+  (click)="manageUserPermissions(user)" pTooltip="İzinleri Yönet" tooltipPosition="top"></button>
+```
+
+2. CSS'de ilgili stil tanımlamalarını kaldırın:
+```scss
+// Kaldırılacak CSS
+.permission-icon-text {
+  display: none !important; /* İzinler yazısını tamamen gizle */
+}
+```
 
 ## Sonuç
 
-Bu yaklaşım, farklı modüller için farklı görsel kimlikler oluşturmamıza olanak tanırken, aynı zamanda her modül içinde tutarlı bir görünüm sağlar. Dashboard modülü içindeki tüm sayfalar benzer görünürken, bilgi işlem modülü kendi özgün görsel kimliğine sahip olabilir. 
+Bu yaklaşım, modüller arasında görsel tutarlılığı korurken, her modülün kendi ihtiyaçlarına göre özelleştirilmiş ikonlara sahip olmasını sağlar. Dashboard modülü içindeki tüm sayfalar aynı ikon stillerini kullanırken, Bilgi İşlem modülü kendi özel stillerini kullanabilir. 
