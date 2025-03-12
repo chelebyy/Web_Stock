@@ -455,18 +455,4 @@ Kullanıcı yönetimi sayfasındaki checkbox'lar artık işlevsel hale geldi. Ku
 - Tablo yükleme simgesinin rengini değiştirmek için `.p-datatable-loading-icon` sınıfının rengini değiştirmek gerekir
 - Yükleme süresini kısa tutarak kullanıcı deneyimini iyileştirmek önemlidir
 
-## Yeni Eklenen Özellikler
-
-### Dashboard Sayfası Kullanıcı İzinleri Yönetimi (Eklendi: 2023-11-XX)
-
-Dashboard yönetimi sayfasında, her bir dashboard sayfası için erişim izni verilen kullanıcıları belirlemek amacıyla bir kullanıcı seçim alanı eklenmiştir. Bu özellik sayesinde, belirli bir sayfaya erişim izni olan kullanıcıları doğrudan seçebilir ve yönetebilirsiniz.
-
-- **Özellik**: Dashboard sayfalarına erişim izni verilen kullanıcıları belirleme
-- **Bileşenler**: PrimeNG MultiSelect, UserService entegrasyonu
-- **Dosyalar**:
-  - `frontend/src/app/features/dashboard-management/components/dashboard-management.component.html`
-  - `frontend/src/app/features/dashboard-management/components/dashboard-management.component.ts`
-  - `frontend/src/app/features/dashboard-management/components/dashboard-management.component.scss`
-- **Belgeleme**: `knowledge-base/feature_modules/dashboard_management_user_permissions.md`
-
 
