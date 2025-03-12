@@ -1,38 +1,53 @@
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormsModule } from '@angular/forms';
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
 
 // PrimeNG Modülleri
 import { TableModule } from 'primeng/table';
 import { ButtonModule } from 'primeng/button';
 import { InputTextModule } from 'primeng/inputtext';
-import { DialogModule } from 'primeng/dialog';
 import { DropdownModule } from 'primeng/dropdown';
-import { CheckboxModule } from 'primeng/checkbox';
 import { CardModule } from 'primeng/card';
 import { ToastModule } from 'primeng/toast';
 import { TagModule } from 'primeng/tag';
 import { RippleModule } from 'primeng/ripple';
+import { TextareaModule } from 'primeng/textarea';
+import { InputSwitchModule } from 'primeng/inputswitch';
+import { DividerModule } from 'primeng/divider';
+import { TooltipModule } from 'primeng/tooltip';
+import { TabViewModule } from 'primeng/tabview';
 
 // Servisler
 import { MessageService } from 'primeng/api';
+
+// Bileşenler
+import { DashboardManagementComponent } from './components/dashboard-management.component';
+import { DashboardEditComponent } from './components/dashboard-edit.component';
+import { UserPagePermissionsComponent } from './components/user-page-permissions.component';
 
 @NgModule({
   imports: [
     CommonModule,
     FormsModule,
+    ReactiveFormsModule,
     RouterModule,
     TableModule,
     ButtonModule,
     InputTextModule,
-    DialogModule,
     DropdownModule,
-    CheckboxModule,
     CardModule,
     ToastModule,
     TagModule,
-    RippleModule
+    RippleModule,
+    TextareaModule,
+    InputSwitchModule,
+    DividerModule,
+    TooltipModule,
+    TabViewModule,
+    DashboardManagementComponent,
+    DashboardEditComponent,
+    UserPagePermissionsComponent
   ],
   providers: [
     MessageService

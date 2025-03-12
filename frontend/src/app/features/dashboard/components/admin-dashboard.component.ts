@@ -21,8 +21,6 @@ import { DialogModule } from 'primeng/dialog';
 import { HostListener } from '@angular/core';
 import { DragDropModule } from '@angular/cdk/drag-drop';
 import { HasPermissionDirective } from '../../../shared/directives/has-permission.directive';
-import { MenuItem } from 'primeng/api';
-import { MenuModule } from 'primeng/menu';
 
 // PrimeNG Tag bileşeni için geçerli severity tipleri
 type TagSeverity = 'success' | 'info' | 'warning' | 'danger' | 'secondary' | 'contrast' | undefined;
@@ -49,8 +47,7 @@ type TagSeverity = 'success' | 'info' | 'warning' | 'danger' | 'secondary' | 'co
         CalendarModule,
         DialogModule,
         DragDropModule,
-        HasPermissionDirective,
-        MenuModule
+        HasPermissionDirective
     ],
     providers: [MessageService]
 })
@@ -153,8 +150,6 @@ export class AdminDashboardComponent implements OnInit {
   hasDashboardManagementAccess: boolean = false;
   hasPageManagementAccess: boolean = false;
 
-  userMenuItems: MenuItem[] = [];
-
   constructor(
     private router: Router,
     public authService: AuthService,
@@ -195,8 +190,6 @@ export class AdminDashboardComponent implements OnInit {
       description: 'Yönetim paneline erişim sağlandı',
       status: 'info'
     }).subscribe();
-
-    this.initUserMenuItems();
   }
 
   // İzinleri kontrol et
@@ -676,7 +669,7 @@ export class AdminDashboardComponent implements OnInit {
   // Sidebar navigasyon fonksiyonları
   navigateToProfile(): void {
     this.activeMenuItem = 'profile';
-    this.router.navigate(['/dashboard/profile']);
+    this.router.navigate(['/admin/profile']);
   }
 
   navigateToSettings(): void {
@@ -715,64 +708,5 @@ export class AdminDashboardComponent implements OnInit {
     // Gerçek uygulamada bu fonksiyon kullanıcının profil resmini API'den alabilir
     // Şimdilik varsayılan resmi kullanıyoruz
     this.profileImageUrl = 'assets/images/default-avatar.png';
-  }
-
-  initUserMenuItems(): void {
-    this.userMenuItems = [
-      {
-        label: 'Profil',
-        icon: 'pi pi-user',
-        command: () => this.navigateToProfile()
-      },
-      {
-        label: 'Şifre Değiştir',
-        icon: 'pi pi-key',
-        command: () => this.showPasswordChange = true
-      },
-      {
-        separator: true
-      },
-      {
-        label: 'Çıkış',
-        icon: 'pi pi-sign-out',
-        command: () => this.logout()
-      }
-    ];
-  }
-
-  navigateTo(route: string): void {
-    this.router.navigate([route]);
-  }
-
-  // Aktivite ikonunu belirle
-  getActivityIconClass(log: UserActivityLog): string {
-    // Önce action alanını kontrol et
-    if (log.action) {
-      const action = log.action.toLowerCase();
-      
-      if (action.includes('login')) return 'pi pi-sign-in text-blue-500';
-      if (action.includes('logout')) return 'pi pi-sign-out text-purple-500';
-      if (action.includes('create') || action.includes('add')) return 'pi pi-plus-circle text-green-500';
-      if (action.includes('update') || action.includes('edit')) return 'pi pi-pencil text-orange-500';
-      if (action.includes('delete') || action.includes('remove')) return 'pi pi-trash text-red-500';
-      if (action.includes('error')) return 'pi pi-exclamation-circle text-red-500';
-      if (action.includes('warning')) return 'pi pi-exclamation-triangle text-yellow-500';
-      if (action.includes('view')) return 'pi pi-eye text-blue-500';
-    }
-    
-    // Action yoksa activityType'a bak
-    const activityType = log.activityType.toLowerCase();
-    
-    if (activityType.includes('login')) return 'pi pi-sign-in text-blue-500';
-    if (activityType.includes('logout')) return 'pi pi-sign-out text-purple-500';
-    if (activityType.includes('create') || activityType.includes('add')) return 'pi pi-plus-circle text-green-500';
-    if (activityType.includes('update') || activityType.includes('edit')) return 'pi pi-pencil text-orange-500';
-    if (activityType.includes('delete') || activityType.includes('remove')) return 'pi pi-trash text-red-500';
-    if (activityType.includes('error')) return 'pi pi-exclamation-circle text-red-500';
-    if (activityType.includes('warning')) return 'pi pi-exclamation-triangle text-yellow-500';
-    if (activityType.includes('view')) return 'pi pi-eye text-blue-500';
-    
-    // Varsayılan ikon
-    return 'pi pi-info-circle text-blue-500';
   }
 }

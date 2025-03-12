@@ -1,18 +1,31 @@
 .dashboard-management-container {
   padding: 1.5rem;
+  background-color: #f8f9fa;
+  min-height: calc(100vh - 64px);
   
   .header {
     display: flex;
     justify-content: space-between;
     align-items: center;
     margin-bottom: 1.5rem;
+    background-color: #ffffff;
+    padding: 1.25rem 1.5rem;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
     
     .title {
       h1 {
         margin: 0;
         font-size: 1.8rem;
-        color: #212529;
+        color: #2c3e50;
         font-weight: 600;
+        display: flex;
+        align-items: center;
+        
+        i {
+          color: var(--primary-color);
+          margin-right: 0.5rem;
+        }
       }
       
       p {
@@ -40,7 +53,7 @@
   }
   
   .dashboard-pages-card {
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
     border-radius: 8px;
     overflow: hidden;
     position: relative;
@@ -78,7 +91,7 @@
     
     i {
       font-size: 2.5rem;
-      color: #4caf50;
+      color: var(--primary-color);
       margin-bottom: 1rem;
       animation: spin 1s linear infinite;
     }
@@ -104,9 +117,13 @@
       .search-input {
         width: 300px;
         transition: width 0.3s ease;
+        border-radius: 4px;
+        border: 1px solid #dee2e6;
         
         &:focus {
           width: 350px;
+          border-color: var(--primary-color);
+          box-shadow: 0 0 0 0.2rem rgba(var(--primary-color-rgb), 0.25);
         }
       }
       
@@ -171,6 +188,30 @@
     }
   }
   
+  .route-badge {
+    background-color: #e9ecef;
+    color: #495057;
+    padding: 0.25rem 0.5rem;
+    border-radius: 4px;
+    font-size: 0.85rem;
+    font-family: monospace;
+    display: inline-block;
+  }
+  
+  .permission-badge {
+    background-color: #e1f5fe;
+    color: #0288d1;
+    padding: 0.25rem 0.5rem;
+    border-radius: 4px;
+    font-size: 0.85rem;
+    font-weight: 500;
+    display: inline-block;
+  }
+  
+  .font-medium {
+    font-weight: 500;
+  }
+  
   @keyframes spin {
     from {
       transform: rotate(0deg);
@@ -180,49 +221,21 @@
     }
   }
   
-  .field {
-    margin-bottom: 1.5rem;
-    
-    label {
-      display: block;
-      margin-bottom: 0.5rem;
-      font-weight: 500;
-    }
-    
-    small.p-error {
-      display: block;
-      margin-top: 0.25rem;
-    }
-  }
-  
-  .field-checkbox {
-    display: flex;
-    align-items: center;
-    margin-bottom: 1.5rem;
-    
-    label {
-      margin-left: 0.5rem;
-      margin-bottom: 0;
-    }
-  }
-  
   ::ng-deep {
-    .p-dialog .p-dialog-header {
-      padding: 1.5rem 1.5rem 0.5rem;
-    }
-    
-    .p-dialog .p-dialog-content {
-      padding: 0 1.5rem 1.5rem;
-    }
-    
-    .p-dialog .p-dialog-footer {
-      padding: 0 1.5rem 1.5rem;
-      text-align: right;
-    }
-    
     .p-tag {
       font-size: 0.75rem;
       font-weight: 500;
+      min-width: 80px;
+      justify-content: center;
+      border-radius: 4px;
+      
+      &.p-tag-success {
+        background-color: #22c55e;
+      }
+      
+      &.p-tag-danger {
+        background-color: #ef4444;
+      }
     }
     
     .p-datatable .p-datatable-header {
@@ -232,9 +245,11 @@
     }
     
     .p-datatable .p-datatable-thead > tr > th {
-      background: var(--surface-card);
-      color: var(--text-color);
+      background: #f8f9fa;
+      color: #495057;
       font-weight: 600;
+      text-transform: uppercase;
+      font-size: 0.85rem;
     }
     
     .p-button-sm {
@@ -246,13 +261,13 @@
       margin-right: 0.5rem;
     }
     
-    /* Eklenen tablo stilleri - Koyu temadan açık temaya düzeltme */
+    /* Tablo stilleri */
     .p-datatable {
       background-color: #ffffff !important;
       color: #333333 !important;
       border-radius: 8px;
       overflow: hidden;
-      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
       
       .p-datatable-wrapper {
         background-color: #ffffff !important;
@@ -268,7 +283,7 @@
         }
         
         &:hover {
-          background-color: #e9ecef !important;
+          background-color: rgba(var(--primary-color-rgb), 0.05) !important;
         }
         
         > td {
@@ -287,252 +302,60 @@
         padding: 0.75rem 1rem !important;
         text-transform: uppercase;
         font-size: 0.85rem;
-        letter-spacing: 0.5px;
-        
-        .p-column-title {
-          font-weight: 600;
-        }
-        
-        .p-sortable-column-icon {
-          color: #6c757d !important;
-          font-size: 0.8rem;
-        }
-        
-        &:hover {
-          background-color: #e9ecef !important;
-        }
-        
-        &.p-highlight {
-          background-color: #f8f9fa !important;
-          color: #0077cc !important;
-          
-          .p-sortable-column-icon {
-            color: #0077cc !important;
-          }
-        }
       }
       
       .p-paginator {
-        background-color: #ffffff !important;
-        color: #333333 !important;
-        border-top: 1px solid #e9ecef;
-        padding: 1rem;
+        background-color: #f8f9fa !important;
+        border: none !important;
         
-        .p-paginator-pages .p-paginator-page {
-          color: #333333 !important;
-          border-radius: 4px;
+        .p-paginator-element {
+          color: #6c757d !important;
           
           &.p-highlight {
-            background-color: #e6f7ff !important;
-            color: #0077cc !important;
+            background-color: var(--primary-color) !important;
+            color: #ffffff !important;
           }
         }
+      }
+    }
+  }
+}
+
+@media screen and (max-width: 768px) {
+  .dashboard-management-container {
+    padding: 1rem;
+    
+    .header {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 1rem;
+      padding: 1rem;
+      
+      .title {
+        h1 {
+          font-size: 1.5rem;
+        }
+      }
+      
+      .actions {
+        width: 100%;
         
-        .p-paginator-first,
-        .p-paginator-prev,
-        .p-paginator-next,
-        .p-paginator-last {
-          color: #6c757d !important;
-          border-radius: 4px;
+        .p-button {
+          width: 100%;
+        }
+      }
+    }
+    
+    .table-header {
+      .search-container {
+        .search-input {
+          width: 100%;
           
-          &:not(.p-disabled):hover {
-            background-color: #e9ecef !important;
-            color: #495057 !important;
+          &:focus {
+            width: 100%;
           }
         }
       }
-      
-      &.p-datatable-loading {
-        .p-datatable-tbody {
-          background-color: #ffffff !important;
-        }
-        
-        .p-datatable-loading-overlay {
-          background-color: rgba(255, 255, 255, 0.9) !important;
-          z-index: 1000 !important;
-        }
-        
-        .p-datatable-loading-icon {
-          color: #4caf50 !important;
-        }
-      }
-      
-      .p-column-title {
-        font-weight: 600;
-      }
-      
-      .p-sortable-column:hover {
-        background-color: #e9ecef !important;
-      }
-      
-      .p-sortable-column.p-highlight {
-        background-color: #f8f9fa !important;
-        color: #0077cc !important;
-        
-        .p-sortable-column-icon {
-          color: #0077cc !important;
-        }
-      }
-    }
-    
-    // Düğme stilleri
-    .p-button {
-      &.p-button-success {
-        background-color: #4caf50 !important;
-        border-color: #4caf50 !important;
-      }
-      
-      &.p-button-info {
-        background-color: #2196f3 !important;
-        border-color: #2196f3 !important;
-      }
-      
-      &.p-button-danger {
-        background-color: #f44336 !important;
-        border-color: #f44336 !important;
-      }
-    }
-    
-    // Tag stilleri
-    .p-tag {
-      &.p-tag-success {
-        background-color: #4caf50 !important;
-      }
-      
-      &.p-tag-danger {
-        background-color: #f44336 !important;
-      }
-    }
-    
-    // Dropdown stili tamamen değiştirildi
-    .p-dropdown-panel {
-      background-color: white !important;
-      color: #333333 !important;
-      border: 1px solid #ced4da !important;
-      border-radius: 4px !important;
-      box-shadow: 0 2px 12px rgba(0, 0, 0, 0.1) !important;
-      z-index: 10001 !important;
-    }
-    
-    .p-dropdown-items {
-      background-color: white !important;
-      padding: 0.5rem 0 !important;
-      
-      .p-dropdown-item {
-        color: #333333 !important;
-        background-color: white !important;
-        padding: 0.75rem 1rem !important;
-        white-space: normal !important;
-        word-break: break-word !important;
-        
-        &:hover {
-          background-color: #e9ecef !important;
-          color: #333333 !important;
-        }
-        
-        &.p-highlight {
-          background-color: #e6f7ff !important;
-          color: #0077cc !important;
-        }
-      }
     }
   }
-}
-
-// Global olarak body'ye eklenen dropdown panel için düzeltme
-:host ::ng-deep .dashboard-permission-dropdown-panel {
-  background-color: white !important;
-  color: #333333 !important;
-  border: 1px solid #ced4da !important;
-  border-radius: 4px !important;
-  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.1) !important;
-  max-width: 450px !important;
-  width: auto !important;
-  max-height: 300px !important;
-  overflow-y: auto !important;
-  position: fixed !important;
-  z-index: 10001 !important;
-  
-  .p-dropdown-items {
-    background-color: white !important;
-    padding: 0.5rem 0 !important;
-    
-    .p-dropdown-item {
-      color: #333333 !important;
-      background-color: white !important;
-      padding: 0.75rem 1rem !important;
-      white-space: normal !important;
-      word-break: break-word !important;
-      
-      &:hover {
-        background-color: #e9ecef !important;
-        color: #333333 !important;
-      }
-      
-      &.p-highlight {
-        background-color: #e6f7ff !important;
-        color: #0077cc !important;
-      }
-    }
-  }
-}
-
-:root {
-  --dropdown-panel-bg: white;
-  --dropdown-panel-text: #333333;
-  --dropdown-panel-border: #ced4da;
-}
-
-// Global olarak body'ye eklenmiş dropdown panelleri
-::ng-deep body .p-dropdown-panel.dashboard-permission-dropdown-panel {
-  background-color: var(--dropdown-panel-bg) !important;
-  color: var(--dropdown-panel-text) !important;
-  border: 1px solid var(--dropdown-panel-border) !important;
-  border-radius: 4px !important;
-  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.1) !important;
-  max-width: 450px !important;
-  width: auto !important;
-  max-height: 300px !important;
-  overflow-y: auto !important;
-  position: fixed !important;
-  z-index: 10001 !important;
-  overflow: visible !important; /* Added to fix overflow */
-}
-
-::ng-deep body .p-dropdown-panel.dashboard-permission-dropdown-panel {
-  background-color: white !important;
-  color: #333333 !important;
-  border: 1px solid #ced4da !important;
-  border-radius: 4px !important;
-  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.1) !important;
-  max-width: 450px !important;
-  width: auto !important;
-  max-height: 300px !important;
-  overflow-y: auto !important;
-  position: fixed !important;
-  z-index: 10001 !important;
-  overflow: visible !important; /* Added to fix overflow */
-}
-
-::ng-deep body .p-dropdown-panel.dashboard-permission-dropdown-panel .p-dropdown-items {
-  background-color: white !important;
-  padding: 0.5rem 0 !important;
-}
-
-::ng-deep body .p-dropdown-panel.dashboard-permission-dropdown-panel .p-dropdown-items .p-dropdown-item {
-  color: #333333 !important;
-  background-color: white !important;
-  padding: 0.75rem 1rem !important;
-  white-space: normal !important;
-  word-break: break-word !important;
-}
-
-::ng-deep body .p-dropdown-panel.dashboard-permission-dropdown-panel .p-dropdown-items .p-dropdown-item:hover {
-  background-color: #e9ecef !important;
-  color: #333333 !important;
-}
-
-::ng-deep body .p-dropdown-panel.dashboard-permission-dropdown-panel .p-dropdown-items .p-dropdown-item.p-highlight {
-  background-color: #e6f7ff !important;
-  color: #0077cc !important;
 }

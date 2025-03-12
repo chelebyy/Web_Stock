@@ -12,8 +12,6 @@ export interface UserActivityLog {
   ipAddress?: string;
   status: string;
   details?: any;
-  action?: string;
-  message?: string;
 }
 
 @Injectable({
@@ -38,9 +36,7 @@ export class LogService {
       description: activity.description || '',
       timestamp: new Date(),
       status: activity.status || 'info',
-      details: activity.details || {},
-      action: activity.action,
-      message: activity.message
+      details: activity.details || {}
     };
 
     console.log('Aktivite kaydediliyor:', logEntry);

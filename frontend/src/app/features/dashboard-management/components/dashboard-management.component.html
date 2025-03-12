@@ -1,13 +1,13 @@
 <div class="dashboard-management-container">
-  <p-toast></p-toast>
+  <p-toast position="top-right"></p-toast>
   
   <div class="header">
     <div class="title">
-      <h1>Dashboard Yönetimi</h1>
+      <h1><i class="pi pi-th-large mr-2"></i>Dashboard Yönetimi</h1>
       <p>Admin dashboard'da bulunan sayfalara erişim izinlerini yönetin</p>
     </div>
     <div class="actions">
-      <p-button label="Geri Dön" icon="pi pi-arrow-left" variant="outlined" severity="info" (onClick)="navigateTo('/dashboard/admin-dashboard')"></p-button>
+      <p-button label="Geri Dön" icon="pi pi-arrow-left" styleClass="p-button-outlined p-button-info" (onClick)="navigateTo('/dashboard/admin-dashboard')"></p-button>
     </div>
   </div>
   
@@ -25,7 +25,7 @@
         [rows]="10" 
         [loading]="loading"
         [showLoader]="false"
-        styleClass="p-datatable-gridlines p-datatable-striped" 
+        styleClass="p-datatable-gridlines p-datatable-striped p-datatable-sm" 
         [tableStyle]="{'min-width': '50rem'}"
         [rowHover]="true"
         dataKey="id"
@@ -59,10 +59,16 @@
         <ng-template pTemplate="body" let-page>
           <tr>
             <td>{{ page.id }}</td>
-            <td>{{ page.name }}</td>
+            <td>
+              <span class="font-medium">{{ page.name }}</span>
+            </td>
             <td>{{ page.description }}</td>
-            <td>{{ page.route }}</td>
-            <td>{{ page.requiredPermission }}</td>
+            <td>
+              <span class="route-badge">{{ page.route }}</span>
+            </td>
+            <td>
+              <span class="permission-badge">{{ page.requiredPermission }}</span>
+            </td>
             <td>
               <p-tag 
                 [value]="getStatusLabel(page.isActive)" 
@@ -71,7 +77,8 @@
             </td>
             <td>
               <div class="action-buttons">
-                <button pButton pRipple icon="pi pi-pencil" class="p-button-rounded p-button-text p-button-info dashboard-edit-icon" (click)="editPage(page)" pTooltip="Düzenle" tooltipPosition="top"></button>
+                <button pButton pRipple icon="pi pi-pencil" class="p-button-rounded p-button-text p-button-info" (click)="editPage(page)" pTooltip="Düzenle" tooltipPosition="top"></button>
+                <button pButton pRipple icon="pi pi-users" class="p-button-rounded p-button-text p-button-success" (click)="navigateToPermissions(page)" pTooltip="Sayfa izinlerini yönet" tooltipPosition="left"></button>
               </div>
             </td>
           </tr>
@@ -79,7 +86,7 @@
         
         <ng-template pTemplate="emptymessage">
           <tr>
-            <td colspan="7" class="text-center">
+            <td colspan="7">
               <div class="empty-container">
                 <div class="empty-icon-container">
                   <i class="pi pi-info-circle"></i>
@@ -95,64 +102,4 @@
       </p-table>
     </p-card>
   </div>
-  
-  <!-- Dashboard Sayfası Ekleme/Düzenleme Dialog -->
-  <p-dialog 
-    [(visible)]="displayDialog" 
-    [style]="{width: '450px'}" 
-    [header]="dialogHeader" 
-    [modal]="true" 
-    styleClass="p-fluid"
-    [baseZIndex]="10000">
-    
-    <ng-template pTemplate="content">
-      <div class="field">
-        <label for="name">Sayfa Adı*</label>
-        <input type="text" pInputText id="name" [(ngModel)]="page.name" required autofocus />
-        <small class="p-error" *ngIf="!page.name && displayDialog">Sayfa adı zorunludur.</small>
-      </div>
-      
-      <div class="field">
-        <label for="description">Açıklama</label>
-        <input type="text" pInputText id="description" [(ngModel)]="page.description" />
-      </div>
-      
-      <div class="field">
-        <label for="route">Rota*</label>
-        <input type="text" pInputText id="route" [(ngModel)]="page.route" required />
-        <small class="p-error" *ngIf="!page.route && displayDialog">Rota zorunludur.</small>
-      </div>
-      
-      <div class="field">
-        <label for="requiredPermission">Gerekli İzin*</label>
-        <p-dropdown 
-          id="requiredPermission" 
-          [options]="permissionOptions" 
-          [(ngModel)]="page.requiredPermission" 
-          placeholder="İzin seçin" 
-          [showClear]="true"
-          optionLabel="label" 
-          optionValue="value"
-          [style]="{'width':'100%', 'background-color': 'white'}"
-          appendTo="body"
-          [autoZIndex]="true"
-          [baseZIndex]="10000"
-          styleClass="dashboard-permission-dropdown"
-          [panelStyleClass]="'dashboard-permission-dropdown-panel'"
-          required>
-        </p-dropdown>
-        <small class="p-error" *ngIf="!page.requiredPermission && displayDialog">Gerekli izin zorunludur.</small>
-      </div>
-      
-      <div class="field-checkbox">
-        <p-checkbox [(ngModel)]="page.isActive" [binary]="true" inputId="isActive"></p-checkbox>
-        <label for="isActive">Aktif</label>
-      </div>
-    </ng-template>
-    
-    <ng-template pTemplate="footer">
-      <button pButton pRipple label="İptal" icon="pi pi-times" class="p-button-text" (click)="hideDialog()"></button>
-      <button pButton pRipple label="Kaydet" icon="pi pi-check" class="p-button-text" (click)="savePage()"></button>
-    </ng-template>
-  </p-dialog>
 </div>

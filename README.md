@@ -1,119 +1,119 @@
-# Stok Yönetim Sistemi Projesi
+# Stok Yönetim Sistemi
 
-## Genel Bakış
+## Proje Hakkında
 
-Bu proje, bir kurumun envanter ve stok takibini yönetmek için geliştirilmiş bir web uygulamasıdır. Sistem, kullanıcı yönetimi, rol ve izin yönetimi, bilgi işlem envanteri ve sağlık ünitesi modüllerini içerir.
+Bu proje, modern bir stok yönetim sistemi geliştirmeyi amaçlamaktadır. Sistem, stok takibi, sipariş yönetimi, kullanıcı yönetimi ve raporlama gibi temel işlevleri içerir.
 
-## Teknoloji Stack
+## Teknolojiler
 
-### Backend
-- .NET Core 9
-- PostgreSQL 17.3
-- Entity Framework Core
-- Clean Architecture
+- **Backend**: ASP.NET Core 8.0
+- **Frontend**: Angular 19
+- **Veritabanı**: PostgreSQL
+- **UI Kütüphanesi**: PrimeNG
+- **Stil**: SASS
 
-### Frontend
-- Angular 19.1.2
-- PrimeNG 19.0.9
-- Tailwind CSS 3.4.1
-- RxJS
+## Başlangıç
+
+### Gereksinimler
+
+- .NET 8.0 SDK
+- Node.js 20.x veya üzeri
+- npm 10.x veya üzeri
+- PostgreSQL 16.x
+
+### Kurulum
+
+1. Repoyu klonlayın:
+   ```
+   git clone https://github.com/kullanici/stok-yonetim.git
+   cd stok-yonetim
+   ```
+
+2. Backend bağımlılıklarını yükleyin:
+   ```
+   cd backend
+   dotnet restore
+   ```
+
+3. Frontend bağımlılıklarını yükleyin:
+   ```
+   cd ../frontend
+   npm install
+   ```
+
+4. Veritabanını oluşturun:
+   ```
+   cd ../backend
+   dotnet ef database update
+   ```
+
+### Çalıştırma
+
+1. Backend'i çalıştırın:
+   ```
+   cd backend
+   dotnet run
+   ```
+
+2. Frontend'i çalıştırın:
+   ```
+   cd frontend
+   npm run start
+   ```
+
+3. Tarayıcınızda `http://localhost:4200` adresine gidin.
 
 ## Proje Yapısı
 
 ```
-proje/
-├── src/                        # Backend kaynak kodları
-│   ├── Stock.API/              # API katmanı
-│   ├── Stock.Application/      # Uygulama katmanı
-│   ├── Stock.Domain/           # Domain katmanı
-│   └── Stock.Infrastructure/   # Altyapı katmanı
-├── frontend/                   # Frontend kaynak kodları
+stok-yonetim/
+├── backend/                # ASP.NET Core API
+│   ├── Controllers/        # API kontrolcüleri
+│   ├── Models/             # Veri modelleri
+│   ├── Services/           # İş mantığı servisleri
+│   └── Data/               # Veritabanı bağlantısı ve yapılandırması
+├── frontend/               # Angular uygulaması
 │   ├── src/
 │   │   ├── app/
-│   │   │   ├── core/           # Çekirdek bileşenler ve hizmetler
-│   │   │   ├── features/       # Feature modülleri
-│   │   │   ├── shared/         # Paylaşılan bileşenler ve servisler
-│   │   │   └── models/         # Veri modelleri
-│   │   ├── assets/             # Statik dosyalar
-│   │   └── environments/       # Ortam yapılandırmaları
-│   └── angular.json
-├── knowledge-base/             # Proje belgeleri ve bilgi tabanı
-│   ├── feature_modules/        # Feature modülleri belgeleri
-│   ├── angular-19-migration/   # Angular 19 geçiş belgeleri
-│   └── ...                     # Diğer belgeler
-├── scratchpad.md               # Aktif çalışma notları ve görev takibi
-├── errors.md                   # Hata kayıtları ve çözümleri
-└── README.md                   # Bu dosya
+│   │   │   ├── core/       # Çekirdek modüller
+│   │   │   ├── features/   # Özellik modülleri
+│   │   │   ├── shared/     # Paylaşılan bileşenler
+│   │   │   └── app.module.ts
+│   │   ├── assets/         # Statik dosyalar
+│   │   └── environments/   # Ortam yapılandırmaları
+│   └── package.json
+├── knowledge-base/         # Proje belgeleri
+│   ├── feature_modules/    # Özellik modülleri belgeleri
+│   ├── technical/          # Teknik belgeler
+│   └── guides/             # Kullanım kılavuzları
+├── errors.md               # Hata kayıtları ve çözümleri
+└── README.md               # Proje açıklaması
 ```
 
-## Belge Organizasyonu
+## Belgelendirme
 
-### Temel Belgeler
+Proje ile ilgili tüm belgeler `knowledge-base` klasöründe bulunmaktadır:
 
-- **README.md** (Bu dosya): Proje genel bakışı ve belge organizasyonu
-- **scratchpad.md**: Aktif çalışma notları, tamamlanan görevler ve planlanan görevler
-- **errors.md**: Karşılaşılan hatalar ve çözüm yöntemleri
+- [Belge Yönetim Kuralları](knowledge-base/document-management-rules.mdc)
+- [Kullanıcı Sayfa İzinleri Modülü](knowledge-base/feature_modules/user_page_permissions_module.md)
+- [Kullanıcı Sayfa İzinleri Bilgi Tabanı](knowledge-base/user_page_permissions_knowledge_base.md)
+- [Hata Kayıtları ve Çözümleri](errors.md)
+- [Scratchpad - Çalışma Notları](scratchpad.md)
 
-### Knowledge Base
+## Katkıda Bulunma
 
-Proje ile ilgili detaylı bilgiler ve teknik dokümanlar `knowledge-base/` dizininde bulunur:
-
-#### Feature Modülleri
-
-- [`knowledge-base/feature_modules/role_management_module.md`](knowledge-base/feature_modules/role_management_module.md): Rol Yönetimi Modülü belgeleri
-- [`knowledge-base/feature_modules/user_management_module.md`](knowledge-base/feature_modules/user_management_module.md): Kullanıcı Yönetimi Modülü belgeleri
-- [`knowledge-base/feature_modules/bilgi_islem_module.md`](knowledge-base/feature_modules/bilgi_islem_module.md): Bilgi İşlem Modülü belgeleri (Angular 19 geçişi sonrası)
-- [`knowledge-base/feature_modules/revir_module.md`](knowledge-base/feature_modules/revir_module.md): Revir (Sağlık Ünitesi) Modülü belgeleri (Angular 19 geçişi sonrası)
-
-#### Mimari ve Tasarım
-
-- [`knowledge-base/angular-19-migration/angular19_migration.md`](knowledge-base/angular-19-migration/angular19_migration.md): Angular 19 geçiş planı ve ilerleme durumu
-- [`knowledge-base/shared_module_knowledge_base.md`](knowledge-base/shared_module_knowledge_base.md): Shared modülü belgeleri
-- [`knowledge-base/system_startup_guide.md`](knowledge-base/system_startup_guide.md): Sistem başlatma rehberi
-
-## Başlangıç
-
-### Sistem Gereksinimleri
-
-- .NET 9 SDK
-- Node.js 20+
-- npm 10+
-- PostgreSQL 17+
-- Visual Studio/VS Code
-
-### Kurulum Adımları
-
-1. Repoyu klonlayın
-   ```
-   git clone https://github.com/yourusername/stock-management.git
-   cd stock-management
-   ```
-
-2. Backend'i başlatın
-   ```
-   cd src/Stock.API
-   dotnet restore
-   dotnet run
-   ```
-
-3. Frontend'i başlatın
-   ```
-   cd frontend
-   npm install
-   npm start
-   ```
-
-4. Tarayıcınızda http://localhost:4202 adresine gidin
-
-Daha detaylı bilgi için [`knowledge-base/system_startup_guide.md`](knowledge-base/system_startup_guide.md) dosyasına bakın.
-
-## Katkı Sağlama
-
-1. Bir branch oluşturun (`git checkout -b feature/amazing-feature`)
-2. Değişikliklerinizi commit edin (`git commit -m 'Add some amazing feature'`)
-3. Branch'inizi push edin (`git push origin feature/amazing-feature`)
-4. Pull Request açın
+1. Bu repoyu fork edin
+2. Yeni bir branch oluşturun (`git checkout -b feature/amazing-feature`)
+3. Değişikliklerinizi commit edin (`git commit -m 'Add some amazing feature'`)
+4. Branch'inizi push edin (`git push origin feature/amazing-feature`)
+5. Bir Pull Request oluşturun
 
 ## Lisans
 
-Bu proje [MIT Lisansı](LICENSE) altında lisanslanmıştır. 
+Bu proje MIT lisansı altında lisanslanmıştır. Detaylar için `LICENSE` dosyasına bakın.
+
+## İletişim
+
+Proje Yöneticisi - [email@example.com](mailto:email@example.com)
+
+Proje Linki: [https://github.com/kullanici/stok-yonetim](https://github.com/kullanici/stok-yonetim)

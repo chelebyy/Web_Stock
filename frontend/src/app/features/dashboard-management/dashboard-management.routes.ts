@@ -1,16 +1,14 @@
 import { Routes } from '@angular/router';
 import { DashboardManagementComponent } from './components/dashboard-management.component';
-import { AuthGuard } from '../../core/guards/auth.guard';
-import { PermissionGuard } from '../../core/guards/permission.guard';
+import { UserPagePermissionsComponent } from './components/user-page-permissions.component';
 
 export const DASHBOARD_MANAGEMENT_ROUTES: Routes = [
   {
     path: '',
-    component: DashboardManagementComponent,
-    canActivate: [AuthGuard, PermissionGuard],
-    data: { 
-      requiredPermission: 'Pages.DashboardManagement',
-      breadcrumb: 'Dashboard Yönetimi'
-    }
+    component: DashboardManagementComponent
+  },
+  {
+    path: 'permissions/:pageId/:pageName',
+    component: UserPagePermissionsComponent
   }
 ]; 

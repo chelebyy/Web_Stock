@@ -14,6 +14,8 @@ export interface User {
     roleName?: string;
     firstName?: string;
     lastName?: string;
+    email?: string;
+    isActive: boolean;
 }
 
 export interface LoginRequest {

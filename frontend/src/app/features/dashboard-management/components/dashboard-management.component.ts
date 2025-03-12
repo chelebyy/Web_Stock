@@ -8,8 +8,6 @@ import { MessageService } from 'primeng/api';
 import { InputTextModule } from 'primeng/inputtext';
 import { DropdownModule } from 'primeng/dropdown';
 import { FormsModule } from '@angular/forms';
-import { DialogModule } from 'primeng/dialog';
-import { CheckboxModule } from 'primeng/checkbox';
 import { TagModule } from 'primeng/tag';
 import { TooltipModule } from 'primeng/tooltip';
 import { AuthService } from '../../../core/authentication/auth.service';
@@ -43,8 +41,6 @@ interface DashboardPage {
     InputTextModule,
     DropdownModule,
     FormsModule,
-    DialogModule,
-    CheckboxModule,
     TagModule,
     TooltipModule
   ],
@@ -62,24 +58,6 @@ export class DashboardManagementComponent implements OnInit, AfterViewInit {
   
   // Seçilen dashboard sayfası
   selectedPage: DashboardPage | null = null;
-  
-  // Dialog görünürlüğü
-  displayDialog: boolean = false;
-  
-  // Yeni/düzenlenen sayfa
-  page: DashboardPage = {
-    id: 0,
-    name: '',
-    description: '',
-    route: '',
-    isActive: true,
-    requiredPermission: '',
-    createdAt: new Date(),
-    updatedAt: new Date()
-  };
-  
-  // Dialog başlığı
-  dialogHeader: string = '';
   
   // Yükleniyor durumu
   loading: boolean = true;
@@ -277,40 +255,6 @@ export class DashboardManagementComponent implements OnInit, AfterViewInit {
     ];
   }
 
-  // Yeni dashboard sayfası ekle
-  openNew(): void {
-    this.page = {
-      id: 0,
-      name: '',
-      description: '',
-      route: '',
-      isActive: true,
-      requiredPermission: '',
-      createdAt: new Date(),
-      updatedAt: new Date()
-    };
-    this.dialogHeader = 'Yeni Dashboard Sayfası Ekle';
-    this.displayDialog = true;
-    
-    // Dropdown stillerini düzenle
-    setTimeout(() => {
-      this.updateDropdownPanelStyles();
-    }, 100);
-  }
-
-  // Dashboard sayfası düzenle
-  editPage(page: DashboardPage): void {
-    // Seçilen sayfanın kopyasını oluştur
-    this.page = { ...page };
-    this.dialogHeader = 'Dashboard Sayfası Düzenle';
-    this.displayDialog = true;
-    
-    // Dropdown stillerini düzenle
-    setTimeout(() => {
-      this.updateDropdownPanelStyles();
-    }, 100);
-  }
-
   // Dashboard sayfası sil
   deletePage(page: DashboardPage): void {
     // Silme işlemi için onay iste
@@ -333,83 +277,6 @@ export class DashboardManagementComponent implements OnInit, AfterViewInit {
         detail: `"${page.name}" sayfası başarıyla silindi.`
       });
     }
-  }
-
-  // Dialog kapatıldığında
-  hideDialog(): void {
-    this.displayDialog = false;
-    
-    // Dropdown panelini kapat
-    this.closeDropdownPanel();
-  }
-
-  // Dropdown panelini kapat
-  closeDropdownPanel(): void {
-    const dropdownPanels = document.querySelectorAll('.p-dropdown-panel');
-    dropdownPanels.forEach(panel => {
-      if (panel instanceof HTMLElement) {
-        panel.style.display = 'none';
-      }
-    });
-  }
-
-  // Dashboard sayfası kaydet
-  savePage(): void {
-    // Form doğrulama
-    if (!this.page.name || !this.page.route || !this.page.requiredPermission) {
-      this.messageService.add({
-        severity: 'error',
-        summary: 'Hata',
-        detail: 'Lütfen tüm zorunlu alanları doldurun.'
-      });
-      return;
-    }
-
-    // Yeni kayıt mı, güncelleme mi?
-    if (this.page.id === 0) {
-      // Yeni kayıt
-      // Gerçek uygulamada API'ye kayıt isteği gönderilecek
-      // Şimdilik yerel listeye ekliyoruz
-      this.page.id = this.dashboardPages.length + 1;
-      this.page.createdAt = new Date();
-      this.page.updatedAt = new Date();
-      this.dashboardPages.push({ ...this.page });
-      
-      // Filtrelenmiş listeyi güncelle
-      this.filteredDashboardPages = [...this.dashboardPages];
-      
-      this.messageService.add({
-        severity: 'success',
-        summary: 'Başarılı',
-        detail: `"${this.page.name}" sayfası başarıyla eklendi.`
-      });
-    } else {
-      // Güncelleme
-      // Gerçek uygulamada API'ye güncelleme isteği gönderilecek
-      // Şimdilik yerel listeyi güncelliyoruz
-      this.page.updatedAt = new Date();
-      const index = this.dashboardPages.findIndex(p => p.id === this.page.id);
-      if (index !== -1) {
-        this.dashboardPages[index] = { ...this.page };
-        
-        // Filtrelenmiş listeyi güncelle
-        this.filteredDashboardPages = [...this.dashboardPages];
-        
-        // Eğer arama yapılmışsa, filtrelemeyi tekrar uygula
-        if (this.searchText) {
-          this.onSearch({ target: { value: this.searchText } } as unknown as Event);
-        }
-      }
-      
-      this.messageService.add({
-        severity: 'success',
-        summary: 'Başarılı',
-        detail: `"${this.page.name}" sayfası başarıyla güncellendi.`
-      });
-    }
-
-    // Dialog kapat
-    this.displayDialog = false;
   }
 
   // Sayfaya git
@@ -448,5 +315,19 @@ export class DashboardManagementComponent implements OnInit, AfterViewInit {
   clearSearch(): void {
     this.searchText = '';
     this.filteredDashboardPages = [...this.dashboardPages];
+  }
+
+  editPage(page: DashboardPage): void {
+    // Düzenleme sayfasına yönlendir
+    this.router.navigate(['/dashboard-management/edit', page.id]);
+  }
+
+  managePermissions(page: DashboardPage): void {
+    // İzinler sayfasına yönlendir
+    this.router.navigate(['/dashboard-management/permissions', page.id]);
+  }
+
+  navigateToPermissions(page: DashboardPage): void {
+    this.router.navigate(['/dashboard-management/permissions', page.id, page.name]);
   }
 } 

@@ -2,7 +2,6 @@
 @use "primeicons/primeicons.css";
 @use "./app/features/dashboard/shared/styles/dashboard-icons.scss";
 @use "./app/features/bilgi-islem/shared/styles/bilgi-islem-icons.scss";
-@use "./assets/sakai-layout/sakai-layout.scss";
 
 /* PrimeNG 19 Tema Ayarları */
 :root {
@@ -2456,3 +2455,107 @@ body .p-dropdown-panel {
     box-shadow: 0 0 0 0 rgba(76, 175, 80, 0);
   }
 }
+
+/* PrimeNG Tema Düzenlemeleri */
+:root {
+  --surface-a: #ffffff;
+  --surface-b: #f8f9fa;
+  --surface-c: #e9ecef;
+  --surface-d: #dee2e6;
+  --surface-e: #ffffff;
+  --surface-f: #ffffff;
+  --text-color: #495057;
+  --text-color-secondary: #6c757d;
+  --primary-color: #1976d2;
+  --primary-color-text: #ffffff;
+  --primary-color-rgb: 25, 118, 210;
+  --font-family: 'Roboto', sans-serif;
+  --border-radius: 4px;
+}
+
+/* Siyah renkleri mavi ile değiştir */
+.p-component {
+  --surface-ground: #f8f9fa;
+  --surface-section: #ffffff;
+  --surface-card: #ffffff;
+  --surface-overlay: #ffffff;
+  --surface-border: #dee2e6;
+  --surface-hover: #e9ecef;
+  --focus-ring: 0 0 0 0.2rem rgba(25, 118, 210, 0.25);
+  --maskbg: rgba(0, 0, 0, 0.4);
+  --highlight-bg: #E3F2FD;
+  --highlight-text-color: #1976d2;
+}
+
+/* Tüm siyah arka planları ve kenarlıkları mavi yap */
+.p-component[style*="background-color: #000"],
+.p-component[style*="background-color: black"],
+.p-component[style*="background-color: rgb(0, 0, 0)"],
+.p-component[style*="background-color: rgba(0, 0, 0"],
+.p-component[style*="background: #000"],
+.p-component[style*="background: black"],
+.p-component[style*="background: rgb(0, 0, 0)"],
+.p-component[style*="background: rgba(0, 0, 0"],
+.p-component[style*="border-color: #000"],
+.p-component[style*="border-color: black"],
+.p-component[style*="border-color: rgb(0, 0, 0)"],
+.p-component[style*="border-color: rgba(0, 0, 0"] {
+  background-color: #1976d2 !important;
+  background: #1976d2 !important;
+  border-color: #1976d2 !important;
+}
+
+/* TabView bileşeni için özel stiller */
+.p-tabview .p-tabview-nav-container {
+  background-color: #1976d2 !important;
+  border-color: #1976d2 !important;
+}
+
+.p-tabview .p-tabview-nav {
+  background-color: #1976d2 !important;
+  border-color: #1976d2 !important;
+}
+
+.p-tabview .p-tabview-nav li .p-tabview-nav-link {
+  color: white !important;
+}
+
+.p-tabview .p-tabview-nav li.p-highlight .p-tabview-nav-link {
+  color: white !important;
+  border-bottom: 2px solid white !important;
+}
+
+.p-tabview .p-tabview-nav li .p-tabview-nav-link:hover {
+  color: rgba(255, 255, 255, 0.8) !important;
+  background-color: rgba(255, 255, 255, 0.1) !important;
+}
+
+/* Siyah arka planları ve kenarlıkları mavi ile değiştir */
+.p-component[style*="background-color: #000"],
+.p-component[style*="background-color: black"],
+.p-component[style*="background-color: rgb(0, 0, 0)"],
+.p-component[style*="background-color: rgba(0, 0, 0"],
+.p-component[style*="background: #000"],
+.p-component[style*="background: black"],
+.p-component[style*="background: rgb(0, 0, 0)"],
+.p-component[style*="background: rgba(0, 0, 0"],
+.p-component[style*="border-color: #000"],
+.p-component[style*="border-color: black"],
+.p-component[style*="border-color: rgb(0, 0, 0)"],
+.p-component[style*="border-color: rgba(0, 0, 0"] {
+  background-color: #1976d2 !important;
+  background: #1976d2 !important;
+  border-color: #1976d2 !important;
+}
+
+/* Ek olarak muhtemel siyah çerçeveleri hedefleyen seçiciler */
+[style*="border: 1px solid #000"],
+[style*="border: 1px solid black"],
+[style*="border: 2px solid #000"],
+[style*="border: 2px solid black"],
+[style*="border-color: #000"],
+[style*="border-color: black"] {
+  border-color: #1976d2 !important;
+}
+
+/* Tabs komponenti için özel stillemeler kaldırıldı - sadece TabView kullanılacak */
