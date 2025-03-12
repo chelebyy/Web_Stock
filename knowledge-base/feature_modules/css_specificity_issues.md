@@ -68,20 +68,20 @@ button.p-button.p-button-rounded.p-button-text.p-button-info.dashboard-edit-icon
   width: 2.5rem !important;
   height: 2.5rem !important;
   border-radius: 50% !important;
-  background: #4caf50 !important;
+  background: #26c6da !important; /* Daha açık ve modern bir turkuaz tonu */
   border: none !important;
   transition: all 0.3s ease !important;
-  box-shadow: 0 2px 5px rgba(76, 175, 80, 0.3) !important;
+  box-shadow: 0 3px 10px rgba(38, 198, 218, 0.4) !important;
   
   &:hover {
-    background: #45a049 !important;
+    background: #00acc1 !important;
     transform: translateY(-3px) !important;
-    box-shadow: 0 4px 8px rgba(76, 175, 80, 0.4) !important;
+    box-shadow: 0 5px 15px rgba(38, 198, 218, 0.5) !important;
   }
   
   &:active {
     transform: translateY(-1px) !important;
-    box-shadow: 0 2px 4px rgba(76, 175, 80, 0.3) !important;
+    box-shadow: 0 3px 8px rgba(38, 198, 218, 0.4) !important;
   }
   
   .p-button-icon {
@@ -95,6 +95,27 @@ button.p-button.p-button-rounded.p-button-text.p-button-info.dashboard-edit-icon
 ### Sonuç
 
 Bu değişikliklerle, tüm dashboard bileşenlerinde ikonlar aynı görünüme sahip oldu. CSS specificity artırılarak, PrimeNG'nin kendi stillerinin üzerine yazılması sağlandı.
+
+### İkon Stillerinin Modernize Edilmesi
+
+İkon stillerini daha modern bir görünüme kavuşturmak için aşağıdaki değişiklikler yapıldı:
+
+1. **Renk Paletinin Güncellenmesi**:
+   - Kalem (Düzenle) ikonu: Koyu yeşil (#4caf50) yerine modern turkuaz tonu (#26c6da)
+   - Çöp Kutusu (Sil) ikonu: Koyu kırmızı (#f44336) yerine daha yumuşak kırmızı tonu (#ef5350)
+   - İzin (Anahtar) ikonu: Koyu mavi (#2196f3) yerine daha açık mavi tonu (#42a5f5)
+   - Artı (Ekle) ikonu: Koyu turuncu (#ff9800) yerine daha açık amber tonu (#ffb74d)
+
+2. **Gölge Efektlerinin İyileştirilmesi**:
+   - Gölge boyutu artırıldı: 0 2px 5px -> 0 3px 10px
+   - Hover durumunda daha belirgin gölge: 0 4px 8px -> 0 5px 15px
+   - Gölge opaklığı artırıldı: 0.3 -> 0.4 (normal durum), 0.4 -> 0.5 (hover durumu)
+
+3. **Tooltip Stillerinin İyileştirilmesi**:
+   - Arka plan rengi daha yumuşak: rgba(0, 0, 0, 0.8) -> rgba(33, 33, 33, 0.9)
+   - Gölge efekti artırıldı: 0 2px 8px -> 0 3px 12px
+
+Bu değişiklikler, ikonların daha modern, canlı ve kullanıcı dostu bir görünüme kavuşmasını sağladı. Ayrıca, hover durumunda daha belirgin geri bildirim sağlayarak kullanıcı deneyimini iyileştirdi.
 
 ### En İyi Uygulamalar ve Öneriler
 
@@ -112,4 +133,5 @@ Bu değişikliklerle, tüm dashboard bileşenlerinde ikonlar aynı görünüme s
 
 - [CSS Specificity - MDN Web Docs](https://developer.mozilla.org/en-US/docs/Web/CSS/Specificity)
 - [PrimeNG Theming Guide](https://primeng.org/theming)
-- [Angular Component Styling Best Practices](https://angular.io/guide/component-styles) 
+- [Angular Component Styling Best Practices](https://angular.io/guide/component-styles)
+- [Material Design Color System](https://material.io/design/color/the-color-system.html) 
