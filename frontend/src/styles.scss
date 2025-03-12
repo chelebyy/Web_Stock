@@ -144,11 +144,44 @@ html, body {
 
 /* PrimeNG Bileşen Düzeltmeleri */
 /* Dialog Düzeltmeleri */
+.p-dialog {
+  background-color: #ffffff !important;
+  color: #333333 !important;
+  z-index: 10000 !important;
+}
+
 .p-dialog .p-dialog-header,
 .p-dialog .p-dialog-content,
 .p-dialog .p-dialog-footer {
-  background: var(--p-surface-overlay, #ffffff);
-  color: var(--p-text-color, #495057);
+  background: #ffffff !important;
+  color: #333333 !important;
+  border-color: #e9ecef !important;
+}
+
+.p-dialog .p-dialog-header {
+  padding: 1.25rem 1.5rem;
+  border-top-right-radius: var(--p-border-radius, 6px);
+  border-top-left-radius: var(--p-border-radius, 6px);
+  border-bottom: 1px solid var(--p-surface-border, #dee2e6);
+}
+
+.p-dialog .p-dialog-content {
+  padding: 1.25rem 1.5rem;
+}
+
+.p-dialog .p-dialog-footer {
+  padding: 1.25rem 1.5rem;
+  border-bottom-right-radius: var(--p-border-radius, 6px);
+  border-bottom-left-radius: var(--p-border-radius, 6px);
+  border-top: 1px solid var(--p-surface-border, #dee2e6);
+}
+
+.p-dialog-mask {
+  z-index: 9999 !important;
+}
+
+.p-component-overlay {
+  z-index: 9000 !important;
 }
 
 /* Dropdown Panel Düzeltmeleri - Koyu Tema Geçersiz Kılma */
@@ -252,24 +285,6 @@ body .p-dropdown-panel .p-dropdown-items .p-dropdown-empty-message {
   font-style: italic !important;
   padding: 0.75rem 1rem !important;
   text-align: center !important;
-}
-
-.p-dialog .p-dialog-header {
-  padding: 1.25rem 1.5rem;
-  border-top-right-radius: var(--p-border-radius, 6px);
-  border-top-left-radius: var(--p-border-radius, 6px);
-  border-bottom: 1px solid var(--p-surface-border, #dee2e6);
-}
-
-.p-dialog .p-dialog-content {
-  padding: 1.25rem 1.5rem;
-}
-
-.p-dialog .p-dialog-footer {
-  padding: 1.25rem 1.5rem;
-  border-bottom-right-radius: var(--p-border-radius, 6px);
-  border-bottom-left-radius: var(--p-border-radius, 6px);
-  border-top: 1px solid var(--p-surface-border, #dee2e6);
 }
 
 /* Tablo Düzeltmeleri */
@@ -2453,5 +2468,73 @@ body .p-dropdown-panel {
   }
   100% {
     box-shadow: 0 0 0 0 rgba(76, 175, 80, 0);
+  }
+}
+
+/* TabView Düzeltmeleri */
+.p-tabview {
+  background-color: #ffffff !important;
+  color: #333333 !important;
+}
+
+.p-tabview .p-tabview-nav {
+  background: #ffffff !important;
+  border-color: #e9ecef !important;
+}
+
+.p-tabview .p-tabview-nav li .p-tabview-nav-link {
+  background: #f8f9fa !important;
+  color: #6c757d !important;
+  border-color: #e9ecef !important;
+}
+
+.p-tabview .p-tabview-nav li.p-highlight .p-tabview-nav-link {
+  background: #ffffff !important;
+  color: #3B82F6 !important;
+  border-color: #3B82F6 !important;
+}
+
+.p-tabview .p-tabview-panels {
+  background: #ffffff !important;
+  color: #333333 !important;
+  border-color: #e9ecef !important;
+}
+
+/* Dashboard Düzenleme Diyalogu Özel Stili */
+.dashboard-edit-dialog {
+  .p-dialog-header, 
+  .p-dialog-content, 
+  .p-dialog-footer {
+    background-color: #ffffff !important;
+    color: #333333 !important;
+  }
+  
+  .p-tabview-panels,
+  .p-tabview-nav,
+  .p-tabview {
+    background-color: #ffffff !important;
+    color: #333333 !important;
+  }
+  
+  input, 
+  .p-dropdown, 
+  .p-multiselect {
+    background-color: #ffffff !important;
+    color: #333333 !important;
+  }
+  
+  label {
+    color: #333333 !important;
+    font-weight: 500 !important;
+  }
+  
+  .p-checkbox-box {
+    background-color: #ffffff !important;
+    border-color: #ced4da !important;
+  }
+  
+  .p-checkbox-box.p-highlight {
+    background-color: #3B82F6 !important;
+    border-color: #3B82F6 !important;
   }
 }
