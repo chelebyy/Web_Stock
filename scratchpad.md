@@ -49,6 +49,10 @@
 - Dashboard yönetimi sayfasındaki PrimeNG dropdown bileşeninin siyah arka plan sorunu çözüldü
 - Dashboard yönetimi sayfasında dropdown açıldığında sayfa yukarı kayma sorunu çözüldü
 - Dashboard yönetimi sayfasında dropdown panelinin sayfaya sığmama sorunu çözüldü
+- Kullanıcı sayfa izinleri yönetimi özelliği eklendi (dashboard sayfalarına erişim izinlerini kullanıcı bazında yönetmek için)
+- Dashboard yönetimi sayfasına "İzinleri Yönet" butonu eklendi
+- Kullanıcı sayfa izinleri yönetimi için sekmeli bir arayüz oluşturuldu (Kullanıcılar ve İzinler sekmeleri)
+- Kullanıcı izinleri sayfasında "Durum" sütunundaki etiketlerin görünümü iyileştirildi (Aktif/Pasif etiketleri için renkler ve ikonlar eklendi)
 
 ## Clean Architecture Geçişi
 
@@ -127,6 +131,7 @@
 - [x] **Frontend Geliştirmesinin Devamı**
   - [x] Kullanıcı Dashboard bileşeninin geliştirilmesi
   - [x] Kullanıcı Dashboard erişim sorunlarının çözümü
+  - [x] Dashboard sayfalarına kullanıcı bazlı erişim izinleri yönetimi
   - [ ] Diğer bileşenlerin oluşturulması
     - [ ] Bilgi İşlem modülünün feature modülü yapısında geliştirilmesi (bilgi_islem_module_knowledge_base.md dosyasında detaylar mevcut)
   - [ ] Service'lerin implementasyonu
@@ -195,6 +200,12 @@
 - Standalone component yaklaşımı daha temiz ve bakımı kolay kod sağlar
 - Tema değişiklikleri için PrimeNG dokümantasyonu dikkatle takip edilmeli
 - Hata mesajları için uygun renk kodları kullanılmalı (kırmızı: hata, yeşil: başarı)
+- Sekmeli arayüzler (TabView) kullanıcı deneyimini iyileştirmek için etkili bir yöntemdir
+- Kullanıcı izinlerini yönetmek için ayrı bir bileşen oluşturmak, modülerliği artırır ve bakımı kolaylaştırır
+- Kullanıcı deneyimini iyileştirmek için animasyonlar ve görsel geri bildirimler eklenmelidir
+- Responsive tasarım için medya sorguları kullanılmalıdır
+- CRUD işlemlerinden sonra veri listesinin otomatik olarak yenilenmesi kullanıcı deneyimini iyileştirir
+- PrimeNG bileşenlerini özelleştirirken, bazen CSS değişkenlerini kullanmak yeterli olmayabilir. Bu durumda, doğrudan stil tanımlamaları ve `!important` kullanımı gerekebilir. Ayrıca, hem CSS sınıfları hem de inline stiller kullanarak daha güvenilir sonuçlar elde edilebilir.
 
 ### Hata Yönetimi
 - Konsol loglarının detaylı tutulması hata tespitini kolaylaştırıyor
@@ -454,5 +465,10 @@ Kullanıcı yönetimi sayfasındaki checkbox'lar artık işlevsel hale geldi. Ku
 - PrimeNG tablo bileşeninin yükleme ekranında siyah arka plan sorununu çözmek için `.p-datatable-loading-overlay` sınıfının arka plan rengini değiştirmek gerekir
 - Tablo yükleme simgesinin rengini değiştirmek için `.p-datatable-loading-icon` sınıfının rengini değiştirmek gerekir
 - Yükleme süresini kısa tutarak kullanıcı deneyimini iyileştirmek önemlidir
+
+### PowerShell Komut Çalıştırma
+- PowerShell'de komutları birleştirmek için && operatörü yerine ; (noktalı virgül) kullanılmalıdır
+- PowerShell'de cd frontend && ng serve gibi komutlar çalışmaz, bunun yerine cd frontend; ng serve veya ayrı ayrı komutlar kullanılmalıdır
+- PowerShell'de komut çalıştırma sorunları için knowledge-base/errors/powershell-and-operator.md dosyasında detaylı bilgi bulunmaktadır
 
 
