@@ -253,6 +253,11 @@ export class UserService {
     // Kontrol amaçlı log
     console.log('Güncellenecek kullanıcı verisi:', user);
     
+    // Kullanıcı adı olarak fullName kullanılıyor, bu nedenle username alanını güncelle
+    if (user.fullName && !user.username) {
+      user.username = user.fullName;
+    }
+    
     return this.http.put<void>(`${this.apiUrl}/Users/${id}`, user, options)
       .pipe(
         catchError(error => {

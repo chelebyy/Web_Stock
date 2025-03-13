@@ -527,9 +527,15 @@ export class UserManagementComponent implements OnInit, AfterViewInit {
           this.users = data.map(user => {
             console.log('Kullanıcı ID tipi:', typeof user.id, 'Değer:', user.id);
             console.log('Kullanıcı rol bilgisi:', user.roleId, 'Rol adı:', this.getRoleName(user.roleId || null));
+            
+            // fullName alanını oluştur
+            const fullName = user.firstName && user.lastName 
+              ? `${user.firstName} ${user.lastName}` 
+              : user.username;
+            
             return {
               id: user.id,
-              fullName: user.firstName && user.lastName ? `${user.firstName} ${user.lastName}` : user.username,
+              fullName: fullName,
               username: user.username,
               sicil: user.sicil,
               roleId: user.roleId,
@@ -598,6 +604,10 @@ export class UserManagementComponent implements OnInit, AfterViewInit {
     this.userForm.get('password')?.setValue('');
     
     this.userDialog = true;
+    
+    // Konsola bilgi yazdır
+    console.log('Düzenlenecek kullanıcı:', user);
+    console.log('Form değerleri:', this.userForm.value);
   }
 
   deleteUser(user: any) {
@@ -704,8 +714,8 @@ export class UserManagementComponent implements OnInit, AfterViewInit {
     if (this.editMode) {
       formData.id = this.user.id; // ID'yi request body'ye ekliyoruz
       
-      // Kullanıcı adını koru, değiştirme
-      formData.username = this.user.username;
+      // Kullanıcı adını fullName olarak güncelle
+      formData.username = formData.fullName;
       
       // Admin kullanıcısı için özel durum - admin kullanıcı adını "Admin" olarak güncelle
       if (this.user.isAdmin && this.user.username && this.user.username.toLowerCase() === 'admin') {
@@ -752,8 +762,8 @@ export class UserManagementComponent implements OnInit, AfterViewInit {
       console.log('Güncellenecek kullanıcı verisi:', formData);
     } else {
       // Yeni kullanıcı oluşturma
-      // Benzersiz bir kullanıcı adı oluştur
-      formData.username = this.generateUniqueUsername(formData.fullName);
+      // Kullanıcı adı olarak fullName kullan
+      formData.username = formData.fullName;
       
       formData.isAdmin = false; // Varsayılan olarak admin değil
       
@@ -1329,29 +1339,10 @@ export class UserManagementComponent implements OnInit, AfterViewInit {
 
   /**
    * Ad soyad değerinden benzersiz bir kullanıcı adı oluşturur
-   * Ad soyadın ilk harflerini alır ve rastgele bir sayı ekler
+   * Kullanıcı adı olarak sadece ad soyadı kullanır, rastgele sayı eklemez
    */
   generateUniqueUsername(fullName: string): string {
-    // Boşlukları temizle ve ad soyadı parçalara ayır
-    const nameParts = fullName.trim().split(/\s+/);
-    
-    // Ad soyadın ilk harflerini al
-    let initials = '';
-    nameParts.forEach(part => {
-      if (part.length > 0) {
-        initials += part[0].toLowerCase();
-      }
-    });
-    
-    // Eğer initials boşsa, "user" kullan
-    if (!initials) {
-      initials = 'user';
-    }
-    
-    // Rastgele 4 basamaklı bir sayı oluştur
-    const randomNum = Math.floor(1000 + Math.random() * 9000);
-    
-    // Kullanıcı adını oluştur: initials + randomNum
-    return `${initials}${randomNum}`;
+    // Boşlukları koru ve ad soyadı olduğu gibi kullan
+    return fullName.trim();
   }
 }

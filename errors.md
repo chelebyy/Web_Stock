@@ -261,17 +261,33 @@ if (existingUserWithSameUsername) {
 }
 ```
 
-### Öğrenilen Dersler
-1. **PrimeNG Bileşen Özelleştirmesi:** PrimeNG bileşenlerini özelleştirirken, bazen CSS değişkenlerini kullanmak yeterli olmayabilir. Bu durumda, doğrudan stil tanımlamaları ve `!important` kullanımı gerekebilir.
-2. **Kart Tabanlı Tasarım:** Tablo yerine kart tabanlı tasarım kullanmak, özellikle mobil cihazlarda daha iyi bir kullanıcı deneyimi sağlar ve daha modern bir görünüm elde edilir.
-3. **PowerShell Komut Çalıştırma:** PowerShell'de komutları birleştirmek için `&&` operatörü yerine `;` (noktalı virgül) kullanılmalıdır.
-4. **Responsive Tasarım:** Medya sorguları kullanarak farklı ekran boyutları için özel stiller tanımlamak, kullanıcı deneyimini iyileştirir.
-5. **Görsel Geri Bildirim:** Hover efektleri, geçiş animasyonları ve belirgin çerçeveler gibi görsel geri bildirimler, kullanıcı etkileşimini iyileştirir.
-6. **Veri Doğrulama:** Kullanıcı girdilerini göndermeden önce doğrulamak, sunucu tarafında oluşabilecek hataları önler.
-7. **Benzersizlik Kontrolleri:** Benzersizlik kontrollerini hem frontend hem de backend tarafında yapmak, kullanıcı deneyimini iyileştirir ve gereksiz API çağrılarını önler.
-8. **Hata Mesajları:** Hata mesajları, kullanıcıların sorunları anlamasına yardımcı olacak şekilde açıklayıcı olmalıdır.
-9. **Düzenleme İşlemleri:** Düzenleme işlemlerinde, mevcut verilerin korunması ve sadece değiştirilmek istenen alanların güncellenmesi önemlidir.
-10. **Veri Formatı Uyumluluğu:** Frontend ve backend arasındaki veri formatı uyumluluğunu kontrol etmek önemlidir.
+### Sorun: Silinen Kullanıcıların Sicil Numaralarının Tekrar Kullanılamaması
+**Tarih:** 13 Mart 2025
+**Hata:** Silinen bir kullanıcının sicil numarası ile yeni bir kullanıcı oluşturulamıyor.
+**Hata Mesajı:**
+```
+Sicil numarası A789 zaten kullanımda.
+```
+**Nedeni:** Kullanıcılar tamamen silinmiyor, sadece "IsDeleted" alanı true olarak işaretleniyor (soft delete). Ancak sicil numarası benzersizlik kontrolü, silinmiş kullanıcıları da dikkate alıyordu.
+**Çözüm:**
+1. `UserConfiguration.cs` dosyasında sicil numarası benzersizlik kontrolünü sadece silinmemiş kullanıcılar için yapacak şekilde güncelledik:
+```csharp
+builder.HasIndex(x => x.Sicil)
+    .IsUnique()
+    .HasFilter("\"IsDeleted\" = false"); // Sadece silinmemiş kullanıcılar için benzersizlik kontrolü
+```
+2. Yeni bir migration oluşturup veritabanını güncelledik:
+```powershell
+dotnet ef migrations add UpdateSicilUniqueConstraintForActiveUsers -s ../Stock.API/Stock.API.csproj
+dotnet ef database update -s ../Stock.API/Stock.API.csproj
+```
+
+**Öğrenilen Dersler:**
+1. Soft delete (yumuşak silme) kullanırken, benzersizlik kısıtlamalarını dikkatli bir şekilde tasarlamalıyız.
+2. Entity Framework Core'da `HasFilter` kullanarak, benzersizlik kısıtlamalarını belirli koşullara göre filtreleyebiliriz.
+3. Silinen kayıtların tekrar kullanılabilmesi için, benzersizlik kontrollerini sadece aktif kayıtlar için yapmalıyız.
+4. Veritabanı değişiklikleri için her zaman migration kullanmalıyız.
+5. Değişiklikler öncesinde GitHub'a push etmek, sorun çıkması durumunda geri dönebilmek için önemlidir.
 
 ## Sorun: Kullanıcı Adı Formatı Değişikliği (19 Haziran 2025)
 
