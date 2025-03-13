@@ -24,8 +24,7 @@ namespace Stock.Infrastructure.Data.Configurations
                 .IsRequired()
                 .HasMaxLength(50);
 
-            builder.Property(a => a.UserId)
-                .HasMaxLength(50);
+            builder.Property(a => a.UserId);
 
             builder.Property(a => a.Path)
                 .HasMaxLength(200);
@@ -35,6 +34,13 @@ namespace Stock.Infrastructure.Data.Configurations
 
             builder.Property(a => a.IsDeleted)
                 .HasDefaultValue(false);
+                
+            // User tablosuyla ilişki tanımlıyoruz
+            builder.HasOne(a => a.User)
+                .WithMany()
+                .HasForeignKey(a => a.UserId)
+                .IsRequired(false)  // İlişki nullable olmalı
+                .OnDelete(DeleteBehavior.SetNull);
         }
     }
 } 

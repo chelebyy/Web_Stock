@@ -4,6 +4,6 @@ namespace Stock.Application.Common.Interfaces
 {
     public interface IAuditService
     {
-        Task LogActionAsync(string action, string entityType, string entityId, string userId, string path, string details);
+        Task LogActionAsync(string action, string entityType, string entityId, int? userId = null, string? path = null, string? details = null);
     }
 } 

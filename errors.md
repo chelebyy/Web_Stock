@@ -526,210 +526,45 @@ Migrasyon şu işlemleri yapmaya çalışıyor:
    dotnet ef database update -c ApplicationDbContext
    ```
 
-## Entity Framework Core Tablo Çakışması Hatası
+## PostgreSQL Veri Tipi Dönüşüm Hatası
 
 ### Hata Mesajı
 ```
-The entity type 'RolePermission' is part of a foreign key relationship with 'RolePermission' but there is no entity type defined for navigation 'RolePermission.Permission'.
-```
-
-### Problem
-Projede iki farklı namespace'te aynı isimde sınıflar bulunuyor:
-- `Stock.Domain.Entities.RolePermission` ve `Stock.Domain.Entities.Permissions.RolePermission`
-- `Stock.Domain.Entities.UserPermission` ve `Stock.Domain.Entities.Permissions.UserPermission`
-
-Entity Framework Core, bu sınıfları aynı tabloya eşlemeye çalışıyor ancak aralarında ilişki tanımlanmadığı için hata veriyor.
-
-### Çözüm Adımları
-1. `UserPermissions` referanslarını `UserPermission` olarak değiştirdik.
-2. `Stock.Domain.Entities.Permissions` namespace'indeki sınıfları kullanmaya karar verdik.
-3. Tüm referansları buna göre güncelledik.
-4. Eski sınıfları (`Stock.Domain.Entities` namespace'indeki) kaldırdık veya yeniden adlandırdık.
-5. Veritabanı şemasını güncellemek için yeni bir migrasyon oluşturduk.
-6. Tüm referansları tek bir namespace'e yönlendirdik.
-
-### Öğrenilen Dersler
-1. Aynı isimde ancak farklı namespace'lerde sınıflar oluşturmaktan kaçının.
-2. Migrasyon oluşturmadan önce, modellerin ve veritabanı şemasının uyumlu olduğundan emin olun.
-3. Migrasyon uygulamadan önce, migrasyon dosyasını dikkatlice inceleyin.
-4. Veritabanı şemasını düzenli olarak kontrol edin ve kod tarafındaki modellerle senkronize olduğundan emin olun.
-
-## Admin Kullanıcısı Giriş Sorunu
-
-### Hata Mesajı
-```
-POST http://localhost:5037/api/auth/login 401 (Unauthorized)
+42804: column "UserId" cannot be cast automatically to type integer
+Hint: You might need to specify "USING "UserId"::integer".
 ```
 
 ### Sorun Açıklaması
-Veritabanı yeniden oluşturulduktan sonra admin kullanıcısı giriş yapamıyordu. Sicil numarası "A001" ve şifre "Admin123" ile giriş denemesi yapıldığında 401 Unauthorized hatası alınıyordu. Sunucu loglarında "Kullanıcı bulunamadı: Sicil No: A001" hatası görülüyordu.
+`FixDatabaseRelationships` migrasyonu uygulanırken, `AuditLogs` tablosundaki `UserId` sütununu string tipinden integer tipine dönüştürmeye çalışırken hata aldık. PostgreSQL, farklı veri tipleri arasında otomatik dönüşüm yapmaz ve bu durumda özel bir USING cümlesi kullanmamız gerektiğini belirtti.
 
 ### Çözüm Adımları
-1. Veritabanını sıfırladık: `dotnet ef database drop -f`
-2. Migrasyonları yeniden uyguladık: `dotnet ef database update`
-3. Uygulamayı yeniden başlattık: `dotnet run`
-
-Bu işlemler sonucunda, veritabanı yeniden oluşturuldu ve seed data içinde admin kullanıcısı da oluşturuldu. Admin kullanıcısı artık "A001" sicil numarası ve "Admin123" şifresi ile giriş yapabilir hale geldi.
-
-### Öğrenilen Dersler
-1. Veritabanı şeması değiştiğinde, veritabanını tamamen sıfırlamak ve migrasyonları yeniden uygulamak bazen en temiz çözüm olabilir.
-2. Seed data'nın doğru şekilde uygulandığından emin olmak için veritabanı işlemlerinden sonra kontrol yapmak önemlidir.
-3. Kullanıcı kimlik doğrulama sorunlarında, sunucu loglarını incelemek sorunun kaynağını bulmak için kritik öneme sahiptir.
-
-## ActivityLog Tablosu Yabancı Anahtar Hatası
-
-### Hata Mesajı
-```
-POST http://localhost:5037/api/logs/bulk-activity 500 (Internal Server Error)
-insert or update on table "ActivityLogs" violates foreign key constraint "FK_ActivityLogs_Users_UserId"
-```
-
-### Sorun Açıklaması
-Admin paneline giriş yapıldığında, `LogService` sınıfındaki `syncPendingLogs` metodu çalışıyor ve localStorage'da bekleyen logları toplu olarak sunucuya göndermeye çalışıyordu. Ancak, frontend'den gelen log verilerindeki UserId değerleri, veritabanındaki Users tablosunda mevcut olmadığı için yabancı anahtar kısıtlaması hatası alınıyordu.
-
-### Çözüm Adımları
-1. `ActivityLogController.cs` dosyasını inceledik ve `CreateBulkActivityLogs` metodunu analiz ettik.
-2. UserId kontrolünü güncelledik, veritabanında olmayan UserId değerleri için null atanmasını sağladık:
+1. Migrasyonu kaldırdık: `dotnet ef migrations remove -p ../Stock.Infrastructure`
+2. Yeni bir migrasyon oluşturduk: `dotnet ef migrations add FixDatabaseRelationships -p ../Stock.Infrastructure`
+3. Migrasyon dosyasını düzenleyerek, `AlterColumn` komutunu özel bir SQL komutuyla değiştirdik:
 
 ```csharp
-if (dynamicLog.TryGetValue("userId", out var userIdElement) && userIdElement.ValueKind != JsonValueKind.Null)
-{
-    try
-    {
-        var userId = userIdElement.GetInt32();
-        
-        // Kullanıcının veritabanında var olup olmadığını kontrol et
-        var userExists = await _context.Users.AnyAsync(u => u.Id == userId);
-        
-        if (userExists)
-        {
-            log.UserId = userId;
-        }
-        else
-        {
-            _logger.LogWarning($"Belirtilen userId ({userId}) veritabanında bulunamadı. UserId null olarak ayarlanıyor.");
-            log.UserId = null; // Kullanıcı bulunamadıysa null olarak ayarla
-        }
-    }
-    catch (Exception ex)
-    {
-        _logger.LogWarning($"userId alanı int'e dönüştürülemedi: {ex.Message}. UserId null olarak ayarlanıyor.");
-        log.UserId = null; // Hata durumunda null olarak ayarla
-    }
-}
-else
-{
-    _logger.LogWarning("Log kaydında userId bulunamadı veya null. UserId null olarak ayarlanıyor.");
-    log.UserId = null; // UserId yoksa null olarak ayarla
-}
+// Özel SQL komutu kullanarak string'den integer'a dönüşüm
+migrationBuilder.Sql(@"
+    ALTER TABLE ""AuditLogs"" 
+    ALTER COLUMN ""UserId"" TYPE integer 
+    USING CASE WHEN ""UserId"" ~ '^[0-9]+$' THEN ""UserId""::integer ELSE NULL END;
+    
+    ALTER TABLE ""AuditLogs"" 
+    ALTER COLUMN ""UserId"" DROP NOT NULL;
+");
 ```
 
-3. `ActivityLog` entity sınıfında UserId alanını nullable yaptık: `public int? UserId { get; set; }`
-4. Yeni bir migration oluşturduk: `dotnet ef migrations add FixActivityLogUserIdNullable -p ../Stock.Infrastructure`
-5. Migration dosyasını düzenleyerek `ActivityLogs` tablosundaki UserId alanını nullable yapmak için SQL komutları ekledik:
+4. Bu SQL komutu şunları yapıyor:
+   - `UserId` sütununu integer tipine dönüştürüyor
+   - Dönüşüm sırasında, sayısal değer içeren string'leri integer'a çeviriyor
+   - Sayısal olmayan değerleri NULL olarak ayarlıyor
+   - Sütunu NULL değerlere izin verecek şekilde değiştiriyor
 
-```sql
--- Foreign key kısıtlamasını kaldır
-ALTER TABLE "ActivityLogs" 
-DROP CONSTRAINT "FK_ActivityLogs_Users_UserId";
-
--- UserId alanını nullable yap
-ALTER TABLE "ActivityLogs" 
-ALTER COLUMN "UserId" DROP NOT NULL;
-
--- Foreign key kısıtlamasını tekrar ekle (ON DELETE SET NULL ile)
-ALTER TABLE "ActivityLogs" 
-ADD CONSTRAINT "FK_ActivityLogs_Users_UserId" 
-FOREIGN KEY ("UserId") REFERENCES "Users" ("Id") 
-ON DELETE SET NULL;
-```
-
-6. Veritabanını güncelledik: `dotnet ef database update`
-7. Uygulamayı yeniden başlattık ve sorunun çözüldüğünü doğruladık.
+5. Migrasyonu uyguladık: `dotnet ef database update -c ApplicationDbContext`
 
 ### Öğrenilen Dersler
-1. Yabancı anahtar ilişkilerinde, ilişkili kaydın var olup olmadığını kontrol etmek önemlidir.
-2. Veritabanı kısıtlamalarını dikkate alarak, gerektiğinde null değerler atamak veri bütünlüğünü korur.
-3. Hata durumlarını detaylı şekilde loglayarak, sorunların kaynağını daha kolay tespit edebiliriz.
-4. Entity Framework Core'un `AnyAsync` gibi metodları, veritabanı sorgularını optimize etmek için kullanılabilir.
-5. Veri dönüşümlerinde try-catch blokları kullanarak, beklenmeyen format hatalarına karşı koruma sağlayabiliriz.
-6. Migration dosyalarını manuel olarak düzenleyerek, Entity Framework Core'un otomatik olarak oluşturamadığı veya algılayamadığı değişiklikleri yapabiliriz.
-
-## ActivityLogController'da UserId Kontrolü Güncelleme Sorunu
-
-### Hata Mesajı
-```
-POST http://localhost:5037/api/logs/bulk-activity 500 (Internal Server Error)
-insert or update on table "ActivityLogs" violates foreign key constraint "FK_ActivityLogs_Users_UserId"
-```
-
-### Sorun Açıklaması
-Admin paneline giriş yapıldığında, `LogService` sınıfındaki `syncPendingLogs` metodu çalışıyor ve localStorage'da bekleyen logları toplu olarak sunucuya göndermeye çalışıyordu. Ancak, frontend'den gelen log verilerindeki UserId değerleri, veritabanındaki Users tablosunda mevcut olmadığı için yabancı anahtar kısıtlaması hatası alınıyordu.
-
-### Çözüm Adımları
-1. `ActivityLogController.cs` dosyasını inceledik ve `CreateBulkActivityLogs` metodunu analiz ettik.
-2. UserId kontrolünü güncelledik, veritabanında olmayan UserId değerleri için null atanmasını sağladık:
-
-```csharp
-if (dynamicLog.TryGetValue("userId", out var userIdElement) && userIdElement.ValueKind != JsonValueKind.Null)
-{
-    try
-    {
-        var userId = userIdElement.GetInt32();
-        
-        // Kullanıcının veritabanında var olup olmadığını kontrol et
-        var userExists = await _context.Users.AnyAsync(u => u.Id == userId);
-        
-        if (userExists)
-        {
-            log.UserId = userId;
-        }
-        else
-        {
-            _logger.LogWarning($"Belirtilen userId ({userId}) veritabanında bulunamadı. UserId null olarak ayarlanıyor.");
-            log.UserId = null; // Kullanıcı bulunamadıysa null olarak ayarla
-        }
-    }
-    catch (Exception ex)
-    {
-        _logger.LogWarning($"userId alanı int'e dönüştürülemedi: {ex.Message}. UserId null olarak ayarlanıyor.");
-        log.UserId = null; // Hata durumunda null olarak ayarla
-    }
-}
-else
-{
-    _logger.LogWarning("Log kaydında userId bulunamadı veya null. UserId null olarak ayarlanıyor.");
-    log.UserId = null; // UserId yoksa null olarak ayarla
-}
-```
-
-3. `ActivityLog` entity sınıfında UserId alanını nullable yaptık: `public int? UserId { get; set; }`
-4. Yeni bir migration oluşturduk: `dotnet ef migrations add FixActivityLogUserIdNullable -p ../Stock.Infrastructure`
-5. Migration dosyasını düzenleyerek `ActivityLogs` tablosundaki UserId alanını nullable yapmak için SQL komutları ekledik:
-
-```sql
--- Foreign key kısıtlamasını kaldır
-ALTER TABLE "ActivityLogs" 
-DROP CONSTRAINT "FK_ActivityLogs_Users_UserId";
-
--- UserId alanını nullable yap
-ALTER TABLE "ActivityLogs" 
-ALTER COLUMN "UserId" DROP NOT NULL;
-
--- Foreign key kısıtlamasını tekrar ekle (ON DELETE SET NULL ile)
-ALTER TABLE "ActivityLogs" 
-ADD CONSTRAINT "FK_ActivityLogs_Users_UserId" 
-FOREIGN KEY ("UserId") REFERENCES "Users" ("Id") 
-ON DELETE SET NULL;
-```
-
-6. Veritabanını güncelledik: `dotnet ef database update`
-7. Uygulamayı yeniden başlattık ve sorunun çözüldüğünü doğruladık.
-
-### Öğrenilen Dersler
-1. Yabancı anahtar ilişkilerinde, ilişkili kaydın var olup olmadığını kontrol etmek önemlidir.
-2. Veritabanı kısıtlamalarını dikkate alarak, gerektiğinde null değerler atamak veri bütünlüğünü korur.
-3. Hata durumlarını detaylı şekilde loglayarak, sorunların kaynağını daha kolay tespit edebiliriz.
-4. Entity Framework Core'un `AnyAsync` gibi metodları, veritabanı sorgularını optimize etmek için kullanılabilir.
-5. Veri dönüşümlerinde try-catch blokları kullanarak, beklenmeyen format hatalarına karşı koruma sağlayabiliriz.
-6. Migration dosyalarını manuel olarak düzenleyerek, Entity Framework Core'un otomatik olarak oluşturamadığı veya algılayamadığı değişiklikleri yapabiliriz.
+1. PostgreSQL, farklı veri tipleri arasında otomatik dönüşüm yapmaz. Özellikle string'den sayısal tiplere dönüşüm yaparken dikkatli olunmalıdır.
+2. Veri tipi dönüşümleri için özel SQL komutları kullanmak gerekebilir.
+3. Entity Framework Core migrasyonlarında, `migrationBuilder.Sql()` metodu ile özel SQL komutları ekleyebiliriz.
+4. Veri tipi dönüşümlerinde, dönüştürülemeyen değerler için bir strateji belirlenmeli (NULL atama, varsayılan değer atama vb.).
+5. Migrasyon dosyalarını manuel olarak düzenlemek, Entity Framework Core'un otomatik olarak oluşturamadığı veya algılayamadığı değişiklikleri yapmak için kullanışlıdır.

@@ -12,8 +12,7 @@ namespace Stock.Infrastructure.Data.Configurations
 
             builder.HasKey(a => a.Id);
 
-            builder.Property(a => a.UserId)
-                .IsRequired();
+            builder.Property(a => a.UserId);
 
             builder.Property(a => a.Username)
                 .IsRequired()
@@ -41,11 +40,11 @@ namespace Stock.Infrastructure.Data.Configurations
             builder.Property(a => a.IsDeleted)
                 .HasDefaultValue(false);
 
-            // Relationships
             builder.HasOne(a => a.User)
                 .WithMany()
                 .HasForeignKey(a => a.UserId)
-                .OnDelete(DeleteBehavior.Restrict);
+                .OnDelete(DeleteBehavior.SetNull)
+                .IsRequired(false);
         }
     }
 } 

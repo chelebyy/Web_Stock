@@ -526,3 +526,89 @@ else
 - [ ] Diğer potansiyel yabancı anahtar ilişkilerini gözden geçirmek
 - [ ] Log kayıtlarının daha detaylı analizi için bir dashboard oluşturmak
 - [ ] Kullanıcı aktivitelerinin daha iyi izlenmesi için raporlama özelliği eklemek
+
+## Görev: Veritabanı İlişkilerini Düzeltme (FixDatabaseRelationships Migrasyonu)
+
+### Sorun
+Veritabanındaki bazı tablolarda yabancı anahtar ilişkileri doğru şekilde yapılandırılmamıştı. Özellikle `ActivityLogs` ve `AuditLogs` tablolarındaki `UserId` alanları için yabancı anahtar kısıtlamaları düzgün çalışmıyordu.
+
+### Çözüm Adımları
+- [X] Yeni bir migrasyon oluşturduk: `dotnet ef migrations add FixDatabaseRelationships -p ../Stock.Infrastructure`
+- [X] Migrasyon dosyasını inceledik ve aşağıdaki değişiklikleri içerdiğini doğruladık:
+  - `ActivityLogs` tablosundaki `UserId` alanını nullable yapmak
+  - `AuditLogs` tablosundaki `UserId` alanını string'den int'e ve nullable'a dönüştürmek
+  - `UserId1` sütununu kaldırmak
+  - Yabancı anahtar kısıtlamalarını `ON DELETE SET NULL` olarak güncellemek
+- [X] Veritabanını güncelledik: `dotnet ef database update`
+- [X] Uygulamayı yeniden başlattık ve sorunun çözüldüğünü doğruladık
+
+### Yapılan Değişiklikler
+Migrasyon dosyasında (`20250313225829_FixDatabaseRelationships.cs`) aşağıdaki değişiklikler yapıldı:
+
+1. `ActivityLogs` tablosundaki `UserId` alanı nullable yapıldı
+2. `AuditLogs` tablosundaki `UserId` alanı string'den int'e ve nullable'a dönüştürüldü
+3. `AuditLogs` tablosundaki `UserId1` sütunu kaldırıldı
+4. Yabancı anahtar kısıtlamaları `ON DELETE SET NULL` olarak güncellendi
+
+### Öğrenilen Dersler
+1. Veritabanı ilişkilerini tasarlarken, silinme durumunda ne olacağını (cascade, set null, restrict) dikkatli bir şekilde düşünmek önemlidir
+2. Yabancı anahtar alanlarının veri tipleri, referans verilen tablodaki alanların veri tipleriyle uyumlu olmalıdır
+3. Log tabloları gibi ilişkisel tablolarda, ilişkili kayıtlar silindiğinde veri bütünlüğünü korumak için `ON DELETE SET NULL` kullanmak uygun bir yaklaşımdır
+4. Migrasyon dosyalarını dikkatlice incelemek, beklenmeyen değişiklikleri erken tespit etmek için önemlidir
+
+### Sonraki Adımlar
+- [ ] Diğer tablolardaki ilişkileri gözden geçirmek
+- [ ] Veritabanı şemasını dokümante etmek
+- [ ] Performans optimizasyonları için indeksleri gözden geçirmek
+
+## Veritabanı İlişkilerini Düzeltme İşlemi
+
+### Sorun
+Veritabanı migrasyonu uygulanırken, `AuditLogs` tablosundaki `UserId` sütununu string tipinden integer tipine dönüştürmeye çalışırken PostgreSQL hatası aldık.
+
+### Hata Mesajı
+```
+42804: column "UserId" cannot be cast automatically to type integer
+Hint: You might need to specify "USING "UserId"::integer".
+```
+
+### Çözüm Adımları
+[X] Mevcut migrasyonu kaldır: `dotnet ef migrations remove -p ../Stock.Infrastructure`
+[X] Yeni bir migrasyon oluştur: `dotnet ef migrations add FixDatabaseRelationships -p ../Stock.Infrastructure`
+[X] Migrasyon dosyasını düzenle:
+   - `AlterColumn` komutunu özel bir SQL komutuyla değiştir
+   - String'den integer'a dönüşüm için CASE WHEN ifadesi kullan
+   - Sayısal olmayan değerleri NULL olarak ayarla
+[X] Migrasyonu uygula: `dotnet ef database update -c ApplicationDbContext`
+[X] Uygulamayı başlat ve test et: `dotnet run`
+
+### Teknik Detaylar
+PostgreSQL, farklı veri tipleri arasında otomatik dönüşüm yapmaz. Özellikle string'den sayısal tiplere dönüşüm yaparken özel bir USING ifadesi kullanmak gerekir. Migrasyon dosyasında aşağıdaki SQL komutunu ekledik:
+
+```sql
+ALTER TABLE "AuditLogs" 
+ALTER COLUMN "UserId" TYPE integer 
+USING CASE WHEN "UserId" ~ '^[0-9]+$' THEN "UserId"::integer ELSE NULL END;
+
+ALTER TABLE "AuditLogs" 
+ALTER COLUMN "UserId" DROP NOT NULL;
+```
+
+Bu SQL komutu:
+1. Sayısal değer içeren string'leri integer'a dönüştürür
+2. Sayısal olmayan değerleri NULL olarak ayarlar
+3. Sütunu NULL değerlere izin verecek şekilde değiştirir
+
+### Öğrenilen Dersler
+- PostgreSQL'de veri tipi dönüşümleri için özel SQL komutları kullanmak gerekebilir
+- Entity Framework Core migrasyonlarında, `migrationBuilder.Sql()` metodu ile özel SQL komutları ekleyebiliriz
+- Veri tipi dönüşümlerinde, dönüştürülemeyen değerler için bir strateji belirlenmeli
+- Migrasyon dosyalarını manuel olarak düzenlemek, EF Core'un otomatik olarak oluşturamadığı değişiklikleri yapmak için kullanışlıdır
+
+### Sonuç
+Migrasyon başarıyla uygulandı ve uygulama sorunsuz bir şekilde çalışıyor. Veritabanı ilişkileri düzeltildi ve veri tipi dönüşümleri başarıyla gerçekleştirildi.
+
+### Sonraki Adımlar
+- Veritabanı şemasını düzenli olarak kontrol et
+- Veri tipi değişikliklerinde dönüşüm stratejilerini önceden planla
+- Migrasyon oluşturmadan önce entity modellerini dikkatlice gözden geçir

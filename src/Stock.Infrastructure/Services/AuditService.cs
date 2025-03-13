@@ -15,7 +15,7 @@ namespace Stock.Infrastructure.Services
             _auditRepository = auditRepository;
         }
 
-        public async Task LogActionAsync(string action, string entityType, string entityId, string? userId = null, string? path = null, string? details = null)
+        public async Task LogActionAsync(string action, string entityType, string entityId, int? userId = null, string? path = null, string? details = null)
         {
             var auditLog = new AuditLog
             {
