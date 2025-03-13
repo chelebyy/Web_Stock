@@ -38,7 +38,7 @@ namespace Stock.Infrastructure.Data.Config
                 .HasForeignKey(x => x.RoleId)
                 .OnDelete(DeleteBehavior.Restrict);
 
-            builder.HasIndex(x => x.Username)
+            builder.HasIndex(x => x.Sicil)
                 .IsUnique();
         }
     }

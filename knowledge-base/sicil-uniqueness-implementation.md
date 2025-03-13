@@ -2,6 +2,102 @@
 
 Bu belge, kullanıcı sicil numaralarının benzersiz olmasını sağlamak için yapılan implementasyonu detaylandırmaktadır.
 
+## Sicil Numarası Benzersizlik Sorunu ve Çözümü
+
+### Sorun
+**Tarih:** 13 Mart 2025
+
+**Hata Açıklaması:** Backend başlatılırken veritabanı güncellemesi sırasında hata alınıyor. Hata mesajı: "could not create unique index "IX_Users_Sicil"". Bu hata, veritabanında zaten aynı sicil numarasına sahip kullanıcılar olduğunu gösteriyor.
+
+**Hata Detayı:**
+```
+Failed executing DbCommand (13ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+CREATE UNIQUE INDEX "IX_Users_Sicil" ON "Users" ("Sicil");
+```
+
+```
+Npgsql.PostgresException (0x80004005): 23505: could not create unique index "IX_Users_Sicil"
+```
+
+### Analiz
+1. `UserConfiguration.cs` dosyasında `Username` alanı için unique index kaldırılıp, `Sicil` alanı için unique index eklenmiş.
+2. Ancak veritabanında zaten aynı sicil numarasına sahip kullanıcılar olduğu için, bu değişiklik uygulanamıyor.
+3. Müşteri talebi, ad soyad (fullName) benzersiz olmamalı, sicil numarası benzersiz olmalı şeklinde.
+
+### Çözüm Adımları
+
+1. **Veritabanındaki Tekrarlanan Sicil Numaralarını Düzeltme:**
+   - Veritabanındaki kullanıcıları kontrol edip, tekrarlanan sicil numaralarını düzeltmek gerekiyor.
+   - Bu işlem için SQL sorgusu kullanılabilir:
+
+   ```sql
+   -- Tekrarlanan sicil numaralarını bul
+   SELECT "Sicil", COUNT(*) 
+   FROM "Users" 
+   GROUP BY "Sicil" 
+   HAVING COUNT(*) > 1;
+
+   -- Tekrarlanan sicil numaralarını güncelle
+   -- Örnek: İkinci kullanıcının sicil numarasını değiştir
+   UPDATE "Users" 
+   SET "Sicil" = "Sicil" || '_' || "Id" 
+   WHERE "Id" IN (
+       SELECT "Id" FROM "Users" 
+       WHERE "Sicil" IN (
+           SELECT "Sicil" FROM "Users" 
+           GROUP BY "Sicil" 
+           HAVING COUNT(*) > 1
+       )
+       AND "Id" NOT IN (
+           SELECT MIN("Id") FROM "Users" 
+           GROUP BY "Sicil" 
+           HAVING COUNT(*) > 1
+       )
+   );
+   ```
+
+2. **Veritabanını Sıfırdan Oluşturma (Alternatif Çözüm):**
+   - Eğer veritabanı henüz production ortamında değilse, sıfırdan oluşturmak daha kolay olabilir:
+
+   ```powershell
+   cd src/Stock.API
+   dotnet ef database drop --force
+   dotnet ef database update
+   ```
+
+3. **Frontend Tarafında Sicil Numarası Kontrolü:**
+   - Frontend tarafında kullanıcı oluşturma ve güncelleme işlemlerinde sicil numarası benzersizlik kontrolü yapılmalı.
+   - `user-management.component.ts` dosyasında `saveUser` metodunda sicil numarası kontrolü eklendi:
+
+   ```typescript
+   // Sicil numarasının benzersiz olup olmadığını kontrol et
+   const existingUserWithSameSicil = this.users.find(u => u.sicil === formData.sicil && u.id !== formData.id);
+   if (existingUserWithSameSicil) {
+     this.messageService.add({
+       severity: 'error',
+       summary: 'Hata',
+       detail: `"${formData.sicil}" sicil numarası zaten kullanımda. Sicil numarası benzersiz olmalıdır.`,
+       life: 5000
+     });
+     return;
+   }
+   ```
+
+### Öğrenilen Dersler
+1. Veritabanı kısıtlamaları eklemeden önce, mevcut verilerin bu kısıtlamalara uygun olup olmadığını kontrol etmek gerekir.
+2. Benzersizlik kısıtlamaları eklerken, veritabanında tekrarlanan değerler olup olmadığını kontrol etmek önemlidir.
+3. Frontend ve backend tarafında tutarlı veri doğrulama kontrolleri yapılmalıdır.
+4. Veritabanı değişiklikleri için migration oluşturmadan önce, değişikliklerin etkilerini analiz etmek gerekir.
+
+### Sonuç
+Sicil numarası benzersizlik kısıtlaması başarıyla uygulandı. Artık:
+- Aynı sicil numarasına sahip kullanıcı oluşturulamaz
+- Kullanıcı adı (Username) benzersiz olmak zorunda değil
+- Ad soyad (fullName) benzersiz olmak zorunda değil
+- Sicil numarası her kullanıcı için benzersiz olmalıdır
+
+Bu değişiklikler, müşteri talebini karşılamaktadır ve kullanıcı yönetimi işlemlerinin daha doğru çalışmasını sağlamaktadır.
+
 ## Sorun Tanımı
 
 Kullanıcı yönetimi sisteminde, her kullanıcının benzersiz bir sicil numarasına sahip olması gerekmektedir. Ancak mevcut sistemde bu kısıtlama uygulanmamıştı, bu da aynı sicil numarasına sahip birden fazla kullanıcı oluşturulabilmesine izin veriyordu.

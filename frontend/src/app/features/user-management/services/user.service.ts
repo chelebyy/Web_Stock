@@ -162,6 +162,10 @@ export class UserService {
       return throwError(() => new Error('Sicil numarası boş olamaz'));
     }
     
+    if (!createUserRequest.roleId || createUserRequest.roleId <= 0) {
+      return throwError(() => new Error('Geçerli bir rol seçilmelidir'));
+    }
+    
     // Kontrol amaçlı log
     console.log('Gönderilen kullanıcı verisi:', createUserRequest);
     
@@ -174,6 +178,7 @@ export class UserService {
           // Hata mesajını düzenle
           let errorMessage = 'Kullanıcı oluşturulurken bir hata oluştu';
           let errorField = '';
+          let errorCode = '';
           
           if (error.error) {
             // API'den gelen hata mesajını kullan
@@ -186,10 +191,24 @@ export class UserService {
               errorField = error.error.field;
             }
             
+            // Hata kodu varsa kaydet
+            if (error.error.code) {
+              errorCode = error.error.code;
+            }
+            
             // Sicil numarası çakışma hatası için özel mesaj
             if (error.error.code === 'DuplicateSicil') {
               errorMessage = `Sicil numarası '${user.sicil}' zaten kullanımda. Lütfen farklı bir sicil numarası girin.`;
               errorField = 'sicil';
+            }
+            
+            // Kullanıcı adı çakışma hatası için özel mesaj
+            if (error.error.code === 'DuplicateUsername' || 
+                (error.error.error && error.error.error.includes('duplicate key')) ||
+                (error.error.details && error.error.details.includes('IX_Users_Username'))) {
+              errorMessage = `Kullanıcı adı '${user.username}' zaten kullanımda. Lütfen farklı bir kullanıcı adı girin.`;
+              errorField = 'username';
+              errorCode = 'DuplicateUsername';
             }
           }
           
@@ -200,11 +219,27 @@ export class UserService {
             errorMessage = 'Bu işlemi gerçekleştirmek için yetkiniz yok.';
           } else if (error.status === 404) {
             errorMessage = 'İstek yapılan kaynak bulunamadı.';
+          } else if (error.status === 500) {
+            // Sunucu hatası için daha detaylı bilgi
+            if (error.error && error.error.details) {
+              errorMessage = `Sunucu hatası: ${error.error.details}`;
+              
+              // Veritabanı benzersizlik hatası kontrolü
+              if (error.error.details.includes('duplicate key') || 
+                  error.error.details.includes('IX_Users_Username')) {
+                errorMessage = `Kullanıcı adı '${user.username}' zaten kullanımda. Lütfen farklı bir kullanıcı adı girin.`;
+                errorField = 'username';
+                errorCode = 'DuplicateUsername';
+              }
+            } else {
+              errorMessage = 'Sunucu tarafında bir hata oluştu. Lütfen daha sonra tekrar deneyin.';
+            }
           }
           
           // Özel hata nesnesi döndür
           const customError = new Error(errorMessage);
           (customError as any).field = errorField;
+          (customError as any).code = errorCode;
           
           // Observable olarak hata mesajını döndür
           return throwError(() => customError);
@@ -214,7 +249,85 @@ export class UserService {
 
   updateUser(id: number, user: User): Observable<void> {
     const options = { headers: this.getHeaders() };
-    return this.http.put<void>(`${this.apiUrl}/Users/${id}`, user, options);
+    
+    // Kontrol amaçlı log
+    console.log('Güncellenecek kullanıcı verisi:', user);
+    
+    return this.http.put<void>(`${this.apiUrl}/Users/${id}`, user, options)
+      .pipe(
+        catchError(error => {
+          console.error('Kullanıcı güncelleme hatası:', error);
+          
+          // Hata mesajını düzenle
+          let errorMessage = 'Kullanıcı güncellenirken bir hata oluştu';
+          let errorField = '';
+          let errorCode = '';
+          
+          if (error.error) {
+            // API'den gelen hata mesajını kullan
+            if (error.error.error) {
+              errorMessage = error.error.error;
+            }
+            
+            // Alan bilgisi varsa kaydet
+            if (error.error.field) {
+              errorField = error.error.field;
+            }
+            
+            // Hata kodu varsa kaydet
+            if (error.error.code) {
+              errorCode = error.error.code;
+            }
+            
+            // Sicil numarası çakışma hatası için özel mesaj
+            if (error.error.code === 'DuplicateSicil') {
+              errorMessage = `Sicil numarası '${user.sicil}' zaten kullanımda. Lütfen farklı bir sicil numarası girin.`;
+              errorField = 'sicil';
+            }
+            
+            // Kullanıcı adı çakışma hatası için özel mesaj
+            if (error.error.code === 'DuplicateUsername' || 
+                (error.error.error && error.error.error.includes('duplicate key')) ||
+                (error.error.details && error.error.details.includes('IX_Users_Username'))) {
+              errorMessage = `Kullanıcı adı '${user.username}' zaten kullanımda. Lütfen farklı bir kullanıcı adı girin.`;
+              errorField = 'username';
+              errorCode = 'DuplicateUsername';
+            }
+          }
+          
+          // HTTP durum kodu kontrolü
+          if (error.status === 401) {
+            errorMessage = 'Oturum süresi dolmuş veya yetkiniz yok. Lütfen tekrar giriş yapın.';
+          } else if (error.status === 403) {
+            errorMessage = 'Bu işlemi gerçekleştirmek için yetkiniz yok.';
+          } else if (error.status === 404) {
+            errorMessage = 'İstek yapılan kaynak bulunamadı.';
+          } else if (error.status === 500) {
+            // Sunucu hatası için daha detaylı bilgi
+            if (error.error && error.error.details) {
+              errorMessage = `Sunucu hatası: ${error.error.details}`;
+              
+              // Veritabanı benzersizlik hatası kontrolü
+              if (error.error.details.includes('duplicate key') || 
+                  error.error.details.includes('IX_Users_Username')) {
+                errorMessage = `Kullanıcı adı '${user.username}' zaten kullanımda. Lütfen farklı bir kullanıcı adı girin.`;
+                errorField = 'username';
+                errorCode = 'DuplicateUsername';
+              }
+            } else {
+              errorMessage = 'Sunucu tarafında bir hata oluştu. Lütfen daha sonra tekrar deneyin.';
+            }
+          }
+          
+          // Özel hata nesnesi döndür
+          const customError = new Error(errorMessage);
+          (customError as any).field = errorField;
+          (customError as any).code = errorCode;
+          
+          // Observable olarak hata mesajını döndür
+          return throwError(() => customError);
+        })
+      );
   }
 
   deleteUser(id: number): Observable<void> {

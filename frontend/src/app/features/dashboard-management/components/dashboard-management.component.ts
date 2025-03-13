@@ -317,17 +317,13 @@ export class DashboardManagementComponent implements OnInit, AfterViewInit {
     this.filteredDashboardPages = [...this.dashboardPages];
   }
 
-  editPage(page: DashboardPage): void {
-    // Düzenleme sayfasına yönlendir
-    this.router.navigate(['/dashboard-management/edit', page.id]);
-  }
-
   managePermissions(page: DashboardPage): void {
     // İzinler sayfasına yönlendir
     this.router.navigate(['/dashboard-management/permissions', page.id]);
   }
 
   navigateToPermissions(page: DashboardPage): void {
+    // İzinler sayfasına yönlendir
     this.router.navigate(['/dashboard-management/permissions', page.id, page.name]);
   }
 } 

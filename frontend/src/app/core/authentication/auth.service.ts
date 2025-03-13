@@ -259,7 +259,81 @@ export class AuthService {
   }
 
   createUser(createUserRequest: CreateUserRequest): Observable<any> {
-    return this.http.post(`${this.apiUrl}/auth/create-user`, createUserRequest);
+    return this.http.post(`${this.apiUrl}/auth/create-user`, createUserRequest)
+      .pipe(
+        catchError(error => {
+          console.error('Kullanıcı oluşturma hatası (AuthService):', error);
+          
+          // Hata mesajını düzenle
+          let errorMessage = 'Kullanıcı oluşturulurken bir hata oluştu';
+          let errorField = '';
+          let errorCode = '';
+          
+          if (error.error) {
+            // API'den gelen hata mesajını kullan
+            if (error.error.error) {
+              errorMessage = error.error.error;
+            }
+            
+            // Alan bilgisi varsa kaydet
+            if (error.error.field) {
+              errorField = error.error.field;
+            }
+            
+            // Hata kodu varsa kaydet
+            if (error.error.code) {
+              errorCode = error.error.code;
+            }
+            
+            // Sicil numarası çakışma hatası için özel mesaj
+            if (error.error.code === 'DuplicateSicil') {
+              errorMessage = `Sicil numarası '${createUserRequest.sicil}' zaten kullanımda. Lütfen farklı bir sicil numarası girin.`;
+              errorField = 'sicil';
+            }
+            
+            // Kullanıcı adı çakışma hatası için özel mesaj
+            if (error.error.code === 'DuplicateUsername' || 
+                (error.error.error && error.error.error.includes('duplicate key')) ||
+                (error.error.details && error.error.details.includes('IX_Users_Username'))) {
+              errorMessage = `Kullanıcı adı '${createUserRequest.username}' zaten kullanımda. Lütfen farklı bir kullanıcı adı girin.`;
+              errorField = 'username';
+              errorCode = 'DuplicateUsername';
+            }
+          }
+          
+          // HTTP durum kodu kontrolü
+          if (error.status === 401) {
+            errorMessage = 'Oturum süresi dolmuş veya yetkiniz yok. Lütfen tekrar giriş yapın.';
+          } else if (error.status === 403) {
+            errorMessage = 'Bu işlemi gerçekleştirmek için yetkiniz yok.';
+          } else if (error.status === 404) {
+            errorMessage = 'İstek yapılan kaynak bulunamadı.';
+          } else if (error.status === 500) {
+            // Sunucu hatası için daha detaylı bilgi
+            if (error.error && error.error.details) {
+              errorMessage = `Sunucu hatası: ${error.error.details}`;
+              
+              // Veritabanı benzersizlik hatası kontrolü
+              if (error.error.details.includes('duplicate key') || 
+                  error.error.details.includes('IX_Users_Username')) {
+                errorMessage = `Kullanıcı adı '${createUserRequest.username}' zaten kullanımda. Lütfen farklı bir kullanıcı adı girin.`;
+                errorField = 'username';
+                errorCode = 'DuplicateUsername';
+              }
+            } else {
+              errorMessage = 'Sunucu tarafında bir hata oluştu. Lütfen daha sonra tekrar deneyin.';
+            }
+          }
+          
+          // Özel hata nesnesi döndür
+          const customError = new Error(errorMessage);
+          (customError as any).field = errorField;
+          (customError as any).code = errorCode;
+          
+          // Observable olarak hata mesajını döndür
+          return throwError(() => customError);
+        })
+      );
   }
 
   logout(): void {

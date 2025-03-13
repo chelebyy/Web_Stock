@@ -39,6 +39,7 @@ Bu dosya, proje geliştirme sürecinde karşılaşılan hataları ve çözümler
 - [Admin Dashboard Yönetimi Modülü Sorunu](#admin-dashboard-yönetimi-modülü-sorunu)
 - [Dashboard Management Modülü Hataları](#dashboard-management-modülü-hataları)
 - [PrimeNG Tablo Bileşenleri Koyu Tema Sorunları](#primeNG-tablo-bileşenleri-koyu-tema-sorunları)
+- [Sorun: Sicil Numarası Benzersizlik Kısıtlaması Hatası](#sorun-sicil-numarası-benzersizlik-kısıtlaması-hatası)
 
 ## Kullanıcı Aktivitesi Grafiği Yerine Log Kaydetme Sistemi
 
@@ -2065,3 +2066,70 @@ html body .p-datatable,
 2. PrimeNG tema dosyalarını doğrudan projeye dahil etmek
 3. Aydınlık/karanlık tema geçişi için daha yapılandırılmış bir sistem kurmak
 4. CSS değişkenleri kullanarak tema yönetimini kolaylaştırmak
+
+### Sorun: Sicil Numarası Benzersizlik Kısıtlaması Hatası
+**Tarih:** 13 Mart 2025
+**Hata:** Backend başlatılırken veritabanı güncellemesi sırasında hata alınıyor.
+**Hata Mesajı:**
+```
+Failed executing DbCommand (13ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+CREATE UNIQUE INDEX "IX_Users_Sicil" ON "Users" ("Sicil");
+
+Npgsql.PostgresException (0x80004005): 23505: could not create unique index "IX_Users_Sicil"
+```
+**Nedeni:** Veritabanında zaten aynı sicil numarasına sahip kullanıcılar var. `UserConfiguration.cs` dosyasında `Username` alanı için unique index kaldırılıp, `Sicil` alanı için unique index eklenmiş, ancak mevcut veriler bu kısıtlamaya uygun değil.
+
+**Çözüm:**
+1. Veritabanındaki tekrarlanan sicil numaralarını düzeltmek için SQL sorgusu kullanıldı:
+```sql
+-- Tekrarlanan sicil numaralarını bul
+SELECT "Sicil", COUNT(*) 
+FROM "Users" 
+GROUP BY "Sicil" 
+HAVING COUNT(*) > 1;
+
+-- Tekrarlanan sicil numaralarını güncelle
+UPDATE "Users" 
+SET "Sicil" = "Sicil" || '_' || "Id" 
+WHERE "Id" IN (
+    SELECT "Id" FROM "Users" 
+    WHERE "Sicil" IN (
+        SELECT "Sicil" FROM "Users" 
+        GROUP BY "Sicil" 
+        HAVING COUNT(*) > 1
+    )
+    AND "Id" NOT IN (
+        SELECT MIN("Id") FROM "Users" 
+        GROUP BY "Sicil" 
+        HAVING COUNT(*) > 1
+    )
+);
+```
+
+2. Alternatif olarak, veritabanı henüz production ortamında değilse, sıfırdan oluşturulabilir:
+```powershell
+cd src/Stock.API
+dotnet ef database drop --force
+dotnet ef database update
+```
+
+3. Frontend tarafında sicil numarası benzersizlik kontrolü eklendi:
+```typescript
+// Sicil numarasının benzersiz olup olmadığını kontrol et
+const existingUserWithSameSicil = this.users.find(u => u.sicil === formData.sicil && u.id !== formData.id);
+if (existingUserWithSameSicil) {
+  this.messageService.add({
+    severity: 'error',
+    summary: 'Hata',
+    detail: `"${formData.sicil}" sicil numarası zaten kullanımda. Sicil numarası benzersiz olmalıdır.`,
+    life: 5000
+  });
+  return;
+}
+```
+
+**Öğrenilen Dersler:**
+1. Veritabanı kısıtlamaları eklemeden önce, mevcut verilerin bu kısıtlamalara uygun olup olmadığını kontrol etmek gerekir.
+2. Benzersizlik kısıtlamaları eklerken, veritabanında tekrarlanan değerler olup olmadığını kontrol etmek önemlidir.
+3. Frontend ve backend tarafında tutarlı veri doğrulama kontrolleri yapılmalıdır.
+4. Veritabanı değişiklikleri için migration oluşturmadan önce, değişikliklerin etkilerini analiz etmek gerekir.

@@ -23,7 +23,6 @@ import { MessageService } from 'primeng/api';
 
 // Bileşenler
 import { DashboardManagementComponent } from './components/dashboard-management.component';
-import { DashboardEditComponent } from './components/dashboard-edit.component';
 import { UserPagePermissionsComponent } from './components/user-page-permissions.component';
 
 @NgModule({
@@ -46,7 +45,6 @@ import { UserPagePermissionsComponent } from './components/user-page-permissions
     TooltipModule,
     TabViewModule,
     DashboardManagementComponent,
-    DashboardEditComponent,
     UserPagePermissionsComponent
   ],
   providers: [

@@ -704,13 +704,92 @@ export class UserManagementComponent implements OnInit, AfterViewInit {
     if (this.editMode) {
       formData.id = this.user.id; // ID'yi request body'ye ekliyoruz
       
-      // Backend'in beklediği formata uygun olacak şekilde username ve isAdmin alanlarını ekle
-      formData.username = this.user.username; // Mevcut kullanıcı adını koru
+      // Kullanıcı adını koru, değiştirme
+      formData.username = this.user.username;
+      
+      // Admin kullanıcısı için özel durum - admin kullanıcı adını "Admin" olarak güncelle
+      if (this.user.isAdmin && this.user.username && this.user.username.toLowerCase() === 'admin') {
+        formData.username = 'Admin'; // Admin kullanıcı adını büyük harfle başlat
+      }
+      
       formData.isAdmin = this.user.isAdmin; // Admin durumunu koru
+      
+      // Sicil alanının doğru şekilde gönderildiğinden emin olalım
+      if (!formData.sicil || formData.sicil.trim() === '') {
+        this.messageService.add({
+          severity: 'error',
+          summary: 'Hata',
+          detail: 'Sicil numarası boş olamaz',
+          life: 5000
+        });
+        return;
+      }
+      
+      // Sicil numarasının benzersiz olup olmadığını kontrol et
+      // Düzenleme modunda, kullanıcının kendi sicil numarasını değiştirmediği durumda hata vermeyelim
+      const existingUserWithSameSicil = this.users.find(u => u.sicil === formData.sicil && u.id !== formData.id);
+      if (existingUserWithSameSicil) {
+        this.messageService.add({
+          severity: 'error',
+          summary: 'Hata',
+          detail: `"${formData.sicil}" sicil numarası zaten kullanımda. Sicil numarası benzersiz olmalıdır.`,
+          life: 5000
+        });
+        return;
+      }
+      
+      // roleId'nin doğru şekilde gönderildiğinden emin olalım
+      if (!formData.roleId || formData.roleId <= 0) {
+        this.messageService.add({
+          severity: 'error',
+          summary: 'Hata',
+          detail: 'Rol seçilmelidir',
+          life: 5000
+        });
+        return;
+      }
+      
+      console.log('Güncellenecek kullanıcı verisi:', formData);
     } else {
       // Yeni kullanıcı oluşturma
-      formData.username = formData.fullName; // fullName'i username olarak kullan
+      // Benzersiz bir kullanıcı adı oluştur
+      formData.username = this.generateUniqueUsername(formData.fullName);
+      
       formData.isAdmin = false; // Varsayılan olarak admin değil
+      
+      // Sicil alanının doğru şekilde gönderildiğinden emin olalım
+      if (!formData.sicil || formData.sicil.trim() === '') {
+        this.messageService.add({
+          severity: 'error',
+          summary: 'Hata',
+          detail: 'Sicil numarası boş olamaz',
+          life: 5000
+        });
+        return;
+      }
+      
+      // Sicil numarasının benzersiz olup olmadığını kontrol et
+      const existingUserWithSameSicil = this.users.find(u => u.sicil === formData.sicil);
+      if (existingUserWithSameSicil) {
+        this.messageService.add({
+          severity: 'error',
+          summary: 'Hata',
+          detail: `"${formData.sicil}" sicil numarası zaten kullanımda. Sicil numarası benzersiz olmalıdır.`,
+          life: 5000
+        });
+        return;
+      }
+      
+      // RoleId alanının doğru şekilde gönderildiğinden emin olalım
+      if (!formData.roleId || formData.roleId <= 0) {
+        this.messageService.add({
+          severity: 'error',
+          summary: 'Hata',
+          detail: 'Rol seçilmelidir',
+          life: 5000
+        });
+        return;
+      }
     }
     
     console.log('Gönderilecek veri:', formData);
@@ -733,10 +812,29 @@ export class UserManagementComponent implements OnInit, AfterViewInit {
         },
         error: (error) => {
           console.error('Kullanıcı güncellenirken hata oluştu:', error);
+          
+          // Hata mesajını daha detaylı göster
+          let errorMessage = 'Kullanıcı güncellenirken bir hata oluştu';
+          
+          if (error.error && error.error.error) {
+            errorMessage = error.error.error;
+          } else if (error.message) {
+            errorMessage = error.message;
+          }
+          
+          // Sunucu hatası için daha detaylı bilgi
+          if (error.status === 500) {
+            if (error.error && error.error.details) {
+              errorMessage = `Sunucu hatası: ${error.error.details}`;
+            } else {
+              errorMessage = 'Sunucu tarafında bir hata oluştu. Lütfen daha sonra tekrar deneyin.';
+            }
+          }
+          
           this.messageService.add({
             severity: 'error',
             summary: 'Hata',
-            detail: error.message || 'Kullanıcı güncellenirken bir hata oluştu',
+            detail: errorMessage,
             life: 5000
           });
         }
@@ -763,11 +861,30 @@ export class UserManagementComponent implements OnInit, AfterViewInit {
         error: (error) => {
           console.error('Kullanıcı işlemi sırasında hata oluştu:', error);
           
-          // Hata mesajını göster (throwError ile oluşturulan Error nesnesinin message özelliği)
+          // Hata mesajını daha detaylı göster
+          let errorMessage = this.editMode 
+            ? 'Kullanıcı güncellenirken bir hata oluştu' 
+            : 'Kullanıcı oluşturulurken bir hata oluştu';
+          
+          if (error.error && error.error.error) {
+            errorMessage = error.error.error;
+          } else if (error.message) {
+            errorMessage = error.message;
+          }
+          
+          // Sunucu hatası için daha detaylı bilgi
+          if (error.status === 500) {
+            if (error.error && error.error.details) {
+              errorMessage = `Sunucu hatası: ${error.error.details}`;
+            } else {
+              errorMessage = 'Sunucu tarafında bir hata oluştu. Lütfen daha sonra tekrar deneyin.';
+            }
+          }
+          
           this.messageService.add({
             severity: 'error',
             summary: 'Hata',
-            detail: error.message || (this.editMode ? 'Kullanıcı güncellenirken bir hata oluştu' : 'Kullanıcı oluşturulurken bir hata oluştu'),
+            detail: errorMessage,
             life: 7000
           });
         }
@@ -1147,7 +1264,7 @@ export class UserManagementComponent implements OnInit, AfterViewInit {
   deleteSelectedUsers() {
     const selectedUserIds = Object.keys(this.selectedUsers)
       .filter(id => this.selectedUsers[parseInt(id)])
-      .map(id => parseInt(id));
+        .map(id => parseInt(id));
     
     if (selectedUserIds.length === 0) {
       this.messageService.add({
@@ -1161,7 +1278,7 @@ export class UserManagementComponent implements OnInit, AfterViewInit {
     this.userToDelete = { id: 'all', fullName: `${selectedUserIds.length} kullanıcı` };
     this.deleteDialogVisible = true;
   }
-
+  
   // Rol adını getiren yardımcı metod
   getRoleName(roleId: number | null): string {
     if (!roleId) return 'Rol Atanmamış';
@@ -1208,5 +1325,33 @@ export class UserManagementComponent implements OnInit, AfterViewInit {
       hash = hash & hash; // 32-bit integer'a dönüştür
     }
     return hash;
+  }
+
+  /**
+   * Ad soyad değerinden benzersiz bir kullanıcı adı oluşturur
+   * Ad soyadın ilk harflerini alır ve rastgele bir sayı ekler
+   */
+  generateUniqueUsername(fullName: string): string {
+    // Boşlukları temizle ve ad soyadı parçalara ayır
+    const nameParts = fullName.trim().split(/\s+/);
+    
+    // Ad soyadın ilk harflerini al
+    let initials = '';
+    nameParts.forEach(part => {
+      if (part.length > 0) {
+        initials += part[0].toLowerCase();
+      }
+    });
+    
+    // Eğer initials boşsa, "user" kullan
+    if (!initials) {
+      initials = 'user';
+    }
+    
+    // Rastgele 4 basamaklı bir sayı oluştur
+    const randomNum = Math.floor(1000 + Math.random() * 9000);
+    
+    // Kullanıcı adını oluştur: initials + randomNum
+    return `${initials}${randomNum}`;
   }
 }
