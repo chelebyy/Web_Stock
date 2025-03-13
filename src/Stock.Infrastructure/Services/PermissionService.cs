@@ -48,16 +48,18 @@ namespace Stock.Infrastructure.Services
             {
                 var permissions = await _permissionRepository.GetAllAsync();
                 
-                var groups = permissions
-                    .GroupBy(p => p.Group)
+                // Grup bazında izinleri düzenle
+                var groupedPermissions = permissions
+                    .GroupBy(p => p.Group ?? "Diğer")
                     .Select(g => new PermissionGroupDto
                     {
                         Group = g.Key,
                         Permissions = g.Select(p => MapToDto(p)).ToList()
                     })
+                    .OrderBy(g => g.Group)
                     .ToList();
-                
-                return groups;
+
+                return groupedPermissions;
             }
             catch (Exception ex)
             {
@@ -70,12 +72,19 @@ namespace Stock.Infrastructure.Services
         {
             try
             {
-                var permissions = await _permissionRepository.GetPermissionsByRoleIdAsync(roleId);
-                return permissions.Select(p => MapToDto(p, true)).ToList();
+                var rolePermissions = await _context.RolePermissions
+                    .Where(rp => rp.RoleId == roleId)
+                    .Include(rp => rp.Permission)
+                    .ToListAsync();
+
+                return rolePermissions
+                    .Where(rp => rp.Permission != null)
+                    .Select(rp => MapToDto(rp.Permission))
+                    .ToList();
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error getting permissions for role {RoleId}", roleId);
+                _logger.LogError(ex, "Error getting permissions by role ID {RoleId}", roleId);
                 return new List<PermissionDto>();
             }
         }
@@ -84,8 +93,7 @@ namespace Stock.Infrastructure.Services
         {
             try
             {
-                // Bu metot IPermissionRepository'de bulunmadığı için
-                // Kullanıcının rolüne bağlı izinlerini al
+                // Kullanıcıyı ve rolünü al
                 var user = await _context.Users
                     .Include(u => u.Role)
                     .ThenInclude(r => r.RolePermissions)
@@ -95,25 +103,56 @@ namespace Stock.Infrastructure.Services
                 if (user == null)
                     return new List<PermissionDto>();
 
-                var rolePermissions = user.Role?.RolePermissions
-                    .Select(rp => rp.Permission)
-                    .ToList() ?? new List<Stock.Domain.Entities.Permission>();
+                // Rol izinlerini DTO'ya dönüştür
+                var roleDtos = new List<PermissionDto>();
+                if (user.Role?.RolePermissions != null)
+                {
+                    foreach (var rp in user.Role.RolePermissions)
+                    {
+                        if (rp.Permission != null)
+                        {
+                            roleDtos.Add(new PermissionDto
+                            {
+                                Id = rp.Permission.Id,
+                                Name = rp.Permission.Name,
+                                Description = rp.Permission.Description,
+                                ResourceType = rp.Permission.ResourceType ?? "",
+                                Group = rp.Permission.Group,
+                                IsFromRole = true,
+                                IsCustom = false,
+                                RoleName = user.Role.Name
+                            });
+                        }
+                    }
+                }
 
                 // Kullanıcıya özel izinleri al
                 var userPermissions = await _context.UserPermissions
                     .Where(up => up.UserId == userId && up.IsGranted)
                     .Include(up => up.Permission)
-                    .Select(up => up.Permission)
                     .ToListAsync();
 
-                // Rol izinleri ve kullanıcı özel izinlerini birleştir
-                var allPermissions = rolePermissions.Union(userPermissions).ToList();
-                
-                return allPermissions.Select(p => MapToDto(p, false)).ToList();
+                // Kullanıcı izinlerini DTO'ya dönüştür
+                var userDtos = userPermissions
+                    .Where(up => up.Permission != null)
+                    .Select(up => new PermissionDto
+                    {
+                        Id = up.Permission.Id,
+                        Name = up.Permission.Name,
+                        Description = up.Permission.Description,
+                        ResourceType = up.Permission.ResourceType ?? "",
+                        Group = up.Permission.Group,
+                        IsFromRole = false,
+                        IsCustom = true
+                    })
+                    .ToList();
+
+                // Tüm izinleri birleştir ve döndür
+                return roleDtos.Concat(userDtos).ToList();
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error getting permissions for user {UserId}", userId);
+                _logger.LogError(ex, "Error getting permissions by user ID {UserId}", userId);
                 return new List<PermissionDto>();
             }
         }
@@ -139,7 +178,7 @@ namespace Stock.Infrastructure.Services
             }
         }
 
-        public async Task<bool> AssignPermissionToUserAsync(int userId, int permissionId, bool isGranted = true)
+        public async Task<bool> AssignPermissionToUserAsync(int userId, int permissionId, bool isGranted)
         {
             try
             {
@@ -149,14 +188,14 @@ namespace Stock.Infrastructure.Services
 
                 if (existingPermission != null)
                 {
-                    // Varsa güncelle
+                    // Mevcut izni güncelle
                     existingPermission.IsGranted = isGranted;
                     existingPermission.UpdatedAt = DateTime.UtcNow;
                 }
                 else
                 {
-                    // Yoksa yeni ekle
-                    var userPermission = new Stock.Domain.Entities.UserPermission
+                    // Yeni izin oluştur
+                    var userPermission = new UserPermission
                     {
                         UserId = userId,
                         PermissionId = permissionId,
@@ -259,11 +298,8 @@ namespace Stock.Infrastructure.Services
             }
         }
 
-        private PermissionDto MapToDto(Stock.Domain.Entities.Permission permission, bool isFromRole = false)
+        private PermissionDto MapToDto(Permission permission, bool isFromRole = false)
         {
-            if (permission == null)
-                return new PermissionDto();
-            
             return new PermissionDto
             {
                 Id = permission.Id,

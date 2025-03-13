@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using Stock.Domain.Entities;
+using Stock.Domain.Entities.Permissions;
 
 namespace Stock.Infrastructure.Data.Configurations
 {

@@ -147,7 +147,7 @@ namespace Stock.API.Controllers
                 
                 if (revirPermission == null)
                 {
-                    _context.Permissions.Add(new Permission
+                    _context.Permissions.Add(new Stock.Domain.Entities.Permissions.Permission
                     {
                         Name = "Pages.Revir.View",
                         Description = "Revir sayfasını görüntüleme",
@@ -165,13 +165,13 @@ namespace Stock.API.Controllers
                     _logger.LogInformation("Pages.Revir.View izni zaten mevcut");
                 }
                 
-                // BilgiIslem izni ekle
+                // Bilgi İşlem izni ekle
                 var bilgiIslemPermission = await _context.Permissions
                     .FirstOrDefaultAsync(p => p.Name == "Pages.BilgiIslem.View");
                 
                 if (bilgiIslemPermission == null)
                 {
-                    _context.Permissions.Add(new Permission
+                    _context.Permissions.Add(new Stock.Domain.Entities.Permissions.Permission
                     {
                         Name = "Pages.BilgiIslem.View",
                         Description = "Bilgi İşlem sayfasını görüntüleme",

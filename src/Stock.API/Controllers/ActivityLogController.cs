@@ -86,18 +86,31 @@ namespace Stock.API.Controllers
                     {
                         try
                         {
-                            log.UserId = userIdElement.GetInt32();
+                            int userId = userIdElement.GetInt32();
+                            
+                            // Kullanıcı ID'sinin veritabanında olup olmadığını kontrol et
+                            var userExists = await _context.Users.AnyAsync(u => u.Id == userId);
+                            
+                            if (userExists)
+                            {
+                                log.UserId = userId;
+                            }
+                            else
+                            {
+                                _logger.LogWarning($"Belirtilen userId ({userId}) veritabanında bulunamadı. UserId null olarak ayarlanıyor.");
+                                log.UserId = null; // Kullanıcı bulunamadıysa null olarak ayarla
+                            }
                         }
                         catch (Exception ex)
                         {
-                            _logger.LogWarning($"userId alanı int'e dönüştürülemedi: {ex.Message}. Varsayılan değer (1) kullanılacak.");
-                            log.UserId = 1; // Varsayılan admin kullanıcı ID'si
+                            _logger.LogWarning($"userId alanı int'e dönüştürülemedi: {ex.Message}. UserId null olarak ayarlanıyor.");
+                            log.UserId = null; // Hata durumunda null olarak ayarla
                         }
                     }
                     else
                     {
-                        _logger.LogWarning("Log kaydında userId bulunamadı veya null. Varsayılan değer (1) kullanılacak.");
-                        log.UserId = 1; // Varsayılan admin kullanıcı ID'si
+                        _logger.LogWarning("Log kaydında userId bulunamadı veya null. UserId null olarak ayarlanıyor.");
+                        log.UserId = null; // UserId yoksa null olarak ayarla
                     }
                     
                     if (dynamicLog.TryGetValue("username", out var usernameElement) && usernameElement.ValueKind != JsonValueKind.Null)
@@ -231,18 +244,31 @@ namespace Stock.API.Controllers
                             {
                                 try
                                 {
-                                    log.UserId = userIdElement.GetInt32();
+                                    int userId = userIdElement.GetInt32();
+                                    
+                                    // Kullanıcı ID'sinin veritabanında olup olmadığını kontrol et
+                                    var userExists = await _context.Users.AnyAsync(u => u.Id == userId);
+                                    
+                                    if (userExists)
+                                    {
+                                        log.UserId = userId;
+                                    }
+                                    else
+                                    {
+                                        _logger.LogWarning($"Belirtilen userId ({userId}) veritabanında bulunamadı. UserId null olarak ayarlanıyor.");
+                                        log.UserId = null; // Kullanıcı bulunamadıysa null olarak ayarla
+                                    }
                                 }
                                 catch (Exception ex)
                                 {
-                                    _logger.LogWarning($"userId alanı int'e dönüştürülemedi: {ex.Message}. Varsayılan değer (1) kullanılacak.");
-                                    log.UserId = 1; // Varsayılan admin kullanıcı ID'si
+                                    _logger.LogWarning($"userId alanı int'e dönüştürülemedi: {ex.Message}. UserId null olarak ayarlanıyor.");
+                                    log.UserId = null; // Hata durumunda null olarak ayarla
                                 }
                             }
                             else
                             {
-                                _logger.LogWarning("Log kaydında userId bulunamadı veya null. Varsayılan değer (1) kullanılacak.");
-                                log.UserId = 1; // Varsayılan admin kullanıcı ID'si
+                                _logger.LogWarning("Log kaydında userId bulunamadı veya null. UserId null olarak ayarlanıyor.");
+                                log.UserId = null; // UserId yoksa null olarak ayarla
                             }
                             
                             if (dynamicLog.TryGetValue("username", out var usernameElement) && usernameElement.ValueKind != JsonValueKind.Null)

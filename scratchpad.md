@@ -312,3 +312,217 @@ Sicil numarası benzersizlik kısıtlaması başarıyla uygulandı. Artık:
 - Sicil numarası her kullanıcı için benzersiz olmalıdır
 
 Bu değişiklikler, kullanıcı talebini karşılamaktadır ve kullanıcı yönetimi işlemlerinin daha doğru çalışmasını sağlamaktadır.
+
+## Güncel Görev: SCSS Bütçe Aşımı Hatalarını Çözme
+
+### Sorun
+Angular projemizde bazı SCSS dosyaları, belirlenen maksimum bütçe sınırını aşıyor ve derleme sırasında hatalara neden oluyor.
+
+### Yapılacaklar
+- [X] Sorunlu SCSS dosyalarını tespit etme
+- [X] Tekrarlanan stilleri analiz etme
+- [X] Ortak stil dosyası oluşturma
+- [X] PrimeNG tema özelleştirmeleri için ayrı dosya oluşturma
+- [X] Ana stil dosyasını güncelleme
+- [X] Bileşen SCSS dosyalarını optimize etme
+- [X] Angular bütçe ayarlarını güncelleme
+- [X] Bilgi dosyası oluşturma
+- [X] errors.md dosyasını güncelleme
+
+### Yapıldı
+- Sorunlu SCSS dosyaları tespit edildi:
+  - user-management.component.scss: 69.78 kB (16 kB sınırını 53.77 kB aşıyor)
+  - user-page-permissions.component.scss: 17.54 kB (16 kB sınırını 1.53 kB aşıyor)
+  - role-management.component.scss: 16.29 kB (16 kB sınırını 287 bytes aşıyor)
+- Tekrarlanan stiller analiz edildi ve ortak stil dosyası oluşturuldu: `frontend/src/app/shared/styles/common.scss`
+- PrimeNG tema özelleştirmeleri için ayrı dosya oluşturuldu: `frontend/src/app/shared/styles/primeng-theme.scss`
+- Ana stil dosyası güncellendi: `frontend/src/styles.scss`
+- Bileşen SCSS dosyaları optimize edildi:
+  - user-management.component.scss
+  - role-management.component.scss
+  - user-page-permissions.component.scss
+- Angular bütçe ayarları güncellendi: `frontend/angular.json`
+- Bilgi dosyası oluşturuldu: `knowledge-base/scss-optimization.md`
+- errors.md dosyası güncellendi
+
+### Öğrenilen Dersler
+- Tekrarlanan stilleri ortak dosyalara taşımak, kod tekrarını azaltır ve bakımı kolaylaştırır.
+- SCSS dosyalarını modüler bir yapıda organize etmek, büyük projelerde stil yönetimini kolaylaştırır.
+- Her bileşenin sadece kendine özel stilleri içermesi, dosya boyutunu azaltır ve performansı artırır.
+- PrimeNG bileşenlerinin özelleştirmelerini merkezi bir dosyada toplamak, tutarlılık sağlar ve bakımı kolaylaştırır.
+- Angular'ın bütçe ayarları, performans sorunlarını erken tespit etmek için önemlidir, ancak gerektiğinde bu sınırlar artırılabilir.
+
+## Güncel Görev: SCSS Optimizasyonu Sonrası Tasarım Bozulması Sorunu
+
+### Sorun
+SCSS optimizasyonu sonrasında kullanıcı yönetimi sayfasının tasarımı bozuldu. Tablo yapısı ve diğer bileşene özel stiller eksik kaldığı için sayfa düzgün görüntülenmiyor.
+
+### Yapılacaklar
+- [X] Bozulan sayfaları tespit etme
+- [X] Eksik kalan stilleri analiz etme
+- [X] Bileşene özel stilleri ekleme
+- [X] Sayfayı test etme
+- [X] Bilgi dosyasını güncelleme
+- [X] errors.md dosyasını güncelleme
+
+### Yapıldı
+- Bozulan sayfa tespit edildi: Kullanıcı Yönetimi Sayfası
+- Eksik kalan stiller analiz edildi:
+  - Tablo başlık satırı stilleri
+  - Tablo veri satırları stilleri
+  - Hücre düzenleri
+  - Özel checkbox'lar
+  - Sayfalama kontrolleri
+  - İzin rozetleri
+  - İşlem butonları
+- Bileşene özel stiller eklendi: `frontend/src/app/features/user-management/components/user-management.component.scss`
+- Sayfa test edildi ve tasarımın düzgün görüntülendiği doğrulandı
+- Bilgi dosyası güncellendi: `knowledge-base/scss-optimization.md`
+- errors.md dosyası güncellendi
+
+### Öğrenilen Dersler
+- SCSS optimizasyonu yaparken, bileşene özel stillerin korunması veya yeniden eklenmesi önemlidir.
+- Optimizasyon sonrasında her sayfayı test etmek, tasarım sorunlarını erken tespit etmek için kritiktir.
+- Stil envanteri çıkarmak, hangi stillerin ortak, hangi stillerin bileşene özel olduğunu belirlemek için faydalıdır.
+- Görsel karşılaştırma, eksik kalan stilleri tespit etmek için etkili bir yöntemdir.
+- Stilleri kategorilere ayırmak (ortak, tema, bileşene özel), stil yönetimini kolaylaştırır.
+
+## SCSS Optimizasyonu Sonrası Rol Renklendirme Özelliğinin Düzeltilmesi
+
+### Görev Tanımı
+SCSS dosyalarının optimizasyonu ve ortak stillerin `common.scss` dosyasına taşınması sonrasında, kullanıcı yönetimi sayfasında izinler sütunundaki rol rozetlerinin otomatik renklendirme özelliği kayboldu. Bu özelliğin geri getirilmesi gerekiyor.
+
+### Yapılan İşlemler
+[X] Kullanıcı yönetimi sayfasındaki rol renklendirme özelliğinin nasıl çalıştığını anlamak için ilgili dosyaları inceleme
+[X] `knowledge-base/feature_modules/user_management_role_colors.md` dosyasındaki bilgileri inceleme
+[X] `user-management.component.ts` dosyasındaki `getRoleColorClass` metodunu inceleme
+[X] `user-management.component.html` dosyasında rol rozetlerinin nasıl kullanıldığını inceleme
+[X] `user-management.component.scss` dosyasına eksik olan renk sınıflarını ekleme
+[X] Değişiklikleri test etme
+[X] Hata ve çözümü `errors.md` dosyasına belgeleme
+
+### Öğrenilen Dersler
+1. SCSS optimizasyonu yaparken, sadece genel stilleri değil, özel işlevsellik sağlayan sınıfları da dikkate almak gerekir.
+2. Stil değişikliklerinden sonra, tüm özel işlevselliğin (renklendirme, animasyonlar, vb.) hala çalıştığından emin olmak için kapsamlı test yapılmalıdır.
+3. Özel işlevsellik sağlayan stil sınıflarını belgelemek ve bu belgeleri SCSS optimizasyonu sırasında referans olarak kullanmak önemlidir.
+4. Bileşene özgü işlevsellik sağlayan stiller, ortak stil dosyalarına taşınmamalı, bileşenin kendi SCSS dosyasında kalmalıdır.
+
+### Sonuç
+Kullanıcı yönetimi sayfasındaki rol rozetlerinin otomatik renklendirme özelliği başarıyla geri getirildi. Eksik olan renk sınıfları `user-management.component.scss` dosyasına eklendi ve özellik tekrar çalışır hale geldi.
+
+# Scratchpad
+
+## Görev: Entity Framework Core Tablo Çakışması Sorunu Çözümü
+
+### Sorun
+Entity Framework Core, aynı isimde ancak farklı namespace'lerde tanımlanan sınıfları aynı tablolara eşleştirmeye çalışıyor, ancak aralarında bir ilişki olmadığı için hata veriyordu.
+
+### Çözüm Adımları
+- [X] `UserPermissions` referanslarını `UserPermission` olarak değiştirdik
+- [X] `Stock.Domain.Entities.Permissions` namespace'indeki sınıfları kullanmaya karar verdik
+- [X] Tüm referansları buna göre güncelledik
+- [X] Eski sınıfları (`Stock.Domain.Entities` namespace'indeki) kaldırdık veya yeniden adlandırdık
+- [X] Migrasyon hatalarını tespit ettik
+- [X] Mevcut migrasyonları kaldırdık
+- [X] Veritabanını sıfırladık
+- [X] Yeni bir migrasyon oluşturduk
+- [X] Veritabanını güncelledik
+- [X] Uygulamayı başarıyla çalıştırdık
+
+### Öğrenilen Dersler
+1. Aynı isimde ancak farklı namespace'lerde sınıflar oluşturmaktan kaçınmalıyız
+2. Migrasyon oluşturmadan önce, modellerin ve veritabanı şemasının uyumlu olduğundan emin olmalıyız
+3. Migrasyon uygulamadan önce, migrasyon dosyasını dikkatlice incelemeli ve gerekirse düzenlemeliyiz
+4. Veritabanı şemasını düzenli olarak kontrol etmeli ve kod tarafındaki modellerle senkronize olduğundan emin olmalıyız
+
+### Sonraki Adımlar
+- [X] Admin kullanıcısı giriş sorunu çözüldü
+- [X] ActivityLog tablosu hatası çözüldü
+
+## Görev: ActivityLog Tablosu Yabancı Anahtar Hatası Çözümü
+
+### Sorun
+Admin paneline giriş yapıldığında, `LogService` sınıfındaki `syncPendingLogs` metodu çalışıyor ve localStorage'da bekleyen logları toplu olarak sunucuya göndermeye çalışıyordu. Ancak, frontend'den gelen log verilerindeki UserId değerleri, veritabanındaki Users tablosunda mevcut olmadığı için yabancı anahtar kısıtlaması hatası alınıyordu.
+
+### Çözüm Adımları
+- [X] `ActivityLog` entity sınıfını inceledik ve UserId alanının [Required] olarak işaretlendiğini gördük
+- [X] Yeni bir migration oluşturduk: `dotnet ef migrations add FixActivityLogUserIdNullable -p ../Stock.Infrastructure`
+- [X] Migration dosyasını düzenleyerek `ActivityLogs` tablosundaki UserId alanını nullable yapmak ve foreign key kısıtlamasını güncellemek için SQL komutları ekledik
+- [X] `ActivityLog` entity sınıfında UserId alanını nullable yaptık: `public int? UserId { get; set; }`
+- [X] Veritabanını güncelledik: `dotnet ef database update`
+- [X] Uygulamayı yeniden başlattık: `dotnet run`
+
+### Öğrenilen Dersler
+1. Entity Framework Core ile çalışırken, yabancı anahtar ilişkilerini dikkatli bir şekilde tasarlamak önemlidir
+2. Bazı durumlarda, özellikle log kayıtları gibi opsiyonel ilişkiler içeren tablolarda, yabancı anahtar alanlarının nullable olması daha uygun olabilir
+3. ON DELETE SET NULL gibi kısıtlamalar, ilişkili kayıtlar silindiğinde veri bütünlüğünü korumaya yardımcı olabilir
+4. Migration dosyalarını manuel olarak düzenleyerek, Entity Framework Core'un otomatik olarak oluşturamadığı veya algılayamadığı değişiklikleri yapabiliriz
+5. Veritabanı şeması değişikliklerinden sonra entity sınıflarını da güncellemek, kod ve veritabanı arasındaki uyumu sağlamak için önemlidir
+
+### Sonraki Adımlar
+- [ ] Diğer potansiyel hataları tespit etmek için uygulamayı test etmeye devam etmek
+- [ ] Kullanıcı deneyimini iyileştirmek için frontend'de gerekli düzenlemeleri yapmak
+
+## Görev: ActivityLogController'da UserId Kontrolü Güncelleme
+
+### Sorun
+Admin paneline giriş yapıldığında, `LogService` sınıfındaki `syncPendingLogs` metodu çalışıyor ve localStorage'da bekleyen logları toplu olarak sunucuya göndermeye çalışıyordu. Ancak, frontend'den gelen log verilerindeki UserId değerleri, veritabanındaki Users tablosunda mevcut olmadığı için yabancı anahtar kısıtlaması hatası alınıyordu.
+
+### Çözüm Adımları
+- [X] `ActivityLogController.cs` dosyasını inceledik ve `CreateBulkActivityLogs` metodunu analiz ettik
+- [X] UserId kontrolünü güncelledik, veritabanında olmayan UserId değerleri için null atanmasını sağladık
+- [X] Entity Framework Core kullanarak UserId'nin veritabanında var olup olmadığını kontrol ettik
+- [X] Kullanıcı bulunamadığında uygun log mesajları ekledik
+- [X] `ActivityLog` entity sınıfında UserId alanını nullable yaptık: `public int? UserId { get; set; }`
+- [X] Yeni bir migration oluşturduk: `dotnet ef migrations add FixActivityLogUserIdNullable -p ../Stock.Infrastructure`
+- [X] Migration dosyasını düzenleyerek `ActivityLogs` tablosundaki UserId alanını nullable yapmak için SQL komutları ekledik
+- [X] Veritabanını güncelledik: `dotnet ef database update`
+- [X] Uygulamayı yeniden başlattık ve sorunun çözüldüğünü doğruladık
+
+### Yapılan Değişiklikler
+`ActivityLogController.cs` dosyasında, `CreateBulkActivityLogs` metodunda UserId kontrolü güncellendi:
+
+```csharp
+if (dynamicLog.TryGetValue("userId", out var userIdElement) && userIdElement.ValueKind != JsonValueKind.Null)
+{
+    try
+    {
+        var userId = userIdElement.GetInt32();
+        
+        // Kullanıcının veritabanında var olup olmadığını kontrol et
+        var userExists = await _context.Users.AnyAsync(u => u.Id == userId);
+        
+        if (userExists)
+        {
+            log.UserId = userId;
+        }
+        else
+        {
+            _logger.LogWarning($"Belirtilen userId ({userId}) veritabanında bulunamadı. UserId null olarak ayarlanıyor.");
+            log.UserId = null; // Kullanıcı bulunamadıysa null olarak ayarla
+        }
+    }
+    catch (Exception ex)
+    {
+        _logger.LogWarning($"userId alanı int'e dönüştürülemedi: {ex.Message}. UserId null olarak ayarlanıyor.");
+        log.UserId = null; // Hata durumunda null olarak ayarla
+    }
+}
+else
+{
+    _logger.LogWarning("Log kaydında userId bulunamadı veya null. UserId null olarak ayarlanıyor.");
+    log.UserId = null; // UserId yoksa null olarak ayarla
+}
+```
+
+### Öğrenilen Dersler
+1. Yabancı anahtar ilişkilerinde, ilişkili kaydın var olup olmadığını kontrol etmek önemlidir
+2. Veritabanı kısıtlamalarını dikkate alarak, gerektiğinde null değerler atamak veri bütünlüğünü korur
+3. Hata durumlarını detaylı şekilde loglayarak, sorunların kaynağını daha kolay tespit edebiliriz
+4. Entity Framework Core'un `AnyAsync` gibi metodları, veritabanı sorgularını optimize etmek için kullanılabilir
+5. Veri dönüşümlerinde try-catch blokları kullanarak, beklenmeyen format hatalarına karşı koruma sağlayabiliriz
+
+### Sonraki Adımlar
+- [ ] Diğer potansiyel yabancı anahtar ilişkilerini gözden geçirmek
+- [ ] Log kayıtlarının daha detaylı analizi için bir dashboard oluşturmak
+- [ ] Kullanıcı aktivitelerinin daha iyi izlenmesi için raporlama özelliği eklemek

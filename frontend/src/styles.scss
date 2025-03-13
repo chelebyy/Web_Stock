@@ -2,6 +2,8 @@
 @use "primeicons/primeicons.css";
 @use "./app/features/dashboard/shared/styles/dashboard-icons.scss";
 @use "./app/features/bilgi-islem/shared/styles/bilgi-islem-icons.scss";
+@use "./app/shared/styles/common.scss";
+@use "./app/shared/styles/primeng-theme.scss";
 
 /* PrimeNG 19 Tema Ayarları */
 :root {

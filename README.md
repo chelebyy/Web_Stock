@@ -100,6 +100,11 @@ Proje ile ilgili tüm belgeler `knowledge-base` klasöründe bulunmaktadır:
 - [Hata Kayıtları ve Çözümleri](errors.md)
 - [Scratchpad - Çalışma Notları](scratchpad.md)
 
+## Teknik Belgeler
+
+- [Sistem Başlatma Kılavuzu](knowledge-base/system_startup_guide.md)
+- [Entity Framework Core Namespace Çakışması Çözümü ve Geçiş Kılavuzu](knowledge-base/namespace-migration-guide.md)
+
 ## Katkıda Bulunma
 
 1. Bu repoyu fork edin

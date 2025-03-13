@@ -3,6 +3,7 @@ using Microsoft.Extensions.Logging;
 using Stock.Application.Common.Interfaces;
 using Stock.Application.Models.DTOs;
 using Stock.Domain.Entities;
+using Stock.Domain.Entities.Permissions;
 using Stock.Infrastructure.Data;
 using System;
 using System.Collections.Generic;
@@ -125,7 +126,7 @@ namespace Stock.Infrastructure.Services
                 else
                 {
                     // Create new permission entry
-                    var userPermission = new Stock.Domain.Entities.UserPermission
+                    var userPermission = new UserPermission
                     {
                         UserId = userId,
                         PermissionId = permissionId,
@@ -201,8 +202,6 @@ namespace Stock.Infrastructure.Services
                         UserName = up.User.Username,
                         PermissionName = up.Permission.Name,
                         ResourceType = up.Permission.ResourceType,
-                        ResourceName = up.Permission.ResourceName,
-                        Action = up.Permission.Action,
                         Description = up.Permission.Description,
                         Group = up.Permission.Group
                     })

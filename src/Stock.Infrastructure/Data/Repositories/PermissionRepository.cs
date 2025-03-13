@@ -8,7 +8,7 @@ using Stock.Domain.Interfaces;
 
 namespace Stock.Infrastructure.Data.Repositories
 {
-    public class PermissionRepository : GenericRepository<Stock.Domain.Entities.Permission>, IPermissionRepository
+    public class PermissionRepository : GenericRepository<Stock.Domain.Entities.Permissions.Permission>, IPermissionRepository
     {
         private readonly new ApplicationDbContext _context;
 
@@ -17,13 +17,13 @@ namespace Stock.Infrastructure.Data.Repositories
             _context = context;
         }
 
-        public async Task<Stock.Domain.Entities.Permission?> GetByNameAsync(string name)
+        public async Task<Stock.Domain.Entities.Permissions.Permission?> GetByNameAsync(string name)
         {
             return await _context.Permissions
                 .FirstOrDefaultAsync(p => p.Name == name);
         }
 
-        public async Task<IEnumerable<Stock.Domain.Entities.Permission>> GetPermissionsByRoleIdAsync(int roleId)
+        public async Task<IEnumerable<Stock.Domain.Entities.Permissions.Permission>> GetPermissionsByRoleIdAsync(int roleId)
         {
             return await _context.RolePermissions
                 .Where(rp => rp.RoleId == roleId)
@@ -31,7 +31,7 @@ namespace Stock.Infrastructure.Data.Repositories
                 .ToListAsync();
         }
 
-        public async Task<IEnumerable<Stock.Domain.Entities.Permission>> GetPermissionsByGroupAsync(string group)
+        public async Task<IEnumerable<Stock.Domain.Entities.Permissions.Permission>> GetPermissionsByGroupAsync(string group)
         {
             return await _context.Permissions
                 .Where(p => p.Group == group)
@@ -51,7 +51,7 @@ namespace Stock.Infrastructure.Data.Repositories
         {
             foreach (var permissionId in permissionIds)
             {
-                var rolePermission = new Stock.Domain.Entities.RolePermission
+                var rolePermission = new Stock.Domain.Entities.Permissions.RolePermission
                 {
                     RoleId = roleId,
                     PermissionId = permissionId

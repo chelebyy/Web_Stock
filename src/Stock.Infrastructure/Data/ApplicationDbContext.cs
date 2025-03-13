@@ -3,6 +3,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using Stock.Domain.Entities;
+using Stock.Domain.Entities.Permissions;
 using Stock.Infrastructure.Data.Config;
 using BCrypt.Net;
 

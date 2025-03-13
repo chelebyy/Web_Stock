@@ -2,6 +2,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Stock.Domain.Entities;
+using Stock.Domain.Entities.Permissions;
 using Stock.Domain.Interfaces;
 using System;
 using System.Collections.Generic;
@@ -97,7 +98,7 @@ namespace Stock.Infrastructure.Data
         private static async Task RemovePermissionAsync(ApplicationDbContext context, int permissionId, string permissionName, ILogger logger)
         {
             // Kullanıcı izinlerini temizle
-            var userPermissions = await context.Set<Domain.Entities.UserPermission>()
+            var userPermissions = await context.UserPermissions
                 .Where(up => up.PermissionId == permissionId)
                 .ToListAsync();
             
@@ -108,7 +109,7 @@ namespace Stock.Infrastructure.Data
             }
 
             // Rol izinlerini temizle
-            var rolePermissions = await context.Set<Domain.Entities.RolePermission>()
+            var rolePermissions = await context.RolePermissions
                 .Where(rp => rp.PermissionId == permissionId)
                 .ToListAsync();
             
@@ -134,10 +135,19 @@ namespace Stock.Infrastructure.Data
             if (await context.Permissions.AnyAsync())
                 return;
 
-            var permissions = new List<Permission>
+            var permissions = new List<Stock.Domain.Entities.Permissions.Permission>
             {
+                new Stock.Domain.Entities.Permissions.Permission { 
+                    Name = "Pages.Dashboard.View", 
+                    Description = "Dashboard sayfasını görüntüleme", 
+                    Group = "Sayfa Erişimi", 
+                    ResourceType = "Page", 
+                    ResourceName = "Dashboard", 
+                    Action = "View", 
+                    CreatedAt = DateTime.UtcNow 
+                },
                 // Kullanıcı Yönetimi İzinleri
-                new Permission { 
+                new Stock.Domain.Entities.Permissions.Permission { 
                     Name = "Users.Create", 
                     Description = "Kullanıcı oluşturma", 
                     Group = "Kullanıcı Yönetimi", 
@@ -146,7 +156,7 @@ namespace Stock.Infrastructure.Data
                     Action = "Create", 
                     CreatedAt = DateTime.UtcNow 
                 },
-                new Permission { 
+                new Stock.Domain.Entities.Permissions.Permission { 
                     Name = "Users.Read", 
                     Description = "Kullanıcıları görüntüleme", 
                     Group = "Kullanıcı Yönetimi", 
@@ -155,7 +165,7 @@ namespace Stock.Infrastructure.Data
                     Action = "Read", 
                     CreatedAt = DateTime.UtcNow 
                 },
-                new Permission { 
+                new Stock.Domain.Entities.Permissions.Permission { 
                     Name = "Users.Update", 
                     Description = "Kullanıcı güncelleme", 
                     Group = "Kullanıcı Yönetimi", 
@@ -164,7 +174,7 @@ namespace Stock.Infrastructure.Data
                     Action = "Update", 
                     CreatedAt = DateTime.UtcNow 
                 },
-                new Permission { 
+                new Stock.Domain.Entities.Permissions.Permission { 
                     Name = "Users.Delete", 
                     Description = "Kullanıcı silme", 
                     Group = "Kullanıcı Yönetimi", 
@@ -175,7 +185,7 @@ namespace Stock.Infrastructure.Data
                 },
                 
                 // Rol Yönetimi İzinleri
-                new Permission { 
+                new Stock.Domain.Entities.Permissions.Permission { 
                     Name = "Roles.Create", 
                     Description = "Rol oluşturma", 
                     Group = "Rol Yönetimi", 
@@ -184,7 +194,7 @@ namespace Stock.Infrastructure.Data
                     Action = "Create", 
                     CreatedAt = DateTime.UtcNow 
                 },
-                new Permission { 
+                new Stock.Domain.Entities.Permissions.Permission { 
                     Name = "Roles.Read", 
                     Description = "Rolleri görüntüleme", 
                     Group = "Rol Yönetimi", 
@@ -193,7 +203,7 @@ namespace Stock.Infrastructure.Data
                     Action = "Read", 
                     CreatedAt = DateTime.UtcNow 
                 },
-                new Permission { 
+                new Stock.Domain.Entities.Permissions.Permission { 
                     Name = "Roles.Update", 
                     Description = "Rol güncelleme", 
                     Group = "Rol Yönetimi", 
@@ -202,7 +212,7 @@ namespace Stock.Infrastructure.Data
                     Action = "Update", 
                     CreatedAt = DateTime.UtcNow 
                 },
-                new Permission { 
+                new Stock.Domain.Entities.Permissions.Permission { 
                     Name = "Roles.Delete", 
                     Description = "Rol silme", 
                     Group = "Rol Yönetimi", 
@@ -213,7 +223,7 @@ namespace Stock.Infrastructure.Data
                 },
                 
                 // Stok Yönetimi İzinleri
-                new Permission { 
+                new Stock.Domain.Entities.Permissions.Permission { 
                     Name = "Stock.Create", 
                     Description = "Stok oluşturma", 
                     Group = "Stok Yönetimi", 
@@ -222,7 +232,7 @@ namespace Stock.Infrastructure.Data
                     Action = "Create", 
                     CreatedAt = DateTime.UtcNow 
                 },
-                new Permission { 
+                new Stock.Domain.Entities.Permissions.Permission { 
                     Name = "Stock.Read", 
                     Description = "Stokları görüntüleme", 
                     Group = "Stok Yönetimi", 
@@ -231,7 +241,7 @@ namespace Stock.Infrastructure.Data
                     Action = "Read", 
                     CreatedAt = DateTime.UtcNow 
                 },
-                new Permission { 
+                new Stock.Domain.Entities.Permissions.Permission { 
                     Name = "Stock.Update", 
                     Description = "Stok güncelleme", 
                     Group = "Stok Yönetimi", 
@@ -240,7 +250,7 @@ namespace Stock.Infrastructure.Data
                     Action = "Update", 
                     CreatedAt = DateTime.UtcNow 
                 },
-                new Permission { 
+                new Stock.Domain.Entities.Permissions.Permission { 
                     Name = "Stock.Delete", 
                     Description = "Stok silme", 
                     Group = "Stok Yönetimi", 
@@ -251,7 +261,7 @@ namespace Stock.Infrastructure.Data
                 },
                 
                 // Rapor İzinleri
-                new Permission { 
+                new Stock.Domain.Entities.Permissions.Permission { 
                     Name = "Reports.View", 
                     Description = "Raporları görüntüleme", 
                     Group = "Raporlar", 
@@ -260,7 +270,7 @@ namespace Stock.Infrastructure.Data
                     Action = "View", 
                     CreatedAt = DateTime.UtcNow 
                 },
-                new Permission { 
+                new Stock.Domain.Entities.Permissions.Permission { 
                     Name = "Reports.Export", 
                     Description = "Raporları dışa aktarma", 
                     Group = "Raporlar", 
@@ -271,16 +281,7 @@ namespace Stock.Infrastructure.Data
                 },
                 
                 // Dashboard İzinleri
-                new Permission { 
-                    Name = "Dashboard.View", 
-                    Description = "Dashboard görüntüleme", 
-                    Group = "Dashboard", 
-                    ResourceType = "Function", 
-                    ResourceName = "Dashboard", 
-                    Action = "View", 
-                    CreatedAt = DateTime.UtcNow 
-                },
-                new Permission { 
+                new Stock.Domain.Entities.Permissions.Permission { 
                     Name = "Dashboard.Admin", 
                     Description = "Admin dashboard görüntüleme", 
                     Group = "Dashboard", 
@@ -291,7 +292,7 @@ namespace Stock.Infrastructure.Data
                 },
                 
                 // Sayfa Erişim İzinleri - Ana Sayfalar
-                new Permission { 
+                new Stock.Domain.Entities.Permissions.Permission { 
                     Name = "Pages.AdminDashboard", 
                     Description = "Admin paneline erişim", 
                     Group = "Sayfa Erişimi", 
@@ -300,7 +301,7 @@ namespace Stock.Infrastructure.Data
                     Action = "View", 
                     CreatedAt = DateTime.UtcNow 
                 },
-                new Permission { 
+                new Stock.Domain.Entities.Permissions.Permission { 
                     Name = "Pages.UserDashboard", 
                     Description = "Kullanıcı paneline erişim", 
                     Group = "Sayfa Erişimi", 
@@ -309,7 +310,7 @@ namespace Stock.Infrastructure.Data
                     Action = "View", 
                     CreatedAt = DateTime.UtcNow 
                 },
-                new Permission { 
+                new Stock.Domain.Entities.Permissions.Permission { 
                     Name = "Pages.UserManagement", 
                     Description = "Kullanıcı yönetimi sayfasına erişim", 
                     Group = "Sayfa Erişimi", 
@@ -318,7 +319,7 @@ namespace Stock.Infrastructure.Data
                     Action = "View", 
                     CreatedAt = DateTime.UtcNow 
                 },
-                new Permission { 
+                new Stock.Domain.Entities.Permissions.Permission { 
                     Name = "Pages.RoleManagement", 
                     Description = "Rol yönetimi sayfasına erişim", 
                     Group = "Sayfa Erişimi", 
@@ -327,7 +328,7 @@ namespace Stock.Infrastructure.Data
                     Action = "View", 
                     CreatedAt = DateTime.UtcNow 
                 },
-                new Permission { 
+                new Stock.Domain.Entities.Permissions.Permission { 
                     Name = "Pages.StockManagement", 
                     Description = "Stok yönetimi sayfasına erişim", 
                     Group = "Sayfa Erişimi", 
@@ -336,7 +337,7 @@ namespace Stock.Infrastructure.Data
                     Action = "View", 
                     CreatedAt = DateTime.UtcNow 
                 },
-                new Permission { 
+                new Stock.Domain.Entities.Permissions.Permission { 
                     Name = "Pages.Reports", 
                     Description = "Raporlar sayfasına erişim", 
                     Group = "Sayfa Erişimi", 
@@ -345,7 +346,7 @@ namespace Stock.Infrastructure.Data
                     Action = "View", 
                     CreatedAt = DateTime.UtcNow 
                 },
-                new Permission { 
+                new Stock.Domain.Entities.Permissions.Permission { 
                     Name = "Pages.Settings", 
                     Description = "Ayarlar sayfasına erişim", 
                     Group = "Sayfa Erişimi", 
@@ -356,7 +357,7 @@ namespace Stock.Infrastructure.Data
                 },
                 
                 // Revir Sayfası İzinleri
-                new Permission { 
+                new Stock.Domain.Entities.Permissions.Permission { 
                     Name = "Pages.Revir.View", 
                     Description = "Revir sayfasını görüntüleme", 
                     Group = "Sayfa Erişimi", 
@@ -365,7 +366,7 @@ namespace Stock.Infrastructure.Data
                     Action = "View", 
                     CreatedAt = DateTime.UtcNow 
                 },
-                new Permission { 
+                new Stock.Domain.Entities.Permissions.Permission { 
                     Name = "Pages.Revir.Create", 
                     Description = "Revir sayfasında ekleme", 
                     Group = "Sayfa Erişimi", 
@@ -374,7 +375,7 @@ namespace Stock.Infrastructure.Data
                     Action = "Create", 
                     CreatedAt = DateTime.UtcNow 
                 },
-                new Permission { 
+                new Stock.Domain.Entities.Permissions.Permission { 
                     Name = "Pages.Revir.Edit", 
                     Description = "Revir sayfasında düzenleme", 
                     Group = "Sayfa Erişimi", 
@@ -383,7 +384,7 @@ namespace Stock.Infrastructure.Data
                     Action = "Edit", 
                     CreatedAt = DateTime.UtcNow 
                 },
-                new Permission { 
+                new Stock.Domain.Entities.Permissions.Permission { 
                     Name = "Pages.Revir.Delete", 
                     Description = "Revir sayfasında silme", 
                     Group = "Sayfa Erişimi", 
@@ -394,7 +395,7 @@ namespace Stock.Infrastructure.Data
                 },
                 
                 // Bilgi İşlem Sayfası İzinleri
-                new Permission { 
+                new Stock.Domain.Entities.Permissions.Permission { 
                     Name = "Pages.BilgiIslem.View", 
                     Description = "Bilgi İşlem sayfasını görüntüleme", 
                     Group = "Sayfa Erişimi", 
@@ -403,7 +404,7 @@ namespace Stock.Infrastructure.Data
                     Action = "View", 
                     CreatedAt = DateTime.UtcNow 
                 },
-                new Permission { 
+                new Stock.Domain.Entities.Permissions.Permission { 
                     Name = "Pages.BilgiIslem.Create", 
                     Description = "Bilgi İşlem sayfasında ekleme", 
                     Group = "Sayfa Erişimi", 
@@ -412,7 +413,7 @@ namespace Stock.Infrastructure.Data
                     Action = "Create", 
                     CreatedAt = DateTime.UtcNow 
                 },
-                new Permission { 
+                new Stock.Domain.Entities.Permissions.Permission { 
                     Name = "Pages.BilgiIslem.Edit", 
                     Description = "Bilgi İşlem sayfasında düzenleme", 
                     Group = "Sayfa Erişimi", 
@@ -421,7 +422,7 @@ namespace Stock.Infrastructure.Data
                     Action = "Edit", 
                     CreatedAt = DateTime.UtcNow 
                 },
-                new Permission { 
+                new Stock.Domain.Entities.Permissions.Permission { 
                     Name = "Pages.BilgiIslem.Delete", 
                     Description = "Bilgi İşlem sayfasında silme", 
                     Group = "Sayfa Erişimi", 
@@ -432,7 +433,7 @@ namespace Stock.Infrastructure.Data
                 },
                 
                 // Eğitim Sayfası İzinleri
-                new Permission { 
+                new Stock.Domain.Entities.Permissions.Permission { 
                     Name = "Pages.Egitim.View", 
                     Description = "Eğitim sayfasını görüntüleme", 
                     Group = "Sayfa Erişimi", 
@@ -441,7 +442,7 @@ namespace Stock.Infrastructure.Data
                     Action = "View", 
                     CreatedAt = DateTime.UtcNow 
                 },
-                new Permission { 
+                new Stock.Domain.Entities.Permissions.Permission { 
                     Name = "Pages.Egitim.Create", 
                     Description = "Eğitim sayfasında ekleme", 
                     Group = "Sayfa Erişimi", 
@@ -450,7 +451,7 @@ namespace Stock.Infrastructure.Data
                     Action = "Create", 
                     CreatedAt = DateTime.UtcNow 
                 },
-                new Permission { 
+                new Stock.Domain.Entities.Permissions.Permission { 
                     Name = "Pages.Egitim.Edit", 
                     Description = "Eğitim sayfasında düzenleme", 
                     Group = "Sayfa Erişimi", 
@@ -459,7 +460,7 @@ namespace Stock.Infrastructure.Data
                     Action = "Edit", 
                     CreatedAt = DateTime.UtcNow 
                 },
-                new Permission { 
+                new Stock.Domain.Entities.Permissions.Permission { 
                     Name = "Pages.Egitim.Delete", 
                     Description = "Eğitim sayfasında silme", 
                     Group = "Sayfa Erişimi", 
@@ -580,34 +581,37 @@ namespace Stock.Infrastructure.Data
 
         private static async Task SeedRolePermissionsAsync(ApplicationDbContext context)
         {
+            // Eğer zaten RolePermission verileri varsa, tekrar oluşturma
             if (await context.RolePermissions.AnyAsync())
                 return;
-
+            
+            // Roller
             var adminRole = await context.Roles.FirstOrDefaultAsync(r => r.Name == "Admin");
             var userRole = await context.Roles.FirstOrDefaultAsync(r => r.Name == "User");
             
             if (adminRole == null || userRole == null)
+            {
+                // Roller henüz yok, seed roles çalıştırılmalı
                 return;
-
-            // Tüm izinleri al
-            var allPermissions = await context.Permissions.ToListAsync();
+            }
             
-            // Admin rolüne tüm izinleri ekle
-            var adminRolePermissions = allPermissions.Select(p => new RolePermission
+            // İzinler
+            var allPermissions = await context.Permissions.ToListAsync();
+            var userPermissions = await context.Permissions.Where(p => 
+                p.Name.StartsWith("Pages.UserDashboard") || 
+                p.Name.StartsWith("Pages.Revir.View") ||
+                p.Name.StartsWith("Stock.Read") ||
+                p.Name.StartsWith("Reports.View")
+            ).ToListAsync();
+            
+            // Admin rolü tüm izinlere sahip olacak
+            var adminRolePermissions = allPermissions.Select(p => new Stock.Domain.Entities.Permissions.RolePermission
             {
                 RoleId = adminRole.Id,
                 PermissionId = p.Id
             }).ToList();
             
-            // User rolüne sadece belirli izinleri ekle
-            var userPermissions = await context.Permissions.Where(p => 
-                p.Name == "Users.Read" || 
-                p.Name == "Stock.Read" || 
-                p.Name == "Reports.View" ||
-                p.Name == "Dashboard.View"
-            ).ToListAsync();
-            
-            var userRolePermissions = userPermissions.Select(p => new RolePermission
+            var userRolePermissions = userPermissions.Select(p => new Stock.Domain.Entities.Permissions.RolePermission
             {
                 RoleId = userRole.Id,
                 PermissionId = p.Id
@@ -629,41 +633,7 @@ namespace Stock.Infrastructure.Data
             var user2 = await context.Users.FirstOrDefaultAsync(u => u.Username == "ahmet");
             var user3 = await context.Users.FirstOrDefaultAsync(u => u.Username == "mehmet");
             
-            if (user1 == null && user2 == null && user3 == null)
-            {
-                // Test kullanıcıları oluştur
-                user1 = new User 
-                { 
-                    Username = "ayse", 
-                    PasswordHash = BCrypt.Net.BCrypt.HashPassword("ayse123"), 
-                    Sicil = "A123",
-                    IsAdmin = true, 
-                    CreatedAt = DateTime.UtcNow 
-                };
-                
-                user2 = new User 
-                { 
-                    Username = "ahmet", 
-                    PasswordHash = BCrypt.Net.BCrypt.HashPassword("ahmet123"), 
-                    Sicil = "A456",
-                    IsAdmin = false, 
-                    CreatedAt = DateTime.UtcNow 
-                };
-                
-                user3 = new User 
-                { 
-                    Username = "mehmet", 
-                    PasswordHash = BCrypt.Net.BCrypt.HashPassword("mehmet123"), 
-                    Sicil = "A789",
-                    IsAdmin = false, 
-                    CreatedAt = DateTime.UtcNow 
-                };
-                
-                await context.Users.AddRangeAsync(user1, user2, user3);
-                await context.SaveChangesAsync();
-            }
-            
-            // İlgili izinleri bul
+            // İzinler
             var egitimEditPermission = await context.Permissions.FirstOrDefaultAsync(p => p.Name == "Pages.Egitim.Edit");
             var revirViewPermission = await context.Permissions.FirstOrDefaultAsync(p => p.Name == "Pages.Revir.View");
             var revirEditPermission = await context.Permissions.FirstOrDefaultAsync(p => p.Name == "Pages.Revir.Edit");
@@ -677,12 +647,12 @@ namespace Stock.Infrastructure.Data
             }
             
             // Kullanıcı özel izinleri oluştur
-            var userPermissions = new List<UserPermission>();
+            var userPermissions = new List<Stock.Domain.Entities.Permissions.UserPermission>();
             
             // Ayşe: Diğer adminlerden farklı olarak sadece Eğitim sayfasını düzenleyebilir
             if (user1 != null)
             {
-                userPermissions.Add(new UserPermission
+                userPermissions.Add(new Stock.Domain.Entities.Permissions.UserPermission
                 {
                     UserId = user1.Id,
                     PermissionId = egitimEditPermission.Id,
@@ -694,7 +664,7 @@ namespace Stock.Infrastructure.Data
             // Ahmet: Standart kullanıcı rolünden farklı olarak Revir sayfasını görüntüleyebilir ve düzenleyebilir
             if (user2 != null)
             {
-                userPermissions.Add(new UserPermission
+                userPermissions.Add(new Stock.Domain.Entities.Permissions.UserPermission
                 {
                     UserId = user2.Id,
                     PermissionId = revirViewPermission.Id,
@@ -702,7 +672,7 @@ namespace Stock.Infrastructure.Data
                     CreatedAt = DateTime.UtcNow
                 });
                 
-                userPermissions.Add(new UserPermission
+                userPermissions.Add(new Stock.Domain.Entities.Permissions.UserPermission
                 {
                     UserId = user2.Id,
                     PermissionId = revirEditPermission.Id,
@@ -714,7 +684,7 @@ namespace Stock.Infrastructure.Data
             // Mehmet: Standart kullanıcı rolünden farklı olarak Bilgi İşlem sayfasını görüntüleyebilir, ama düzenleyemez
             if (user3 != null)
             {
-                userPermissions.Add(new UserPermission
+                userPermissions.Add(new Stock.Domain.Entities.Permissions.UserPermission
                 {
                     UserId = user3.Id,
                     PermissionId = bilgiIslemViewPermission.Id,

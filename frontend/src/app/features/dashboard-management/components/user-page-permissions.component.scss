@@ -89,78 +89,12 @@
   .font-medium {
     font-weight: 500;
   }
+}
 
-  :host ::ng-deep {
-    .custom-tabview {
-      .p-tabview-nav-container {
-        background-color: #1976d2 !important;
-        border-color: #1976d2 !important;
-      }
-      
-      .p-tabview-nav {
-        background-color: #1976d2 !important;
-        border-color: #1976d2 !important;
-      }
-      
-      .p-tabview-nav li .p-tabview-nav-link {
-        color: white !important;
-        padding: 1rem 1.5rem;
-        transition: all 0.2s;
-      }
-      
-      .p-tabview-nav li.p-highlight .p-tabview-nav-link {
-        color: white !important;
-        border-bottom: 2px solid white !important;
-        font-weight: 600;
-      }
-      
-      .p-tabview-nav li .p-tabview-nav-link:hover {
-        color: rgba(255, 255, 255, 0.9) !important;
-        background-color: rgba(255, 255, 255, 0.1) !important;
-      }
-      
-      .p-tabview-panels {
-        background-color: #ffffff !important;
-        padding: 1.5rem;
-      }
-    }
-    
-    .p-tabview .p-tabview-nav-container {
-      background-color: #1976d2 !important;
-      border-color: #1976d2 !important;
-    }
-    
-    .p-tabview .p-tabview-nav {
-      background-color: #1976d2 !important;
-      border-color: #1976d2 !important;
-    }
-    
-    .p-tabview .p-tabview-nav li .p-tabview-nav-link {
-      color: white !important;
-    }
-    
-    .p-tabview .p-tabview-nav li.p-highlight .p-tabview-nav-link {
-      color: white !important;
-      border-bottom: 2px solid white !important;
-    }
-    
-    .p-tabview .p-tabview-nav li .p-tabview-nav-link:hover {
-      color: rgba(255, 255, 255, 0.8) !important;
-      background-color: rgba(255, 255, 255, 0.1) !important;
-    }
-    
-    [style*="background-color: #000"],
-    [style*="background-color: black"],
-    [style*="background-color: rgb(0, 0, 0)"],
-    [style*="background-color: rgba(0, 0, 0"],
-    [style*="background: #000"],
-    [style*="background: black"],
-    [style*="background: rgb(0, 0, 0)"],
-    [style*="background: rgba(0, 0, 0"] {
-      background-color: #1976d2 !important;
-      background: #1976d2 !important;
-    }
-    
+// Sayfa izinleri sayfasına özel stiller
+:host ::ng-deep {
+  // Tabview özel stilleri
+  .custom-tabview {
     .p-tabview-nav-container {
       background-color: #1976d2 !important;
       border-color: #1976d2 !important;
@@ -173,154 +107,60 @@
     
     .p-tabview-nav li .p-tabview-nav-link {
       color: white !important;
+      padding: 1rem 1.5rem;
+      transition: all 0.2s;
     }
     
     .p-tabview-nav li.p-highlight .p-tabview-nav-link {
       color: white !important;
       border-bottom: 2px solid white !important;
+      font-weight: 600;
     }
-
-    .p-datatable {
-      .p-datatable-header {
-        background-color: #f8f9fa;
-        border: none;
+    
+    .p-tabview-nav li .p-tabview-nav-link:hover {
+      color: rgba(255, 255, 255, 0.9) !important;
+      background-color: rgba(255, 255, 255, 0.1) !important;
+    }
+    
+    .p-tabview-panels {
+      background-color: #ffffff !important;
+      padding: 1.5rem;
+    }
+  }
+  
+  // İzin tablosu özel stilleri
+  .permissions-table {
+    border: 2px solid #1976d2 !important;
+    border-radius: 8px;
+    overflow: hidden;
+    
+    .permission-header {
+      background-color: #f8f9fa;
+      padding: 1rem;
+      font-weight: 600;
+      color: #1976d2;
+    }
+    
+    .permission-row {
+      border-bottom: 1px solid #e9ecef;
+      
+      &:hover {
+        background-color: rgba(25, 118, 210, 0.05);
+      }
+      
+      .permission-cell {
         padding: 1rem;
       }
-
-      .p-datatable-thead > tr > th {
-        background-color: #f8f9fa;
-        color: #495057;
-        font-weight: 600;
-        padding: 1rem;
-        border-color: #e9ecef;
-      }
-
-      .p-datatable-tbody > tr {
-        background-color: #ffffff;
-        transition: background-color 0.2s;
-        
-        &:hover {
-          background-color: rgba(var(--primary-color-rgb), 0.05);
-        }
-        
-        > td {
-          padding: 1rem;
-          border-color: #e9ecef;
-        }
-      }
-
-      .p-paginator {
-        background-color: #f8f9fa;
-        border: none;
-        padding: 1rem;
-        
-        .p-paginator-element {
-          color: #6c757d;
-          
-          &.p-highlight {
-            background-color: var(--primary-color);
-            color: #ffffff;
-          }
-        }
+      
+      .permission-name {
+        font-weight: 500;
+        color: #333;
       }
       
-      &.p-datatable-striped {
-        border: 2px solid #1976d2 !important;
-      }
-    }
-    
-    .p-component {
-      border-color: #1976d2 !important;
-    }
-    
-    .p-tabview-panels, .p-tabview-nav, .p-tabview-nav-container {
-      border-color: #1976d2 !important;
-    }
-    
-    .p-datatable, .p-datatable-wrapper, .p-datatable-table {
-      border-color: #1976d2 !important;
-    }
-    
-    * {
-      border-color: #1976d2 !important;
-    }
-    
-    .p-datatable-wrapper {
-      border: 2px solid #1976d2 !important;
-    }
-    
-    .p-tag {
-      min-width: 80px;
-      justify-content: center;
-      border-radius: 4px;
-      font-weight: 500;
-      padding: 0.25rem 0.5rem;
-    }
-    
-    .custom-tag.p-tag {
-      display: inline-flex !important;
-      align-items: center !important;
-      justify-content: center !important;
-    }
-    
-    .custom-tag.p-tag.p-tag-success {
-      background-color: var(--green-500, #22c55e) !important;
-      border: 1px solid var(--green-600, #16a34a) !important;
-      color: white !important;
-    }
-    
-    .custom-tag.p-tag.p-tag-success:before {
-      content: "\e930" !important; /* pi pi-check-circle icon */
-      font-family: 'primeicons' !important;
-      margin-right: 0.25rem !important;
-    }
-    
-    .custom-tag.p-tag.p-tag-danger {
-      background-color: var(--red-500, #ef4444) !important;
-      border: 1px solid var(--red-600, #dc2626) !important;
-      color: white !important;
-    }
-    
-    .custom-tag.p-tag.p-tag-danger:before {
-      content: "\e90b" !important; /* pi pi-times-circle icon */
-      font-family: 'primeicons' !important;
-      margin-right: 0.25rem !important;
-    }
-    
-    td .p-tag.p-tag-success {
-      background-color: var(--green-500, #22c55e) !important;
-      color: white !important;
-    }
-    
-    td .p-tag.p-tag-danger {
-      background-color: var(--red-500, #ef4444) !important;
-      color: white !important;
-    }
-    
-    .p-button {
-      border-radius: 4px;
-      
-      &.p-button-success {
-        background-color: #22c55e;
-        border-color: #22c55e;
-        min-width: 120px;
-        white-space: nowrap;
-      }
-      
-      &.p-button-primary {
-        background-color: var(--primary-color);
-        border-color: var(--primary-color);
-        min-width: 120px;
-        white-space: nowrap;
-      }
-      
-      &.p-button-danger {
-        background-color: #ef4444;
-        border-color: #ef4444;
-      }
-      
-      &.p-button-rounded {
-        border-radius: 50%;
+      .permission-actions {
+        display: flex;
+        gap: 0.5rem;
+        justify-content: flex-end;
       }
     }
   }

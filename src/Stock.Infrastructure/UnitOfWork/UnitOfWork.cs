@@ -5,6 +5,7 @@ using System;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore.Storage;
 using Stock.Domain.Entities;
+using Stock.Domain.Entities.Permissions;
 
 namespace Stock.Infrastructure.UnitOfWork
 {
@@ -27,7 +28,7 @@ namespace Stock.Infrastructure.UnitOfWork
         
         public IRepository<T> GetRepository<T>() where T : BaseEntity
         {
-            if (typeof(T) == typeof(Permission))
+            if (typeof(T) == typeof(Stock.Domain.Entities.Permissions.Permission))
             {
                 return (IRepository<T>)(object)new PermissionRepository(_context);
             }

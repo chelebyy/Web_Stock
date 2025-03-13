@@ -77,7 +77,7 @@ namespace Stock.API.Controllers
         private async Task RemovePermission(int permissionId, string permissionName)
         {
             // Kullanıcı izinlerini temizle
-            var userPermissions = await _context.Set<Domain.Entities.UserPermission>()
+            var userPermissions = await _context.UserPermissions
                 .Where(up => up.PermissionId == permissionId)
                 .ToListAsync();
             
@@ -88,7 +88,7 @@ namespace Stock.API.Controllers
             }
 
             // Rol izinlerini temizle
-            var rolePermissions = await _context.Set<Domain.Entities.RolePermission>()
+            var rolePermissions = await _context.RolePermissions
                 .Where(rp => rp.PermissionId == permissionId)
                 .ToListAsync();
             

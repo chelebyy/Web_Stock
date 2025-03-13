@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using Stock.Domain.Entities.Permissions;
 
 namespace Stock.Domain.Entities
 {

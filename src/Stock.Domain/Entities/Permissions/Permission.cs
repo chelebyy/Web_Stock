@@ -9,6 +9,8 @@ namespace Stock.Domain.Entities.Permissions
         public string Name { get; set; }
         public string Description { get; set; }
         public string ResourceType { get; set; }
+        public string ResourceName { get; set; }
+        public string Action { get; set; }
         public string Group { get; set; }
 
         // Navigation properties
