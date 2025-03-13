@@ -121,7 +121,8 @@ interface PagePermission {
                   <i class="pi pi-times"></i>
                 </div>
                 
-                <div class="page-card-content" [class.expanded]="page.expanded" [attr.id]="'page-content-' + i">
+                <div class="page-card-content" [class.expanded]="page.expanded" [attr.id]="'page-content-' + i"
+                     [style.display]="page.expanded ? 'block' : 'none'">
                   <div class="page-permissions-list">
                     <div class="permission-item" *ngFor="let permission of page.permissions">
                       <div class="permission-content">
@@ -307,6 +308,7 @@ interface PagePermission {
       z-index: 10;
       box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
       border-color: #bfdbfe;
+      overflow: visible;
     }
 
     @media (max-width: 992px) {
@@ -382,14 +384,16 @@ interface PagePermission {
       overflow: hidden;
       max-height: 0;
       opacity: 0;
-      transition: all 0.3s ease;
+      transition: opacity 0.3s ease, max-height 0.3s ease, padding 0.3s ease;
       padding: 0;
+      position: relative;
+      z-index: 1;
     }
     
     .page-card-content.expanded {
       opacity: 1;
       padding: 1rem;
-      max-height: 1000px;
+      max-height: 2000px;
       border-top: 1px solid #e2e8f0;
     }
 
@@ -809,27 +813,33 @@ export class UserPagePermissionsComponent implements OnInit {
   togglePageExpanded(index: number): void {
     // Eğer zaten açıksa kapat
     if (this.pagePermissions[index].expanded) {
+      // Direkt olarak kapat, animasyon olmadan
       this.pagePermissions[index].expanded = false;
       return;
     }
     
     // Tüm kartları kapat
     this.pagePermissions.forEach((page, i) => {
-      page.expanded = false;
+      if (page.expanded) {
+        // Direkt olarak kapat, animasyon olmadan
+        page.expanded = false;
+      }
     });
     
-    // Seçili kartı aç
-    this.pagePermissions[index].expanded = true;
-    
-    // DOM'un güncellenmesini bekle
+    // 50ms gecikme ile seçili kartı aç (DOM'un güncellenmesi için)
     setTimeout(() => {
-      const cardElement = document.getElementById(`page-card-${index}`);
+      this.pagePermissions[index].expanded = true;
       
-      if (cardElement) {
-        // Kart açıldıysa görünür alana getir
-        cardElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
-      }
-    }, 50);
+      // DOM'un güncellenmesini bekle
+      setTimeout(() => {
+        const cardElement = document.getElementById(`page-card-${index}`);
+        
+        if (cardElement) {
+          // Kart açıldıysa görünür alana getir
+          cardElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+      }, 50);
+    }, 10);
   }
 
   savePermissions(): void {
@@ -932,6 +942,7 @@ export class UserPagePermissionsComponent implements OnInit {
   
   // Belirli bir kartı kapat
   closeCard(index: number): void {
+    // Direkt olarak kapat
     this.pagePermissions[index].expanded = false;
   }
 } 
