@@ -39,7 +39,8 @@ namespace Stock.Infrastructure.Data.Config
                 .OnDelete(DeleteBehavior.Restrict);
 
             builder.HasIndex(x => x.Sicil)
-                .IsUnique();
+                .IsUnique()
+                .HasFilter("\"IsDeleted\" = false");
         }
     }
 } 
