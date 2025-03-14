@@ -643,3 +643,63 @@ migrationBuilder.Sql(@"
 3. Entity Framework Core migrasyonlarında, `migrationBuilder.Sql()` metodu ile özel SQL komutları ekleyebiliriz.
 4. Veri tipi dönüşümlerinde, dönüştürülemeyen değerler için bir strateji belirlenmeli (NULL atama, varsayılan değer atama vb.).
 5. Migrasyon dosyalarını manuel olarak düzenlemek, Entity Framework Core'un otomatik olarak oluşturamadığı veya algılayamadığı değişiklikleri yapmak için kullanışlıdır.
+
+## TypeScript Tip Hataları ve Çözümleri
+
+### Hata Mesajı
+```
+[ERROR] TS2339: Property 'getRoleById' does not exist on type 'RoleService'.
+[ERROR] TS7006: Parameter 'role' implicitly has an 'any' type.
+[ERROR] TS7006: Parameter 'error' implicitly has an 'any' type.
+```
+
+### Hatanın Nedeni
+1. `permission-management.component.ts` dosyasında `roleService.getRoleById` metodu çağrılıyordu, ancak `RoleService` sınıfında böyle bir metot bulunmuyordu. Bunun yerine `getRole` metodu vardı.
+2. Bazı parametrelerin tip tanımlamaları eksikti, bu da TypeScript'in katı tip kontrolü nedeniyle hatalara neden oluyordu.
+3. Bileşende tanımlanan `Permission` interface'i ile `shared/models/permission.model.ts` dosyasındaki `Permission` interface'i arasında bir uyumsuzluk vardı. Bileşendeki `Permission` interface'inde `isGranted` alanı vardı, ancak modeldeki `Permission` interface'inde bu alan yoktu.
+
+### Çözüm
+1. `roleService.getRoleById` metodu çağrılarını `roleService.getRole` olarak değiştirdik:
+   ```typescript
+   // Eski kod
+   this.roleService.getRoleById(this.entityId).subscribe({...});
+   
+   // Yeni kod
+   this.roleService.getRole(this.entityId).subscribe({...});
+   ```
+
+2. Tüm parametrelere tip tanımlamaları ekledik:
+   ```typescript
+   // Eski kod
+   next: (role) => {...}
+   error: (error) => {...}
+   
+   // Yeni kod
+   next: (role: Role) => {...}
+   error: (error: any) => {...}
+   ```
+
+3. Model ve bileşen arasındaki tip uyumsuzluğunu çözmek için:
+   - Model tipini farklı bir isimle import ettik: `import { Permission as ModelPermission } from '../../../shared/models/permission.model';`
+   - API'den gelen verileri bileşendeki tipe dönüştürdük:
+   ```typescript
+   this.allPermissions = permissions.map(p => ({
+     id: p.id,
+     name: p.name,
+     description: p.description || '',
+     group: p.group || '',
+     isGranted: false
+   }));
+   ```
+
+### Öğrenilen Dersler
+1. Servis metodlarını çağırmadan önce, servis sınıfında bu metodların var olduğundan emin olunmalıdır.
+2. TypeScript'in katı tip kontrolü sayesinde, tip hatalarını erken aşamada tespit edebiliriz. Bu nedenle tüm parametrelere ve değişkenlere uygun tip tanımlamaları eklemeliyiz.
+3. Farklı modüllerde aynı isimde ancak farklı yapıda interface'ler olduğunda, bunları farklı isimlerle import ederek çakışmaları önleyebiliriz.
+4. API'den gelen verileri bileşende kullanılan tiplere dönüştürürken, eksik alanlar için varsayılan değerler sağlamalıyız.
+5. Hata mesajlarını dikkatlice okuyarak, sorunun kaynağını tespit edebiliriz.
+
+### Sonraki Adımlar
+1. Tüm bileşenlerde benzer tip hatalarını kontrol etmek ve düzeltmek.
+2. Model ve bileşen arasındaki tip uyumsuzluklarını gidermek için ortak bir tip tanımı oluşturmak.
+3. Servis metodlarının dokümantasyonunu iyileştirmek ve tutarlı isimlendirme kuralları uygulamak.

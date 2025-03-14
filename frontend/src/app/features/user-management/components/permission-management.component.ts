@@ -19,6 +19,8 @@ import { DividerModule } from 'primeng/divider';
 import { PermissionService } from '../../../services/permission.service';
 import { UserService } from '../../../services/user.service';
 import { RoleService } from '../../../services/role.service';
+import { Role } from '../../../shared/models/role.model';
+import { Permission as ModelPermission } from '../../../shared/models/permission.model';
 
 interface Permission {
   id: number;
@@ -205,30 +207,30 @@ export class PermissionManagementComponent implements OnInit {
     this.loading = true;
     
     // Önce rol bilgilerini al
-    this.roleService.getRoleById(this.entityId).subscribe({
-      next: (role) => {
+    this.roleService.getRole(this.entityId).subscribe({
+      next: (role: Role) => {
         this.roleName = role.name;
         
         // Tüm izinleri al
         this.permissionService.getAllPermissions().subscribe({
-          next: (permissions) => {
-            console.log('getAllPermissions yanıtı:', permissions);
+          next: (permissions: ModelPermission[]) => {
             if (!permissions || !Array.isArray(permissions)) {
-              console.error('Permissions verisi dizi değil:', permissions);
               this.allPermissions = [];
               this.loading = false;
               return;
             }
             
             this.allPermissions = permissions.map(p => ({
-              ...p,
+              id: p.id,
+              name: p.name,
+              description: p.description || '',
+              group: p.group || '',
               isGranted: false
             }));
             
             // Rolün mevcut izinlerini al
             this.permissionService.getPermissionsByRoleId(this.entityId).subscribe({
-              next: (rolePermissions) => {
-                console.log('getPermissionsByRoleId yanıtı:', rolePermissions);
+              next: (rolePermissions: ModelPermission[]) => {
                 if (rolePermissions && Array.isArray(rolePermissions)) {
                   const rolePermissionIds = rolePermissions.map(p => p.id);
                   this.allPermissions.forEach(permission => {
@@ -240,19 +242,19 @@ export class PermissionManagementComponent implements OnInit {
                 this.groupPermissions();
                 this.loading = false;
               },
-              error: (error) => {
+              error: (error: any) => {
                 console.error('Rol izinleri yüklenirken hata oluştu:', error);
                 this.loading = false;
               }
             });
           },
-          error: (error) => {
+          error: (error: any) => {
             console.error('Tüm izinler yüklenirken hata oluştu:', error);
             this.loading = false;
           }
         });
       },
-      error: (error) => {
+      error: (error: any) => {
         console.error('Rol bilgisi yüklenirken hata oluştu:', error);
         this.loading = false;
       }
@@ -261,49 +263,56 @@ export class PermissionManagementComponent implements OnInit {
   
   loadUserPermissions(): void {
     this.loading = true;
-    this.userService.getUserById(this.entityId).subscribe({
-      next: (user) => {
-        this.userName = user.username;
+    
+    // Önce kullanıcı bilgilerini al
+    this.userService.getUser(this.entityId).subscribe({
+      next: (user: any) => {
+        this.userName = user.username || `Kullanıcı #${this.entityId}`;
+        
+        // Tüm izinleri al
         this.permissionService.getAllPermissions().subscribe({
-          next: (permissions) => {
-            console.log('getAllPermissions yanıtı:', permissions);
+          next: (permissions: ModelPermission[]) => {
             if (!permissions || !Array.isArray(permissions)) {
-              console.error('Permissions verisi dizi değil:', permissions);
               this.allPermissions = [];
               this.loading = false;
               return;
             }
             
             this.allPermissions = permissions.map(p => ({
-              ...p,
+              id: p.id,
+              name: p.name,
+              description: p.description || '',
+              group: p.group || '',
               isGranted: false
             }));
             
+            // Kullanıcının mevcut izinlerini al
             this.permissionService.getPermissionsByUserId(this.entityId).subscribe({
-              next: (userPermissions) => {
-                console.log('getPermissionsByUserId yanıtı:', userPermissions);
+              next: (userPermissions: ModelPermission[]) => {
                 if (userPermissions && Array.isArray(userPermissions)) {
                   const userPermissionIds = userPermissions.map(p => p.id);
-                  this.allPermissions.forEach(p => {
-                    p.isGranted = userPermissionIds.includes(p.id);
+                  this.allPermissions.forEach(permission => {
+                    permission.isGranted = userPermissionIds.includes(permission.id);
                   });
                 }
-                this.loading = false;
+                
+                // İzinleri grupla
                 this.groupPermissions();
+                this.loading = false;
               },
-              error: (error) => {
+              error: (error: any) => {
                 console.error('Kullanıcı izinleri yüklenirken hata oluştu:', error);
                 this.loading = false;
               }
             });
           },
-          error: (error) => {
+          error: (error: any) => {
             console.error('Tüm izinler yüklenirken hata oluştu:', error);
             this.loading = false;
           }
         });
       },
-      error: (error) => {
+      error: (error: any) => {
         console.error('Kullanıcı bilgisi yüklenirken hata oluştu:', error);
         this.loading = false;
       }
@@ -348,70 +357,67 @@ export class PermissionManagementComponent implements OnInit {
   
   savePermissions(): void {
     this.loading = true;
-    console.log('İzinler kaydediliyor, entityType:', this.entityType, 'entityId:', this.entityId);
     
     // Seçili izinlerin ID'lerini al
     const selectedPermissionIds = this.allPermissions
       .filter(p => p.isGranted)
       .map(p => p.id);
     
-    console.log('Seçili izin ID\'leri:', selectedPermissionIds);
-    
     if (this.entityType === 'role') {
       // Rol izinlerini kaydet
       this.permissionService.assignPermissionsToRole(this.entityId, selectedPermissionIds).subscribe({
-        next: (result) => {
+        next: (result: boolean) => {
           this.loading = false;
           if (result) {
             this.messageService.add({
               severity: 'success',
               summary: 'Başarılı',
-              detail: 'Rol izinleri başarıyla güncellendi'
+              detail: 'Rol izinleri başarıyla kaydedildi'
             });
           } else {
             this.messageService.add({
               severity: 'error',
               summary: 'Hata',
-              detail: 'Rol izinleri güncellenirken bir hata oluştu'
+              detail: 'Rol izinleri kaydedilirken bir hata oluştu'
             });
           }
         },
-        error: (error) => {
-          console.error('Rol izinleri kaydedilirken hata:', error);
+        error: (error: any) => {
           this.loading = false;
+          console.error('Rol izinleri kaydedilirken hata oluştu:', error);
           this.messageService.add({
             severity: 'error',
             summary: 'Hata',
-            detail: 'Rol izinleri güncellenirken bir hata oluştu'
+            detail: 'Rol izinleri kaydedilirken bir hata oluştu'
           });
         }
       });
     } else if (this.entityType === 'user') {
       // Kullanıcı izinlerini kaydet
       this.permissionService.assignPermissionsToUser(this.entityId, selectedPermissionIds).subscribe({
-        next: (result) => {
+        next: (result: boolean) => {
           this.loading = false;
           if (result) {
             this.messageService.add({
               severity: 'success',
               summary: 'Başarılı',
-              detail: 'Kullanıcı izinleri başarıyla güncellendi'
+              detail: 'Kullanıcı izinleri başarıyla kaydedildi'
             });
           } else {
             this.messageService.add({
               severity: 'error',
               summary: 'Hata',
-              detail: 'Kullanıcı izinleri güncellenirken bir hata oluştu'
+              detail: 'Kullanıcı izinleri kaydedilirken bir hata oluştu'
             });
           }
         },
-        error: (error) => {
-          console.error('Kullanıcı izinleri kaydedilirken hata:', error);
+        error: (error: any) => {
           this.loading = false;
+          console.error('Kullanıcı izinleri kaydedilirken hata oluştu:', error);
           this.messageService.add({
             severity: 'error',
             summary: 'Hata',
-            detail: 'Kullanıcı izinleri güncellenirken bir hata oluştu'
+            detail: 'Kullanıcı izinleri kaydedilirken bir hata oluştu'
           });
         }
       });
@@ -422,10 +428,9 @@ export class PermissionManagementComponent implements OnInit {
     if (this.entityType !== 'user') return;
     
     this.loading = true;
-    console.log('Kullanıcı izinleri rol izinlerine sıfırlanıyor, userId:', this.entityId);
-    
     this.permissionService.resetUserToRolePermissions(this.entityId).subscribe({
-      next: (result) => {
+      next: (result: boolean) => {
+        this.loading = false;
         if (result) {
           this.messageService.add({
             severity: 'success',
@@ -435,21 +440,20 @@ export class PermissionManagementComponent implements OnInit {
           // İzinleri yeniden yükle
           this.loadUserPermissions();
         } else {
-          this.loading = false;
           this.messageService.add({
             severity: 'error',
             summary: 'Hata',
-            detail: 'İzinler sıfırlanırken bir hata oluştu'
+            detail: 'Kullanıcı izinleri sıfırlanırken bir hata oluştu'
           });
         }
       },
-      error: (error) => {
-        console.error('İzinler sıfırlanırken hata:', error);
+      error: (error: any) => {
         this.loading = false;
+        console.error('Kullanıcı izinleri sıfırlanırken hata oluştu:', error);
         this.messageService.add({
           severity: 'error',
           summary: 'Hata',
-          detail: error.error?.message || 'İzinler sıfırlanırken bir hata oluştu'
+          detail: 'Kullanıcı izinleri sıfırlanırken bir hata oluştu'
         });
       }
     });

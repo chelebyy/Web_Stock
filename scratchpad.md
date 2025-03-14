@@ -689,3 +689,12 @@ Kod iyileştirme planı, `kod_iyilestirme_plani.md` dosyasında detaylı olarak 
 - Her değişiklik sonrası uygulama test edilmelidir.
 - Değişiklikler, kod iyileştirme planında belirtilen risk seviyelerine göre sırayla yapılmalıdır.
 - Yüksek riskli değişiklikler için ayrı branch'ler oluşturulmalıdır.
+
+### TypeScript Tip Hataları Çözüldü (20 Haziran 2025)
+- `permission-management.component.ts` dosyasında TypeScript tip hataları çözüldü.
+- Hata 1: `roleService.getRoleById` metodu yerine `roleService.getRole` metodu kullanıldı.
+- Hata 2: Tüm parametrelere tip tanımlamaları eklendi (`role: Role`, `error: any`, vb.).
+- Hata 3: Model ve bileşen arasındaki tip uyumsuzluğu çözüldü.
+- Model tipini farklı bir isimle import ederek (`Permission as ModelPermission`) çakışmalar önlendi.
+- API'den gelen verileri bileşendeki tipe dönüştürerek tip uyumluluğu sağlandı.
+- Detaylı bilgi için: [TypeScript Tip Hataları ve Çözümleri](knowledge-base/typescript-tip-hatalari-cozumu.md)
