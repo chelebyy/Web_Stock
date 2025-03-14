@@ -703,3 +703,77 @@ migrationBuilder.Sql(@"
 1. Tüm bileşenlerde benzer tip hatalarını kontrol etmek ve düzeltmek.
 2. Model ve bileşen arasındaki tip uyumsuzluklarını gidermek için ortak bir tip tanımı oluşturmak.
 3. Servis metodlarının dokümantasyonunu iyileştirmek ve tutarlı isimlendirme kuralları uygulamak.
+
+## Kullanıcı Yönetimi Sayfası Sorunları
+
+### Sorun 1: Kullanıcılar otomatik olarak yüklenmiyor
+**Tarih:** 2023-11-15
+
+**Sorun Açıklaması:**  
+Kullanıcı yönetimi sayfasına girildiğinde kullanıcılar otomatik olarak yüklenmiyordu.
+
+**Çözüm:**  
+`user-management.component.ts` dosyasında `ngOnInit` metodunda `loadUsers()` çağrısı yorum satırı haline getirilmişti. Bu çağrı aktif hale getirildi. Böylece sayfa yüklendiğinde kullanıcılar otomatik olarak yüklenecek.
+
+```typescript
+ngOnInit() {
+  console.log('UserManagementComponent initialized');
+  
+  // Önce rolleri yükle
+  this.loadRoles();
+  
+  // Kullanıcıları yükle - artık loadRoles içinde çağrılıyor olsa da
+  // burada da çağıralım, böylece roller yüklenemese bile kullanıcılar yüklenebilir
+  this.loadUsers();
+  
+  // Form başlatma
+  this.initForm();
+  
+  // ...
+}
+```
+
+### Sorun 2: Oluşturulan roller kullanıcı yönetimi sayfasında görünmüyor
+**Tarih:** 2023-11-15
+
+**Sorun Açıklaması:**  
+Oluşturulan roller kullanıcı yönetimi sayfasında görüntülenmiyordu. Kullanıcıların rol bilgileri "Bilinmeyen Rol" olarak gösteriliyordu.
+
+**Çözüm:**  
+İki sorun tespit edildi ve çözüldü:
+
+1. `loadRoles` metodunda API'den gelen rol verilerinin işlenmesi sırasında sadece `label` ve `value` özellikleri kaydediliyordu. Buna `id` ve `name` özellikleri de eklendi.
+
+```typescript
+this.roles = roles.map(role => {
+  console.log('İşlenen rol:', role);
+  return {
+    label: role.name,
+    value: role.id,
+    id: role.id,
+    name: role.name
+  };
+});
+```
+
+2. `getRoleName` metodunda rol ID'si ile eşleşen rolü bulmak için sadece `value` özelliği kontrol ediliyordu. Hem `value` hem de `id` özelliklerini kontrol edecek şekilde güncellendi.
+
+```typescript
+// Rol ID'si ile eşleşen rolü bul (hem value hem de id özelliklerini kontrol et)
+const role = this.roles.find(r => r.value === roleId || r.id === roleId);
+
+if (role) {
+  console.log('Rol bulundu:', role);
+  return role.label || role.name;
+} else {
+  console.warn(`ID: ${roleId} için rol bulunamadı!`);
+  return 'Bilinmeyen Rol';
+}
+```
+
+3. Rol yükleme hatası durumunda daha iyi bir hata yönetimi eklendi ve varsayılan roller oluşturuldu.
+
+**Öğrenilen Dersler:**
+- Frontend'de veri yapılarının tutarlı olması önemlidir. Aynı veri farklı yerlerde farklı şekillerde (id/value, name/label) kullanılabilir, bu durumda her iki durumu da desteklemek gerekir.
+- Hata durumlarında kullanıcıya bilgi vermek ve varsayılan değerler sağlamak önemlidir.
+- Konsola detaylı log bilgileri yazmak hata ayıklamayı kolaylaştırır.

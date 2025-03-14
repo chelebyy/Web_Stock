@@ -414,8 +414,9 @@ export class UserManagementComponent implements OnInit, AfterViewInit {
     // Önce rolleri yükle
     this.loadRoles();
     
-    // Kullanıcıları yükle - artık loadRoles içinde çağrılıyor
-    // this.loadUsers();
+    // Kullanıcıları yükle - artık loadRoles içinde çağrılıyor olsa da
+    // burada da çağıralım, böylece roller yüklenemese bile kullanıcılar yüklenebilir
+    this.loadUsers();
     
     // Form başlatma
     this.initForm();
@@ -996,54 +997,77 @@ export class UserManagementComponent implements OnInit, AfterViewInit {
   }
 
   loadRoles() {
-    // Role Service ile gerçek rollerini yüklemek burada yapılacak
-    // Şimdilik statik veriler kullanıyoruz
+    console.log('Roller yükleniyor...');
+    
+    // Role Service ile rolleri yükle
     this.roleService.getRoles().subscribe({
       next: (roles) => {
         console.log('API\'den gelen roller:', roles);
         
-        // API'den gelen roller için
-        this.roles = roles.map(role => {
-          console.log('İşlenen rol:', role);
-          return {
-            label: role.name,
-            value: role.id
-          };
-        });
-        
-        // Rol filtre seçenekleri için "Tümü" seçeneğini ekle
-        this.roleFilterOptions = [
-          { label: 'Tümü', value: null },
-          ...this.roles
-        ];
-        
-        console.log('Roller yüklendi:', this.roles);
-        console.log('Rol filtre seçenekleri:', this.roleFilterOptions);
-        
-        // Rolleri yükledikten sonra kullanıcıları yeniden yükle
-        // Bu, kullanıcıların doğru rol bilgilerini almasını sağlar
-        this.loadUsers();
+        if (roles && Array.isArray(roles)) {
+          // API'den gelen roller için
+          this.roles = roles.map(role => {
+            console.log('İşlenen rol:', role);
+            return {
+              label: role.name,
+              value: role.id,
+              id: role.id,
+              name: role.name
+            };
+          });
+          
+          // Rol filtre seçenekleri için "Tümü" seçeneğini ekle
+          this.roleFilterOptions = [
+            { label: 'Tümü', value: null },
+            ...this.roles
+          ];
+          
+          console.log('Roller yüklendi:', this.roles);
+          console.log('Rol filtre seçenekleri:', this.roleFilterOptions);
+          
+          // Rolleri yükledikten sonra kullanıcıları yeniden yükle
+          // Bu, kullanıcıların doğru rol bilgilerini almasını sağlar
+          this.loadUsers();
+        } else {
+          console.error('API\'den geçersiz rol verisi alındı:', roles);
+          this.handleRoleLoadError('Geçersiz rol verisi alındı');
+        }
       },
       error: (err) => {
         // Hata durumunda
         console.error('Roller yüklenirken hata oluştu:', err);
-        
-        // Hata durumunda varsayılan roller
-        this.roles = [
-          { label: 'Admin', value: 1 },
-          { label: 'Kullanıcı', value: 2 }
-        ];
-        
-        // Rol filtre seçenekleri için "Tümü" seçeneğini ekle
-        this.roleFilterOptions = [
-          { label: 'Tümü', value: null },
-          ...this.roles
-        ];
-        
-        console.log('Varsayılan roller yüklendi:', this.roles);
-        console.log('Varsayılan rol filtre seçenekleri:', this.roleFilterOptions);
+        this.handleRoleLoadError(err.message || 'Roller yüklenirken bir hata oluştu');
       }
     });
+  }
+
+  // Rol yükleme hatası durumunda çağrılacak yardımcı metod
+  private handleRoleLoadError(errorMessage: string) {
+    // Kullanıcıya hata mesajı göster
+    this.messageService.add({
+      severity: 'error',
+      summary: 'Rol Yükleme Hatası',
+      detail: errorMessage,
+      life: 5000
+    });
+    
+    // Varsayılan roller oluştur
+    this.roles = [
+      { label: 'Admin', value: 1, id: 1, name: 'Admin' },
+      { label: 'Kullanıcı', value: 2, id: 2, name: 'Kullanıcı' }
+    ];
+    
+    // Rol filtre seçenekleri için "Tümü" seçeneğini ekle
+    this.roleFilterOptions = [
+      { label: 'Tümü', value: null },
+      ...this.roles
+    ];
+    
+    console.log('Varsayılan roller yüklendi:', this.roles);
+    console.log('Varsayılan rol filtre seçenekleri:', this.roleFilterOptions);
+    
+    // Yine de kullanıcıları yüklemeyi dene
+    this.loadUsers();
   }
 
   // Rol filtresini uygula
@@ -1293,8 +1317,19 @@ export class UserManagementComponent implements OnInit, AfterViewInit {
   getRoleName(roleId: number | null): string {
     if (!roleId) return 'Rol Atanmamış';
     
-    const role = this.roles.find(r => r.id === roleId);
-    return role ? role.name : 'Bilinmeyen Rol';
+    console.log('getRoleName çağrıldı, roleId:', roleId);
+    console.log('Mevcut roller:', this.roles);
+    
+    // Rol ID'si ile eşleşen rolü bul (hem value hem de id özelliklerini kontrol et)
+    const role = this.roles.find(r => r.value === roleId || r.id === roleId);
+    
+    if (role) {
+      console.log('Rol bulundu:', role);
+      return role.label || role.name;
+    } else {
+      console.warn(`ID: ${roleId} için rol bulunamadı!`);
+      return 'Bilinmeyen Rol';
+    }
   }
 
   // Rol adına göre renk sınıfı döndüren yardımcı metot

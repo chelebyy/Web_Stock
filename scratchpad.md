@@ -698,3 +698,30 @@ Kod iyileştirme planı, `kod_iyilestirme_plani.md` dosyasında detaylı olarak 
 - Model tipini farklı bir isimle import ederek (`Permission as ModelPermission`) çakışmalar önlendi.
 - API'den gelen verileri bileşendeki tipe dönüştürerek tip uyumluluğu sağlandı.
 - Detaylı bilgi için: [TypeScript Tip Hataları ve Çözümleri](knowledge-base/typescript-tip-hatalari-cozumu.md)
+
+## Kullanıcı Yönetimi Sayfası Sorunları ve Çözümleri
+
+### Tespit Edilen Sorunlar
+- [X] Kullanıcılar otomatik olarak yüklenmiyor
+- [X] Oluşturulan roller kullanıcı yönetimi sayfasında görünmüyor
+
+### Yapılan Değişiklikler
+
+1. **Kullanıcıların Otomatik Yüklenmesi Sorunu**
+   - `user-management.component.ts` dosyasında `ngOnInit` metodunda `loadUsers()` çağrısı aktif hale getirildi.
+   - Böylece sayfa yüklendiğinde kullanıcılar otomatik olarak yüklenecek.
+   - Roller yüklenemese bile kullanıcıların yüklenmesi sağlandı.
+
+2. **Rollerin Görüntülenmesi Sorunu**
+   - `loadRoles` metodunda API'den gelen rol verilerinin işlenmesi sırasında `id` ve `name` özellikleri eklendi.
+   - `getRoleName` metodunda rol ID'si ile eşleşen rolü bulmak için hem `value` hem de `id` özelliklerini kontrol edecek şekilde güncellendi.
+   - Rol yükleme hatası durumunda daha iyi bir hata yönetimi eklendi ve varsayılan roller oluşturuldu.
+
+### Belgeleme
+- [X] `errors.md` dosyasına sorunlar ve çözümleri eklendi
+- [X] `knowledge-base/kullanici-yonetimi-sorunlari.md` dosyası oluşturuldu ve detaylı çözüm bilgileri eklendi
+
+### Sonraki Adımlar
+- [ ] Veri modeli standardizasyonu: Tüm bileşenlerde tutarlı bir veri modeli kullanılmalı
+- [ ] Hata yönetimi iyileştirmeleri: Daha kapsamlı bir hata yönetimi stratejisi uygulanmalı
+- [ ] Performans iyileştirmeleri: Kullanıcı ve rol verilerinin önbelleğe alınması düşünülmeli
