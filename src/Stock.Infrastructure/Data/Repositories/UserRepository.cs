@@ -3,6 +3,7 @@ using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using Stock.Domain.Entities;
 using Stock.Domain.Interfaces;
+using System.Linq;
 
 namespace Stock.Infrastructure.Data.Repositories
 {
@@ -44,6 +45,39 @@ namespace Stock.Infrastructure.Data.Repositories
         {
             return await _dbSet
                 .Include(x => x.Role)
+                .ToListAsync();
+        }
+        
+        // Sayfalama için yeni metot
+        public async Task<(IEnumerable<User> Users, int TotalCount)> GetPaginatedUsersAsync(int pageNumber, int pageSize)
+        {
+            var totalCount = await _dbSet
+                .CountAsync();
+                
+            var users = await _dbSet
+                .Include(x => x.Role)
+                .OrderBy(x => x.Id)
+                .Skip((pageNumber - 1) * pageSize)
+                .Take(pageSize)
+                .ToListAsync();
+                
+            return (users, totalCount);
+        }
+        
+        // Projection için yeni metot
+        public async Task<IEnumerable<User>> GetUserSummariesAsync()
+        {
+            return await _dbSet
+                .Include(x => x.Role)
+                .Select(u => new User
+                {
+                    Id = u.Id,
+                    Username = u.Username,
+                    Email = u.Email,
+                    Sicil = u.Sicil,
+                    IsActive = u.IsActive,
+                    Role = new Role { Name = u.Role.Name }
+                })
                 .ToListAsync();
         }
     }
