@@ -28,6 +28,8 @@ namespace Stock.Infrastructure.Data.Config
 
             builder.HasIndex(x => x.Name)
                 .IsUnique();
+
+            builder.HasIndex(x => x.IsDeleted);
         }
     }
 } 

@@ -14,18 +14,42 @@ namespace Stock.Infrastructure.Repositories
         {
         }
 
-        public async Task<Role?> GetByNameAsync(string name)
+        public virtual async Task<Role?> GetByNameAsync(string name)
         {
             return await _dbSet
-                .FirstOrDefaultAsync(r => r.Name == name && !r.IsDeleted);
+                .FirstOrDefaultAsync(r => r.Name == name);
         }
 
-        public async Task<IEnumerable<Role>> GetRolesWithUsersAsync()
+        public virtual async Task<IEnumerable<Role>> GetRolesWithUsersAsync()
         {
             return await _dbSet
                 .Include(r => r.Users)
-                .Where(r => !r.IsDeleted)
                 .ToListAsync();
+        }
+        
+        public override async Task<Role?> GetByIdAsync(int id)
+        {
+            return await base.GetByIdAsync(id);
+        }
+        
+        public override async Task<IEnumerable<Role>> GetAllAsync()
+        {
+            return await base.GetAllAsync();
+        }
+        
+        public override async Task AddAsync(Role entity)
+        {
+            await base.AddAsync(entity);
+        }
+        
+        public override async Task UpdateAsync(Role entity)
+        {
+            await base.UpdateAsync(entity);
+        }
+        
+        public override async Task DeleteAsync(Role entity)
+        {
+            await base.DeleteAsync(entity);
         }
     }
 } 

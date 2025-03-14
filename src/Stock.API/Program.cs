@@ -12,6 +12,7 @@ using NLog;
 using NLog.Web;
 using System.IO;
 using Stock.API.Middleware;
+using Stock.Infrastructure.Extensions;
 
 // NLog yapılandırmasını yükle
 var logger = NLogBuilder.ConfigureNLog("nlog.config").GetCurrentClassLogger();
@@ -35,10 +36,10 @@ try
             builder.Host.UseNLog();
 
             // Add services to the container.
-            builder.Services.AddDbContext<ApplicationDbContext>(options =>
-                options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection"))
-                       .EnableSensitiveDataLogging() // Hassas verileri de logla
-                       .LogTo(Console.WriteLine, LogLevel.Information)); // SQL sorgularını konsola yazdır
+            builder.Services.AddControllers();
+
+            // Infrastructure services
+            builder.Services.AddInfrastructureServices(builder.Configuration);
 
             // Add Application and Infrastructure services
             builder.Services.AddApplication();

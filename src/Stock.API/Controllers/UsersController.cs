@@ -8,6 +8,7 @@ using Microsoft.Extensions.Logging;
 using System;
 using Microsoft.AspNetCore.Http;
 using Stock.Infrastructure.Logging;
+using Stock.Application.Features.Users.Queries.GetPaginatedUsers;
 
 namespace Stock.API.Controllers
 {
@@ -40,6 +41,25 @@ namespace Stock.API.Controllers
             var query = new GetAllUsersQuery();
             var result = await _mediator.Send(query);
             _logger.LogInfo($"{result.Count} kullanıcı başarıyla getirildi.");
+            return Ok(result);
+        }
+
+        [HttpGet("paginated")]
+        [Authorize(Roles = "Admin")]
+        public async Task<IActionResult> GetPaginated([FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10)
+        {
+            _logger.LogInfo($"Sayfalanmış kullanıcılar getiriliyor. Sayfa: {pageNumber}, Sayfa Boyutu: {pageSize}");
+            
+            var query = new GetPaginatedUsersQuery
+            {
+                PageNumber = pageNumber < 1 ? 1 : pageNumber,
+                PageSize = pageSize < 1 ? 10 : (pageSize > 50 ? 50 : pageSize)
+            };
+            
+            var result = await _mediator.Send(query);
+            
+            _logger.LogInfo($"Toplam {result.TotalCount} kullanıcıdan {result.Items.Count()} kullanıcı başarıyla getirildi. Sayfa: {pageNumber}/{result.TotalPages}");
+            
             return Ok(result);
         }
 

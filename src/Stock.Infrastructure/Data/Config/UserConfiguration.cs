@@ -8,39 +8,32 @@ namespace Stock.Infrastructure.Data.Config
     {
         public void Configure(EntityTypeBuilder<User> builder)
         {
-            builder.HasKey(x => x.Id);
+            builder.HasKey(u => u.Id);
 
-            builder.Property(x => x.Username)
+            builder.Property(u => u.Username)
                 .IsRequired()
                 .HasMaxLength(50);
 
-            builder.Property(x => x.PasswordHash)
+            builder.Property(u => u.PasswordHash)
                 .IsRequired();
 
-            builder.Property(x => x.IsAdmin)
-                .HasDefaultValue(false);
+            builder.Property(u => u.Email)
+                .HasMaxLength(100);
 
-            builder.Property(x => x.Sicil)
-                .IsRequired()
-                .HasMaxLength(50);
+            builder.Property(u => u.Sicil)
+                .HasMaxLength(20);
 
-            builder.Property(x => x.CreatedAt)
-                .IsRequired();
-
-            builder.Property(x => x.CreatedBy)
-                .HasMaxLength(50);
-
-            builder.Property(x => x.UpdatedBy)
-                .HasMaxLength(50);
-
-            builder.HasOne(x => x.Role)
-                .WithMany(x => x.Users)
-                .HasForeignKey(x => x.RoleId)
+            builder.HasOne(u => u.Role)
+                .WithMany(r => r.Users)
+                .HasForeignKey(u => u.RoleId)
                 .OnDelete(DeleteBehavior.Restrict);
 
-            builder.HasIndex(x => x.Sicil)
-                .IsUnique()
-                .HasFilter("\"IsDeleted\" = false");
+            // İndeksler
+            builder.HasIndex(u => u.Username).IsUnique();
+            builder.HasIndex(u => u.Email);
+            builder.HasIndex(u => u.Sicil);
+            builder.HasIndex(u => u.IsDeleted);
+            builder.HasIndex(u => u.RoleId);
         }
     }
 } 

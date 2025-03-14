@@ -5,34 +5,69 @@ using Stock.Infrastructure.Data;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Stock.Application.Models.DTOs;
 
 namespace Stock.Infrastructure.Repositories
 {
     public class UserRepository : Repository<User>, IUserRepository
     {
+        private readonly ApplicationDbContext _context;
+
         public UserRepository(ApplicationDbContext context) : base(context)
         {
+            _context = context;
         }
 
         public async Task<User?> GetByUsernameAsync(string username)
         {
             return await _dbSet
                 .Include(u => u.Role)
-                .FirstOrDefaultAsync(u => u.Username == username && !u.IsDeleted);
+                .FirstOrDefaultAsync(u => u.Username == username);
         }
 
         public async Task<User?> GetBySicilAsync(string sicil)
         {
             return await _dbSet
                 .Include(u => u.Role)
-                .FirstOrDefaultAsync(u => u.Sicil == sicil && !u.IsDeleted);
+                .FirstOrDefaultAsync(u => u.Sicil == sicil);
         }
 
         public async Task<IEnumerable<User>> GetUsersWithRolesAsync()
         {
             return await _dbSet
                 .Include(u => u.Role)
-                .Where(u => !u.IsDeleted)
+                .ToListAsync();
+        }
+
+        // Sayfalama için yeni metot
+        public async Task<(IEnumerable<User> Users, int TotalCount)> GetPaginatedUsersAsync(int pageNumber, int pageSize)
+        {
+            var totalCount = await _dbSet
+                .CountAsync();
+                
+            var users = await _dbSet
+                .Include(u => u.Role)
+                .OrderBy(u => u.Id)
+                .Skip((pageNumber - 1) * pageSize)
+                .Take(pageSize)
+                .ToListAsync();
+                
+            return (users, totalCount);
+        }
+        
+        // Projection için yeni metot
+        public async Task<IEnumerable<UserSummaryDto>> GetUserSummariesAsync()
+        {
+            return await _dbSet
+                .Select(u => new UserSummaryDto
+                {
+                    Id = u.Id,
+                    Username = u.Username,
+                    RoleName = u.Role.Name,
+                    Email = u.Email,
+                    Sicil = u.Sicil,
+                    IsActive = u.IsActive
+                })
                 .ToListAsync();
         }
     }

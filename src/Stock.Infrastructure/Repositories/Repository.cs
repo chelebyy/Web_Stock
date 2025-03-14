@@ -21,42 +21,42 @@ namespace Stock.Infrastructure.Repositories
             _dbSet = context.Set<T>();
         }
 
-        public async Task<T?> GetByIdAsync(int id)
+        public virtual async Task<T?> GetByIdAsync(int id)
         {
             return await _dbSet.FindAsync(id);
         }
 
-        public async Task<IEnumerable<T>> GetAllAsync()
+        public virtual async Task<IEnumerable<T>> GetAllAsync()
         {
-            return await _dbSet.Where(e => !e.IsDeleted).ToListAsync();
+            return await _dbSet.ToListAsync();
         }
 
-        public async Task<IEnumerable<T>> FindAsync(Expression<Func<T, bool>> predicate)
+        public virtual async Task<IEnumerable<T>> FindAsync(Expression<Func<T, bool>> predicate)
         {
-            return await _dbSet.Where(predicate).Where(e => !e.IsDeleted).ToListAsync();
+            return await _dbSet.Where(predicate).ToListAsync();
         }
 
-        public async Task AddAsync(T entity)
+        public virtual async Task AddAsync(T entity)
         {
             entity.CreatedAt = DateTime.UtcNow;
             await _dbSet.AddAsync(entity);
         }
 
-        public Task UpdateAsync(T entity)
+        public virtual Task UpdateAsync(T entity)
         {
             entity.UpdatedAt = DateTime.UtcNow;
             _context.Entry(entity).State = EntityState.Modified;
             return Task.CompletedTask;
         }
 
-        public Task DeleteAsync(T entity)
+        public virtual Task DeleteAsync(T entity)
         {
             entity.IsDeleted = true;
             entity.UpdatedAt = DateTime.UtcNow;
             return Task.CompletedTask;
         }
 
-        public async Task<int> SaveChangesAsync()
+        public virtual async Task<int> SaveChangesAsync()
         {
             return await _context.SaveChangesAsync();
         }

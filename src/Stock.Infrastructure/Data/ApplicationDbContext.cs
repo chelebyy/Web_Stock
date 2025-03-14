@@ -28,6 +28,11 @@ namespace Stock.Infrastructure.Data
         {
             base.OnModelCreating(modelBuilder);
 
+            // Global sorgu filtreleri
+            modelBuilder.Entity<User>().HasQueryFilter(u => !u.IsDeleted);
+            modelBuilder.Entity<Role>().HasQueryFilter(r => !r.IsDeleted);
+            modelBuilder.Entity<Permission>().HasQueryFilter(p => !p.IsDeleted);
+
             // Apply entity configurations
             modelBuilder.ApplyConfigurationsFromAssembly(typeof(ApplicationDbContext).Assembly);
 

@@ -1227,15 +1227,15 @@ Backend controller'lardaki gereksiz log ifadelerini kaldırmak ve magic string/n
   - [X] role-management.component.ts dosyasındaki console.log ifadeleri kaldırıldı
   - [X] permission-management.component.ts dosyasındaki console.log ifadeleri kaldırıldı
 
-- [ ] Backend controller'lardaki gereksiz log ifadelerini kaldırma
-  - [ ] UsersController.cs dosyasındaki gereksiz log ifadeleri kaldırılacak
-  - [ ] RoleController.cs dosyasındaki gereksiz log ifadeleri kaldırılacak
-  - [ ] PermissionsController.cs dosyasındaki gereksiz log ifadeleri kaldırılacak
+- [X] Backend controller'lardaki gereksiz log ifadelerini kaldırma
+  - [X] UsersController.cs dosyasındaki gereksiz log ifadeleri kaldırıldı
+  - [X] RoleController.cs dosyasındaki gereksiz log ifadeleri kaldırıldı
+  - [X] PermissionsController.cs dosyasındaki gereksiz log ifadeleri kaldırıldı
 
-- [ ] Backend'de magic string ve magic number'ları sabit değişkenlere dönüştürme
-  - [ ] Hata mesajları için sabit değişkenler oluşturulacak
-  - [ ] HTTP durum kodları için StatusCodes sınıfı kullanılacak
-  - [ ] Rol ve izin isimleri için sabit değişkenler oluşturulacak
+- [X] Backend'de magic string ve magic number'ları sabit değişkenlere dönüştürme
+  - [X] Hata mesajları için sabit değişkenler oluşturuldu
+  - [X] HTTP durum kodları için StatusCodes sınıfı kullanıldı
+  - [X] Rol ve izin isimleri için sabit değişkenler oluşturuldu
 
 ### Faz 2: Orta Riskli İyileştirmeler
 - [ ] Merkezi bir loglama mekanizması oluşturma
@@ -1260,15 +1260,15 @@ Backend controller'lardaki gereksiz log ifadelerini kaldırmak ve magic string/n
   - [X] role-management.component.ts dosyasındaki console.log ifadeleri kaldırıldı
   - [X] permission-management.component.ts dosyasındaki console.log ifadeleri kaldırıldı
 
-- [ ] Backend controller'lardaki gereksiz log ifadelerini kaldırma
-  - [ ] UsersController.cs dosyasındaki gereksiz log ifadeleri kaldırılacak
-  - [ ] RoleController.cs dosyasındaki gereksiz log ifadeleri kaldırılacak
-  - [ ] PermissionsController.cs dosyasındaki gereksiz log ifadeleri kaldırılacak
+- [X] Backend controller'lardaki gereksiz log ifadelerini kaldırma
+  - [X] UsersController.cs dosyasındaki gereksiz log ifadeleri kaldırıldı
+  - [X] RoleController.cs dosyasındaki gereksiz log ifadeleri kaldırıldı
+  - [X] PermissionsController.cs dosyasındaki gereksiz log ifadeleri kaldırıldı
 
-- [ ] Backend'de magic string ve magic number'ları sabit değişkenlere dönüştürme
-  - [ ] Hata mesajları için sabit değişkenler oluşturulacak
-  - [ ] HTTP durum kodları için StatusCodes sınıfı kullanılacak
-  - [ ] Rol ve izin isimleri için sabit değişkenler oluşturulacak
+- [X] Backend'de magic string ve magic number'ları sabit değişkenlere dönüştürme
+  - [X] Hata mesajları için sabit değişkenler oluşturuldu
+  - [X] HTTP durum kodları için StatusCodes sınıfı kullanıldı
+  - [X] Rol ve izin isimleri için sabit değişkenler oluşturuldu
 
 ### Faz 2: Orta Riskli İyileştirmeler
 - [ ] Merkezi bir loglama mekanizması oluşturma
