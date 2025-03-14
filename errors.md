@@ -996,3 +996,64 @@ public async Task<IActionResult> GetAll()
 ### Referanslar
 - [NLog Resmi Dokümantasyonu](https://github.com/NLog/NLog/wiki)
 - [ASP.NET Core Middleware](https://docs.microsoft.com/en-us/aspnet/core/fundamentals/middleware/)
+
+## Veritabanı Sorgu Optimizasyonu Sırasında Karşılaşılan Hatalar
+
+### Domain Katmanının Application Katmanına Bağımlılık Hatası
+
+**Hata Mesajı:**
+```
+C:\Users\muham\OneDrive\Masaüstü\Stock\src\Stock.Domain\Interfaces\IUserRepository.cs(4,13): error CS0234: 'Application' tür veya ad alanı adı 'Stock' ad alanında yok (bir derleme başvurunuz mu eksik?)
+C:\Users\muham\OneDrive\Masaüstü\Stock\src\Stock.Domain\Interfaces\IUserRepository.cs(18,26): error CS0246: 'UserSummaryDto' türü veya ad alanı adı bulunamadı (bir using yönergeniz veya derleme başvurunuz mu eksik?)
+```
+
+**Nedeni:**
+Domain katmanı, Application katmanına referans vermediği için `UserSummaryDto` sınıfına erişilemiyor. Clean Architecture prensiplerine göre, domain katmanı diğer katmanlara bağımlı olmamalıdır.
+
+**Çözüm:**
+1. `IUserRepository` arayüzünden `UserSummaryDto` referansını kaldırdık.
+2. `GetUserSummariesAsync` metodunu domain katmanına uygun olarak güncelledik, DTO yerine domain entity'lerini kullanacak şekilde değiştirdik.
+3. Application katmanında, domain entity'lerini DTO'lara dönüştüren bir mapping mekanizması ekledik.
+
+**Teknik Detaylar:**
+```csharp
+// Önceki hatalı kod
+public interface IUserRepository : IRepository<User>
+{
+    // ...
+    Task<IEnumerable<UserSummaryDto>> GetUserSummariesAsync();
+}
+
+// Düzeltilmiş kod
+public interface IUserRepository : IRepository<User>
+{
+    // ...
+    Task<IEnumerable<User>> GetUserSummariesAsync();
+}
+```
+
+**Öğrenilen Dersler:**
+1. Clean Architecture prensiplerine göre, iç katmanlar (domain) dış katmanlara (application, infrastructure) bağımlı olmamalıdır.
+2. DTO'lar application katmanında tanımlanmalı ve kullanılmalıdır.
+3. Domain katmanı, sadece domain entity'leri ve business kurallarını içermelidir.
+4. Katmanlar arası veri dönüşümleri için mapping mekanizmaları kullanılmalıdır.
+
+### Güvenlik Açıkları Uyarıları
+
+**Uyarı Mesajları:**
+```
+C:\Users\muham\OneDrive\Masaüstü\Stock\src\Stock.Infrastructure\Stock.Infrastructure.csproj : warning NU1903: 'Npgsql' 7.0.0 paketinde önem derecesi yüksek olan bilinen bir https://github.com/advisories/GHSA-x9vc-6hfv-hg8c güvenlik açığı var
+C:\Users\muham\OneDrive\Masaüstü\Stock\src\Stock.Infrastructure\Stock.Infrastructure.csproj : warning NU1903: 'System.Text.Json' 7.0.0 paketinde önem derecesi yüksek olan bilinen bir https://github.com/advisories/GHSA-hh2w-p6rv-4g7w güvenlik açığı var
+```
+
+**Nedeni:**
+Kullanılan NuGet paketlerinde bilinen güvenlik açıkları bulunmaktadır.
+
+**Çözüm:**
+İlgili paketlerin güncel sürümlerine yükseltilmesi gerekmektedir.
+
+**Yapılacak İşlemler:**
+1. `Npgsql` paketini en son sürüme yükseltmek
+2. `System.Text.Json` paketini en son sürüme yükseltmek
+
+**Not:** Bu güvenlik açıkları, yüksek riskli iyileştirmeler aşamasında ele alınacaktır.

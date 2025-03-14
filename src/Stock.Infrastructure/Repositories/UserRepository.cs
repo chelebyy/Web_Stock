@@ -5,7 +5,6 @@ using Stock.Infrastructure.Data;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Stock.Application.Models.DTOs;
 
 namespace Stock.Infrastructure.Repositories
 {
@@ -55,18 +54,19 @@ namespace Stock.Infrastructure.Repositories
             return (users, totalCount);
         }
         
-        // Projection için yeni metot
-        public async Task<IEnumerable<UserSummaryDto>> GetUserSummariesAsync()
+        // Projection için yeni metot - domain katmanına uygun olarak güncellendi
+        public async Task<IEnumerable<User>> GetUserSummariesAsync()
         {
             return await _dbSet
-                .Select(u => new UserSummaryDto
+                .Include(u => u.Role)
+                .Select(u => new User
                 {
                     Id = u.Id,
                     Username = u.Username,
-                    RoleName = u.Role.Name,
                     Email = u.Email,
                     Sicil = u.Sicil,
-                    IsActive = u.IsActive
+                    IsActive = u.IsActive,
+                    Role = new Role { Name = u.Role.Name }
                 })
                 .ToListAsync();
         }

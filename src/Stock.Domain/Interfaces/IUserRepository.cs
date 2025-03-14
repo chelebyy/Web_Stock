@@ -1,7 +1,6 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Stock.Domain.Entities;
-using Stock.Application.Models.DTOs;
 
 namespace Stock.Domain.Interfaces
 {
@@ -14,7 +13,7 @@ namespace Stock.Domain.Interfaces
         // Sayfalama için yeni metot
         Task<(IEnumerable<User> Users, int TotalCount)> GetPaginatedUsersAsync(int pageNumber, int pageSize);
         
-        // Projection için yeni metot
-        Task<IEnumerable<UserSummaryDto>> GetUserSummariesAsync();
+        // Projection için yeni metot - domain katmanında DTO kullanmak yerine, entity üzerinden çalışıyoruz
+        Task<IEnumerable<User>> GetUserSummariesAsync();
     }
 } 

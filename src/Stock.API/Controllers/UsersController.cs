@@ -63,6 +63,20 @@ namespace Stock.API.Controllers
             return Ok(result);
         }
 
+        [HttpGet("summaries")]
+        [Authorize(Roles = "Admin")]
+        public async Task<IActionResult> GetSummaries()
+        {
+            _logger.LogInfo("Kullanıcı özetleri getiriliyor.");
+            
+            var query = new GetUserSummariesQuery();
+            var result = await _mediator.Send(query);
+            
+            _logger.LogInfo($"{result.Count()} kullanıcı özeti başarıyla getirildi.");
+            
+            return Ok(result);
+        }
+
         [HttpGet("{id}")]
         [Authorize]
         public async Task<IActionResult> GetById(int id)
