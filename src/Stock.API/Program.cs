@@ -8,111 +8,141 @@ using Microsoft.Extensions.Logging;
 using System.Text;
 using System.Text.Json.Serialization;
 using Stock.API; // CreateAdminUser sınıfını import ediyoruz
+using NLog;
+using NLog.Web;
+using System.IO;
+using Stock.API.Middleware;
 
-// Program sınıfını public yaparak erişilebilirlik sorununu çözüyoruz
-public class Program
+// NLog yapılandırmasını yükle
+var logger = NLogBuilder.ConfigureNLog("nlog.config").GetCurrentClassLogger();
+logger.Debug("Uygulama başlatılıyor...");
+
+try
 {
-    public static void Main(string[] args)
+    // Program sınıfını public yaparak erişilebilirlik sorununu çözüyoruz
+    public class Program
     {
-        var builder = WebApplication.CreateBuilder(args);
-
-        // Add services to the container.
-        builder.Services.AddDbContext<ApplicationDbContext>(options =>
-            options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection"))
-                   .EnableSensitiveDataLogging() // Hassas verileri de logla
-                   .LogTo(Console.WriteLine, LogLevel.Information)); // SQL sorgularını konsola yazdır
-
-        // Logging ayarlarını yapılandır
-        builder.Logging.ClearProviders();
-        builder.Logging.AddConsole();
-        builder.Logging.AddDebug();
-        builder.Logging.SetMinimumLevel(LogLevel.Information);
-
-        // Add Application and Infrastructure services
-        builder.Services.AddApplication();
-        builder.Services.AddInfrastructure(builder.Configuration);
-
-        // JWT yapılandırması
-        builder.Services.AddAuthentication(options =>
+        public static void Main(string[] args)
         {
-            options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-            options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
-        })
-        .AddJwtBearer(options =>
-        {
-            options.TokenValidationParameters = new TokenValidationParameters
-            {
-                ValidateIssuer = true,
-                ValidateAudience = true,
-                ValidateLifetime = true,
-                ValidateIssuerSigningKey = true,
-                ValidIssuer = builder.Configuration["Jwt:Issuer"],
-                ValidAudience = builder.Configuration["Jwt:Audience"],
-                IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"]))
-            };
-        });
+            // Logs klasörünü oluştur
+            Directory.CreateDirectory("logs");
+            Directory.CreateDirectory("logs/archives");
 
-        // JSON serialization ayarları
-        builder.Services.AddControllers()
-            .AddJsonOptions(options =>
+            var builder = WebApplication.CreateBuilder(args);
+
+            // NLog'u yapılandır
+            builder.Logging.ClearProviders();
+            builder.Host.UseNLog();
+
+            // Add services to the container.
+            builder.Services.AddDbContext<ApplicationDbContext>(options =>
+                options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection"))
+                       .EnableSensitiveDataLogging() // Hassas verileri de logla
+                       .LogTo(Console.WriteLine, LogLevel.Information)); // SQL sorgularını konsola yazdır
+
+            // Add Application and Infrastructure services
+            builder.Services.AddApplication();
+            builder.Services.AddInfrastructure(builder.Configuration);
+
+            // JWT yapılandırması
+            builder.Services.AddAuthentication(options =>
             {
-                // Döngüsel referansları koru
-                options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.Preserve;
-                // Null değerleri dahil etme
-                options.JsonSerializerOptions.DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull;
-                // Enum değerlerini string olarak serialize et
-                options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
+                options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+                options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+            })
+            .AddJwtBearer(options =>
+            {
+                options.TokenValidationParameters = new TokenValidationParameters
+                {
+                    ValidateIssuer = true,
+                    ValidateAudience = true,
+                    ValidateLifetime = true,
+                    ValidateIssuerSigningKey = true,
+                    ValidIssuer = builder.Configuration["Jwt:Issuer"],
+                    ValidAudience = builder.Configuration["Jwt:Audience"],
+                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"]))
+                };
             });
 
-        // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
-        builder.Services.AddEndpointsApiExplorer();
-        builder.Services.AddSwaggerGen();
-        builder.Services.AddCors();
-        builder.Services.AddHttpContextAccessor();
+            // JSON serialization ayarları
+            builder.Services.AddControllers()
+                .AddJsonOptions(options =>
+                {
+                    // Döngüsel referansları koru
+                    options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.Preserve;
+                    // Null değerleri dahil etme
+                    options.JsonSerializerOptions.DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull;
+                    // Enum değerlerini string olarak serialize et
+                    options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
+                });
 
-        var app = builder.Build();
+            // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
+            builder.Services.AddEndpointsApiExplorer();
+            builder.Services.AddSwaggerGen();
+            builder.Services.AddCors();
+            builder.Services.AddHttpContextAccessor();
 
-        // Admin kullanıcısını oluştur
-        using (var scope = app.Services.CreateScope())
-        {
-            var services = scope.ServiceProvider;
-            try
+            var app = builder.Build();
+
+            // Admin kullanıcısını oluştur
+            using (var scope = app.Services.CreateScope())
             {
-                var logger = services.GetRequiredService<ILogger<Program>>();
-                CreateAdminUser.InitializeAsync(services, logger).Wait();
+                var services = scope.ServiceProvider;
+                try
+                {
+                    var loggerFactory = services.GetRequiredService<ILoggerFactory>();
+                    var logger = loggerFactory.CreateLogger<Program>();
+                    CreateAdminUser.InitializeAsync(services, logger).Wait();
+                }
+                catch (Exception ex)
+                {
+                    var loggerFactory = services.GetRequiredService<ILoggerFactory>();
+                    var logger = loggerFactory.CreateLogger<Program>();
+                    logger.LogError(ex, "Admin kullanıcısı oluşturulurken bir hata oluştu.");
+                }
             }
-            catch (Exception ex)
+
+            // Configure the HTTP request pipeline.
+            if (app.Environment.IsDevelopment())
             {
-                var logger = services.GetRequiredService<ILogger<Program>>();
-                logger.LogError(ex, "Admin kullanıcısı oluşturulurken bir hata oluştu.");
+                app.UseSwagger();
+                app.UseSwaggerUI();
             }
+            else
+            {
+                // Üretim ortamında global exception handler kullan
+                app.UseGlobalExceptionHandler();
+            }
+
+            // CORS politikasını ekle
+            app.UseCors(builder => builder
+                .AllowAnyOrigin()
+                .AllowAnyMethod()
+                .AllowAnyHeader());
+
+            app.UseHttpsRedirection();
+
+            // Kimlik doğrulama ve yetkilendirme middleware'lerini ekle
+            app.UseAuthentication();
+            app.UseAuthorization();
+
+            app.MapControllers();
+
+            // Seed data
+            SeedData.InitializeAsync(app.Services).Wait();
+
+            app.Run();
         }
-
-        // Configure the HTTP request pipeline.
-        if (app.Environment.IsDevelopment())
-        {
-            app.UseSwagger();
-            app.UseSwaggerUI();
-            app.UseDeveloperExceptionPage(); // Geliştirme ortamında hata sayfasını göster
-        }
-
-        // CORS politikasını ekle
-        app.UseCors(builder => builder
-            .AllowAnyOrigin()
-            .AllowAnyMethod()
-            .AllowAnyHeader());
-
-        app.UseHttpsRedirection();
-
-        // Kimlik doğrulama ve yetkilendirme middleware'lerini ekle
-        app.UseAuthentication();
-        app.UseAuthorization();
-
-        app.MapControllers();
-
-        // Seed data
-        SeedData.InitializeAsync(app.Services).Wait();
-
-        app.Run();
     }
+}
+catch (Exception ex)
+{
+    // NLog ile kritik hataları yakala
+    logger.Error(ex, "Program beklenmedik şekilde sonlandı");
+    throw;
+}
+finally
+{
+    // NLog'u düzgün şekilde kapat
+    LogManager.Shutdown();
 }

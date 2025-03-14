@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using System;
 using Microsoft.AspNetCore.Http;
+using Stock.Infrastructure.Logging;
 
 namespace Stock.API.Controllers
 {
@@ -15,7 +16,7 @@ namespace Stock.API.Controllers
     public class UsersController : ControllerBase
     {
         private readonly IMediator _mediator;
-        private readonly ILogger<UsersController> _logger;
+        private readonly ILoggerManager _logger;
 
         // Sabit hata mesajları
         private const string ERROR_USER_NOT_FOUND = "ID: {0} olan kullanıcı bulunamadı.";
@@ -25,7 +26,7 @@ namespace Stock.API.Controllers
         private const string ERROR_ID_MISMATCH = "URL'deki ID ile request body'deki ID eşleşmiyor.";
         private const string ERROR_VALIDATION = "{0}";
 
-        public UsersController(IMediator mediator, ILogger<UsersController> logger)
+        public UsersController(IMediator mediator, ILoggerManager logger)
         {
             _mediator = mediator;
             _logger = logger;
@@ -35,8 +36,10 @@ namespace Stock.API.Controllers
         [Authorize(Roles = "Admin")]
         public async Task<IActionResult> GetAll()
         {
+            _logger.LogInfo("Tüm kullanıcılar getiriliyor.");
             var query = new GetAllUsersQuery();
             var result = await _mediator.Send(query);
+            _logger.LogInfo($"{result.Count} kullanıcı başarıyla getirildi.");
             return Ok(result);
         }
 
@@ -44,12 +47,17 @@ namespace Stock.API.Controllers
         [Authorize]
         public async Task<IActionResult> GetById(int id)
         {
+            _logger.LogInfo($"ID: {id} olan kullanıcı getiriliyor.");
             var query = new GetUserByIdQuery { Id = id };
             var result = await _mediator.Send(query);
             
             if (result == null)
-                return NotFound(new { error = string.Format(ERROR_USER_NOT_FOUND, id) });
-                
+            {
+                _logger.LogWarn(string.Format(ERROR_USER_NOT_FOUND, id));
+                return NotFound(string.Format(ERROR_USER_NOT_FOUND, id));
+            }
+
+            _logger.LogInfo($"ID: {id} olan kullanıcı başarıyla getirildi.");
             return Ok(result);
         }
 
@@ -59,28 +67,20 @@ namespace Stock.API.Controllers
         {
             try
             {
+                _logger.LogInfo("Yeni kullanıcı oluşturuluyor.");
                 var result = await _mediator.Send(command);
-                _logger.LogInformation("Kullanıcı oluşturuldu. ID: {Id}", result.Id);
+                _logger.LogInfo($"ID: {result.Id} olan kullanıcı başarıyla oluşturuldu.");
                 return CreatedAtAction(nameof(GetById), new { id = result.Id }, result);
             }
-            catch (InvalidOperationException ex)
+            catch (Exception ex) when (ex.Message.Contains("unique constraint"))
             {
-                // Sicil benzersizlik hatası veya diğer doğrulama hataları
-                string errorMessage = ex.Message;
-                _logger.LogWarning("Kullanıcı ekleme işlemi sırasında doğrulama hatası: {Message}", errorMessage);
-                
-                // Özel olarak sicil numarası hatası için kontrol et
-                if (errorMessage.Contains("sicil numarası zaten kullanılmaktadır"))
-                {
-                    return BadRequest(new { error = errorMessage });
-                }
-                
-                return BadRequest(new { error = string.Format(ERROR_VALIDATION, errorMessage) });
+                _logger.LogError($"Kullanıcı oluşturulurken benzersizlik hatası: {ex.Message}");
+                return Conflict("Bu e-posta adresi veya kullanıcı adı zaten kullanılıyor.");
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Kullanıcı ekleme işlemi sırasında hata oluştu");
-                return StatusCode(StatusCodes.Status500InternalServerError, new { error = ERROR_USER_CREATE });
+                _logger.LogError(ERROR_USER_CREATE, ex);
+                return StatusCode(StatusCodes.Status500InternalServerError, ERROR_USER_CREATE);
             }
         }
 
@@ -92,39 +92,31 @@ namespace Stock.API.Controllers
             {
                 if (id != command.Id)
                 {
-                    _logger.LogWarning("ID uyuşmazlığı: URL'deki {UrlId} ile gönderilen {CommandId} eşleşmiyor", id, command.Id);
-                    return BadRequest(new { error = ERROR_ID_MISMATCH });
+                    _logger.LogWarn(ERROR_ID_MISMATCH);
+                    return BadRequest(ERROR_ID_MISMATCH);
                 }
-                
+
+                _logger.LogInfo($"ID: {id} olan kullanıcı güncelleniyor.");
                 var result = await _mediator.Send(command);
-                
+
                 if (result == null)
                 {
-                    _logger.LogWarning("Güncellenecek kullanıcı bulunamadı: ID: {Id}", id);
-                    return NotFound(new { error = string.Format(ERROR_USER_NOT_FOUND, id) });
+                    _logger.LogWarn(string.Format(ERROR_USER_NOT_FOUND, id));
+                    return NotFound(string.Format(ERROR_USER_NOT_FOUND, id));
                 }
-                
-                _logger.LogInformation("Kullanıcı güncellendi. ID: {Id}", result.Id);
+
+                _logger.LogInfo($"ID: {id} olan kullanıcı başarıyla güncellendi.");
                 return Ok(result);
             }
-            catch (InvalidOperationException ex)
+            catch (Exception ex) when (ex.Message.Contains("unique constraint"))
             {
-                // Sicil benzersizlik hatası veya diğer doğrulama hataları
-                string errorMessage = ex.Message;
-                _logger.LogWarning("Kullanıcı güncelleme işlemi sırasında doğrulama hatası: {Message}", errorMessage);
-                
-                // Özel olarak sicil numarası hatası için kontrol et
-                if (errorMessage.Contains("sicil numarası zaten"))
-                {
-                    return BadRequest(new { error = errorMessage });
-                }
-                
-                return BadRequest(new { error = string.Format(ERROR_VALIDATION, errorMessage) });
+                _logger.LogError($"Kullanıcı güncellenirken benzersizlik hatası: {ex.Message}");
+                return Conflict("Bu e-posta adresi veya kullanıcı adı zaten kullanılıyor.");
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Kullanıcı güncelleme işlemi sırasında hata oluştu");
-                return StatusCode(StatusCodes.Status500InternalServerError, new { error = ERROR_USER_UPDATE });
+                _logger.LogError(ERROR_USER_UPDATE, ex);
+                return StatusCode(StatusCodes.Status500InternalServerError, ERROR_USER_UPDATE);
             }
         }
 
@@ -134,23 +126,23 @@ namespace Stock.API.Controllers
         {
             try
             {
-                _logger.LogInformation("Kullanıcı silme isteği başlatıldı: ID: {Id}", id);
-                var command = new Stock.Application.Features.Users.Commands.DeleteUserCommand { Id = id };
+                _logger.LogInfo($"ID: {id} olan kullanıcı siliniyor.");
+                var command = new DeleteUserCommand { Id = id };
                 var result = await _mediator.Send(command);
-                
+
                 if (!result)
                 {
-                    _logger.LogWarning("Silinecek kullanıcı bulunamadı: ID: {Id}", id);
-                    return NotFound(new { error = string.Format(ERROR_USER_NOT_FOUND, id) });
+                    _logger.LogWarn(string.Format(ERROR_USER_NOT_FOUND, id));
+                    return NotFound(string.Format(ERROR_USER_NOT_FOUND, id));
                 }
-                
-                _logger.LogInformation("Kullanıcı silindi. ID: {Id}", id);
+
+                _logger.LogInfo($"ID: {id} olan kullanıcı başarıyla silindi.");
                 return NoContent();
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Kullanıcı silme işlemi sırasında hata oluştu");
-                return StatusCode(StatusCodes.Status500InternalServerError, new { error = ERROR_USER_DELETE });
+                _logger.LogError(ERROR_USER_DELETE, ex);
+                return StatusCode(StatusCodes.Status500InternalServerError, ERROR_USER_DELETE);
             }
         }
     }

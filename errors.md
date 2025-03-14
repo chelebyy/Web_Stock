@@ -942,9 +942,57 @@ Backend controller'larda çok sayıda gereksiz log ifadesi ve doğrudan kod içi
 - src/Stock.API/Controllers/RoleController.cs
 - src/Stock.API/Controllers/PermissionsController.cs
 
-### Faydalar
+### Faydaları
 - Performans iyileştirmesi: Gereksiz log ifadelerinin kaldırılması
 - Kod kalitesinin artması: Magic string ve magic number'ların sabit değişkenlere dönüştürülmesi
 - Güvenlik iyileştirmesi: Hassas bilgilerin log'lara yazılmaması
 - Daha iyi hata ayıklama: Standart bir loglama yaklaşımı
 - Disk alanı tasarrufu: Gereksiz log kayıtlarının azaltılması
+
+## Merkezi Loglama Mekanizması ve Global Exception Handler Eklenmesi
+
+### Sorun
+Uygulama genelinde tutarlı bir loglama yaklaşımı ve beklenmeyen hataların merkezi bir şekilde yakalanması ve işlenmesi için bir mekanizma bulunmuyordu.
+
+### Çözüm
+1. NLog kütüphanesi kullanılarak merkezi bir loglama mekanizması oluşturuldu.
+2. ILoggerManager arayüzü ve LoggerManager sınıfı oluşturuldu.
+3. NLog yapılandırma dosyası oluşturuldu.
+4. Global exception handler middleware eklendi.
+5. Program.cs dosyası güncellendi.
+6. DependencyInjection.cs dosyası güncellendi.
+7. UsersController güncellendi.
+
+### Teknik Detaylar
+- NLog kütüphanesi, farklı log hedeflerine (dosya, konsol, veritabanı vb.) log göndermeyi sağlar.
+- ILoggerManager arayüzü, uygulamanın loglama ihtiyaçlarını karşılamak için tasarlanmıştır.
+- LoggerManager sınıfı, ILoggerManager arayüzünü uygular ve NLog kütüphanesini kullanarak logları yönetir.
+- ExceptionMiddleware, beklenmeyen hataları yakalamak ve uygun şekilde işlemek için tasarlanmıştır.
+- MiddlewareExtensions, middleware'i uygulamaya eklemek için extension method sağlar.
+
+### Faydaları
+1. **Tutarlı Loglama**: Tüm uygulama genelinde tutarlı bir loglama yaklaşımı sağlar.
+2. **Merkezi Hata Yönetimi**: Beklenmeyen hataları merkezi bir şekilde yakalar ve işler.
+3. **Gelişmiş İzlenebilirlik**: Uygulamanın davranışını ve performansını izlemek için daha fazla bilgi sağlar.
+4. **Yapılandırılabilir Log Seviyeleri**: Farklı ortamlar için farklı log seviyeleri yapılandırılabilir.
+5. **Log Rotasyonu ve Arşivleme**: Logların otomatik olarak döndürülmesi ve arşivlenmesi sağlanır.
+6. **Kullanıcı Dostu Hata Mesajları**: Son kullanıcılara daha anlaşılır hata mesajları sunulur.
+
+### Örnek Kullanım
+```csharp
+// Controller'da loglama kullanımı
+[HttpGet]
+[Authorize(Roles = "Admin")]
+public async Task<IActionResult> GetAll()
+{
+    _logger.LogInfo("Tüm kullanıcılar getiriliyor.");
+    var query = new GetAllUsersQuery();
+    var result = await _mediator.Send(query);
+    _logger.LogInfo($"{result.Count} kullanıcı başarıyla getirildi.");
+    return Ok(result);
+}
+```
+
+### Referanslar
+- [NLog Resmi Dokümantasyonu](https://github.com/NLog/NLog/wiki)
+- [ASP.NET Core Middleware](https://docs.microsoft.com/en-us/aspnet/core/fundamentals/middleware/)

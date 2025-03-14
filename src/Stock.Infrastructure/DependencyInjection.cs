@@ -4,6 +4,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Stock.Application.Common.Interfaces;
 using Stock.Domain.Interfaces;
 using Stock.Infrastructure.Data;
+using Stock.Infrastructure.Logging;
 using Stock.Infrastructure.Repositories;
 using Stock.Infrastructure.Services;
 using Stock.Infrastructure.UnitOfWork;
@@ -37,6 +38,9 @@ namespace Stock.Infrastructure
             services.AddScoped<IPermissionService, PermissionService>();
             services.AddScoped<IUserPermissionService, UserPermissionService>();
             services.AddScoped<ICurrentUserService, CurrentUserService>();
+
+            // Logging
+            services.AddSingleton<ILoggerManager, LoggerManager>();
 
             return services;
         }
