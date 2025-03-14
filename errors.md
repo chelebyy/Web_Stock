@@ -2,6 +2,213 @@
 
 ## Kod İyileştirme Çalışmaları
 
+### BaseHttpService Oluşturma Sürecinde Karşılaşılan Sorunlar ve Çözümleri
+**Tarih:** 25 Haziran 2025
+**Sorun:** HTTP isteklerini standartlaştırmak ve kod tekrarını azaltmak için bir BaseHttpService oluşturulması gerekiyordu.
+**Nedeni:** Mevcut servislerde çok fazla kod tekrarı vardı, özellikle HTTP istekleri, hata yönetimi ve API yanıt işleme konularında.
+**Çözüm:**
+
+1. **CoreModule Oluşturma ve Bağımlılık Enjeksiyonu**
+   - Sorun: BaseHttpService oluşturuldu, ancak Angular'ın bağımlılık enjeksiyonu sistemine doğru şekilde kaydedilmediği için servislerde kullanılamadı. `No provider for BaseHttpService!` hatası alındı.
+   - Çözüm: `CoreModule` adında yeni bir modül oluşturuldu ve BaseHttpService bu modüle provider olarak eklendi.
+
+   ```typescript
+   // core.module.ts
+   import { NgModule, Optional, SkipSelf } from '@angular/core';
+   import { CommonModule } from '@angular/common';
+   import { HttpClientModule } from '@angular/common/http';
+
+   import { BaseHttpService } from './services/base-http.service';
+   import { ErrorService } from './services/error.service';
+   import { LogService } from './services/log.service';
+
+   @NgModule({
+     declarations: [],
+     imports: [
+       CommonModule,
+       HttpClientModule
+     ],
+     providers: [
+       BaseHttpService,
+       ErrorService,
+       LogService
+     ]
+   })
+   export class CoreModule {
+     constructor(@Optional() @SkipSelf() parentModule: CoreModule) {
+       if (parentModule) {
+         throw new Error(
+           'CoreModule zaten AppModule tarafından import edilmiş. CoreModule sadece AppModule tarafından import edilmelidir.'
+         );
+       }
+     }
+   }
+   ```
+
+2. **TypeScript Kalıtım ve Override Anahtar Kelimesi**
+   - Sorun: BaseHttpService'i extend eden servislerde, constructor parametrelerinde `http` ve `authService` için TypeScript hataları alındı: `Property 'http' in type 'UserService' is not assignable to the same property in base type 'BaseHttpService'.`
+   - Çözüm: Constructor parametrelerinde `protected override` anahtar kelimesi kullanıldı.
+
+   ```typescript
+   constructor(
+     protected override http: HttpClient,
+     protected override authService: AuthService
+   ) {
+     super(http, authService);
+   }
+   ```
+
+3. **API Yanıt Normalizasyonu**
+   - Sorun: Farklı API endpoint'leri farklı yanıt formatları döndürüyordu (doğrudan dizi, ReferenceHandler.Preserve formatı, value/Value property'si içinde).
+   - Çözüm: BaseHttpService içinde, tüm bu formatları işleyebilen bir `normalizeResponse` metodu oluşturuldu.
+
+   ```typescript
+   protected normalizeResponse<T>(response: any): T {
+     if (!response) return [] as unknown as T;
+     
+     // $values dizisi varsa
+     if (response.$values) {
+       return response.$values as T;
+     }
+     // Dizi ise doğrudan döndür
+     else if (Array.isArray(response)) {
+       return response as T;
+     }
+     // Başka özelliklerde veri varsa
+     else if (response && typeof response === 'object') {
+       // Nesne içinde dizi özelliği ara
+       if (response.value && Array.isArray(response.value)) {
+         return response.value as T;
+       }
+       
+       if (response.Value && Array.isArray(response.Value)) {
+         return response.Value as T;
+       }
+       
+       // ID değeri varsa ve tek bir nesne ise
+       if (response.id || response.Id) {
+         return response as T;
+       }
+     }
+     
+     // Son çare: orijinal yanıtı döndür
+     return response as T;
+   }
+   ```
+
+4. **Dosya Yükleme İsteklerinde Content-Type Header'ı**
+   - Sorun: Dosya yükleme isteklerinde, `Content-Type: application/json` header'ı eklendiğinde, dosya doğru şekilde yüklenemiyordu.
+   - Çözüm: Dosya yükleme istekleri için özel bir `uploadFile` metodu oluşturuldu ve bu metotta `Content-Type` header'ı eklenmedi.
+
+   ```typescript
+   protected uploadFile<T>(endpoint: string, file: File, additionalData?: Record<string, any>): Observable<T> {
+     const formData = new FormData();
+     formData.append('file', file, file.name);
+     
+     // Ek veri varsa ekle
+     if (additionalData) {
+       Object.keys(additionalData).forEach(key => {
+         formData.append(key, additionalData[key]);
+       });
+     }
+     
+     const token = this.authService.getToken();
+     const headers = new HttpHeaders({
+       'Authorization': `Bearer ${token}`
+     });
+     
+     return this.http.post<any>(`${this.apiUrl}${endpoint}`, formData, { headers })
+       .pipe(
+         map(response => this.normalizeResponse<T>(response)),
+         catchError(error => this.handleError(error))
+       );
+   }
+   ```
+
+5. **Dosya İndirme İsteklerinde ResponseType**
+   - Sorun: Dosya indirme isteklerinde, varsayılan `responseType: 'json'` kullanıldığında, dosya içeriği JSON olarak parse edilmeye çalışılıyordu.
+   - Çözüm: Dosya indirme istekleri için özel bir `downloadFile` metodu oluşturuldu ve bu metotta `responseType: 'blob'` olarak ayarlandı.
+
+   ```typescript
+   protected downloadFile(endpoint: string): Observable<Blob> {
+     const options = { 
+       headers: this.getHeaders(),
+       responseType: 'blob' as 'json'
+     };
+     
+     return this.http.get<Blob>(`${this.apiUrl}${endpoint}`, options)
+       .pipe(
+         catchError(error => this.handleError(error))
+       );
+   }
+   ```
+
+6. **Signal Kullanımı ve BaseHttpService Entegrasyonu**
+   - Sorun: RoleService gibi bazı servislerde Angular Signals kullanılıyordu. BaseHttpService'e geçiş yaparken, bu signal'ların korunması gerekiyordu.
+   - Çözüm: BaseHttpService'i extend eden servislerde, signal'lar ve ilgili metodlar korundu. BaseHttpService'in metodları, signal'ları güncellemek için kullanıldı.
+
+   ```typescript
+   @Injectable({
+     providedIn: 'root'
+   })
+   export class RoleService extends BaseHttpService {
+     private endpoint = '/api/Role';
+     
+     // Signal tanımları
+     private _roles = signal<Role[]>([]);
+     private _loading = signal<boolean>(false);
+     private _error = signal<string | null>(null);
+     
+     // Computed signals
+     readonly roles = computed(() => this._roles());
+     readonly loading = computed(() => this._loading());
+     readonly error = computed(() => this._error());
+
+     constructor(
+       protected override http: HttpClient,
+       protected override authService: AuthService
+     ) {
+       super(http, authService);
+     }
+
+     // Signal ile roller yükle
+     loadRoles(): void {
+       this._loading.set(true);
+       this._error.set(null);
+       
+       this.getRoles().subscribe({
+         next: (data) => {
+           this._roles.set(data);
+           this._loading.set(false);
+         },
+         error: (error) => {
+           console.error('Roller yüklenirken hata:', error);
+           this._error.set('Roller yüklenirken bir hata oluştu.');
+           this._loading.set(false);
+         }
+       });
+     }
+
+     // GET /api/Role - Tüm rolleri getir
+     getRoles(): Observable<Role[]> {
+       return this.get<Role[]>(this.endpoint);
+     }
+   }
+   ```
+
+**Öğrenilen Dersler:**
+1. Angular'da servis kalıtımı kullanırken, constructor parametrelerinde `protected override` anahtar kelimesi kullanılmalıdır.
+2. Farklı API yanıt formatlarını işleyebilen esnek bir normalizasyon mekanizması, kod tekrarını azaltır ve bakımı kolaylaştırır.
+3. Dosya yükleme ve indirme işlemleri için özel metodlar oluşturulmalı ve uygun HTTP ayarları yapılmalıdır.
+4. Angular Signals gibi modern özellikleri kullanırken, kalıtım ve kompozisyon desenlerini doğru şekilde uygulamak önemlidir.
+5. CoreModule gibi merkezi bir modül oluşturmak, servis sağlayıcılarını yönetmeyi kolaylaştırır ve tek bir yerden import edilmelerini sağlar.
+
+**Sonraki Adımlar:**
+1. Diğer servislerin de BaseHttpService'i kullanacak şekilde güncellenmesi.
+2. İstek önbelleğe alma, yeniden deneme ve iptal etme gibi gelişmiş özelliklerin eklenmesi.
+3. HTTP interceptor'lar kullanılarak token yönetimi ve hata işleme süreçlerinin daha da merkezileştirilmesi.
+4. Birim testlerin eklenmesi ve güncellenmesi.
+
 ### Frontend Servis İyileştirmeleri
 **Tarih:** 20 Haziran 2025
 **Sorun:** Frontend servislerinde gereksiz console.log ifadeleri, magic string/number kullanımı ve tutarsız hata yönetimi vardı.
