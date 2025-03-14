@@ -1,5 +1,80 @@
 # Hata Kayıtları ve Çözümleri
 
+## Kod İyileştirme Çalışmaları
+
+### Frontend Servis İyileştirmeleri
+**Tarih:** 20 Haziran 2025
+**Sorun:** Frontend servislerinde gereksiz console.log ifadeleri, magic string/number kullanımı ve tutarsız hata yönetimi vardı.
+**Nedeni:** Geliştirme sürecinde debug amaçlı eklenen console.log ifadeleri temizlenmemiş, sabit değerler doğrudan kodda kullanılmış ve hata yönetimi her serviste farklı şekilde uygulanmıştı.
+**Çözüm:**
+1. Tüm servis dosyalarından gereksiz console.log, console.warn ve console.error ifadeleri kaldırıldı.
+2. HTTP durum kodları ve hata kodları için sabit değişkenler oluşturuldu:
+   ```typescript
+   export const HttpStatusCodes = {
+     OK: 200,
+     BAD_REQUEST: 400,
+     UNAUTHORIZED: 401,
+     FORBIDDEN: 403,
+     NOT_FOUND: 404,
+     SERVER_ERROR: 500,
+     CONNECTION_ERROR: 0
+   };
+   
+   export const ErrorCodes = {
+     DUPLICATE_SICIL: 'DuplicateSicil',
+     DUPLICATE_USERNAME: 'DuplicateUsername'
+   };
+   ```
+3. Tüm servislerde tutarlı bir hata yönetimi yaklaşımı uygulandı:
+   ```typescript
+   private handleError(error: HttpErrorResponse): Observable<never> {
+     let errorMessage = 'Bir hata oluştu';
+     
+     if (error.error instanceof ErrorEvent) {
+       // İstemci taraflı hata
+       errorMessage = `Hata: ${error.error.message}`;
+     } else {
+       // Sunucu taraflı hata
+       if (error.status === HttpStatusCodes.UNAUTHORIZED) {
+         errorMessage = 'Oturum süresi dolmuş veya yetkiniz yok. Lütfen tekrar giriş yapın.';
+       } else if (error.status === HttpStatusCodes.FORBIDDEN) {
+         errorMessage = 'Bu işlemi gerçekleştirmek için yetkiniz yok.';
+       } else if (error.status === HttpStatusCodes.NOT_FOUND) {
+         errorMessage = 'İstek yapılan kaynak bulunamadı.';
+       } else if (error.status === HttpStatusCodes.SERVER_ERROR) {
+         errorMessage = 'Sunucu hatası. Lütfen daha sonra tekrar deneyin.';
+       } else if (error.status === HttpStatusCodes.CONNECTION_ERROR) {
+         errorMessage = 'Sunucuya bağlanılamadı. İnternet bağlantınızı kontrol edin.';
+       } else {
+         errorMessage = `Sunucu hatası: ${error.status}, mesaj: ${error.message}`;
+       }
+     }
+     
+     return throwError(() => new Error(errorMessage));
+   }
+   ```
+4. API yanıtlarını işleyen normalizeResponse metodu iyileştirildi ve tüm servislerde tutarlı hale getirildi.
+5. Tüm HTTP isteklerinde Authorization token'ı ve Content-Type header'ları eklendi.
+6. İyileştirilen dosyalar:
+   - user.service.ts
+   - role.service.ts
+   - permission.service.ts
+   - user-permission.service.ts
+   - password.service.ts
+
+**Öğrenilen Dersler:**
+1. Üretim kodunda console.log ifadeleri bulunmamalıdır. Geliştirme sürecinde eklenen log ifadeleri, geliştirme tamamlandığında temizlenmelidir.
+2. Magic string ve magic number kullanımından kaçınılmalı, bunun yerine anlamlı isimlerle sabit değişkenler kullanılmalıdır.
+3. Hata yönetimi tüm uygulamada tutarlı olmalıdır. Benzer hatalar için benzer mesajlar gösterilmelidir.
+4. HTTP istekleri için standart bir yaklaşım benimsenmeli ve tüm servislerde uygulanmalıdır.
+5. Kod tekrarından kaçınmak için ortak işlevsellik (örneğin, API yanıt işleme) merkezileştirilmelidir.
+
+**Sonraki Adımlar:**
+1. Ortak işlevselliği içeren bir BaseService sınıfı oluşturulabilir.
+2. Tip güvenliği artırılabilir (any tipinin azaltılması).
+3. HTTP istekleri için interceptor oluşturulabilir.
+4. Daha kapsamlı hata yönetimi ve loglama stratejisi uygulanabilir.
+
 ## Kullanıcı Sayfa İzinleri Yönetimi Sayfası Sorunları ve Çözümleri
 
 ### Sorun: PrimeNG TabView Bileşeni Siyah Arka Plan Sorunu

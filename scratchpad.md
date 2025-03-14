@@ -612,3 +612,80 @@ Migrasyon başarıyla uygulandı ve uygulama sorunsuz bir şekilde çalışıyor
 - Veritabanı şemasını düzenli olarak kontrol et
 - Veri tipi değişikliklerinde dönüşüm stratejilerini önceden planla
 - Migrasyon oluşturmadan önce entity modellerini dikkatlice gözden geçir
+
+# Scratchpad - Kod İyileştirme Çalışmaları
+
+## Görev Tanımı
+Mevcut kodun kalitesini artırmak ve sürdürülebilirliğini iyileştirmek için kod iyileştirme çalışmaları yapmak. Bu çalışmalar, mevcut işlevselliği bozmadan kod kalitesini artırmayı hedeflemektedir.
+
+## İyileştirme Planı
+Kod iyileştirme planı, `kod_iyilestirme_plani.md` dosyasında detaylı olarak belirtilmiştir. Bu plan, aşağıdaki fazları içermektedir:
+
+1. Faz 1: Düşük Riskli İyileştirmeler
+2. Faz 2: Orta Riskli İyileştirmeler
+3. Faz 3: Yapısal İyileştirmeler
+4. Faz 4: Mimari İyileştirmeler
+
+## Yapılan İyileştirmeler ve İlerleme
+
+### Faz 1: Düşük Riskli İyileştirmeler
+
+#### 1. Frontend Servis İyileştirmeleri
+[X] Gereksiz console.log ifadelerinin kaldırılması
+[X] Magic string ve magic number'ların sabit değişkenlere dönüştürülmesi
+[X] Hata yönetiminin iyileştirilmesi
+[X] API yanıt işleme iyileştirmesi
+[X] HTTP isteklerinin standartlaştırılması
+[X] Import ifadelerinin düzenlenmesi
+
+##### İyileştirilen Dosyalar:
+- [X] user.service.ts
+- [X] role.service.ts
+- [X] permission.service.ts
+- [X] user-permission.service.ts
+- [X] password.service.ts
+
+#### 2. Backend İyileştirmeleri
+[ ] Gereksiz log ifadelerinin kaldırılması
+[ ] Magic string ve magic number'ların sabit değişkenlere dönüştürülmesi
+[ ] Hata yönetiminin iyileştirilmesi
+[ ] Kullanılmayan using ifadelerinin kaldırılması
+
+#### 3. Belgelendirme İyileştirmeleri
+[X] Frontend servis iyileştirmelerinin belgelendirilmesi (knowledge-base/frontend-service-improvements.md)
+[ ] Backend iyileştirmelerinin belgelendirilmesi
+
+### Faz 2: Orta Riskli İyileştirmeler (Henüz Başlanmadı)
+[ ] Global exception handling mekanizması oluşturma
+[ ] Ortak UI bileşenleri oluşturma
+[ ] Form validasyon mantığını ayrı sınıflara taşıma
+[ ] HTTP istekleri için interceptor oluşturma
+
+### Faz 3: Yapısal İyileştirmeler (Henüz Başlanmadı)
+[ ] Büyük bileşenleri daha küçük alt bileşenlere ayırma
+[ ] Base service ve base controller oluşturma
+[ ] Ortak CRUD işlemlerini base sınıflara taşıma
+
+### Faz 4: Mimari İyileştirmeler (Henüz Başlanmadı)
+[ ] MediatR/CQRS pattern'inin tüm controllerlara uygulanması
+[ ] State management yaklaşımının standartlaştırılması
+[ ] Validation logic'in ayrı sınıflara taşınması
+
+## Sonraki Adımlar
+1. Frontend bileşenlerindeki gereksiz console.log ifadelerinin kaldırılması
+2. Backend controller'lardaki gereksiz log ifadelerinin kaldırılması
+3. Backend'de magic string ve magic number'ların sabit değişkenlere dönüştürülmesi
+
+## Öğrenilen Dersler
+1. Kod iyileştirme çalışmaları, mevcut işlevselliği bozmadan yapılmalıdır.
+2. Değişiklikler küçük parçalar halinde yapılmalı ve her değişiklik sonrası test edilmelidir.
+3. Sabit değerler (magic string/number) her zaman sabit değişkenlere dönüştürülmelidir.
+4. Hata yönetimi merkezileştirilmeli ve tutarlı olmalıdır.
+5. Kod tekrarı azaltılmalı, ortak işlevsellik base sınıflara taşınmalıdır.
+6. Belgelendirme, yapılan değişiklikleri ve nedenleri açıkça belirtmelidir.
+
+## Notlar
+- Tüm değişiklikler, mevcut işlevselliği bozmadan yapılmalıdır.
+- Her değişiklik sonrası uygulama test edilmelidir.
+- Değişiklikler, kod iyileştirme planında belirtilen risk seviyelerine göre sırayla yapılmalıdır.
+- Yüksek riskli değişiklikler için ayrı branch'ler oluşturulmalıdır.

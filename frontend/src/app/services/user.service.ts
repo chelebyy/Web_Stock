@@ -7,6 +7,23 @@ import { CreateUserRequest } from '../core/authentication/auth.model';
 import { environment } from '../../environments/environment';
 import { AuthService } from '../core/authentication/auth.service';
 
+// HTTP durum kodları için sabitler
+export const HttpStatusCodes = {
+  OK: 200,
+  BAD_REQUEST: 400,
+  UNAUTHORIZED: 401,
+  FORBIDDEN: 403,
+  NOT_FOUND: 404,
+  SERVER_ERROR: 500,
+  CONNECTION_ERROR: 0
+};
+
+// Hata kodları için sabitler
+export const ErrorCodes = {
+  DUPLICATE_SICIL: 'DuplicateSicil',
+  DUPLICATE_USERNAME: 'DuplicateUsername'
+};
+
 @Injectable({
   providedIn: 'root'
 })
@@ -21,11 +38,6 @@ export class UserService {
   // HTTP Headers oluştur
   private getHeaders(): HttpHeaders {
     const token = this.authService.getToken();
-    console.log('Kullanılan token:', token ? `${token.substring(0, 15)}...` : 'Token yok');
-    
-    if (!token) {
-      console.warn('Auth token bulunamadı! Lütfen tekrar giriş yapın.');
-    }
     
     return new HttpHeaders({
       'Content-Type': 'application/json',
@@ -34,79 +46,43 @@ export class UserService {
   }
 
   getUsers(): Observable<User[]> {
-    console.log(`API URL: ${this.apiUrl}/Users`);
     const options = { headers: this.getHeaders() };
-    
-    console.log('API isteği gönderiliyor...', {
-      url: `${this.apiUrl}/Users`,
-      headers: {
-        contentType: options.headers.get('Content-Type'),
-        authHeader: options.headers.has('Authorization') ? 'Bearer token mevcut' : 'Authorization header yok'
-      }
-    });
     
     return this.http.get<any>(`${this.apiUrl}/Users`, options)
       .pipe(
         map(response => {
-          console.log('API yanıtı alındı:', response);
-          
           // ReferenceHandler.Preserve formatını işle ($id ve $values)
           if (response && response.$values && Array.isArray(response.$values)) {
-            console.log(`$values dizisinden ${response.$values.length} kullanıcı yüklendi`);
             return response.$values as User[];
           }
           
           // Normal dizi yanıtını işle
           if (Array.isArray(response) && response.length > 0) {
-            console.log(`${response.length} kullanıcı başarıyla yüklendi`);
             return response as User[];
           } else if (Array.isArray(response) && response.length === 0) {
-            console.warn('API yanıtı boş bir dizi döndürdü (hiç kullanıcı yok)');
             return [] as User[];
           } else {
-            console.warn('API yanıtı beklenen formatta değil:', response);
-            
             // Diğer olası formatlara bak
             if (response && typeof response === 'object') {
               // value ya da Value içinde olabilir
               if (response.value && Array.isArray(response.value)) {
-                console.log('value dizisi bulundu, kullanılıyor');
                 return response.value as User[];
               }
               
               if (response.Value && Array.isArray(response.Value)) {
-                console.log('Value dizisi bulundu, kullanılıyor');
                 return response.Value as User[];
               }
               
               // Yanıt doğrudan bir nesne ise ve kullanıcı gibi görünüyorsa
               if ('username' in response || 'id' in response) {
-                console.log('Tek kullanıcı nesnesi bulundu, dizi haline getiriliyor');
                 return [response as User];
               }
             }
             
-            console.error('API yanıtı beklendiği gibi değil, dizi dönüştürülemedi');
             return [] as User[];
           }
         }),
         catchError(error => {
-          console.error('Kullanıcıları getirirken hata oluştu:', error);
-          console.error('Hata detayları:', {
-            status: error.status,
-            statusText: error.statusText,
-            message: error.message,
-            error: error.error
-          });
-          
-          if (error.status === 401) {
-            console.error('Yetkilendirme hatası (401). Token geçersiz veya eksik olabilir.');
-          } else if (error.status === 404) {
-            console.error('API endpoint bulunamadı (404). URL doğru mu?');
-          } else if (error.status === 0) {
-            console.error('Bağlantı hatası. Backend çalışıyor mu?');
-          }
-          
           // Boş dizi döndür ki uygulama çökmeden devam edebilsin
           return of([] as User[]);
         })
@@ -162,15 +138,10 @@ export class UserService {
       return throwError(() => new Error('Sicil numarası boş olamaz'));
     }
     
-    // Kontrol amaçlı log
-    console.log('Gönderilen kullanıcı verisi:', createUserRequest);
-    
     const options = { headers: this.getHeaders() };
     return this.http.post<any>(`${this.apiUrl}/auth/create-user`, createUserRequest, options)
       .pipe(
         catchError(error => {
-          console.error('Kullanıcı oluşturma hatası:', error);
-          
           // Hata mesajını düzenle
           let errorMessage = 'Kullanıcı oluşturulurken bir hata oluştu';
           let errorField = '';
@@ -187,18 +158,18 @@ export class UserService {
             }
             
             // Sicil numarası çakışma hatası için özel mesaj
-            if (error.error.code === 'DuplicateSicil') {
+            if (error.error.code === ErrorCodes.DUPLICATE_SICIL) {
               errorMessage = `Sicil numarası '${user.sicil}' zaten kullanımda. Lütfen farklı bir sicil numarası girin.`;
               errorField = 'sicil';
             }
           }
           
           // HTTP durum kodu kontrolü
-          if (error.status === 401) {
+          if (error.status === HttpStatusCodes.UNAUTHORIZED) {
             errorMessage = 'Oturum süresi dolmuş veya yetkiniz yok. Lütfen tekrar giriş yapın.';
-          } else if (error.status === 403) {
+          } else if (error.status === HttpStatusCodes.FORBIDDEN) {
             errorMessage = 'Bu işlemi gerçekleştirmek için yetkiniz yok.';
-          } else if (error.status === 404) {
+          } else if (error.status === HttpStatusCodes.NOT_FOUND) {
             errorMessage = 'İstek yapılan kaynak bulunamadı.';
           }
           
