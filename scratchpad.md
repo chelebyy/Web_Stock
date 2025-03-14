@@ -655,99 +655,2127 @@ Kod iyileştirme planı, `kod_iyilestirme_plani.md` dosyasında detaylı olarak 
 [X] Frontend servis iyileştirmelerinin belgelendirilmesi (knowledge-base/frontend-service-improvements.md)
 [ ] Backend iyileştirmelerinin belgelendirilmesi
 
-### Faz 2: Orta Riskli İyileştirmeler (Henüz Başlanmadı)
-[ ] Global exception handling mekanizması oluşturma
-[ ] Ortak UI bileşenleri oluşturma
-[ ] Form validasyon mantığını ayrı sınıflara taşıma
-[ ] HTTP istekleri için interceptor oluşturma
+### Faz 2: Orta Riskli İyileştirmeler
+- [ ] Merkezi bir loglama mekanizması oluşturma
+- [ ] Hata yönetimini iyileştirme
+- [ ] Performans optimizasyonları
 
-### Faz 3: Yapısal İyileştirmeler (Henüz Başlanmadı)
-[ ] Büyük bileşenleri daha küçük alt bileşenlere ayırma
-[ ] Base service ve base controller oluşturma
-[ ] Ortak CRUD işlemlerini base sınıflara taşıma
+### Faz 3: Yüksek Riskli İyileştirmeler
+- [ ] Veritabanı sorgularını optimize etme
+- [ ] Mimari iyileştirmeler
 
-### Faz 4: Mimari İyileştirmeler (Henüz Başlanmadı)
-[ ] MediatR/CQRS pattern'inin tüm controllerlara uygulanması
-[ ] State management yaklaşımının standartlaştırılması
-[ ] Validation logic'in ayrı sınıflara taşınması
+## Şu Anki Görev: Backend Controller İyileştirmeleri
 
-## Sonraki Adımlar
-1. Frontend bileşenlerindeki gereksiz console.log ifadelerinin kaldırılması
-2. Backend controller'lardaki gereksiz log ifadelerinin kaldırılması
-3. Backend'de magic string ve magic number'ların sabit değişkenlere dönüştürülmesi
-4. Merkezi bir loglama mekanizması oluşturulması
+Backend controller'lardaki gereksiz log ifadelerini kaldırmak ve magic string/number'ları sabit değişkenlere dönüştürmek için bir analiz yapıldı. İncelenen controller'lar:
 
-## Öğrenilen Dersler
-1. Kod iyileştirme çalışmaları, mevcut işlevselliği bozmadan yapılmalıdır.
-2. Değişiklikler küçük parçalar halinde yapılmalı ve her değişiklik sonrası test edilmelidir.
-3. Sabit değerler (magic string/number) her zaman sabit değişkenlere dönüştürülmelidir.
-4. Hata yönetimi merkezileştirilmeli ve tutarlı olmalıdır.
-5. Kod tekrarı azaltılmalı, ortak işlevsellik base sınıflara taşınmalıdır.
-6. Belgelendirme, yapılan değişiklikleri ve nedenleri açıkça belirtmelidir.
+1. **UsersController.cs**
+   - Her API çağrısı için detaylı log kayıtları tutuluyor
+   - Hata durumlarında detaylı log kayıtları tutuluyor
+   - Kullanıcı bilgileri doğrudan log'lara yazılıyor
 
-## Notlar
-- Tüm değişiklikler, mevcut işlevselliği bozmadan yapılmalıdır.
-- Her değişiklik sonrası uygulama test edilmelidir.
-- Değişiklikler, kod iyileştirme planında belirtilen risk seviyelerine göre sırayla yapılmalıdır.
-- Yüksek riskli değişiklikler için ayrı branch'ler oluşturulmalıdır.
+2. **RoleController.cs**
+   - Her API çağrısı için detaylı log kayıtları tutuluyor
+   - Hata durumlarında detaylı log kayıtları tutuluyor
+   - Rol bilgileri doğrudan log'lara yazılıyor
 
-### TypeScript Tip Hataları Çözüldü (20 Haziran 2025)
-- `permission-management.component.ts` dosyasında TypeScript tip hataları çözüldü.
-- Hata 1: `roleService.getRoleById` metodu yerine `roleService.getRole` metodu kullanıldı.
-- Hata 2: Tüm parametrelere tip tanımlamaları eklendi (`role: Role`, `error: any`, vb.).
-- Hata 3: Model ve bileşen arasındaki tip uyumsuzluğu çözüldü.
-- Model tipini farklı bir isimle import ederek (`Permission as ModelPermission`) çakışmalar önlendi.
-- API'den gelen verileri bileşendeki tipe dönüştürerek tip uyumluluğu sağlandı.
-- Detaylı bilgi için: [TypeScript Tip Hataları ve Çözümleri](knowledge-base/typescript-tip-hatalari-cozumu.md)
+3. **PermissionsController.cs**
+   - Bazı API çağrıları için detaylı log kayıtları tutuluyor
+   - Hata durumlarında detaylı log kayıtları tutuluyor
+   - İzin bilgileri doğrudan log'lara yazılıyor
 
-## Kullanıcı Yönetimi Sayfası Sorunları ve Çözümleri
+İyileştirme planı ve detayları `knowledge-base/backend-controller-improvements.md` dosyasında belgelenmiştir.
 
-### Tespit Edilen Sorunlar
-- [X] Kullanıcılar otomatik olarak yüklenmiyor
-- [X] Oluşturulan roller kullanıcı yönetimi sayfasında görünmüyor
+## Kod İyileştirme Planı - İlerleme
 
-### Yapılan Değişiklikler
+### Faz 1: Düşük Riskli İyileştirmeler
+- [X] API endpoint uyumluluğu sorunlarını çözme
+  - [X] role.service.ts dosyasındaki API URL'si düzeltildi (/api/roles -> /api/role)
+  - [X] permission.service.ts dosyasındaki API URL'si düzeltildi (/api/permissions -> /api/Permissions)
+  - [X] password.service.ts dosyasındaki şifre sıfırlama endpoint'i düzeltildi (/api/auth/request-password-reset -> /api/FixPassword/request-password-reset)
+  - [X] password.service.ts dosyasındaki şifre değiştirme endpoint'i düzeltildi (/api/auth/change-password -> /api/Auth/change-password)
 
-1. **Kullanıcıların Otomatik Yüklenmesi Sorunu**
-   - `user-management.component.ts` dosyasında `ngOnInit` metodunda `loadUsers()` çağrısı aktif hale getirildi.
-   - Böylece sayfa yüklendiğinde kullanıcılar otomatik olarak yüklenecek.
-   - Roller yüklenemese bile kullanıcıların yüklenmesi sağlandı.
+- [X] Frontend bileşenlerindeki gereksiz console.log ifadelerini kaldırma
+  - [X] user-management.component.ts dosyasındaki console.log ifadeleri kaldırıldı
+  - [X] role-management.component.ts dosyasındaki console.log ifadeleri kaldırıldı
+  - [X] permission-management.component.ts dosyasındaki console.log ifadeleri kaldırıldı
 
-2. **Rollerin Görüntülenmesi Sorunu**
-   - `loadRoles` metodunda API'den gelen rol verilerinin işlenmesi sırasında `id` ve `name` özellikleri eklendi.
-   - `getRoleName` metodunda rol ID'si ile eşleşen rolü bulmak için hem `value` hem de `id` özelliklerini kontrol edecek şekilde güncellendi.
-   - Rol yükleme hatası durumunda daha iyi bir hata yönetimi eklendi ve varsayılan roller oluşturuldu.
+- [X] Backend controller'lardaki gereksiz log ifadelerini kaldırma
+  - [X] UsersController.cs dosyasındaki gereksiz log ifadeleri kaldırıldı
+  - [X] RoleController.cs dosyasındaki gereksiz log ifadeleri kaldırıldı
+  - [X] PermissionsController.cs dosyasındaki gereksiz log ifadeleri kaldırıldı
 
-### Belgeleme
-- [X] `errors.md` dosyasına sorunlar ve çözümleri eklendi
-- [X] `knowledge-base/kullanici-yonetimi-sorunlari.md` dosyası oluşturuldu ve detaylı çözüm bilgileri eklendi
+- [X] Backend'de magic string ve magic number'ları sabit değişkenlere dönüştürme
+  - [X] Hata mesajları için sabit değişkenler oluşturuldu
+  - [X] HTTP durum kodları için StatusCodes sınıfı kullanıldı
+  - [X] Rol ve izin isimleri için sabit değişkenler oluşturuldu
 
-### Sonraki Adımlar
-- [ ] Veri modeli standardizasyonu: Tüm bileşenlerde tutarlı bir veri modeli kullanılmalı
-- [ ] Hata yönetimi iyileştirmeleri: Daha kapsamlı bir hata yönetimi stratejisi uygulanmalı
-- [ ] Performans iyileştirmeleri: Kullanıcı ve rol verilerinin önbelleğe alınması düşünülmeli
+### Faz 2: Orta Riskli İyileştirmeler
+- [ ] Merkezi bir loglama mekanizması oluşturma
+- [ ] Hata yönetimini iyileştirme
+- [ ] Performans optimizasyonları
 
-## API Endpoint Uyumluluğu Sorunları ve Çözümleri
+### Faz 3: Yüksek Riskli İyileştirmeler
+- [ ] Veritabanı sorgularını optimize etme
+- [ ] Mimari iyileştirmeler
 
-### Tespit Edilen Sorunlar
-- [X] Kullanıcı yönetimi sayfasında roller yüklenirken 404 (Not Found) hatası alınıyor
-- [X] İzinler yüklenirken 404 (Not Found) hatası alınabilir
-- [X] Şifre sıfırlama işlemi için 404 (Not Found) hatası alınabilir
+## Kod İyileştirme Planı - İlerleme
 
-### Yapılan Değişiklikler
-- [X] `role.service.ts` dosyasındaki API URL'si düzeltildi: `/api/roles` -> `/api/role`
-- [X] `permission.service.ts` dosyasındaki API URL'si düzeltildi: `/api/permissions` -> `/api/Permissions`
-- [X] `password.service.ts` dosyasındaki şifre sıfırlama endpoint'i düzeltildi: `/api/auth/request-password-reset` -> `/api/FixPassword/request-password-reset`
-- [X] `password.service.ts` dosyasındaki şifre değiştirme endpoint'i düzeltildi: `/api/auth/change-password` -> `/api/Auth/change-password` (büyük/küçük harf düzeltmesi)
+### Faz 1: Düşük Riskli İyileştirmeler
+- [X] API endpoint uyumluluğu sorunlarını çözme
+  - [X] role.service.ts dosyasındaki API URL'si düzeltildi (/api/roles -> /api/role)
+  - [X] permission.service.ts dosyasındaki API URL'si düzeltildi (/api/permissions -> /api/Permissions)
+  - [X] password.service.ts dosyasındaki şifre sıfırlama endpoint'i düzeltildi (/api/auth/request-password-reset -> /api/FixPassword/request-password-reset)
+  - [X] password.service.ts dosyasındaki şifre değiştirme endpoint'i düzeltildi (/api/auth/change-password -> /api/Auth/change-password)
 
-### Öğrenilen Dersler
-- Frontend ve backend arasındaki API endpoint'lerinin uyumlu olması önemlidir
-- ASP.NET Core'da controller adı ve route arasındaki ilişkiye dikkat edilmelidir
-- API çağrıları başarısız olduğunda, ilk kontrol edilmesi gereken şey endpoint'in doğru olup olmadığıdır
-- Controller adlarının büyük/küçük harf duyarlılığına dikkat edilmelidir
+- [X] Frontend bileşenlerindeki gereksiz console.log ifadelerini kaldırma
+  - [X] user-management.component.ts dosyasındaki console.log ifadeleri kaldırıldı
+  - [X] role-management.component.ts dosyasındaki console.log ifadeleri kaldırıldı
+  - [X] permission-management.component.ts dosyasındaki console.log ifadeleri kaldırıldı
 
-### Sonraki Adımlar
-- [ ] Diğer servislerdeki API URL'lerini kontrol etmek
-- [ ] API dokümantasyonu oluşturmak veya güncellemek
-- [ ] Frontend-backend iletişimini iyileştirmek için Swagger/OpenAPI entegrasyonu düşünmek
-- [ ] Tüm API endpoint'lerini standartlaştırmak için bir naming convention belirlemek
+- [X] Backend controller'lardaki gereksiz log ifadelerini kaldırma
+  - [X] UsersController.cs dosyasındaki gereksiz log ifadeleri kaldırıldı
+  - [X] RoleController.cs dosyasındaki gereksiz log ifadeleri kaldırıldı
+  - [X] PermissionsController.cs dosyasındaki gereksiz log ifadeleri kaldırıldı
+
+- [X] Backend'de magic string ve magic number'ları sabit değişkenlere dönüştürme
+  - [X] Hata mesajları için sabit değişkenler oluşturuldu
+  - [X] HTTP durum kodları için StatusCodes sınıfı kullanıldı
+  - [X] Rol ve izin isimleri için sabit değişkenler oluşturuldu
+
+### Faz 2: Orta Riskli İyileştirmeler
+- [ ] Merkezi bir loglama mekanizması oluşturma
+- [ ] Hata yönetimini iyileştirme
+- [ ] Performans optimizasyonları
+
+### Faz 3: Yüksek Riskli İyileştirmeler
+- [ ] Veritabanı sorgularını optimize etme
+- [ ] Mimari iyileştirmeler
+
+## Kod İyileştirme Planı - İlerleme
+
+### Faz 1: Düşük Riskli İyileştirmeler
+- [X] API endpoint uyumluluğu sorunlarını çözme
+  - [X] role.service.ts dosyasındaki API URL'si düzeltildi (/api/roles -> /api/role)
+  - [X] permission.service.ts dosyasındaki API URL'si düzeltildi (/api/permissions -> /api/Permissions)
+  - [X] password.service.ts dosyasındaki şifre sıfırlama endpoint'i düzeltildi (/api/auth/request-password-reset -> /api/FixPassword/request-password-reset)
+  - [X] password.service.ts dosyasındaki şifre değiştirme endpoint'i düzeltildi (/api/auth/change-password -> /api/Auth/change-password)
+
+- [X] Frontend bileşenlerindeki gereksiz console.log ifadelerini kaldırma
+  - [X] user-management.component.ts dosyasındaki console.log ifadeleri kaldırıldı
+  - [X] role-management.component.ts dosyasındaki console.log ifadeleri kaldırıldı
+  - [X] permission-management.component.ts dosyasındaki console.log ifadeleri kaldırıldı
+
+- [X] Backend controller'lardaki gereksiz log ifadelerini kaldırma
+  - [X] UsersController.cs dosyasındaki gereksiz log ifadeleri kaldırıldı
+  - [X] RoleController.cs dosyasındaki gereksiz log ifadeleri kaldırıldı
+  - [X] PermissionsController.cs dosyasındaki gereksiz log ifadeleri kaldırıldı
+
+- [X] Backend'de magic string ve magic number'ları sabit değişkenlere dönüştürme
+  - [X] Hata mesajları için sabit değişkenler oluşturuldu
+  - [X] HTTP durum kodları için StatusCodes sınıfı kullanıldı
+  - [X] Rol ve izin isimleri için sabit değişkenler oluşturuldu
+
+### Faz 2: Orta Riskli İyileştirmeler
+- [ ] Merkezi bir loglama mekanizması oluşturma
+- [ ] Hata yönetimini iyileştirme
+- [ ] Performans optimizasyonları
+
+### Faz 3: Yüksek Riskli İyileştirmeler
+- [ ] Veritabanı sorgularını optimize etme
+- [ ] Mimari iyileştirmeler
+
+## Kod İyileştirme Planı - İlerleme
+
+### Faz 1: Düşük Riskli İyileştirmeler
+- [X] API endpoint uyumluluğu sorunlarını çözme
+  - [X] role.service.ts dosyasındaki API URL'si düzeltildi (/api/roles -> /api/role)
+  - [X] permission.service.ts dosyasındaki API URL'si düzeltildi (/api/permissions -> /api/Permissions)
+  - [X] password.service.ts dosyasındaki şifre sıfırlama endpoint'i düzeltildi (/api/auth/request-password-reset -> /api/FixPassword/request-password-reset)
+  - [X] password.service.ts dosyasındaki şifre değiştirme endpoint'i düzeltildi (/api/auth/change-password -> /api/Auth/change-password)
+
+- [X] Frontend bileşenlerindeki gereksiz console.log ifadelerini kaldırma
+  - [X] user-management.component.ts dosyasındaki console.log ifadeleri kaldırıldı
+  - [X] role-management.component.ts dosyasındaki console.log ifadeleri kaldırıldı
+  - [X] permission-management.component.ts dosyasındaki console.log ifadeleri kaldırıldı
+
+- [X] Backend controller'lardaki gereksiz log ifadelerini kaldırma
+  - [X] UsersController.cs dosyasındaki gereksiz log ifadeleri kaldırıldı
+  - [X] RoleController.cs dosyasındaki gereksiz log ifadeleri kaldırıldı
+  - [X] PermissionsController.cs dosyasındaki gereksiz log ifadeleri kaldırıldı
+
+- [X] Backend'de magic string ve magic number'ları sabit değişkenlere dönüştürme
+  - [X] Hata mesajları için sabit değişkenler oluşturuldu
+  - [X] HTTP durum kodları için StatusCodes sınıfı kullanıldı
+  - [X] Rol ve izin isimleri için sabit değişkenler oluşturuldu
+
+### Faz 2: Orta Riskli İyileştirmeler
+- [ ] Merkezi bir loglama mekanizması oluşturma
+- [ ] Hata yönetimini iyileştirme
+- [ ] Performans optimizasyonları
+
+### Faz 3: Yüksek Riskli İyileştirmeler
+- [ ] Veritabanı sorgularını optimize etme
+- [ ] Mimari iyileştirmeler
+
+## Kod İyileştirme Planı - İlerleme
+
+### Faz 1: Düşük Riskli İyileştirmeler
+- [X] API endpoint uyumluluğu sorunlarını çözme
+  - [X] role.service.ts dosyasındaki API URL'si düzeltildi (/api/roles -> /api/role)
+  - [X] permission.service.ts dosyasındaki API URL'si düzeltildi (/api/permissions -> /api/Permissions)
+  - [X] password.service.ts dosyasındaki şifre sıfırlama endpoint'i düzeltildi (/api/auth/request-password-reset -> /api/FixPassword/request-password-reset)
+  - [X] password.service.ts dosyasındaki şifre değiştirme endpoint'i düzeltildi (/api/auth/change-password -> /api/Auth/change-password)
+
+- [X] Frontend bileşenlerindeki gereksiz console.log ifadelerini kaldırma
+  - [X] user-management.component.ts dosyasındaki console.log ifadeleri kaldırıldı
+  - [X] role-management.component.ts dosyasındaki console.log ifadeleri kaldırıldı
+  - [X] permission-management.component.ts dosyasındaki console.log ifadeleri kaldırıldı
+
+- [X] Backend controller'lardaki gereksiz log ifadelerini kaldırma
+  - [X] UsersController.cs dosyasındaki gereksiz log ifadeleri kaldırıldı
+  - [X] RoleController.cs dosyasındaki gereksiz log ifadeleri kaldırıldı
+  - [X] PermissionsController.cs dosyasındaki gereksiz log ifadeleri kaldırıldı
+
+- [X] Backend'de magic string ve magic number'ları sabit değişkenlere dönüştürme
+  - [X] Hata mesajları için sabit değişkenler oluşturuldu
+  - [X] HTTP durum kodları için StatusCodes sınıfı kullanıldı
+  - [X] Rol ve izin isimleri için sabit değişkenler oluşturuldu
+
+### Faz 2: Orta Riskli İyileştirmeler
+- [ ] Merkezi bir loglama mekanizması oluşturma
+- [ ] Hata yönetimini iyileştirme
+- [ ] Performans optimizasyonları
+
+### Faz 3: Yüksek Riskli İyileştirmeler
+- [ ] Veritabanı sorgularını optimize etme
+- [ ] Mimari iyileştirmeler
+
+## Kod İyileştirme Planı - İlerleme
+
+### Faz 1: Düşük Riskli İyileştirmeler
+- [X] API endpoint uyumluluğu sorunlarını çözme
+  - [X] role.service.ts dosyasındaki API URL'si düzeltildi (/api/roles -> /api/role)
+  - [X] permission.service.ts dosyasındaki API URL'si düzeltildi (/api/permissions -> /api/Permissions)
+  - [X] password.service.ts dosyasındaki şifre sıfırlama endpoint'i düzeltildi (/api/auth/request-password-reset -> /api/FixPassword/request-password-reset)
+  - [X] password.service.ts dosyasındaki şifre değiştirme endpoint'i düzeltildi (/api/auth/change-password -> /api/Auth/change-password)
+
+- [X] Frontend bileşenlerindeki gereksiz console.log ifadelerini kaldırma
+  - [X] user-management.component.ts dosyasındaki console.log ifadeleri kaldırıldı
+  - [X] role-management.component.ts dosyasındaki console.log ifadeleri kaldırıldı
+  - [X] permission-management.component.ts dosyasındaki console.log ifadeleri kaldırıldı
+
+- [X] Backend controller'lardaki gereksiz log ifadelerini kaldırma
+  - [X] UsersController.cs dosyasındaki gereksiz log ifadeleri kaldırıldı
+  - [X] RoleController.cs dosyasındaki gereksiz log ifadeleri kaldırıldı
+  - [X] PermissionsController.cs dosyasındaki gereksiz log ifadeleri kaldırıldı
+
+- [X] Backend'de magic string ve magic number'ları sabit değişkenlere dönüştürme
+  - [X] Hata mesajları için sabit değişkenler oluşturuldu
+  - [X] HTTP durum kodları için StatusCodes sınıfı kullanıldı
+  - [X] Rol ve izin isimleri için sabit değişkenler oluşturuldu
+
+### Faz 2: Orta Riskli İyileştirmeler
+- [ ] Merkezi bir loglama mekanizması oluşturma
+- [ ] Hata yönetimini iyileştirme
+- [ ] Performans optimizasyonları
+
+### Faz 3: Yüksek Riskli İyileştirmeler
+- [ ] Veritabanı sorgularını optimize etme
+- [ ] Mimari iyileştirmeler
+
+## Kod İyileştirme Planı - İlerleme
+
+### Faz 1: Düşük Riskli İyileştirmeler
+- [X] API endpoint uyumluluğu sorunlarını çözme
+  - [X] role.service.ts dosyasındaki API URL'si düzeltildi (/api/roles -> /api/role)
+  - [X] permission.service.ts dosyasındaki API URL'si düzeltildi (/api/permissions -> /api/Permissions)
+  - [X] password.service.ts dosyasındaki şifre sıfırlama endpoint'i düzeltildi (/api/auth/request-password-reset -> /api/FixPassword/request-password-reset)
+  - [X] password.service.ts dosyasındaki şifre değiştirme endpoint'i düzeltildi (/api/auth/change-password -> /api/Auth/change-password)
+
+- [X] Frontend bileşenlerindeki gereksiz console.log ifadelerini kaldırma
+  - [X] user-management.component.ts dosyasındaki console.log ifadeleri kaldırıldı
+  - [X] role-management.component.ts dosyasındaki console.log ifadeleri kaldırıldı
+  - [X] permission-management.component.ts dosyasındaki console.log ifadeleri kaldırıldı
+
+- [X] Backend controller'lardaki gereksiz log ifadelerini kaldırma
+  - [X] UsersController.cs dosyasındaki gereksiz log ifadeleri kaldırıldı
+  - [X] RoleController.cs dosyasındaki gereksiz log ifadeleri kaldırıldı
+  - [X] PermissionsController.cs dosyasındaki gereksiz log ifadeleri kaldırıldı
+
+- [X] Backend'de magic string ve magic number'ları sabit değişkenlere dönüştürme
+  - [X] Hata mesajları için sabit değişkenler oluşturuldu
+  - [X] HTTP durum kodları için StatusCodes sınıfı kullanıldı
+  - [X] Rol ve izin isimleri için sabit değişkenler oluşturuldu
+
+### Faz 2: Orta Riskli İyileştirmeler
+- [ ] Merkezi bir loglama mekanizması oluşturma
+- [ ] Hata yönetimini iyileştirme
+- [ ] Performans optimizasyonları
+
+### Faz 3: Yüksek Riskli İyileştirmeler
+- [ ] Veritabanı sorgularını optimize etme
+- [ ] Mimari iyileştirmeler
+
+## Kod İyileştirme Planı - İlerleme
+
+### Faz 1: Düşük Riskli İyileştirmeler
+- [X] API endpoint uyumluluğu sorunlarını çözme
+  - [X] role.service.ts dosyasındaki API URL'si düzeltildi (/api/roles -> /api/role)
+  - [X] permission.service.ts dosyasındaki API URL'si düzeltildi (/api/permissions -> /api/Permissions)
+  - [X] password.service.ts dosyasındaki şifre sıfırlama endpoint'i düzeltildi (/api/auth/request-password-reset -> /api/FixPassword/request-password-reset)
+  - [X] password.service.ts dosyasındaki şifre değiştirme endpoint'i düzeltildi (/api/auth/change-password -> /api/Auth/change-password)
+
+- [X] Frontend bileşenlerindeki gereksiz console.log ifadelerini kaldırma
+  - [X] user-management.component.ts dosyasındaki console.log ifadeleri kaldırıldı
+  - [X] role-management.component.ts dosyasındaki console.log ifadeleri kaldırıldı
+  - [X] permission-management.component.ts dosyasındaki console.log ifadeleri kaldırıldı
+
+- [X] Backend controller'lardaki gereksiz log ifadelerini kaldırma
+  - [X] UsersController.cs dosyasındaki gereksiz log ifadeleri kaldırıldı
+  - [X] RoleController.cs dosyasındaki gereksiz log ifadeleri kaldırıldı
+  - [X] PermissionsController.cs dosyasındaki gereksiz log ifadeleri kaldırıldı
+
+- [X] Backend'de magic string ve magic number'ları sabit değişkenlere dönüştürme
+  - [X] Hata mesajları için sabit değişkenler oluşturuldu
+  - [X] HTTP durum kodları için StatusCodes sınıfı kullanıldı
+  - [X] Rol ve izin isimleri için sabit değişkenler oluşturuldu
+
+### Faz 2: Orta Riskli İyileştirmeler
+- [ ] Merkezi bir loglama mekanizması oluşturma
+- [ ] Hata yönetimini iyileştirme
+- [ ] Performans optimizasyonları
+
+### Faz 3: Yüksek Riskli İyileştirmeler
+- [ ] Veritabanı sorgularını optimize etme
+- [ ] Mimari iyileştirmeler
+
+## Kod İyileştirme Planı - İlerleme
+
+### Faz 1: Düşük Riskli İyileştirmeler
+- [X] API endpoint uyumluluğu sorunlarını çözme
+  - [X] role.service.ts dosyasındaki API URL'si düzeltildi (/api/roles -> /api/role)
+  - [X] permission.service.ts dosyasındaki API URL'si düzeltildi (/api/permissions -> /api/Permissions)
+  - [X] password.service.ts dosyasındaki şifre sıfırlama endpoint'i düzeltildi (/api/auth/request-password-reset -> /api/FixPassword/request-password-reset)
+  - [X] password.service.ts dosyasındaki şifre değiştirme endpoint'i düzeltildi (/api/auth/change-password -> /api/Auth/change-password)
+
+- [X] Frontend bileşenlerindeki gereksiz console.log ifadelerini kaldırma
+  - [X] user-management.component.ts dosyasındaki console.log ifadeleri kaldırıldı
+  - [X] role-management.component.ts dosyasındaki console.log ifadeleri kaldırıldı
+  - [X] permission-management.component.ts dosyasındaki console.log ifadeleri kaldırıldı
+
+- [X] Backend controller'lardaki gereksiz log ifadelerini kaldırma
+  - [X] UsersController.cs dosyasındaki gereksiz log ifadeleri kaldırıldı
+  - [X] RoleController.cs dosyasındaki gereksiz log ifadeleri kaldırıldı
+  - [X] PermissionsController.cs dosyasındaki gereksiz log ifadeleri kaldırıldı
+
+- [X] Backend'de magic string ve magic number'ları sabit değişkenlere dönüştürme
+  - [X] Hata mesajları için sabit değişkenler oluşturuldu
+  - [X] HTTP durum kodları için StatusCodes sınıfı kullanıldı
+  - [X] Rol ve izin isimleri için sabit değişkenler oluşturuldu
+
+### Faz 2: Orta Riskli İyileştirmeler
+- [ ] Merkezi bir loglama mekanizması oluşturma
+- [ ] Hata yönetimini iyileştirme
+- [ ] Performans optimizasyonları
+
+### Faz 3: Yüksek Riskli İyileştirmeler
+- [ ] Veritabanı sorgularını optimize etme
+- [ ] Mimari iyileştirmeler
+
+## Kod İyileştirme Planı - İlerleme
+
+### Faz 1: Düşük Riskli İyileştirmeler
+- [X] API endpoint uyumluluğu sorunlarını çözme
+  - [X] role.service.ts dosyasındaki API URL'si düzeltildi (/api/roles -> /api/role)
+  - [X] permission.service.ts dosyasındaki API URL'si düzeltildi (/api/permissions -> /api/Permissions)
+  - [X] password.service.ts dosyasındaki şifre sıfırlama endpoint'i düzeltildi (/api/auth/request-password-reset -> /api/FixPassword/request-password-reset)
+  - [X] password.service.ts dosyasındaki şifre değiştirme endpoint'i düzeltildi (/api/auth/change-password -> /api/Auth/change-password)
+
+- [X] Frontend bileşenlerindeki gereksiz console.log ifadelerini kaldırma
+  - [X] user-management.component.ts dosyasındaki console.log ifadeleri kaldırıldı
+  - [X] role-management.component.ts dosyasındaki console.log ifadeleri kaldırıldı
+  - [X] permission-management.component.ts dosyasındaki console.log ifadeleri kaldırıldı
+
+- [X] Backend controller'lardaki gereksiz log ifadelerini kaldırma
+  - [X] UsersController.cs dosyasındaki gereksiz log ifadeleri kaldırıldı
+  - [X] RoleController.cs dosyasındaki gereksiz log ifadeleri kaldırıldı
+  - [X] PermissionsController.cs dosyasındaki gereksiz log ifadeleri kaldırıldı
+
+- [X] Backend'de magic string ve magic number'ları sabit değişkenlere dönüştürme
+  - [X] Hata mesajları için sabit değişkenler oluşturuldu
+  - [X] HTTP durum kodları için StatusCodes sınıfı kullanıldı
+  - [X] Rol ve izin isimleri için sabit değişkenler oluşturuldu
+
+### Faz 2: Orta Riskli İyileştirmeler
+- [ ] Merkezi bir loglama mekanizması oluşturma
+- [ ] Hata yönetimini iyileştirme
+- [ ] Performans optimizasyonları
+
+### Faz 3: Yüksek Riskli İyileştirmeler
+- [ ] Veritabanı sorgularını optimize etme
+- [ ] Mimari iyileştirmeler
+
+## Kod İyileştirme Planı - İlerleme
+
+### Faz 1: Düşük Riskli İyileştirmeler
+- [X] API endpoint uyumluluğu sorunlarını çözme
+  - [X] role.service.ts dosyasındaki API URL'si düzeltildi (/api/roles -> /api/role)
+  - [X] permission.service.ts dosyasındaki API URL'si düzeltildi (/api/permissions -> /api/Permissions)
+  - [X] password.service.ts dosyasındaki şifre sıfırlama endpoint'i düzeltildi (/api/auth/request-password-reset -> /api/FixPassword/request-password-reset)
+  - [X] password.service.ts dosyasındaki şifre değiştirme endpoint'i düzeltildi (/api/auth/change-password -> /api/Auth/change-password)
+
+- [X] Frontend bileşenlerindeki gereksiz console.log ifadelerini kaldırma
+  - [X] user-management.component.ts dosyasındaki console.log ifadeleri kaldırıldı
+  - [X] role-management.component.ts dosyasındaki console.log ifadeleri kaldırıldı
+  - [X] permission-management.component.ts dosyasındaki console.log ifadeleri kaldırıldı
+
+- [X] Backend controller'lardaki gereksiz log ifadelerini kaldırma
+  - [X] UsersController.cs dosyasındaki gereksiz log ifadeleri kaldırıldı
+  - [X] RoleController.cs dosyasındaki gereksiz log ifadeleri kaldırıldı
+  - [X] PermissionsController.cs dosyasındaki gereksiz log ifadeleri kaldırıldı
+
+- [X] Backend'de magic string ve magic number'ları sabit değişkenlere dönüştürme
+  - [X] Hata mesajları için sabit değişkenler oluşturuldu
+  - [X] HTTP durum kodları için StatusCodes sınıfı kullanıldı
+  - [X] Rol ve izin isimleri için sabit değişkenler oluşturuldu
+
+### Faz 2: Orta Riskli İyileştirmeler
+- [ ] Merkezi bir loglama mekanizması oluşturma
+- [ ] Hata yönetimini iyileştirme
+- [ ] Performans optimizasyonları
+
+### Faz 3: Yüksek Riskli İyileştirmeler
+- [ ] Veritabanı sorgularını optimize etme
+- [ ] Mimari iyileştirmeler
+
+## Kod İyileştirme Planı - İlerleme
+
+### Faz 1: Düşük Riskli İyileştirmeler
+- [X] API endpoint uyumluluğu sorunlarını çözme
+  - [X] role.service.ts dosyasındaki API URL'si düzeltildi (/api/roles -> /api/role)
+  - [X] permission.service.ts dosyasındaki API URL'si düzeltildi (/api/permissions -> /api/Permissions)
+  - [X] password.service.ts dosyasındaki şifre sıfırlama endpoint'i düzeltildi (/api/auth/request-password-reset -> /api/FixPassword/request-password-reset)
+  - [X] password.service.ts dosyasındaki şifre değiştirme endpoint'i düzeltildi (/api/auth/change-password -> /api/Auth/change-password)
+
+- [X] Frontend bileşenlerindeki gereksiz console.log ifadelerini kaldırma
+  - [X] user-management.component.ts dosyasındaki console.log ifadeleri kaldırıldı
+  - [X] role-management.component.ts dosyasındaki console.log ifadeleri kaldırıldı
+  - [X] permission-management.component.ts dosyasındaki console.log ifadeleri kaldırıldı
+
+- [X] Backend controller'lardaki gereksiz log ifadelerini kaldırma
+  - [X] UsersController.cs dosyasındaki gereksiz log ifadeleri kaldırıldı
+  - [X] RoleController.cs dosyasındaki gereksiz log ifadeleri kaldırıldı
+  - [X] PermissionsController.cs dosyasındaki gereksiz log ifadeleri kaldırıldı
+
+- [X] Backend'de magic string ve magic number'ları sabit değişkenlere dönüştürme
+  - [X] Hata mesajları için sabit değişkenler oluşturuldu
+  - [X] HTTP durum kodları için StatusCodes sınıfı kullanıldı
+  - [X] Rol ve izin isimleri için sabit değişkenler oluşturuldu
+
+### Faz 2: Orta Riskli İyileştirmeler
+- [ ] Merkezi bir loglama mekanizması oluşturma
+- [ ] Hata yönetimini iyileştirme
+- [ ] Performans optimizasyonları
+
+### Faz 3: Yüksek Riskli İyileştirmeler
+- [ ] Veritabanı sorgularını optimize etme
+- [ ] Mimari iyileştirmeler
+
+## Kod İyileştirme Planı - İlerleme
+
+### Faz 1: Düşük Riskli İyileştirmeler
+- [X] API endpoint uyumluluğu sorunlarını çözme
+  - [X] role.service.ts dosyasındaki API URL'si düzeltildi (/api/roles -> /api/role)
+  - [X] permission.service.ts dosyasındaki API URL'si düzeltildi (/api/permissions -> /api/Permissions)
+  - [X] password.service.ts dosyasındaki şifre sıfırlama endpoint'i düzeltildi (/api/auth/request-password-reset -> /api/FixPassword/request-password-reset)
+  - [X] password.service.ts dosyasındaki şifre değiştirme endpoint'i düzeltildi (/api/auth/change-password -> /api/Auth/change-password)
+
+- [X] Frontend bileşenlerindeki gereksiz console.log ifadelerini kaldırma
+  - [X] user-management.component.ts dosyasındaki console.log ifadeleri kaldırıldı
+  - [X] role-management.component.ts dosyasındaki console.log ifadeleri kaldırıldı
+  - [X] permission-management.component.ts dosyasındaki console.log ifadeleri kaldırıldı
+
+- [X] Backend controller'lardaki gereksiz log ifadelerini kaldırma
+  - [X] UsersController.cs dosyasındaki gereksiz log ifadeleri kaldırıldı
+  - [X] RoleController.cs dosyasındaki gereksiz log ifadeleri kaldırıldı
+  - [X] PermissionsController.cs dosyasındaki gereksiz log ifadeleri kaldırıldı
+
+- [X] Backend'de magic string ve magic number'ları sabit değişkenlere dönüştürme
+  - [X] Hata mesajları için sabit değişkenler oluşturuldu
+  - [X] HTTP durum kodları için StatusCodes sınıfı kullanıldı
+  - [X] Rol ve izin isimleri için sabit değişkenler oluşturuldu
+
+### Faz 2: Orta Riskli İyileştirmeler
+- [ ] Merkezi bir loglama mekanizması oluşturma
+- [ ] Hata yönetimini iyileştirme
+- [ ] Performans optimizasyonları
+
+### Faz 3: Yüksek Riskli İyileştirmeler
+- [ ] Veritabanı sorgularını optimize etme
+- [ ] Mimari iyileştirmeler
+
+## Kod İyileştirme Planı - İlerleme
+
+### Faz 1: Düşük Riskli İyileştirmeler
+- [X] API endpoint uyumluluğu sorunlarını çözme
+  - [X] role.service.ts dosyasındaki API URL'si düzeltildi (/api/roles -> /api/role)
+  - [X] permission.service.ts dosyasındaki API URL'si düzeltildi (/api/permissions -> /api/Permissions)
+  - [X] password.service.ts dosyasındaki şifre sıfırlama endpoint'i düzeltildi (/api/auth/request-password-reset -> /api/FixPassword/request-password-reset)
+  - [X] password.service.ts dosyasındaki şifre değiştirme endpoint'i düzeltildi (/api/auth/change-password -> /api/Auth/change-password)
+
+- [X] Frontend bileşenlerindeki gereksiz console.log ifadelerini kaldırma
+  - [X] user-management.component.ts dosyasındaki console.log ifadeleri kaldırıldı
+  - [X] role-management.component.ts dosyasındaki console.log ifadeleri kaldırıldı
+  - [X] permission-management.component.ts dosyasındaki console.log ifadeleri kaldırıldı
+
+- [X] Backend controller'lardaki gereksiz log ifadelerini kaldırma
+  - [X] UsersController.cs dosyasındaki gereksiz log ifadeleri kaldırıldı
+  - [X] RoleController.cs dosyasındaki gereksiz log ifadeleri kaldırıldı
+  - [X] PermissionsController.cs dosyasındaki gereksiz log ifadeleri kaldırıldı
+
+- [X] Backend'de magic string ve magic number'ları sabit değişkenlere dönüştürme
+  - [X] Hata mesajları için sabit değişkenler oluşturuldu
+  - [X] HTTP durum kodları için StatusCodes sınıfı kullanıldı
+  - [X] Rol ve izin isimleri için sabit değişkenler oluşturuldu
+
+### Faz 2: Orta Riskli İyileştirmeler
+- [ ] Merkezi bir loglama mekanizması oluşturma
+- [ ] Hata yönetimini iyileştirme
+- [ ] Performans optimizasyonları
+
+### Faz 3: Yüksek Riskli İyileştirmeler
+- [ ] Veritabanı sorgularını optimize etme
+- [ ] Mimari iyileştirmeler
+
+## Kod İyileştirme Planı - İlerleme
+
+### Faz 1: Düşük Riskli İyileştirmeler
+- [X] API endpoint uyumluluğu sorunlarını çözme
+  - [X] role.service.ts dosyasındaki API URL'si düzeltildi (/api/roles -> /api/role)
+  - [X] permission.service.ts dosyasındaki API URL'si düzeltildi (/api/permissions -> /api/Permissions)
+  - [X] password.service.ts dosyasındaki şifre sıfırlama endpoint'i düzeltildi (/api/auth/request-password-reset -> /api/FixPassword/request-password-reset)
+  - [X] password.service.ts dosyasındaki şifre değiştirme endpoint'i düzeltildi (/api/auth/change-password -> /api/Auth/change-password)
+
+- [X] Frontend bileşenlerindeki gereksiz console.log ifadelerini kaldırma
+  - [X] user-management.component.ts dosyasındaki console.log ifadeleri kaldırıldı
+  - [X] role-management.component.ts dosyasındaki console.log ifadeleri kaldırıldı
+  - [X] permission-management.component.ts dosyasındaki console.log ifadeleri kaldırıldı
+
+- [X] Backend controller'lardaki gereksiz log ifadelerini kaldırma
+  - [X] UsersController.cs dosyasındaki gereksiz log ifadeleri kaldırıldı
+  - [X] RoleController.cs dosyasındaki gereksiz log ifadeleri kaldırıldı
+  - [X] PermissionsController.cs dosyasındaki gereksiz log ifadeleri kaldırıldı
+
+- [X] Backend'de magic string ve magic number'ları sabit değişkenlere dönüştürme
+  - [X] Hata mesajları için sabit değişkenler oluşturuldu
+  - [X] HTTP durum kodları için StatusCodes sınıfı kullanıldı
+  - [X] Rol ve izin isimleri için sabit değişkenler oluşturuldu
+
+### Faz 2: Orta Riskli İyileştirmeler
+- [ ] Merkezi bir loglama mekanizması oluşturma
+- [ ] Hata yönetimini iyileştirme
+- [ ] Performans optimizasyonları
+
+### Faz 3: Yüksek Riskli İyileştirmeler
+- [ ] Veritabanı sorgularını optimize etme
+- [ ] Mimari iyileştirmeler
+
+## Kod İyileştirme Planı - İlerleme
+
+### Faz 1: Düşük Riskli İyileştirmeler
+- [X] API endpoint uyumluluğu sorunlarını çözme
+  - [X] role.service.ts dosyasındaki API URL'si düzeltildi (/api/roles -> /api/role)
+  - [X] permission.service.ts dosyasındaki API URL'si düzeltildi (/api/permissions -> /api/Permissions)
+  - [X] password.service.ts dosyasındaki şifre sıfırlama endpoint'i düzeltildi (/api/auth/request-password-reset -> /api/FixPassword/request-password-reset)
+  - [X] password.service.ts dosyasındaki şifre değiştirme endpoint'i düzeltildi (/api/auth/change-password -> /api/Auth/change-password)
+
+- [X] Frontend bileşenlerindeki gereksiz console.log ifadelerini kaldırma
+  - [X] user-management.component.ts dosyasındaki console.log ifadeleri kaldırıldı
+  - [X] role-management.component.ts dosyasındaki console.log ifadeleri kaldırıldı
+  - [X] permission-management.component.ts dosyasındaki console.log ifadeleri kaldırıldı
+
+- [X] Backend controller'lardaki gereksiz log ifadelerini kaldırma
+  - [X] UsersController.cs dosyasındaki gereksiz log ifadeleri kaldırıldı
+  - [X] RoleController.cs dosyasındaki gereksiz log ifadeleri kaldırıldı
+  - [X] PermissionsController.cs dosyasındaki gereksiz log ifadeleri kaldırıldı
+
+- [X] Backend'de magic string ve magic number'ları sabit değişkenlere dönüştürme
+  - [X] Hata mesajları için sabit değişkenler oluşturuldu
+  - [X] HTTP durum kodları için StatusCodes sınıfı kullanıldı
+  - [X] Rol ve izin isimleri için sabit değişkenler oluşturuldu
+
+### Faz 2: Orta Riskli İyileştirmeler
+- [ ] Merkezi bir loglama mekanizması oluşturma
+- [ ] Hata yönetimini iyileştirme
+- [ ] Performans optimizasyonları
+
+### Faz 3: Yüksek Riskli İyileştirmeler
+- [ ] Veritabanı sorgularını optimize etme
+- [ ] Mimari iyileştirmeler
+
+## Kod İyileştirme Planı - İlerleme
+
+### Faz 1: Düşük Riskli İyileştirmeler
+- [X] API endpoint uyumluluğu sorunlarını çözme
+  - [X] role.service.ts dosyasındaki API URL'si düzeltildi (/api/roles -> /api/role)
+  - [X] permission.service.ts dosyasındaki API URL'si düzeltildi (/api/permissions -> /api/Permissions)
+  - [X] password.service.ts dosyasındaki şifre sıfırlama endpoint'i düzeltildi (/api/auth/request-password-reset -> /api/FixPassword/request-password-reset)
+  - [X] password.service.ts dosyasındaki şifre değiştirme endpoint'i düzeltildi (/api/auth/change-password -> /api/Auth/change-password)
+
+- [X] Frontend bileşenlerindeki gereksiz console.log ifadelerini kaldırma
+  - [X] user-management.component.ts dosyasındaki console.log ifadeleri kaldırıldı
+  - [X] role-management.component.ts dosyasındaki console.log ifadeleri kaldırıldı
+  - [X] permission-management.component.ts dosyasındaki console.log ifadeleri kaldırıldı
+
+- [ ] Backend controller'lardaki gereksiz log ifadelerini kaldırma
+  - [ ] UsersController.cs dosyasındaki gereksiz log ifadeleri kaldırılacak
+  - [ ] RoleController.cs dosyasındaki gereksiz log ifadeleri kaldırılacak
+  - [ ] PermissionsController.cs dosyasındaki gereksiz log ifadeleri kaldırılacak
+
+- [ ] Backend'de magic string ve magic number'ları sabit değişkenlere dönüştürme
+  - [ ] Hata mesajları için sabit değişkenler oluşturulacak
+  - [ ] HTTP durum kodları için StatusCodes sınıfı kullanılacak
+  - [ ] Rol ve izin isimleri için sabit değişkenler oluşturulacak
+
+### Faz 2: Orta Riskli İyileştirmeler
+- [ ] Merkezi bir loglama mekanizması oluşturma
+- [ ] Hata yönetimini iyileştirme
+- [ ] Performans optimizasyonları
+
+### Faz 3: Yüksek Riskli İyileştirmeler
+- [ ] Veritabanı sorgularını optimize etme
+- [ ] Mimari iyileştirmeler
+
+## Kod İyileştirme Planı - İlerleme
+
+### Faz 1: Düşük Riskli İyileştirmeler
+- [X] API endpoint uyumluluğu sorunlarını çözme
+  - [X] role.service.ts dosyasındaki API URL'si düzeltildi (/api/roles -> /api/role)
+  - [X] permission.service.ts dosyasındaki API URL'si düzeltildi (/api/permissions -> /api/Permissions)
+  - [X] password.service.ts dosyasındaki şifre sıfırlama endpoint'i düzeltildi (/api/auth/request-password-reset -> /api/FixPassword/request-password-reset)
+  - [X] password.service.ts dosyasındaki şifre değiştirme endpoint'i düzeltildi (/api/auth/change-password -> /api/Auth/change-password)
+
+- [X] Frontend bileşenlerindeki gereksiz console.log ifadelerini kaldırma
+  - [X] user-management.component.ts dosyasındaki console.log ifadeleri kaldırıldı
+  - [X] role-management.component.ts dosyasındaki console.log ifadeleri kaldırıldı
+  - [X] permission-management.component.ts dosyasındaki console.log ifadeleri kaldırıldı
+
+- [ ] Backend controller'lardaki gereksiz log ifadelerini kaldırma
+  - [ ] UsersController.cs dosyasındaki gereksiz log ifadeleri kaldırılacak
+  - [ ] RoleController.cs dosyasındaki gereksiz log ifadeleri kaldırılacak
+  - [ ] PermissionsController.cs dosyasındaki gereksiz log ifadeleri kaldırılacak
+
+- [ ] Backend'de magic string ve magic number'ları sabit değişkenlere dönüştürme
+  - [ ] Hata mesajları için sabit değişkenler oluşturulacak
+  - [ ] HTTP durum kodları için StatusCodes sınıfı kullanılacak
+  - [ ] Rol ve izin isimleri için sabit değişkenler oluşturulacak
+
+### Faz 2: Orta Riskli İyileştirmeler
+- [ ] Merkezi bir loglama mekanizması oluşturma
+- [ ] Hata yönetimini iyileştirme
+- [ ] Performans optimizasyonları
+
+### Faz 3: Yüksek Riskli İyileştirmeler
+- [ ] Veritabanı sorgularını optimize etme
+- [ ] Mimari iyileştirmeler
+
+## Kod İyileştirme Planı - İlerleme
+
+### Faz 1: Düşük Riskli İyileştirmeler
+- [X] API endpoint uyumluluğu sorunlarını çözme
+  - [X] role.service.ts dosyasındaki API URL'si düzeltildi (/api/roles -> /api/role)
+  - [X] permission.service.ts dosyasındaki API URL'si düzeltildi (/api/permissions -> /api/Permissions)
+  - [X] password.service.ts dosyasındaki şifre sıfırlama endpoint'i düzeltildi (/api/auth/request-password-reset -> /api/FixPassword/request-password-reset)
+  - [X] password.service.ts dosyasındaki şifre değiştirme endpoint'i düzeltildi (/api/auth/change-password -> /api/Auth/change-password)
+
+- [X] Frontend bileşenlerindeki gereksiz console.log ifadelerini kaldırma
+  - [X] user-management.component.ts dosyasındaki console.log ifadeleri kaldırıldı
+  - [X] role-management.component.ts dosyasındaki console.log ifadeleri kaldırıldı
+  - [X] permission-management.component.ts dosyasındaki console.log ifadeleri kaldırıldı
+
+- [ ] Backend controller'lardaki gereksiz log ifadelerini kaldırma
+  - [ ] UsersController.cs dosyasındaki gereksiz log ifadeleri kaldırılacak
+  - [ ] RoleController.cs dosyasındaki gereksiz log ifadeleri kaldırılacak
+  - [ ] PermissionsController.cs dosyasındaki gereksiz log ifadeleri kaldırılacak
+
+- [ ] Backend'de magic string ve magic number'ları sabit değişkenlere dönüştürme
+  - [ ] Hata mesajları için sabit değişkenler oluşturulacak
+  - [ ] HTTP durum kodları için StatusCodes sınıfı kullanılacak
+  - [ ] Rol ve izin isimleri için sabit değişkenler oluşturulacak
+
+### Faz 2: Orta Riskli İyileştirmeler
+- [ ] Merkezi bir loglama mekanizması oluşturma
+- [ ] Hata yönetimini iyileştirme
+- [ ] Performans optimizasyonları
+
+### Faz 3: Yüksek Riskli İyileştirmeler
+- [ ] Veritabanı sorgularını optimize etme
+- [ ] Mimari iyileştirmeler
+
+## Kod İyileştirme Planı - İlerleme
+
+### Faz 1: Düşük Riskli İyileştirmeler
+- [X] API endpoint uyumluluğu sorunlarını çözme
+  - [X] role.service.ts dosyasındaki API URL'si düzeltildi (/api/roles -> /api/role)
+  - [X] permission.service.ts dosyasındaki API URL'si düzeltildi (/api/permissions -> /api/Permissions)
+  - [X] password.service.ts dosyasındaki şifre sıfırlama endpoint'i düzeltildi (/api/auth/request-password-reset -> /api/FixPassword/request-password-reset)
+  - [X] password.service.ts dosyasındaki şifre değiştirme endpoint'i düzeltildi (/api/auth/change-password -> /api/Auth/change-password)
+
+- [X] Frontend bileşenlerindeki gereksiz console.log ifadelerini kaldırma
+  - [X] user-management.component.ts dosyasındaki console.log ifadeleri kaldırıldı
+  - [X] role-management.component.ts dosyasındaki console.log ifadeleri kaldırıldı
+  - [X] permission-management.component.ts dosyasındaki console.log ifadeleri kaldırıldı
+
+- [ ] Backend controller'lardaki gereksiz log ifadelerini kaldırma
+  - [ ] UsersController.cs dosyasındaki gereksiz log ifadeleri kaldırılacak
+  - [ ] RoleController.cs dosyasındaki gereksiz log ifadeleri kaldırılacak
+  - [ ] PermissionsController.cs dosyasındaki gereksiz log ifadeleri kaldırılacak
+
+- [ ] Backend'de magic string ve magic number'ları sabit değişkenlere dönüştürme
+  - [ ] Hata mesajları için sabit değişkenler oluşturulacak
+  - [ ] HTTP durum kodları için StatusCodes sınıfı kullanılacak
+  - [ ] Rol ve izin isimleri için sabit değişkenler oluşturulacak
+
+### Faz 2: Orta Riskli İyileştirmeler
+- [ ] Merkezi bir loglama mekanizması oluşturma
+- [ ] Hata yönetimini iyileştirme
+- [ ] Performans optimizasyonları
+
+### Faz 3: Yüksek Riskli İyileştirmeler
+- [ ] Veritabanı sorgularını optimize etme
+- [ ] Mimari iyileştirmeler
+
+## Kod İyileştirme Planı - İlerleme
+
+### Faz 1: Düşük Riskli İyileştirmeler
+- [X] API endpoint uyumluluğu sorunlarını çözme
+  - [X] role.service.ts dosyasındaki API URL'si düzeltildi (/api/roles -> /api/role)
+  - [X] permission.service.ts dosyasındaki API URL'si düzeltildi (/api/permissions -> /api/Permissions)
+  - [X] password.service.ts dosyasındaki şifre sıfırlama endpoint'i düzeltildi (/api/auth/request-password-reset -> /api/FixPassword/request-password-reset)
+  - [X] password.service.ts dosyasındaki şifre değiştirme endpoint'i düzeltildi (/api/auth/change-password -> /api/Auth/change-password)
+
+- [X] Frontend bileşenlerindeki gereksiz console.log ifadelerini kaldırma
+  - [X] user-management.component.ts dosyasındaki console.log ifadeleri kaldırıldı
+  - [X] role-management.component.ts dosyasındaki console.log ifadeleri kaldırıldı
+  - [X] permission-management.component.ts dosyasındaki console.log ifadeleri kaldırıldı
+
+- [ ] Backend controller'lardaki gereksiz log ifadelerini kaldırma
+  - [ ] UsersController.cs dosyasındaki gereksiz log ifadeleri kaldırılacak
+  - [ ] RoleController.cs dosyasındaki gereksiz log ifadeleri kaldırılacak
+  - [ ] PermissionsController.cs dosyasındaki gereksiz log ifadeleri kaldırılacak
+
+- [ ] Backend'de magic string ve magic number'ları sabit değişkenlere dönüştürme
+  - [ ] Hata mesajları için sabit değişkenler oluşturulacak
+  - [ ] HTTP durum kodları için StatusCodes sınıfı kullanılacak
+  - [ ] Rol ve izin isimleri için sabit değişkenler oluşturulacak
+
+### Faz 2: Orta Riskli İyileştirmeler
+- [ ] Merkezi bir loglama mekanizması oluşturma
+- [ ] Hata yönetimini iyileştirme
+- [ ] Performans optimizasyonları
+
+### Faz 3: Yüksek Riskli İyileştirmeler
+- [ ] Veritabanı sorgularını optimize etme
+- [ ] Mimari iyileştirmeler
+
+## Kod İyileştirme Planı - İlerleme
+
+### Faz 1: Düşük Riskli İyileştirmeler
+- [X] API endpoint uyumluluğu sorunlarını çözme
+  - [X] role.service.ts dosyasındaki API URL'si düzeltildi (/api/roles -> /api/role)
+  - [X] permission.service.ts dosyasındaki API URL'si düzeltildi (/api/permissions -> /api/Permissions)
+  - [X] password.service.ts dosyasındaki şifre sıfırlama endpoint'i düzeltildi (/api/auth/request-password-reset -> /api/FixPassword/request-password-reset)
+  - [X] password.service.ts dosyasındaki şifre değiştirme endpoint'i düzeltildi (/api/auth/change-password -> /api/Auth/change-password)
+
+- [X] Frontend bileşenlerindeki gereksiz console.log ifadelerini kaldırma
+  - [X] user-management.component.ts dosyasındaki console.log ifadeleri kaldırıldı
+  - [X] role-management.component.ts dosyasındaki console.log ifadeleri kaldırıldı
+  - [X] permission-management.component.ts dosyasındaki console.log ifadeleri kaldırıldı
+
+- [ ] Backend controller'lardaki gereksiz log ifadelerini kaldırma
+  - [ ] UsersController.cs dosyasındaki gereksiz log ifadeleri kaldırılacak
+  - [ ] RoleController.cs dosyasındaki gereksiz log ifadeleri kaldırılacak
+  - [ ] PermissionsController.cs dosyasındaki gereksiz log ifadeleri kaldırılacak
+
+- [ ] Backend'de magic string ve magic number'ları sabit değişkenlere dönüştürme
+  - [ ] Hata mesajları için sabit değişkenler oluşturulacak
+  - [ ] HTTP durum kodları için StatusCodes sınıfı kullanılacak
+  - [ ] Rol ve izin isimleri için sabit değişkenler oluşturulacak
+
+### Faz 2: Orta Riskli İyileştirmeler
+- [ ] Merkezi bir loglama mekanizması oluşturma
+- [ ] Hata yönetimini iyileştirme
+- [ ] Performans optimizasyonları
+
+### Faz 3: Yüksek Riskli İyileştirmeler
+- [ ] Veritabanı sorgularını optimize etme
+- [ ] Mimari iyileştirmeler
+
+## Kod İyileştirme Planı - İlerleme
+
+### Faz 1: Düşük Riskli İyileştirmeler
+- [X] API endpoint uyumluluğu sorunlarını çözme
+  - [X] role.service.ts dosyasındaki API URL'si düzeltildi (/api/roles -> /api/role)
+  - [X] permission.service.ts dosyasındaki API URL'si düzeltildi (/api/permissions -> /api/Permissions)
+  - [X] password.service.ts dosyasındaki şifre sıfırlama endpoint'i düzeltildi (/api/auth/request-password-reset -> /api/FixPassword/request-password-reset)
+  - [X] password.service.ts dosyasındaki şifre değiştirme endpoint'i düzeltildi (/api/auth/change-password -> /api/Auth/change-password)
+
+- [X] Frontend bileşenlerindeki gereksiz console.log ifadelerini kaldırma
+  - [X] user-management.component.ts dosyasındaki console.log ifadeleri kaldırıldı
+  - [X] role-management.component.ts dosyasındaki console.log ifadeleri kaldırıldı
+  - [X] permission-management.component.ts dosyasındaki console.log ifadeleri kaldırıldı
+
+- [ ] Backend controller'lardaki gereksiz log ifadelerini kaldırma
+  - [ ] UsersController.cs dosyasındaki gereksiz log ifadeleri kaldırılacak
+  - [ ] RoleController.cs dosyasındaki gereksiz log ifadeleri kaldırılacak
+  - [ ] PermissionsController.cs dosyasındaki gereksiz log ifadeleri kaldırılacak
+
+- [ ] Backend'de magic string ve magic number'ları sabit değişkenlere dönüştürme
+  - [ ] Hata mesajları için sabit değişkenler oluşturulacak
+  - [ ] HTTP durum kodları için StatusCodes sınıfı kullanılacak
+  - [ ] Rol ve izin isimleri için sabit değişkenler oluşturulacak
+
+### Faz 2: Orta Riskli İyileştirmeler
+- [ ] Merkezi bir loglama mekanizması oluşturma
+- [ ] Hata yönetimini iyileştirme
+- [ ] Performans optimizasyonları
+
+### Faz 3: Yüksek Riskli İyileştirmeler
+- [ ] Veritabanı sorgularını optimize etme
+- [ ] Mimari iyileştirmeler
+
+## Kod İyileştirme Planı - İlerleme
+
+### Faz 1: Düşük Riskli İyileştirmeler
+- [X] API endpoint uyumluluğu sorunlarını çözme
+  - [X] role.service.ts dosyasındaki API URL'si düzeltildi (/api/roles -> /api/role)
+  - [X] permission.service.ts dosyasındaki API URL'si düzeltildi (/api/permissions -> /api/Permissions)
+  - [X] password.service.ts dosyasındaki şifre sıfırlama endpoint'i düzeltildi (/api/auth/request-password-reset -> /api/FixPassword/request-password-reset)
+  - [X] password.service.ts dosyasındaki şifre değiştirme endpoint'i düzeltildi (/api/auth/change-password -> /api/Auth/change-password)
+
+- [X] Frontend bileşenlerindeki gereksiz console.log ifadelerini kaldırma
+  - [X] user-management.component.ts dosyasındaki console.log ifadeleri kaldırıldı
+  - [X] role-management.component.ts dosyasındaki console.log ifadeleri kaldırıldı
+  - [X] permission-management.component.ts dosyasındaki console.log ifadeleri kaldırıldı
+
+- [ ] Backend controller'lardaki gereksiz log ifadelerini kaldırma
+  - [ ] UsersController.cs dosyasındaki gereksiz log ifadeleri kaldırılacak
+  - [ ] RoleController.cs dosyasındaki gereksiz log ifadeleri kaldırılacak
+  - [ ] PermissionsController.cs dosyasındaki gereksiz log ifadeleri kaldırılacak
+
+- [ ] Backend'de magic string ve magic number'ları sabit değişkenlere dönüştürme
+  - [ ] Hata mesajları için sabit değişkenler oluşturulacak
+  - [ ] HTTP durum kodları için StatusCodes sınıfı kullanılacak
+  - [ ] Rol ve izin isimleri için sabit değişkenler oluşturulacak
+
+### Faz 2: Orta Riskli İyileştirmeler
+- [ ] Merkezi bir loglama mekanizması oluşturma
+- [ ] Hata yönetimini iyileştirme
+- [ ] Performans optimizasyonları
+
+### Faz 3: Yüksek Riskli İyileştirmeler
+- [ ] Veritabanı sorgularını optimize etme
+- [ ] Mimari iyileştirmeler
+
+## Kod İyileştirme Planı - İlerleme
+
+### Faz 1: Düşük Riskli İyileştirmeler
+- [X] API endpoint uyumluluğu sorunlarını çözme
+  - [X] role.service.ts dosyasındaki API URL'si düzeltildi (/api/roles -> /api/role)
+  - [X] permission.service.ts dosyasındaki API URL'si düzeltildi (/api/permissions -> /api/Permissions)
+  - [X] password.service.ts dosyasındaki şifre sıfırlama endpoint'i düzeltildi (/api/auth/request-password-reset -> /api/FixPassword/request-password-reset)
+  - [X] password.service.ts dosyasındaki şifre değiştirme endpoint'i düzeltildi (/api/auth/change-password -> /api/Auth/change-password)
+
+- [X] Frontend bileşenlerindeki gereksiz console.log ifadelerini kaldırma
+  - [X] user-management.component.ts dosyasındaki console.log ifadeleri kaldırıldı
+  - [X] role-management.component.ts dosyasındaki console.log ifadeleri kaldırıldı
+  - [X] permission-management.component.ts dosyasındaki console.log ifadeleri kaldırıldı
+
+- [ ] Backend controller'lardaki gereksiz log ifadelerini kaldırma
+  - [ ] UsersController.cs dosyasındaki gereksiz log ifadeleri kaldırılacak
+  - [ ] RoleController.cs dosyasındaki gereksiz log ifadeleri kaldırılacak
+  - [ ] PermissionsController.cs dosyasındaki gereksiz log ifadeleri kaldırılacak
+
+- [ ] Backend'de magic string ve magic number'ları sabit değişkenlere dönüştürme
+  - [ ] Hata mesajları için sabit değişkenler oluşturulacak
+  - [ ] HTTP durum kodları için StatusCodes sınıfı kullanılacak
+  - [ ] Rol ve izin isimleri için sabit değişkenler oluşturulacak
+
+### Faz 2: Orta Riskli İyileştirmeler
+- [ ] Merkezi bir loglama mekanizması oluşturma
+- [ ] Hata yönetimini iyileştirme
+- [ ] Performans optimizasyonları
+
+### Faz 3: Yüksek Riskli İyileştirmeler
+- [ ] Veritabanı sorgularını optimize etme
+- [ ] Mimari iyileştirmeler
+
+## Kod İyileştirme Planı - İlerleme
+
+### Faz 1: Düşük Riskli İyileştirmeler
+- [X] API endpoint uyumluluğu sorunlarını çözme
+  - [X] role.service.ts dosyasındaki API URL'si düzeltildi (/api/roles -> /api/role)
+  - [X] permission.service.ts dosyasındaki API URL'si düzeltildi (/api/permissions -> /api/Permissions)
+  - [X] password.service.ts dosyasındaki şifre sıfırlama endpoint'i düzeltildi (/api/auth/request-password-reset -> /api/FixPassword/request-password-reset)
+  - [X] password.service.ts dosyasındaki şifre değiştirme endpoint'i düzeltildi (/api/auth/change-password -> /api/Auth/change-password)
+
+- [X] Frontend bileşenlerindeki gereksiz console.log ifadelerini kaldırma
+  - [X] user-management.component.ts dosyasındaki console.log ifadeleri kaldırıldı
+  - [X] role-management.component.ts dosyasındaki console.log ifadeleri kaldırıldı
+  - [X] permission-management.component.ts dosyasındaki console.log ifadeleri kaldırıldı
+
+- [ ] Backend controller'lardaki gereksiz log ifadelerini kaldırma
+  - [ ] UsersController.cs dosyasındaki gereksiz log ifadeleri kaldırılacak
+  - [ ] RoleController.cs dosyasındaki gereksiz log ifadeleri kaldırılacak
+  - [ ] PermissionsController.cs dosyasındaki gereksiz log ifadeleri kaldırılacak
+
+- [ ] Backend'de magic string ve magic number'ları sabit değişkenlere dönüştürme
+  - [ ] Hata mesajları için sabit değişkenler oluşturulacak
+  - [ ] HTTP durum kodları için StatusCodes sınıfı kullanılacak
+  - [ ] Rol ve izin isimleri için sabit değişkenler oluşturulacak
+
+### Faz 2: Orta Riskli İyileştirmeler
+- [ ] Merkezi bir loglama mekanizması oluşturma
+- [ ] Hata yönetimini iyileştirme
+- [ ] Performans optimizasyonları
+
+### Faz 3: Yüksek Riskli İyileştirmeler
+- [ ] Veritabanı sorgularını optimize etme
+- [ ] Mimari iyileştirmeler
+
+## Kod İyileştirme Planı - İlerleme
+
+### Faz 1: Düşük Riskli İyileştirmeler
+- [X] API endpoint uyumluluğu sorunlarını çözme
+  - [X] role.service.ts dosyasındaki API URL'si düzeltildi (/api/roles -> /api/role)
+  - [X] permission.service.ts dosyasındaki API URL'si düzeltildi (/api/permissions -> /api/Permissions)
+  - [X] password.service.ts dosyasındaki şifre sıfırlama endpoint'i düzeltildi (/api/auth/request-password-reset -> /api/FixPassword/request-password-reset)
+  - [X] password.service.ts dosyasındaki şifre değiştirme endpoint'i düzeltildi (/api/auth/change-password -> /api/Auth/change-password)
+
+- [X] Frontend bileşenlerindeki gereksiz console.log ifadelerini kaldırma
+  - [X] user-management.component.ts dosyasındaki console.log ifadeleri kaldırıldı
+  - [X] role-management.component.ts dosyasındaki console.log ifadeleri kaldırıldı
+  - [X] permission-management.component.ts dosyasındaki console.log ifadeleri kaldırıldı
+
+- [ ] Backend controller'lardaki gereksiz log ifadelerini kaldırma
+  - [ ] UsersController.cs dosyasındaki gereksiz log ifadeleri kaldırılacak
+  - [ ] RoleController.cs dosyasındaki gereksiz log ifadeleri kaldırılacak
+  - [ ] PermissionsController.cs dosyasındaki gereksiz log ifadeleri kaldırılacak
+
+- [ ] Backend'de magic string ve magic number'ları sabit değişkenlere dönüştürme
+  - [ ] Hata mesajları için sabit değişkenler oluşturulacak
+  - [ ] HTTP durum kodları için StatusCodes sınıfı kullanılacak
+  - [ ] Rol ve izin isimleri için sabit değişkenler oluşturulacak
+
+### Faz 2: Orta Riskli İyileştirmeler
+- [ ] Merkezi bir loglama mekanizması oluşturma
+- [ ] Hata yönetimini iyileştirme
+- [ ] Performans optimizasyonları
+
+### Faz 3: Yüksek Riskli İyileştirmeler
+- [ ] Veritabanı sorgularını optimize etme
+- [ ] Mimari iyileştirmeler
+
+## Kod İyileştirme Planı - İlerleme
+
+### Faz 1: Düşük Riskli İyileştirmeler
+- [X] API endpoint uyumluluğu sorunlarını çözme
+  - [X] role.service.ts dosyasındaki API URL'si düzeltildi (/api/roles -> /api/role)
+  - [X] permission.service.ts dosyasındaki API URL'si düzeltildi (/api/permissions -> /api/Permissions)
+  - [X] password.service.ts dosyasındaki şifre sıfırlama endpoint'i düzeltildi (/api/auth/request-password-reset -> /api/FixPassword/request-password-reset)
+  - [X] password.service.ts dosyasındaki şifre değiştirme endpoint'i düzeltildi (/api/auth/change-password -> /api/Auth/change-password)
+
+- [X] Frontend bileşenlerindeki gereksiz console.log ifadelerini kaldırma
+  - [X] user-management.component.ts dosyasındaki console.log ifadeleri kaldırıldı
+  - [X] role-management.component.ts dosyasındaki console.log ifadeleri kaldırıldı
+  - [X] permission-management.component.ts dosyasındaki console.log ifadeleri kaldırıldı
+
+- [ ] Backend controller'lardaki gereksiz log ifadelerini kaldırma
+  - [ ] UsersController.cs dosyasındaki gereksiz log ifadeleri kaldırılacak
+  - [ ] RoleController.cs dosyasındaki gereksiz log ifadeleri kaldırılacak
+  - [ ] PermissionsController.cs dosyasındaki gereksiz log ifadeleri kaldırılacak
+
+- [ ] Backend'de magic string ve magic number'ları sabit değişkenlere dönüştürme
+  - [ ] Hata mesajları için sabit değişkenler oluşturulacak
+  - [ ] HTTP durum kodları için StatusCodes sınıfı kullanılacak
+  - [ ] Rol ve izin isimleri için sabit değişkenler oluşturulacak
+
+### Faz 2: Orta Riskli İyileştirmeler
+- [ ] Merkezi bir loglama mekanizması oluşturma
+- [ ] Hata yönetimini iyileştirme
+- [ ] Performans optimizasyonları
+
+### Faz 3: Yüksek Riskli İyileştirmeler
+- [ ] Veritabanı sorgularını optimize etme
+- [ ] Mimari iyileştirmeler
+
+## Kod İyileştirme Planı - İlerleme
+
+### Faz 1: Düşük Riskli İyileştirmeler
+- [X] API endpoint uyumluluğu sorunlarını çözme
+  - [X] role.service.ts dosyasındaki API URL'si düzeltildi (/api/roles -> /api/role)
+  - [X] permission.service.ts dosyasındaki API URL'si düzeltildi (/api/permissions -> /api/Permissions)
+  - [X] password.service.ts dosyasındaki şifre sıfırlama endpoint'i düzeltildi (/api/auth/request-password-reset -> /api/FixPassword/request-password-reset)
+  - [X] password.service.ts dosyasındaki şifre değiştirme endpoint'i düzeltildi (/api/auth/change-password -> /api/Auth/change-password)
+
+- [X] Frontend bileşenlerindeki gereksiz console.log ifadelerini kaldırma
+  - [X] user-management.component.ts dosyasındaki console.log ifadeleri kaldırıldı
+  - [X] role-management.component.ts dosyasındaki console.log ifadeleri kaldırıldı
+  - [X] permission-management.component.ts dosyasındaki console.log ifadeleri kaldırıldı
+
+- [ ] Backend controller'lardaki gereksiz log ifadelerini kaldırma
+  - [ ] UsersController.cs dosyasındaki gereksiz log ifadeleri kaldırılacak
+  - [ ] RoleController.cs dosyasındaki gereksiz log ifadeleri kaldırılacak
+  - [ ] PermissionsController.cs dosyasındaki gereksiz log ifadeleri kaldırılacak
+
+- [ ] Backend'de magic string ve magic number'ları sabit değişkenlere dönüştürme
+  - [ ] Hata mesajları için sabit değişkenler oluşturulacak
+  - [ ] HTTP durum kodları için StatusCodes sınıfı kullanılacak
+  - [ ] Rol ve izin isimleri için sabit değişkenler oluşturulacak
+
+### Faz 2: Orta Riskli İyileştirmeler
+- [ ] Merkezi bir loglama mekanizması oluşturma
+- [ ] Hata yönetimini iyileştirme
+- [ ] Performans optimizasyonları
+
+### Faz 3: Yüksek Riskli İyileştirmeler
+- [ ] Veritabanı sorgularını optimize etme
+- [ ] Mimari iyileştirmeler
+
+## Kod İyileştirme Planı - İlerleme
+
+### Faz 1: Düşük Riskli İyileştirmeler
+- [X] API endpoint uyumluluğu sorunlarını çözme
+  - [X] role.service.ts dosyasındaki API URL'si düzeltildi (/api/roles -> /api/role)
+  - [X] permission.service.ts dosyasındaki API URL'si düzeltildi (/api/permissions -> /api/Permissions)
+  - [X] password.service.ts dosyasındaki şifre sıfırlama endpoint'i düzeltildi (/api/auth/request-password-reset -> /api/FixPassword/request-password-reset)
+  - [X] password.service.ts dosyasındaki şifre değiştirme endpoint'i düzeltildi (/api/auth/change-password -> /api/Auth/change-password)
+
+- [X] Frontend bileşenlerindeki gereksiz console.log ifadelerini kaldırma
+  - [X] user-management.component.ts dosyasındaki console.log ifadeleri kaldırıldı
+  - [X] role-management.component.ts dosyasındaki console.log ifadeleri kaldırıldı
+  - [X] permission-management.component.ts dosyasındaki console.log ifadeleri kaldırıldı
+
+- [ ] Backend controller'lardaki gereksiz log ifadelerini kaldırma
+  - [ ] UsersController.cs dosyasındaki gereksiz log ifadeleri kaldırılacak
+  - [ ] RoleController.cs dosyasındaki gereksiz log ifadeleri kaldırılacak
+  - [ ] PermissionsController.cs dosyasındaki gereksiz log ifadeleri kaldırılacak
+
+- [ ] Backend'de magic string ve magic number'ları sabit değişkenlere dönüştürme
+  - [ ] Hata mesajları için sabit değişkenler oluşturulacak
+  - [ ] HTTP durum kodları için StatusCodes sınıfı kullanılacak
+  - [ ] Rol ve izin isimleri için sabit değişkenler oluşturulacak
+
+### Faz 2: Orta Riskli İyileştirmeler
+- [ ] Merkezi bir loglama mekanizması oluşturma
+- [ ] Hata yönetimini iyileştirme
+- [ ] Performans optimizasyonları
+
+### Faz 3: Yüksek Riskli İyileştirmeler
+- [ ] Veritabanı sorgularını optimize etme
+- [ ] Mimari iyileştirmeler
+
+## Kod İyileştirme Planı - İlerleme
+
+### Faz 1: Düşük Riskli İyileştirmeler
+- [X] API endpoint uyumluluğu sorunlarını çözme
+  - [X] role.service.ts dosyasındaki API URL'si düzeltildi (/api/roles -> /api/role)
+  - [X] permission.service.ts dosyasındaki API URL'si düzeltildi (/api/permissions -> /api/Permissions)
+  - [X] password.service.ts dosyasındaki şifre sıfırlama endpoint'i düzeltildi (/api/auth/request-password-reset -> /api/FixPassword/request-password-reset)
+  - [X] password.service.ts dosyasındaki şifre değiştirme endpoint'i düzeltildi (/api/auth/change-password -> /api/Auth/change-password)
+
+- [X] Frontend bileşenlerindeki gereksiz console.log ifadelerini kaldırma
+  - [X] user-management.component.ts dosyasındaki console.log ifadeleri kaldırıldı
+  - [X] role-management.component.ts dosyasındaki console.log ifadeleri kaldırıldı
+  - [X] permission-management.component.ts dosyasındaki console.log ifadeleri kaldırıldı
+
+- [ ] Backend controller'lardaki gereksiz log ifadelerini kaldırma
+  - [ ] UsersController.cs dosyasındaki gereksiz log ifadeleri kaldırılacak
+  - [ ] RoleController.cs dosyasındaki gereksiz log ifadeleri kaldırılacak
+  - [ ] PermissionsController.cs dosyasındaki gereksiz log ifadeleri kaldırılacak
+
+- [ ] Backend'de magic string ve magic number'ları sabit değişkenlere dönüştürme
+  - [ ] Hata mesajları için sabit değişkenler oluşturulacak
+  - [ ] HTTP durum kodları için StatusCodes sınıfı kullanılacak
+  - [ ] Rol ve izin isimleri için sabit değişkenler oluşturulacak
+
+### Faz 2: Orta Riskli İyileştirmeler
+- [ ] Merkezi bir loglama mekanizması oluşturma
+- [ ] Hata yönetimini iyileştirme
+- [ ] Performans optimizasyonları
+
+### Faz 3: Yüksek Riskli İyileştirmeler
+- [ ] Veritabanı sorgularını optimize etme
+- [ ] Mimari iyileştirmeler
+
+## Kod İyileştirme Planı - İlerleme
+
+### Faz 1: Düşük Riskli İyileştirmeler
+- [X] API endpoint uyumluluğu sorunlarını çözme
+  - [X] role.service.ts dosyasındaki API URL'si düzeltildi (/api/roles -> /api/role)
+  - [X] permission.service.ts dosyasındaki API URL'si düzeltildi (/api/permissions -> /api/Permissions)
+  - [X] password.service.ts dosyasındaki şifre sıfırlama endpoint'i düzeltildi (/api/auth/request-password-reset -> /api/FixPassword/request-password-reset)
+  - [X] password.service.ts dosyasındaki şifre değiştirme endpoint'i düzeltildi (/api/auth/change-password -> /api/Auth/change-password)
+
+- [X] Frontend bileşenlerindeki gereksiz console.log ifadelerini kaldırma
+  - [X] user-management.component.ts dosyasındaki console.log ifadeleri kaldırıldı
+  - [X] role-management.component.ts dosyasındaki console.log ifadeleri kaldırıldı
+  - [X] permission-management.component.ts dosyasındaki console.log ifadeleri kaldırıldı
+
+- [ ] Backend controller'lardaki gereksiz log ifadelerini kaldırma
+  - [ ] UsersController.cs dosyasındaki gereksiz log ifadeleri kaldırılacak
+  - [ ] RoleController.cs dosyasındaki gereksiz log ifadeleri kaldırılacak
+  - [ ] PermissionsController.cs dosyasındaki gereksiz log ifadeleri kaldırılacak
+
+- [ ] Backend'de magic string ve magic number'ları sabit değişkenlere dönüştürme
+  - [ ] Hata mesajları için sabit değişkenler oluşturulacak
+  - [ ] HTTP durum kodları için StatusCodes sınıfı kullanılacak
+  - [ ] Rol ve izin isimleri için sabit değişkenler oluşturulacak
+
+### Faz 2: Orta Riskli İyileştirmeler
+- [ ] Merkezi bir loglama mekanizması oluşturma
+- [ ] Hata yönetimini iyileştirme
+- [ ] Performans optimizasyonları
+
+### Faz 3: Yüksek Riskli İyileştirmeler
+- [ ] Veritabanı sorgularını optimize etme
+- [ ] Mimari iyileştirmeler
+
+## Kod İyileştirme Planı - İlerleme
+
+### Faz 1: Düşük Riskli İyileştirmeler
+- [X] API endpoint uyumluluğu sorunlarını çözme
+  - [X] role.service.ts dosyasındaki API URL'si düzeltildi (/api/roles -> /api/role)
+  - [X] permission.service.ts dosyasındaki API URL'si düzeltildi (/api/permissions -> /api/Permissions)
+  - [X] password.service.ts dosyasındaki şifre sıfırlama endpoint'i düzeltildi (/api/auth/request-password-reset -> /api/FixPassword/request-password-reset)
+  - [X] password.service.ts dosyasındaki şifre değiştirme endpoint'i düzeltildi (/api/auth/change-password -> /api/Auth/change-password)
+
+- [X] Frontend bileşenlerindeki gereksiz console.log ifadelerini kaldırma
+  - [X] user-management.component.ts dosyasındaki console.log ifadeleri kaldırıldı
+  - [X] role-management.component.ts dosyasındaki console.log ifadeleri kaldırıldı
+  - [X] permission-management.component.ts dosyasındaki console.log ifadeleri kaldırıldı
+
+- [ ] Backend controller'lardaki gereksiz log ifadelerini kaldırma
+  - [ ] UsersController.cs dosyasındaki gereksiz log ifadeleri kaldırılacak
+  - [ ] RoleController.cs dosyasındaki gereksiz log ifadeleri kaldırılacak
+  - [ ] PermissionsController.cs dosyasındaki gereksiz log ifadeleri kaldırılacak
+
+- [ ] Backend'de magic string ve magic number'ları sabit değişkenlere dönüştürme
+  - [ ] Hata mesajları için sabit değişkenler oluşturulacak
+  - [ ] HTTP durum kodları için StatusCodes sınıfı kullanılacak
+  - [ ] Rol ve izin isimleri için sabit değişkenler oluşturulacak
+
+### Faz 2: Orta Riskli İyileştirmeler
+- [ ] Merkezi bir loglama mekanizması oluşturma
+- [ ] Hata yönetimini iyileştirme
+- [ ] Performans optimizasyonları
+
+### Faz 3: Yüksek Riskli İyileştirmeler
+- [ ] Veritabanı sorgularını optimize etme
+- [ ] Mimari iyileştirmeler
+
+## Kod İyileştirme Planı - İlerleme
+
+### Faz 1: Düşük Riskli İyileştirmeler
+- [X] API endpoint uyumluluğu sorunlarını çözme
+  - [X] role.service.ts dosyasındaki API URL'si düzeltildi (/api/roles -> /api/role)
+  - [X] permission.service.ts dosyasındaki API URL'si düzeltildi (/api/permissions -> /api/Permissions)
+  - [X] password.service.ts dosyasındaki şifre sıfırlama endpoint'i düzeltildi (/api/auth/request-password-reset -> /api/FixPassword/request-password-reset)
+  - [X] password.service.ts dosyasındaki şifre değiştirme endpoint'i düzeltildi (/api/auth/change-password -> /api/Auth/change-password)
+
+- [X] Frontend bileşenlerindeki gereksiz console.log ifadelerini kaldırma
+  - [X] user-management.component.ts dosyasındaki console.log ifadeleri kaldırıldı
+  - [X] role-management.component.ts dosyasındaki console.log ifadeleri kaldırıldı
+  - [X] permission-management.component.ts dosyasındaki console.log ifadeleri kaldırıldı
+
+- [ ] Backend controller'lardaki gereksiz log ifadelerini kaldırma
+  - [ ] UsersController.cs dosyasındaki gereksiz log ifadeleri kaldırılacak
+  - [ ] RoleController.cs dosyasındaki gereksiz log ifadeleri kaldırılacak
+  - [ ] PermissionsController.cs dosyasındaki gereksiz log ifadeleri kaldırılacak
+
+- [ ] Backend'de magic string ve magic number'ları sabit değişkenlere dönüştürme
+  - [ ] Hata mesajları için sabit değişkenler oluşturulacak
+  - [ ] HTTP durum kodları için StatusCodes sınıfı kullanılacak
+  - [ ] Rol ve izin isimleri için sabit değişkenler oluşturulacak
+
+### Faz 2: Orta Riskli İyileştirmeler
+- [ ] Merkezi bir loglama mekanizması oluşturma
+- [ ] Hata yönetimini iyileştirme
+- [ ] Performans optimizasyonları
+
+### Faz 3: Yüksek Riskli İyileştirmeler
+- [ ] Veritabanı sorgularını optimize etme
+- [ ] Mimari iyileştirmeler
+
+## Kod İyileştirme Planı - İlerleme
+
+### Faz 1: Düşük Riskli İyileştirmeler
+- [X] API endpoint uyumluluğu sorunlarını çözme
+  - [X] role.service.ts dosyasındaki API URL'si düzeltildi (/api/roles -> /api/role)
+  - [X] permission.service.ts dosyasındaki API URL'si düzeltildi (/api/permissions -> /api/Permissions)
+  - [X] password.service.ts dosyasındaki şifre sıfırlama endpoint'i düzeltildi (/api/auth/request-password-reset -> /api/FixPassword/request-password-reset)
+  - [X] password.service.ts dosyasındaki şifre değiştirme endpoint'i düzeltildi (/api/auth/change-password -> /api/Auth/change-password)
+
+- [X] Frontend bileşenlerindeki gereksiz console.log ifadelerini kaldırma
+  - [X] user-management.component.ts dosyasındaki console.log ifadeleri kaldırıldı
+  - [X] role-management.component.ts dosyasındaki console.log ifadeleri kaldırıldı
+  - [X] permission-management.component.ts dosyasındaki console.log ifadeleri kaldırıldı
+
+- [ ] Backend controller'lardaki gereksiz log ifadelerini kaldırma
+  - [ ] UsersController.cs dosyasındaki gereksiz log ifadeleri kaldırılacak
+  - [ ] RoleController.cs dosyasındaki gereksiz log ifadeleri kaldırılacak
+  - [ ] PermissionsController.cs dosyasındaki gereksiz log ifadeleri kaldırılacak
+
+- [ ] Backend'de magic string ve magic number'ları sabit değişkenlere dönüştürme
+  - [ ] Hata mesajları için sabit değişkenler oluşturulacak
+  - [ ] HTTP durum kodları için StatusCodes sınıfı kullanılacak
+  - [ ] Rol ve izin isimleri için sabit değişkenler oluşturulacak
+
+### Faz 2: Orta Riskli İyileştirmeler
+- [ ] Merkezi bir loglama mekanizması oluşturma
+- [ ] Hata yönetimini iyileştirme
+- [ ] Performans optimizasyonları
+
+### Faz 3: Yüksek Riskli İyileştirmeler
+- [ ] Veritabanı sorgularını optimize etme
+- [ ] Mimari iyileştirmeler
+
+## Kod İyileştirme Planı - İlerleme
+
+### Faz 1: Düşük Riskli İyileştirmeler
+- [X] API endpoint uyumluluğu sorunlarını çözme
+  - [X] role.service.ts dosyasındaki API URL'si düzeltildi (/api/roles -> /api/role)
+  - [X] permission.service.ts dosyasındaki API URL'si düzeltildi (/api/permissions -> /api/Permissions)
+  - [X] password.service.ts dosyasındaki şifre sıfırlama endpoint'i düzeltildi (/api/auth/request-password-reset -> /api/FixPassword/request-password-reset)
+  - [X] password.service.ts dosyasındaki şifre değiştirme endpoint'i düzeltildi (/api/auth/change-password -> /api/Auth/change-password)
+
+- [X] Frontend bileşenlerindeki gereksiz console.log ifadelerini kaldırma
+  - [X] user-management.component.ts dosyasındaki console.log ifadeleri kaldırıldı
+  - [X] role-management.component.ts dosyasındaki console.log ifadeleri kaldırıldı
+  - [X] permission-management.component.ts dosyasındaki console.log ifadeleri kaldırıldı
+
+- [ ] Backend controller'lardaki gereksiz log ifadelerini kaldırma
+  - [ ] UsersController.cs dosyasındaki gereksiz log ifadeleri kaldırılacak
+  - [ ] RoleController.cs dosyasındaki gereksiz log ifadeleri kaldırılacak
+  - [ ] PermissionsController.cs dosyasındaki gereksiz log ifadeleri kaldırılacak
+
+- [ ] Backend'de magic string ve magic number'ları sabit değişkenlere dönüştürme
+  - [ ] Hata mesajları için sabit değişkenler oluşturulacak
+  - [ ] HTTP durum kodları için StatusCodes sınıfı kullanılacak
+  - [ ] Rol ve izin isimleri için sabit değişkenler oluşturulacak
+
+### Faz 2: Orta Riskli İyileştirmeler
+- [ ] Merkezi bir loglama mekanizması oluşturma
+- [ ] Hata yönetimini iyileştirme
+- [ ] Performans optimizasyonları
+
+### Faz 3: Yüksek Riskli İyileştirmeler
+- [ ] Veritabanı sorgularını optimize etme
+- [ ] Mimari iyileştirmeler
+
+## Kod İyileştirme Planı - İlerleme
+
+### Faz 1: Düşük Riskli İyileştirmeler
+- [X] API endpoint uyumluluğu sorunlarını çözme
+  - [X] role.service.ts dosyasındaki API URL'si düzeltildi (/api/roles -> /api/role)
+  - [X] permission.service.ts dosyasındaki API URL'si düzeltildi (/api/permissions -> /api/Permissions)
+  - [X] password.service.ts dosyasındaki şifre sıfırlama endpoint'i düzeltildi (/api/auth/request-password-reset -> /api/FixPassword/request-password-reset)
+  - [X] password.service.ts dosyasındaki şifre değiştirme endpoint'i düzeltildi (/api/auth/change-password -> /api/Auth/change-password)
+
+- [X] Frontend bileşenlerindeki gereksiz console.log ifadelerini kaldırma
+  - [X] user-management.component.ts dosyasındaki console.log ifadeleri kaldırıldı
+  - [X] role-management.component.ts dosyasındaki console.log ifadeleri kaldırıldı
+  - [X] permission-management.component.ts dosyasındaki console.log ifadeleri kaldırıldı
+
+- [ ] Backend controller'lardaki gereksiz log ifadelerini kaldırma
+  - [ ] UsersController.cs dosyasındaki gereksiz log ifadeleri kaldırılacak
+  - [ ] RoleController.cs dosyasındaki gereksiz log ifadeleri kaldırılacak
+  - [ ] PermissionsController.cs dosyasındaki gereksiz log ifadeleri kaldırılacak
+
+- [ ] Backend'de magic string ve magic number'ları sabit değişkenlere dönüştürme
+  - [ ] Hata mesajları için sabit değişkenler oluşturulacak
+  - [ ] HTTP durum kodları için StatusCodes sınıfı kullanılacak
+  - [ ] Rol ve izin isimleri için sabit değişkenler oluşturulacak
+
+### Faz 2: Orta Riskli İyileştirmeler
+- [ ] Merkezi bir loglama mekanizması oluşturma
+- [ ] Hata yönetimini iyileştirme
+- [ ] Performans optimizasyonları
+
+### Faz 3: Yüksek Riskli İyileştirmeler
+- [ ] Veritabanı sorgularını optimize etme
+- [ ] Mimari iyileştirmeler
+
+## Kod İyileştirme Planı - İlerleme
+
+### Faz 1: Düşük Riskli İyileştirmeler
+- [X] API endpoint uyumluluğu sorunlarını çözme
+  - [X] role.service.ts dosyasındaki API URL'si düzeltildi (/api/roles -> /api/role)
+  - [X] permission.service.ts dosyasındaki API URL'si düzeltildi (/api/permissions -> /api/Permissions)
+  - [X] password.service.ts dosyasındaki şifre sıfırlama endpoint'i düzeltildi (/api/auth/request-password-reset -> /api/FixPassword/request-password-reset)
+  - [X] password.service.ts dosyasındaki şifre değiştirme endpoint'i düzeltildi (/api/auth/change-password -> /api/Auth/change-password)
+
+- [X] Frontend bileşenlerindeki gereksiz console.log ifadelerini kaldırma
+  - [X] user-management.component.ts dosyasındaki console.log ifadeleri kaldırıldı
+  - [X] role-management.component.ts dosyasındaki console.log ifadeleri kaldırıldı
+  - [X] permission-management.component.ts dosyasındaki console.log ifadeleri kaldırıldı
+
+- [ ] Backend controller'lardaki gereksiz log ifadelerini kaldırma
+  - [ ] UsersController.cs dosyasındaki gereksiz log ifadeleri kaldırılacak
+  - [ ] RoleController.cs dosyasındaki gereksiz log ifadeleri kaldırılacak
+  - [ ] PermissionsController.cs dosyasındaki gereksiz log ifadeleri kaldırılacak
+
+- [ ] Backend'de magic string ve magic number'ları sabit değişkenlere dönüştürme
+  - [ ] Hata mesajları için sabit değişkenler oluşturulacak
+  - [ ] HTTP durum kodları için StatusCodes sınıfı kullanılacak
+  - [ ] Rol ve izin isimleri için sabit değişkenler oluşturulacak
+
+### Faz 2: Orta Riskli İyileştirmeler
+- [ ] Merkezi bir loglama mekanizması oluşturma
+- [ ] Hata yönetimini iyileştirme
+- [ ] Performans optimizasyonları
+
+### Faz 3: Yüksek Riskli İyileştirmeler
+- [ ] Veritabanı sorgularını optimize etme
+- [ ] Mimari iyileştirmeler
+
+## Kod İyileştirme Planı - İlerleme
+
+### Faz 1: Düşük Riskli İyileştirmeler
+- [X] API endpoint uyumluluğu sorunlarını çözme
+  - [X] role.service.ts dosyasındaki API URL'si düzeltildi (/api/roles -> /api/role)
+  - [X] permission.service.ts dosyasındaki API URL'si düzeltildi (/api/permissions -> /api/Permissions)
+  - [X] password.service.ts dosyasındaki şifre sıfırlama endpoint'i düzeltildi (/api/auth/request-password-reset -> /api/FixPassword/request-password-reset)
+  - [X] password.service.ts dosyasındaki şifre değiştirme endpoint'i düzeltildi (/api/auth/change-password -> /api/Auth/change-password)
+
+- [X] Frontend bileşenlerindeki gereksiz console.log ifadelerini kaldırma
+  - [X] user-management.component.ts dosyasındaki console.log ifadeleri kaldırıldı
+  - [X] role-management.component.ts dosyasındaki console.log ifadeleri kaldırıldı
+  - [X] permission-management.component.ts dosyasındaki console.log ifadeleri kaldırıldı
+
+- [ ] Backend controller'lardaki gereksiz log ifadelerini kaldırma
+  - [ ] UsersController.cs dosyasındaki gereksiz log ifadeleri kaldırılacak
+  - [ ] RoleController.cs dosyasındaki gereksiz log ifadeleri kaldırılacak
+  - [ ] PermissionsController.cs dosyasındaki gereksiz log ifadeleri kaldırılacak
+
+- [ ] Backend'de magic string ve magic number'ları sabit değişkenlere dönüştürme
+  - [ ] Hata mesajları için sabit değişkenler oluşturulacak
+  - [ ] HTTP durum kodları için StatusCodes sınıfı kullanılacak
+  - [ ] Rol ve izin isimleri için sabit değişkenler oluşturulacak
+
+### Faz 2: Orta Riskli İyileştirmeler
+- [ ] Merkezi bir loglama mekanizması oluşturma
+- [ ] Hata yönetimini iyileştirme
+- [ ] Performans optimizasyonları
+
+### Faz 3: Yüksek Riskli İyileştirmeler
+- [ ] Veritabanı sorgularını optimize etme
+- [ ] Mimari iyileştirmeler
+
+## Kod İyileştirme Planı - İlerleme
+
+### Faz 1: Düşük Riskli İyileştirmeler
+- [X] API endpoint uyumluluğu sorunlarını çözme
+  - [X] role.service.ts dosyasındaki API URL'si düzeltildi (/api/roles -> /api/role)
+  - [X] permission.service.ts dosyasındaki API URL'si düzeltildi (/api/permissions -> /api/Permissions)
+  - [X] password.service.ts dosyasındaki şifre sıfırlama endpoint'i düzeltildi (/api/auth/request-password-reset -> /api/FixPassword/request-password-reset)
+  - [X] password.service.ts dosyasındaki şifre değiştirme endpoint'i düzeltildi (/api/auth/change-password -> /api/Auth/change-password)
+
+- [X] Frontend bileşenlerindeki gereksiz console.log ifadelerini kaldırma
+  - [X] user-management.component.ts dosyasındaki console.log ifadeleri kaldırıldı
+  - [X] role-management.component.ts dosyasındaki console.log ifadeleri kaldırıldı
+  - [X] permission-management.component.ts dosyasındaki console.log ifadeleri kaldırıldı
+
+- [ ] Backend controller'lardaki gereksiz log ifadelerini kaldırma
+  - [ ] UsersController.cs dosyasındaki gereksiz log ifadeleri kaldırılacak
+  - [ ] RoleController.cs dosyasındaki gereksiz log ifadeleri kaldırılacak
+  - [ ] PermissionsController.cs dosyasındaki gereksiz log ifadeleri kaldırılacak
+
+- [ ] Backend'de magic string ve magic number'ları sabit değişkenlere dönüştürme
+  - [ ] Hata mesajları için sabit değişkenler oluşturulacak
+  - [ ] HTTP durum kodları için StatusCodes sınıfı kullanılacak
+  - [ ] Rol ve izin isimleri için sabit değişkenler oluşturulacak
+
+### Faz 2: Orta Riskli İyileştirmeler
+- [ ] Merkezi bir loglama mekanizması oluşturma
+- [ ] Hata yönetimini iyileştirme
+- [ ] Performans optimizasyonları
+
+### Faz 3: Yüksek Riskli İyileştirmeler
+- [ ] Veritabanı sorgularını optimize etme
+- [ ] Mimari iyileştirmeler
+
+## Kod İyileştirme Planı - İlerleme
+
+### Faz 1: Düşük Riskli İyileştirmeler
+- [X] API endpoint uyumluluğu sorunlarını çözme
+  - [X] role.service.ts dosyasındaki API URL'si düzeltildi (/api/roles -> /api/role)
+  - [X] permission.service.ts dosyasındaki API URL'si düzeltildi (/api/permissions -> /api/Permissions)
+  - [X] password.service.ts dosyasındaki şifre sıfırlama endpoint'i düzeltildi (/api/auth/request-password-reset -> /api/FixPassword/request-password-reset)
+  - [X] password.service.ts dosyasındaki şifre değiştirme endpoint'i düzeltildi (/api/auth/change-password -> /api/Auth/change-password)
+
+- [X] Frontend bileşenlerindeki gereksiz console.log ifadelerini kaldırma
+  - [X] user-management.component.ts dosyasındaki console.log ifadeleri kaldırıldı
+  - [X] role-management.component.ts dosyasındaki console.log ifadeleri kaldırıldı
+  - [X] permission-management.component.ts dosyasındaki console.log ifadeleri kaldırıldı
+
+- [ ] Backend controller'lardaki gereksiz log ifadelerini kaldırma
+  - [ ] UsersController.cs dosyasındaki gereksiz log ifadeleri kaldırılacak
+  - [ ] RoleController.cs dosyasındaki gereksiz log ifadeleri kaldırılacak
+  - [ ] PermissionsController.cs dosyasındaki gereksiz log ifadeleri kaldırılacak
+
+- [ ] Backend'de magic string ve magic number'ları sabit değişkenlere dönüştürme
+  - [ ] Hata mesajları için sabit değişkenler oluşturulacak
+  - [ ] HTTP durum kodları için StatusCodes sınıfı kullanılacak
+  - [ ] Rol ve izin isimleri için sabit değişkenler oluşturulacak
+
+### Faz 2: Orta Riskli İyileştirmeler
+- [ ] Merkezi bir loglama mekanizması oluşturma
+- [ ] Hata yönetimini iyileştirme
+- [ ] Performans optimizasyonları
+
+### Faz 3: Yüksek Riskli İyileştirmeler
+- [ ] Veritabanı sorgularını optimize etme
+- [ ] Mimari iyileştirmeler
+
+## Kod İyileştirme Planı - İlerleme
+
+### Faz 1: Düşük Riskli İyileştirmeler
+- [X] API endpoint uyumluluğu sorunlarını çözme
+  - [X] role.service.ts dosyasındaki API URL'si düzeltildi (/api/roles -> /api/role)
+  - [X] permission.service.ts dosyasındaki API URL'si düzeltildi (/api/permissions -> /api/Permissions)
+  - [X] password.service.ts dosyasındaki şifre sıfırlama endpoint'i düzeltildi (/api/auth/request-password-reset -> /api/FixPassword/request-password-reset)
+  - [X] password.service.ts dosyasındaki şifre değiştirme endpoint'i düzeltildi (/api/auth/change-password -> /api/Auth/change-password)
+
+- [X] Frontend bileşenlerindeki gereksiz console.log ifadelerini kaldırma
+  - [X] user-management.component.ts dosyasındaki console.log ifadeleri kaldırıldı
+  - [X] role-management.component.ts dosyasındaki console.log ifadeleri kaldırıldı
+  - [X] permission-management.component.ts dosyasındaki console.log ifadeleri kaldırıldı
+
+- [ ] Backend controller'lardaki gereksiz log ifadelerini kaldırma
+  - [ ] UsersController.cs dosyasındaki gereksiz log ifadeleri kaldırılacak
+  - [ ] RoleController.cs dosyasındaki gereksiz log ifadeleri kaldırılacak
+  - [ ] PermissionsController.cs dosyasındaki gereksiz log ifadeleri kaldırılacak
+
+- [ ] Backend'de magic string ve magic number'ları sabit değişkenlere dönüştürme
+  - [ ] Hata mesajları için sabit değişkenler oluşturulacak
+  - [ ] HTTP durum kodları için StatusCodes sınıfı kullanılacak
+  - [ ] Rol ve izin isimleri için sabit değişkenler oluşturulacak
+
+### Faz 2: Orta Riskli İyileştirmeler
+- [ ] Merkezi bir loglama mekanizması oluşturma
+- [ ] Hata yönetimini iyileştirme
+- [ ] Performans optimizasyonları
+
+### Faz 3: Yüksek Riskli İyileştirmeler
+- [ ] Veritabanı sorgularını optimize etme
+- [ ] Mimari iyileştirmeler
+
+## Kod İyileştirme Planı - İlerleme
+
+### Faz 1: Düşük Riskli İyileştirmeler
+- [X] API endpoint uyumluluğu sorunlarını çözme
+  - [X] role.service.ts dosyasındaki API URL'si düzeltildi (/api/roles -> /api/role)
+  - [X] permission.service.ts dosyasındaki API URL'si düzeltildi (/api/permissions -> /api/Permissions)
+  - [X] password.service.ts dosyasındaki şifre sıfırlama endpoint'i düzeltildi (/api/auth/request-password-reset -> /api/FixPassword/request-password-reset)
+  - [X] password.service.ts dosyasındaki şifre değiştirme endpoint'i düzeltildi (/api/auth/change-password -> /api/Auth/change-password)
+
+- [X] Frontend bileşenlerindeki gereksiz console.log ifadelerini kaldırma
+  - [X] user-management.component.ts dosyasındaki console.log ifadeleri kaldırıldı
+  - [X] role-management.component.ts dosyasındaki console.log ifadeleri kaldırıldı
+  - [X] permission-management.component.ts dosyasındaki console.log ifadeleri kaldırıldı
+
+- [ ] Backend controller'lardaki gereksiz log ifadelerini kaldırma
+  - [ ] UsersController.cs dosyasındaki gereksiz log ifadeleri kaldırılacak
+  - [ ] RoleController.cs dosyasındaki gereksiz log ifadeleri kaldırılacak
+  - [ ] PermissionsController.cs dosyasındaki gereksiz log ifadeleri kaldırılacak
+
+- [ ] Backend'de magic string ve magic number'ları sabit değişkenlere dönüştürme
+  - [ ] Hata mesajları için sabit değişkenler oluşturulacak
+  - [ ] HTTP durum kodları için StatusCodes sınıfı kullanılacak
+  - [ ] Rol ve izin isimleri için sabit değişkenler oluşturulacak
+
+### Faz 2: Orta Riskli İyileştirmeler
+- [ ] Merkezi bir loglama mekanizması oluşturma
+- [ ] Hata yönetimini iyileştirme
+- [ ] Performans optimizasyonları
+
+### Faz 3: Yüksek Riskli İyileştirmeler
+- [ ] Veritabanı sorgularını optimize etme
+- [ ] Mimari iyileştirmeler
+
+## Kod İyileştirme Planı - İlerleme
+
+### Faz 1: Düşük Riskli İyileştirmeler
+- [X] API endpoint uyumluluğu sorunlarını çözme
+  - [X] role.service.ts dosyasındaki API URL'si düzeltildi (/api/roles -> /api/role)
+  - [X] permission.service.ts dosyasındaki API URL'si düzeltildi (/api/permissions -> /api/Permissions)
+  - [X] password.service.ts dosyasındaki şifre sıfırlama endpoint'i düzeltildi (/api/auth/request-password-reset -> /api/FixPassword/request-password-reset)
+  - [X] password.service.ts dosyasındaki şifre değiştirme endpoint'i düzeltildi (/api/auth/change-password -> /api/Auth/change-password)
+
+- [X] Frontend bileşenlerindeki gereksiz console.log ifadelerini kaldırma
+  - [X] user-management.component.ts dosyasındaki console.log ifadeleri kaldırıldı
+  - [X] role-management.component.ts dosyasındaki console.log ifadeleri kaldırıldı
+  - [X] permission-management.component.ts dosyasındaki console.log ifadeleri kaldırıldı
+
+- [ ] Backend controller'lardaki gereksiz log ifadelerini kaldırma
+  - [ ] UsersController.cs dosyasındaki gereksiz log ifadeleri kaldırılacak
+  - [ ] RoleController.cs dosyasındaki gereksiz log ifadeleri kaldırılacak
+  - [ ] PermissionsController.cs dosyasındaki gereksiz log ifadeleri kaldırılacak
+
+- [ ] Backend'de magic string ve magic number'ları sabit değişkenlere dönüştürme
+  - [ ] Hata mesajları için sabit değişkenler oluşturulacak
+  - [ ] HTTP durum kodları için StatusCodes sınıfı kullanılacak
+  - [ ] Rol ve izin isimleri için sabit değişkenler oluşturulacak
+
+### Faz 2: Orta Riskli İyileştirmeler
+- [ ] Merkezi bir loglama mekanizması oluşturma
+- [ ] Hata yönetimini iyileştirme
+- [ ] Performans optimizasyonları
+
+### Faz 3: Yüksek Riskli İyileştirmeler
+- [ ] Veritabanı sorgularını optimize etme
+- [ ] Mimari iyileştirmeler
+
+## Kod İyileştirme Planı - İlerleme
+
+### Faz 1: Düşük Riskli İyileştirmeler
+- [X] API endpoint uyumluluğu sorunlarını çözme
+  - [X] role.service.ts dosyasındaki API URL'si düzeltildi (/api/roles -> /api/role)
+  - [X] permission.service.ts dosyasındaki API URL'si düzeltildi (/api/permissions -> /api/Permissions)
+  - [X] password.service.ts dosyasındaki şifre sıfırlama endpoint'i düzeltildi (/api/auth/request-password-reset -> /api/FixPassword/request-password-reset)
+  - [X] password.service.ts dosyasındaki şifre değiştirme endpoint'i düzeltildi (/api/auth/change-password -> /api/Auth/change-password)
+
+- [X] Frontend bileşenlerindeki gereksiz console.log ifadelerini kaldırma
+  - [X] user-management.component.ts dosyasındaki console.log ifadeleri kaldırıldı
+  - [X] role-management.component.ts dosyasındaki console.log ifadeleri kaldırıldı
+  - [X] permission-management.component.ts dosyasındaki console.log ifadeleri kaldırıldı
+
+- [ ] Backend controller'lardaki gereksiz log ifadelerini kaldırma
+  - [ ] UsersController.cs dosyasındaki gereksiz log ifadeleri kaldırılacak
+  - [ ] RoleController.cs dosyasındaki gereksiz log ifadeleri kaldırılacak
+  - [ ] PermissionsController.cs dosyasındaki gereksiz log ifadeleri kaldırılacak
+
+- [ ] Backend'de magic string ve magic number'ları sabit değişkenlere dönüştürme
+  - [ ] Hata mesajları için sabit değişkenler oluşturulacak
+  - [ ] HTTP durum kodları için StatusCodes sınıfı kullanılacak
+  - [ ] Rol ve izin isimleri için sabit değişkenler oluşturulacak
+
+### Faz 2: Orta Riskli İyileştirmeler
+- [ ] Merkezi bir loglama mekanizması oluşturma
+- [ ] Hata yönetimini iyileştirme
+- [ ] Performans optimizasyonları
+
+### Faz 3: Yüksek Riskli İyileştirmeler
+- [ ] Veritabanı sorgularını optimize etme
+- [ ] Mimari iyileştirmeler
+
+## Kod İyileştirme Planı - İlerleme
+
+### Faz 1: Düşük Riskli İyileştirmeler
+- [X] API endpoint uyumluluğu sorunlarını çözme
+  - [X] role.service.ts dosyasındaki API URL'si düzeltildi (/api/roles -> /api/role)
+  - [X] permission.service.ts dosyasındaki API URL'si düzeltildi (/api/permissions -> /api/Permissions)
+  - [X] password.service.ts dosyasındaki şifre sıfırlama endpoint'i düzeltildi (/api/auth/request-password-reset -> /api/FixPassword/request-password-reset)
+  - [X] password.service.ts dosyasındaki şifre değiştirme endpoint'i düzeltildi (/api/auth/change-password -> /api/Auth/change-password)
+
+- [X] Frontend bileşenlerindeki gereksiz console.log ifadelerini kaldırma
+  - [X] user-management.component.ts dosyasındaki console.log ifadeleri kaldırıldı
+  - [X] role-management.component.ts dosyasındaki console.log ifadeleri kaldırıldı
+  - [X] permission-management.component.ts dosyasındaki console.log ifadeleri kaldırıldı
+
+- [ ] Backend controller'lardaki gereksiz log ifadelerini kaldırma
+  - [ ] UsersController.cs dosyasındaki gereksiz log ifadeleri kaldırılacak
+  - [ ] RoleController.cs dosyasındaki gereksiz log ifadeleri kaldırılacak
+  - [ ] PermissionsController.cs dosyasındaki gereksiz log ifadeleri kaldırılacak
+
+- [ ] Backend'de magic string ve magic number'ları sabit değişkenlere dönüştürme
+  - [ ] Hata mesajları için sabit değişkenler oluşturulacak
+  - [ ] HTTP durum kodları için StatusCodes sınıfı kullanılacak
+  - [ ] Rol ve izin isimleri için sabit değişkenler oluşturulacak
+
+### Faz 2: Orta Riskli İyileştirmeler
+- [ ] Merkezi bir loglama mekanizması oluşturma
+- [ ] Hata yönetimini iyileştirme
+- [ ] Performans optimizasyonları
+
+### Faz 3: Yüksek Riskli İyileştirmeler
+- [ ] Veritabanı sorgularını optimize etme
+- [ ] Mimari iyileştirmeler
+
+## Kod İyileştirme Planı - İlerleme
+
+### Faz 1: Düşük Riskli İyileştirmeler
+- [X] API endpoint uyumluluğu sorunlarını çözme
+  - [X] role.service.ts dosyasındaki API URL'si düzeltildi (/api/roles -> /api/role)
+  - [X] permission.service.ts dosyasındaki API URL'si düzeltildi (/api/permissions -> /api/Permissions)
+  - [X] password.service.ts dosyasındaki şifre sıfırlama endpoint'i düzeltildi (/api/auth/request-password-reset -> /api/FixPassword/request-password-reset)
+  - [X] password.service.ts dosyasındaki şifre değiştirme endpoint'i düzeltildi (/api/auth/change-password -> /api/Auth/change-password)
+
+- [X] Frontend bileşenlerindeki gereksiz console.log ifadelerini kaldırma
+  - [X] user-management.component.ts dosyasındaki console.log ifadeleri kaldırıldı
+  - [X] role-management.component.ts dosyasındaki console.log ifadeleri kaldırıldı
+  - [X] permission-management.component.ts dosyasındaki console.log ifadeleri kaldırıldı
+
+- [ ] Backend controller'lardaki gereksiz log ifadelerini kaldırma
+  - [ ] UsersController.cs dosyasındaki gereksiz log ifadeleri kaldırılacak
+  - [ ] RoleController.cs dosyasındaki gereksiz log ifadeleri kaldırılacak
+  - [ ] PermissionsController.cs dosyasındaki gereksiz log ifadeleri kaldırılacak
+
+- [ ] Backend'de magic string ve magic number'ları sabit değişkenlere dönüştürme
+  - [ ] Hata mesajları için sabit değişkenler oluşturulacak
+  - [ ] HTTP durum kodları için StatusCodes sınıfı kullanılacak
+  - [ ] Rol ve izin isimleri için sabit değişkenler oluşturulacak
+
+### Faz 2: Orta Riskli İyileştirmeler
+- [ ] Merkezi bir loglama mekanizması oluşturma
+- [ ] Hata yönetimini iyileştirme
+- [ ] Performans optimizasyonları
+
+### Faz 3: Yüksek Riskli İyileştirmeler
+- [ ] Veritabanı sorgularını optimize etme
+- [ ] Mimari iyileştirmeler
+
+## Kod İyileştirme Planı - İlerleme
+
+### Faz 1: Düşük Riskli İyileştirmeler
+- [X] API endpoint uyumluluğu sorunlarını çözme
+  - [X] role.service.ts dosyasındaki API URL'si düzeltildi (/api/roles -> /api/role)
+  - [X] permission.service.ts dosyasındaki API URL'si düzeltildi (/api/permissions -> /api/Permissions)
+  - [X] password.service.ts dosyasındaki şifre sıfırlama endpoint'i düzeltildi (/api/auth/request-password-reset -> /api/FixPassword/request-password-reset)
+  - [X] password.service.ts dosyasındaki şifre değiştirme endpoint'i düzeltildi (/api/auth/change-password -> /api/Auth/change-password)
+
+- [X] Frontend bileşenlerindeki gereksiz console.log ifadelerini kaldırma
+  - [X] user-management.component.ts dosyasındaki console.log ifadeleri kaldırıldı
+  - [X] role-management.component.ts dosyasındaki console.log ifadeleri kaldırıldı
+  - [X] permission-management.component.ts dosyasındaki console.log ifadeleri kaldırıldı
+
+- [ ] Backend controller'lardaki gereksiz log ifadelerini kaldırma
+  - [ ] UsersController.cs dosyasındaki gereksiz log ifadeleri kaldırılacak
+  - [ ] RoleController.cs dosyasındaki gereksiz log ifadeleri kaldırılacak
+  - [ ] PermissionsController.cs dosyasındaki gereksiz log ifadeleri kaldırılacak
+
+- [ ] Backend'de magic string ve magic number'ları sabit değişkenlere dönüştürme
+  - [ ] Hata mesajları için sabit değişkenler oluşturulacak
+  - [ ] HTTP durum kodları için StatusCodes sınıfı kullanılacak
+  - [ ] Rol ve izin isimleri için sabit değişkenler oluşturulacak
+
+### Faz 2: Orta Riskli İyileştirmeler
+- [ ] Merkezi bir loglama mekanizması oluşturma
+- [ ] Hata yönetimini iyileştirme
+- [ ] Performans optimizasyonları
+
+### Faz 3: Yüksek Riskli İyileştirmeler
+- [ ] Veritabanı sorgularını optimize etme
+- [ ] Mimari iyileştirmeler
+
+## Kod İyileştirme Planı - İlerleme
+
+### Faz 1: Düşük Riskli İyileştirmeler
+- [X] API endpoint uyumluluğu sorunlarını çözme
+  - [X] role.service.ts dosyasındaki API URL'si düzeltildi (/api/roles -> /api/role)
+  - [X] permission.service.ts dosyasındaki API URL'si düzeltildi (/api/permissions -> /api/Permissions)
+  - [X] password.service.ts dosyasındaki şifre sıfırlama endpoint'i düzeltildi (/api/auth/request-password-reset -> /api/FixPassword/request-password-reset)
+  - [X] password.service.ts dosyasındaki şifre değiştirme endpoint'i düzeltildi (/api/auth/change-password -> /api/Auth/change-password)
+
+- [X] Frontend bileşenlerindeki gereksiz console.log ifadelerini kaldırma
+  - [X] user-management.component.ts dosyasındaki console.log ifadeleri kaldırıldı
+  - [X] role-management.component.ts dosyasındaki console.log ifadeleri kaldırıldı
+  - [X] permission-management.component.ts dosyasındaki console.log ifadeleri kaldırıldı
+
+- [ ] Backend controller'lardaki gereksiz log ifadelerini kaldırma
+  - [ ] UsersController.cs dosyasındaki gereksiz log ifadeleri kaldırılacak
+  - [ ] RoleController.cs dosyasındaki gereksiz log ifadeleri kaldırılacak
+  - [ ] PermissionsController.cs dosyasındaki gereksiz log ifadeleri kaldırılacak
+
+- [ ] Backend'de magic string ve magic number'ları sabit değişkenlere dönüştürme
+  - [ ] Hata mesajları için sabit değişkenler oluşturulacak
+  - [ ] HTTP durum kodları için StatusCodes sınıfı kullanılacak
+  - [ ] Rol ve izin isimleri için sabit değişkenler oluşturulacak
+
+### Faz 2: Orta Riskli İyileştirmeler
+- [ ] Merkezi bir loglama mekanizması oluşturma
+- [ ] Hata yönetimini iyileştirme
+- [ ] Performans optimizasyonları
+
+### Faz 3: Yüksek Riskli İyileştirmeler
+- [ ] Veritabanı sorgularını optimize etme
+- [ ] Mimari iyileştirmeler
+
+## Kod İyileştirme Planı - İlerleme
+
+### Faz 1: Düşük Riskli İyileştirmeler
+- [X] API endpoint uyumluluğu sorunlarını çözme
+  - [X] role.service.ts dosyasındaki API URL'si düzeltildi (/api/roles -> /api/role)
+  - [X] permission.service.ts dosyasındaki API URL'si düzeltildi (/api/permissions -> /api/Permissions)
+  - [X] password.service.ts dosyasındaki şifre sıfırlama endpoint'i düzeltildi (/api/auth/request-password-reset -> /api/FixPassword/request-password-reset)
+  - [X] password.service.ts dosyasındaki şifre değiştirme endpoint'i düzeltildi (/api/auth/change-password -> /api/Auth/change-password)
+
+- [X] Frontend bileşenlerindeki gereksiz console.log ifadelerini kaldırma
+  - [X] user-management.component.ts dosyasındaki console.log ifadeleri kaldırıldı
+  - [X] role-management.component.ts dosyasındaki console.log ifadeleri kaldırıldı
+  - [X] permission-management.component.ts dosyasındaki console.log ifadeleri kaldırıldı
+
+- [ ] Backend controller'lardaki gereksiz log ifadelerini kaldırma
+  - [ ] UsersController.cs dosyasındaki gereksiz log ifadeleri kaldırılacak
+  - [ ] RoleController.cs dosyasındaki gereksiz log ifadeleri kaldırılacak
+  - [ ] PermissionsController.cs dosyasındaki gereksiz log ifadeleri kaldırılacak
+
+- [ ] Backend'de magic string ve magic number'ları sabit değişkenlere dönüştürme
+  - [ ] Hata mesajları için sabit değişkenler oluşturulacak
+  - [ ] HTTP durum kodları için StatusCodes sınıfı kullanılacak
+  - [ ] Rol ve izin isimleri için sabit değişkenler oluşturulacak
+
+### Faz 2: Orta Riskli İyileştirmeler
+- [ ] Merkezi bir loglama mekanizması oluşturma
+- [ ] Hata yönetimini iyileştirme
+- [ ] Performans optimizasyonları
+
+### Faz 3: Yüksek Riskli İyileştirmeler
+- [ ] Veritabanı sorgularını optimize etme
+- [ ] Mimari iyileştirmeler
+
+## Kod İyileştirme Planı - İlerleme
+
+### Faz 1: Düşük Riskli İyileştirmeler
+- [X] API endpoint uyumluluğu sorunlarını çözme
+  - [X] role.service.ts dosyasındaki API URL'si düzeltildi (/api/roles -> /api/role)
+  - [X] permission.service.ts dosyasındaki API URL'si düzeltildi (/api/permissions -> /api/Permissions)
+  - [X] password.service.ts dosyasındaki şifre sıfırlama endpoint'i düzeltildi (/api/auth/request-password-reset -> /api/FixPassword/request-password-reset)
+  - [X] password.service.ts dosyasındaki şifre değiştirme endpoint'i düzeltildi (/api/auth/change-password -> /api/Auth/change-password)
+
+- [X] Frontend bileşenlerindeki gereksiz console.log ifadelerini kaldırma
+  - [X] user-management.component.ts dosyasındaki console.log ifadeleri kaldırıldı
+  - [X] role-management.component.ts dosyasındaki console.log ifadeleri kaldırıldı
+  - [X] permission-management.component.ts dosyasındaki console.log ifadeleri kaldırıldı
+
+- [ ] Backend controller'lardaki gereksiz log ifadelerini kaldırma
+  - [ ] UsersController.cs dosyasındaki gereksiz log ifadeleri kaldırılacak
+  - [ ] RoleController.cs dosyasındaki gereksiz log ifadeleri kaldırılacak
+  - [ ] PermissionsController.cs dosyasındaki gereksiz log ifadeleri kaldırılacak
+
+- [ ] Backend'de magic string ve magic number'ları sabit değişkenlere dönüştürme
+  - [ ] Hata mesajları için sabit değişkenler oluşturulacak
+  - [ ] HTTP durum kodları için StatusCodes sınıfı kullanılacak
+  - [ ] Rol ve izin isimleri için sabit değişkenler oluşturulacak
+
+### Faz 2: Orta Riskli İyileştirmeler
+- [ ] Merkezi bir loglama mekanizması oluşturma
+- [ ] Hata yönetimini iyileştirme
+- [ ] Performans optimizasyonları
+
+### Faz 3: Yüksek Riskli İyileştirmeler
+- [ ] Veritabanı sorgularını optimize etme
+- [ ] Mimari iyileştirmeler
+
+## Kod İyileştirme Planı - İlerleme
+
+### Faz 1: Düşük Riskli İyileştirmeler
+- [X] API endpoint uyumluluğu sorunlarını çözme
+  - [X] role.service.ts dosyasındaki API URL'si düzeltildi (/api/roles -> /api/role)
+  - [X] permission.service.ts dosyasındaki API URL'si düzeltildi (/api/permissions -> /api/Permissions)
+  - [X] password.service.ts dosyasındaki şifre sıfırlama endpoint'i düzeltildi (/api/auth/request-password-reset -> /api/FixPassword/request-password-reset)
+  - [X] password.service.ts dosyasındaki şifre değiştirme endpoint'i düzeltildi (/api/auth/change-password -> /api/Auth/change-password)
+
+- [X] Frontend bileşenlerindeki gereksiz console.log ifadelerini kaldırma
+  - [X] user-management.component.ts dosyasındaki console.log ifadeleri kaldırıldı
+  - [X] role-management.component.ts dosyasındaki console.log ifadeleri kaldırıldı
+  - [X] permission-management.component.ts dosyasındaki console.log ifadeleri kaldırıldı
+
+- [ ] Backend controller'lardaki gereksiz log ifadelerini kaldırma
+  - [ ] UsersController.cs dosyasındaki gereksiz log ifadeleri kaldırılacak
+  - [ ] RoleController.cs dosyasındaki gereksiz log ifadeleri kaldırılacak
+  - [ ] PermissionsController.cs dosyasındaki gereksiz log ifadeleri kaldırılacak
+
+- [ ] Backend'de magic string ve magic number'ları sabit değişkenlere dönüştürme
+  - [ ] Hata mesajları için sabit değişkenler oluşturulacak
+  - [ ] HTTP durum kodları için StatusCodes sınıfı kullanılacak
+  - [ ] Rol ve izin isimleri için sabit değişkenler oluşturulacak
+
+### Faz 2: Orta Riskli İyileştirmeler
+- [ ] Merkezi bir loglama mekanizması oluşturma
+- [ ] Hata yönetimini iyileştirme
+- [ ] Performans optimizasyonları
+
+### Faz 3: Yüksek Riskli İyileştirmeler
+- [ ] Veritabanı sorgularını optimize etme
+- [ ] Mimari iyileştirmeler
+
+## Kod İyileştirme Planı - İlerleme
+
+### Faz 1: Düşük Riskli İyileştirmeler
+- [X] API endpoint uyumluluğu sorunlarını çözme
+  - [X] role.service.ts dosyasındaki API URL'si düzeltildi (/api/roles -> /api/role)
+  - [X] permission.service.ts dosyasındaki API URL'si düzeltildi (/api/permissions -> /api/Permissions)
+  - [X] password.service.ts dosyasındaki şifre sıfırlama endpoint'i düzeltildi (/api/auth/request-password-reset -> /api/FixPassword/request-password-reset)
+  - [X] password.service.ts dosyasındaki şifre değiştirme endpoint'i düzeltildi (/api/auth/change-password -> /api/Auth/change-password)
+
+- [X] Frontend bileşenlerindeki gereksiz console.log ifadelerini kaldırma
+  - [X] user-management.component.ts dosyasındaki console.log ifadeleri kaldırıldı
+  - [X] role-management.component.ts dosyasındaki console.log ifadeleri kaldırıldı
+  - [X] permission-management.component.ts dosyasındaki console.log ifadeleri kaldırıldı
+
+- [ ] Backend controller'lardaki gereksiz log ifadelerini kaldırma
+  - [ ] UsersController.cs dosyasındaki gereksiz log ifadeleri kaldırılacak
+  - [ ] RoleController.cs dosyasındaki gereksiz log ifadeleri kaldırılacak
+  - [ ] PermissionsController.cs dosyasındaki gereksiz log ifadeleri kaldırılacak
+
+- [ ] Backend'de magic string ve magic number'ları sabit değişkenlere dönüştürme
+  - [ ] Hata mesajları için sabit değişkenler oluşturulacak
+  - [ ] HTTP durum kodları için StatusCodes sınıfı kullanılacak
+  - [ ] Rol ve izin isimleri için sabit değişkenler oluşturulacak
+
+### Faz 2: Orta Riskli İyileştirmeler
+- [ ] Merkezi bir loglama mekanizması oluşturma
+- [ ] Hata yönetimini iyileştirme
+- [ ] Performans optimizasyonları
+
+### Faz 3: Yüksek Riskli İyileştirmeler
+- [ ] Veritabanı sorgularını optimize etme
+- [ ] Mimari iyileştirmeler
+
+## Kod İyileştirme Planı - İlerleme
+
+### Faz 1: Düşük Riskli İyileştirmeler
+- [X] API endpoint uyumluluğu sorunlarını çözme
+  - [X] role.service.ts dosyasındaki API URL'si düzeltildi (/api/roles -> /api/role)
+  - [X] permission.service.ts dosyasındaki API URL'si düzeltildi (/api/permissions -> /api/Permissions)
+  - [X] password.service.ts dosyasındaki şifre sıfırlama endpoint'i düzeltildi (/api/auth/request-password-reset -> /api/FixPassword/request-password-reset)
+  - [X] password.service.ts dosyasındaki şifre değiştirme endpoint'i düzeltildi (/api/auth/change-password -> /api/Auth/change-password)
+
+- [X] Frontend bileşenlerindeki gereksiz console.log ifadelerini kaldırma
+  - [X] user-management.component.ts dosyasındaki console.log ifadeleri kaldırıldı
+  - [X] role-management.component.ts dosyasındaki console.log ifadeleri kaldırıldı
+  - [X] permission-management.component.ts dosyasındaki console.log ifadeleri kaldırıldı
+
+- [ ] Backend controller'lardaki gereksiz log ifadelerini kaldırma
+  - [ ] UsersController.cs dosyasındaki gereksiz log ifadeleri kaldırılacak
+  - [ ] RoleController.cs dosyasındaki gereksiz log ifadeleri kaldırılacak
+  - [ ] PermissionsController.cs dosyasındaki gereksiz log ifadeleri kaldırılacak
+
+- [ ] Backend'de magic string ve magic number'ları sabit değişkenlere dönüştürme
+  - [ ] Hata mesajları için sabit değişkenler oluşturulacak
+  - [ ] HTTP durum kodları için StatusCodes sınıfı kullanılacak
+  - [ ] Rol ve izin isimleri için sabit değişkenler oluşturulacak
+
+### Faz 2: Orta Riskli İyileştirmeler
+- [ ] Merkezi bir loglama mekanizması oluşturma
+- [ ] Hata yönetimini iyileştirme
+- [ ] Performans optimizasyonları
+
+### Faz 3: Yüksek Riskli İyileştirmeler
+- [ ] Veritabanı sorgularını optimize etme
+- [ ] Mimari iyileştirmeler
+
+## Kod İyileştirme Planı - İlerleme
+
+### Faz 1: Düşük Riskli İyileştirmeler
+- [X] API endpoint uyumluluğu sorunlarını çözme
+  - [X] role.service.ts dosyasındaki API URL'si düzeltildi (/api/roles -> /api/role)
+  - [X] permission.service.ts dosyasındaki API URL'si düzeltildi (/api/permissions -> /api/Permissions)
+  - [X] password.service.ts dosyasındaki şifre sıfırlama endpoint'i düzeltildi (/api/auth/request-password-reset -> /api/FixPassword/request-password-reset)
+  - [X] password.service.ts dosyasındaki şifre değiştirme endpoint'i düzeltildi (/api/auth/change-password -> /api/Auth/change-password)
+
+- [X] Frontend bileşenlerindeki gereksiz console.log ifadelerini kaldırma
+  - [X] user-management.component.ts dosyasındaki console.log ifadeleri kaldırıldı
+  - [X] role-management.component.ts dosyasındaki console.log ifadeleri kaldırıldı
+  - [X] permission-management.component.ts dosyasındaki console.log ifadeleri kaldırıldı
+
+- [ ] Backend controller'lardaki gereksiz log ifadelerini kaldırma
+  - [ ] UsersController.cs dosyasındaki gereksiz log ifadeleri kaldırılacak
+  - [ ] RoleController.cs dosyasındaki gereksiz log ifadeleri kaldırılacak
+  - [ ] PermissionsController.cs dosyasındaki gereksiz log ifadeleri kaldırılacak
+
+- [ ] Backend'de magic string ve magic number'ları sabit değişkenlere dönüştürme
+  - [ ] Hata mesajları için sabit değişkenler oluşturulacak
+  - [ ] HTTP durum kodları için StatusCodes sınıfı kullanılacak
+  - [ ] Rol ve izin isimleri için sabit değişkenler oluşturulacak
+
+### Faz 2: Orta Riskli İyileştirmeler
+- [ ] Merkezi bir loglama mekanizması oluşturma
+- [ ] Hata yönetimini iyileştirme
+- [ ] Performans optimizasyonları
+
+### Faz 3: Yüksek Riskli İyileştirmeler
+- [ ] Veritabanı sorgularını optimize etme
+- [ ] Mimari iyileştirmeler
+
+## Kod İyileştirme Planı - İlerleme
+
+### Faz 1: Düşük Riskli İyileştirmeler
+- [X] API endpoint uyumluluğu sorunlarını çözme
+  - [X] role.service.ts dosyasındaki API URL'si düzeltildi (/api/roles -> /api/role)
+  - [X] permission.service.ts dosyasındaki API URL'si düzeltildi (/api/permissions -> /api/Permissions)
+  - [X] password.service.ts dosyasındaki şifre sıfırlama endpoint'i düzeltildi (/api/auth/request-password-reset -> /api/FixPassword/request-password-reset)
+  - [X] password.service.ts dosyasındaki şifre değiştirme endpoint'i düzeltildi (/api/auth/change-password -> /api/Auth/change-password)
+
+- [X] Frontend bileşenlerindeki gereksiz console.log ifadelerini kaldırma
+  - [X] user-management.component.ts dosyasındaki console.log ifadeleri kaldırıldı
+  - [X] role-management.component.ts dosyasındaki console.log ifadeleri kaldırıldı
+  - [X] permission-management.component.ts dosyasındaki console.log ifadeleri kaldırıldı
+
+- [ ] Backend controller'lardaki gereksiz log ifadelerini kaldırma
+  - [ ] UsersController.cs dosyasındaki gereksiz log ifadeleri kaldırılacak
+  - [ ] RoleController.cs dosyasındaki gereksiz log ifadeleri kaldırılacak
+  - [ ] PermissionsController.cs dosyasındaki gereksiz log ifadeleri kaldırılacak
+
+- [ ] Backend'de magic string ve magic number'ları sabit değişkenlere dönüştürme
+  - [ ] Hata mesajları için sabit değişkenler oluşturulacak
+  - [ ] HTTP durum kodları için StatusCodes sınıfı kullanılacak
+  - [ ] Rol ve izin isimleri için sabit değişkenler oluşturulacak
+
+### Faz 2: Orta Riskli İyileştirmeler
+- [ ] Merkezi bir loglama mekanizması oluşturma
+- [ ] Hata yönetimini iyileştirme
+- [ ] Performans optimizasyonları
+
+### Faz 3: Yüksek Riskli İyileştirmeler
+- [ ] Veritabanı sorgularını optimize etme
+- [ ] Mimari iyileştirmeler
+
+## Kod İyileştirme Planı - İlerleme
+
+### Faz 1: Düşük Riskli İyileştirmeler
+- [X] API endpoint uyumluluğu sorunlarını çözme
+  - [X] role.service.ts dosyasındaki API URL'si düzeltildi (/api/roles -> /api/role)
+  - [X] permission.service.ts dosyasındaki API URL'si düzeltildi (/api/permissions -> /api/Permissions)
+  - [X] password.service.ts dosyasındaki şifre sıfırlama endpoint'i düzeltildi (/api/auth/request-password-reset -> /api/FixPassword/request-password-reset)
+  - [X] password.service.ts dosyasındaki şifre değiştirme endpoint'i düzeltildi (/api/auth/change-password -> /api/Auth/change-password)
+
+- [X] Frontend bileşenlerindeki gereksiz console.log ifadelerini kaldırma
+  - [X] user-management.component.ts dosyasındaki console.log ifadeleri kaldırıldı
+  - [X] role-management.component.ts dosyasındaki console.log ifadeleri kaldırıldı
+  - [X] permission-management.component.ts dosyasındaki console.log ifadeleri kaldırıldı
+
+- [ ] Backend controller'lardaki gereksiz log ifadelerini kaldırma
+  - [ ] UsersController.cs dosyasındaki gereksiz log ifadeleri kaldırılacak
+  - [ ] RoleController.cs dosyasındaki gereksiz log ifadeleri kaldırılacak
+  - [ ] PermissionsController.cs dosyasındaki gereksiz log ifadeleri kaldırılacak
+
+- [ ] Backend'de magic string ve magic number'ları sabit değişkenlere dönüştürme
+  - [ ] Hata mesajları için sabit değişkenler oluşturulacak
+  - [ ] HTTP durum kodları için StatusCodes sınıfı kullanılacak
+  - [ ] Rol ve izin isimleri için sabit değişkenler oluşturulacak
+
+### Faz 2: Orta Riskli İyileştirmeler
+- [ ] Merkezi bir loglama mekanizması oluşturma
+- [ ] Hata yönetimini iyileştirme
+- [ ] Performans optimizasyonları
+
+### Faz 3: Yüksek Riskli İyileştirmeler
+- [ ] Veritabanı sorgularını optimize etme
+- [ ] Mimari iyileştirmeler
+
+## Kod İyileştirme Planı - İlerleme
+
+### Faz 1: Düşük Riskli İyileştirmeler
+- [X] API endpoint uyumluluğu sorunlarını çözme
+  - [X] role.service.ts dosyasındaki API URL'si düzeltildi (/api/roles -> /api/role)
+  - [X] permission.service.ts dosyasındaki API URL'si düzeltildi (/api/permissions -> /api/Permissions)
+  - [X] password.service.ts dosyasındaki şifre sıfırlama endpoint'i düzeltildi (/api/auth/request-password-reset -> /api/FixPassword/request-password-reset)
+  - [X] password.service.ts dosyasındaki şifre değiştirme endpoint'i düzeltildi (/api/auth/change-password -> /api/Auth/change-password)
+
+- [X] Frontend bileşenlerindeki gereksiz console.log ifadelerini kaldırma
+  - [X] user-management.component.ts dosyasındaki console.log ifadeleri kaldırıldı
+  - [X] role-management.component.ts dosyasındaki console.log ifadeleri kaldırıldı
+  - [X] permission-management.component.ts dosyasındaki console.log ifadeleri kaldırıldı
+
+- [ ] Backend controller'lardaki gereksiz log ifadelerini kaldırma
+  - [ ] UsersController.cs dosyasındaki gereksiz log ifadeleri kaldırılacak
+  - [ ] RoleController.cs dosyasındaki gereksiz log ifadeleri kaldırılacak
+  - [ ] PermissionsController.cs dosyasındaki gereksiz log ifadeleri kaldırılacak
+
+- [ ] Backend'de magic string ve magic number'ları sabit değişkenlere dönüştürme
+  - [ ] Hata mesajları için sabit değişkenler oluşturulacak
+  - [ ] HTTP durum kodları için StatusCodes sınıfı kullanılacak
+  - [ ] Rol ve izin isimleri için sabit değişkenler oluşturulacak
+
+### Faz 2: Orta Riskli İyileştirmeler
+- [ ] Merkezi bir loglama mekanizması oluşturma
+- [ ] Hata yönetimini iyileştirme
+- [ ] Performans optimizasyonları
+
+### Faz 3: Yüksek Riskli İyileştirmeler
+- [ ] Veritabanı sorgularını optimize etme
+- [ ] Mimari iyileştirmeler
+
+## Kod İyileştirme Planı - İlerleme
+
+### Faz 1: Düşük Riskli İyileştirmeler
+- [X] API endpoint uyumluluğu sorunlarını çözme
+  - [X] role.service.ts dosyasındaki API URL'si düzeltildi (/api/roles -> /api/role)
+  - [X] permission.service.ts dosyasındaki API URL'si düzeltildi (/api/permissions -> /api/Permissions)
+  - [X] password.service.ts dosyasındaki şifre sıfırlama endpoint'i düzeltildi (/api/auth/request-password-reset -> /api/FixPassword/request-password-reset)
+  - [X] password.service.ts dosyasındaki şifre değiştirme endpoint'i düzeltildi (/api/auth/change-password -> /api/Auth/change-password)
+
+- [X] Frontend bileşenlerindeki gereksiz console.log ifadelerini kaldırma
+  - [X] user-management.component.ts dosyasındaki console.log ifadeleri kaldırıldı
+  - [X] role-management.component.ts dosyasındaki console.log ifadeleri kaldırıldı
+  - [X] permission-management.component.ts dosyasındaki console.log ifadeleri kaldırıldı
+
+- [ ] Backend controller'lardaki gereksiz log ifadelerini kaldırma
+  - [ ] UsersController.cs dosyasındaki gereksiz log ifadeleri kaldırılacak
+  - [ ] RoleController.cs dosyasındaki gereksiz log ifadeleri kaldırılacak
+  - [ ] PermissionsController.cs dosyasındaki gereksiz log ifadeleri kaldırılacak
+
+- [ ] Backend'de magic string ve magic number'ları sabit değişkenlere dönüştürme
+  - [ ] Hata mesajları için sabit değişkenler oluşturulacak
+  - [ ] HTTP durum kodları için StatusCodes sınıfı kullanılacak
+  - [ ] Rol ve izin isimleri için sabit değişkenler oluşturulacak
+
+### Faz 2: Orta Riskli İyileştirmeler
+- [ ] Merkezi bir loglama mekanizması oluşturma
+- [ ] Hata yönetimini iyileştirme
+- [ ] Performans optimizasyonları
+
+### Faz 3: Yüksek Riskli İyileştirmeler
+- [ ] Veritabanı sorgularını optimize etme
+- [ ] Mimari iyileştirmeler
+
+## Kod İyileştirme Planı - İlerleme
+
+### Faz 1: Düşük Riskli İyileştirmeler
+- [X] API endpoint uyumluluğu sorunlarını çözme
+  - [X] role.service.ts dosyasındaki API URL'si düzeltildi (/api/roles -> /api/role)
+  - [X] permission.service.ts dosyasındaki API URL'si düzeltildi (/api/permissions -> /api/Permissions)
+  - [X] password.service.ts dosyasındaki şifre sıfırlama endpoint'i düzeltildi (/api/auth/request-password-reset -> /api/FixPassword/request-password-reset)
+  - [X] password.service.ts dosyasındaki şifre değiştirme endpoint'i düzeltildi (/api/auth/change-password -> /api/Auth/change-password)
+
+- [X] Frontend bileşenlerindeki gereksiz console.log ifadelerini kaldırma
+  - [X] user-management.component.ts dosyasındaki console.log ifadeleri kaldırıldı
+  - [X] role-management.component.ts dosyasındaki console.log ifadeleri kaldırıldı
+  - [X] permission-management.component.ts dosyasındaki console.log ifadeleri kaldırıldı
+
+- [ ] Backend controller'lardaki gereksiz log ifadelerini kaldırma
+  - [ ] UsersController.cs dosyasındaki gereksiz log ifadeleri kaldırılacak
+  - [ ] RoleController.cs dosyasındaki gereksiz log ifadeleri kaldırılacak
+  - [ ] PermissionsController.cs dosyasındaki gereksiz log ifadeleri kaldırılacak
+
+- [ ] Backend'de magic string ve magic number'ları sabit değişkenlere dönüştürme
+  - [ ] Hata mesajları için sabit değişkenler oluşturulacak
+  - [ ] HTTP durum kodları için StatusCodes sınıfı kullanılacak
+  - [ ] Rol ve izin isimleri için sabit değişkenler oluşturulacak
+
+### Faz 2: Orta Riskli İyileştirmeler
+- [ ] Merkezi bir loglama mekanizması oluşturma
+- [ ] Hata yönetimini iyileştirme
+- [ ] Performans optimizasyonları
+
+### Faz 3: Yüksek Riskli İyileştirmeler
+- [ ] Veritabanı sorgularını optimize etme
+- [ ] Mimari iyileştirmeler
+
+## Kod İyileştirme Planı - İlerleme
+
+### Faz 1: Düşük Riskli İyileştirmeler
+- [X] API endpoint uyumluluğu sorunlarını çözme
+  - [X] role.service.ts dosyasındaki API URL'si düzeltildi (/api/roles -> /api/role)
+  - [X] permission.service.ts dosyasındaki API URL'si düzeltildi (/api/permissions -> /api/Permissions)
+  - [X] password.service.ts dosyasındaki şifre sıfırlama endpoint'i düzeltildi (/api/auth/request-password-reset -> /api/FixPassword/request-password-reset)
+  - [X] password.service.ts dosyasındaki şifre değiştirme endpoint'i düzeltildi (/api/auth/change-password -> /api/Auth/change-password)
+
+- [X] Frontend bileşenlerindeki gereksiz console.log ifadelerini kaldırma
+  - [X] user-management.component.ts dosyasındaki console.log ifadeleri kaldırıldı
+  - [X] role-management.component.ts dosyasındaki console.log ifadeleri kaldırıldı
+  - [X] permission-management.component.ts dosyasındaki console.log ifadeleri kaldırıldı
+
+- [ ] Backend controller'lardaki gereksiz log ifadelerini kaldırma
+  - [ ] UsersController.cs dosyasındaki gereksiz log ifadeleri kaldırılacak
+  - [ ] RoleController.cs dosyasındaki gereksiz log ifadeleri kaldırılacak
+  - [ ] PermissionsController.cs dosyasındaki gereksiz log ifadeleri kaldırılacak
+
+- [ ] Backend'de magic string ve magic number'ları sabit değişkenlere dönüştürme
+  - [ ] Hata mesajları için sabit değişkenler oluşturulacak
+  - [ ] HTTP durum kodları için StatusCodes sınıfı kullanılacak
+  - [ ] Rol ve izin isimleri için sabit değişkenler oluşturulacak
+
+### Faz 2: Orta Riskli İyileştirmeler
+- [ ] Merkezi bir loglama mekanizması oluşturma
+- [ ] Hata yönetimini iyileştirme
+- [ ] Performans optimizasyonları
+
+### Faz 3: Yüksek Riskli İyileştirmeler
+- [ ] Veritabanı sorgularını optimize etme
+- [ ] Mimari iyileştirmeler
+
+## Kod İyileştirme Planı - İlerleme
+
+### Faz 1: Düşük Riskli İyileştirmeler
+- [X] API endpoint uyumluluğu sorunlarını çözme
+  - [X] role.service.ts dosyasındaki API URL'si düzeltildi (/api/roles -> /api/role)
+  - [X] permission.service.ts dosyasındaki API URL'si düzeltildi (/api/permissions -> /api/Permissions)
+  - [X] password.service.ts dosyasındaki şifre sıfırlama endpoint'i düzeltildi (/api/auth/request-password-reset -> /api/FixPassword/request-password-reset)
+  - [X] password.service.ts dosyasındaki şifre değiştirme endpoint'i düzeltildi (/api/auth/change-password -> /api/Auth/change-password)
+
+- [X] Frontend bileşenlerindeki gereksiz console.log ifadelerini kaldırma
+  - [X] user-management.component.ts dosyasındaki console.log ifadeleri kaldırıldı
+  - [X] role-management.component.ts dosyasındaki console.log ifadeleri kaldırıldı
+  - [X] permission-management.component.ts dosyasındaki console.log ifadeleri kaldırıldı
+
+- [ ] Backend controller'lardaki gereksiz log ifadelerini kaldırma
+  - [ ] UsersController.cs dosyasındaki gereksiz log ifadeleri kaldırılacak
+  - [ ] RoleController.cs dosyasındaki gereksiz log ifadeleri kaldırılacak
+  - [ ] PermissionsController.cs dosyasındaki gereksiz log ifadeleri kaldırılacak
+
+- [ ] Backend'de magic string ve magic number'ları sabit değişkenlere dönüştürme
+  - [ ] Hata mesajları için sabit değişkenler oluşturulacak
+  - [ ] HTTP durum kodları için StatusCodes sınıfı kullanılacak
+  - [ ] Rol ve izin isimleri için sabit değişkenler oluşturulacak
+
+### Faz 2: Orta Riskli İyileştirmeler
+- [ ] Merkezi bir loglama mekanizması oluşturma
+- [ ] Hata yönetimini iyileştirme
+- [ ] Performans optimizasyonları
+
+### Faz 3: Yüksek Riskli İyileştirmeler
+- [ ] Veritabanı sorgularını optimize etme
+- [ ] Mimari iyileştirmeler
+
+## Kod İyileştirme Planı - İlerleme
+
+### Faz 1: Düşük Riskli İyileştirmeler
+- [X] API endpoint uyumluluğu sorunlarını çözme
+  - [X] role.service.ts dosyasındaki API URL'si düzeltildi (/api/roles -> /api/role)
+  - [X] permission.service.ts dosyasındaki API URL'si düzeltildi (/api/permissions -> /api/Permissions)
+  - [X] password.service.ts dosyasındaki şifre sıfırlama endpoint'i düzeltildi (/api/auth/request-password-reset -> /api/FixPassword/request-password-reset)
+  - [X] password.service.ts dosyasındaki şifre değiştirme endpoint'i düzeltildi (/api/auth/change-password -> /api/Auth/change-password)
+
+- [X] Frontend bileşenlerindeki gereksiz console.log ifadelerini kaldırma
+  - [X] user-management.component.ts dosyasındaki console.log ifadeleri kaldırıldı
+  - [X] role-management.component.ts dosyasındaki console.log ifadeleri kaldırıldı
+  - [X] permission-management.component.ts dosyasındaki console.log ifadeleri kaldırıldı
+
+- [ ] Backend controller'lardaki gereksiz log ifadelerini kaldırma
+  - [ ] UsersController.cs dosyasındaki gereksiz log ifadeleri kaldırılacak
+  - [ ] RoleController.cs dosyasındaki gereksiz log ifadeleri kaldırılacak
+  - [ ] PermissionsController.cs dosyasındaki gereksiz log ifadeleri kaldırılacak
+
+- [ ] Backend'de magic string ve magic number'ları sabit değişkenlere dönüştürme
+  - [ ] Hata mesajları için sabit değişkenler oluşturulacak
+  - [ ] HTTP durum kodları için StatusCodes sınıfı kullanılacak
+  - [ ] Rol ve izin isimleri için sabit değişkenler oluşturulacak
+
+### Faz 2: Orta Riskli İyileştirmeler
+- [ ] Merkezi bir loglama mekanizması oluşturma
+- [ ] Hata yönetimini iyileştirme
+- [ ] Performans optimizasyonları
+
+### Faz 3: Yüksek Riskli İyileştirmeler
+- [ ] Veritabanı sorgularını optimize etme
+- [ ] Mimari iyileştirmeler
+
+## Kod İyileştirme Planı - İlerleme
+
+### Faz 1: Düşük Riskli İyileştirmeler
+- [X] API endpoint uyumluluğu sorunlarını çözme
+  - [X] role.service.ts dosyasındaki API URL'si düzeltildi (/api/roles -> /api/role)
+  - [X] permission.service.ts dosyasındaki API URL'si düzeltildi (/api/permissions -> /api/Permissions)
+  - [X] password.service.ts dosyasındaki şifre sıfırlama endpoint'i düzeltildi (/api/auth/request-password-reset -> /api/FixPassword/request-password-reset)
+  - [X] password.service.ts dosyasındaki şifre değiştirme endpoint'i düzeltildi (/api/auth/change-password -> /api/Auth/change-password)
+
+- [X] Frontend bileşenlerindeki gereksiz console.log ifadelerini kaldırma
+  - [X] user-management.component.ts dosyasındaki console.log ifadeleri kaldırıldı
+  - [X] role-management.component.ts dosyasındaki console.log ifadeleri kaldırıldı
+  - [X] permission-management.component.ts dosyasındaki console.log ifadeleri kaldırıldı
+
+  -

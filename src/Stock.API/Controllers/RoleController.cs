@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using Stock.Domain.Entities;
 using Stock.Infrastructure.Data;
 using System.Text.Json;
+using Microsoft.AspNetCore.Http;
 
 namespace Stock.API.Controllers
 {
@@ -12,6 +13,17 @@ namespace Stock.API.Controllers
     {
         private readonly ApplicationDbContext _context;
         private readonly ILogger<RoleController> _logger;
+
+        // Sabit hata mesajları
+        private const string ERROR_ROLE_NOT_FOUND = "ID: {0} olan rol bulunamadı.";
+        private const string ERROR_ROLE_CREATE = "Rol oluşturulurken bir hata oluştu. Detaylar: {0}";
+        private const string ERROR_ROLE_UPDATE = "Rol güncellenirken bir hata oluştu. Detaylar: {0}";
+        private const string ERROR_ROLE_DELETE = "Rol silinirken bir hata oluştu. Detaylar: {0}";
+        private const string ERROR_ROLE_FETCH = "Roller getirilirken bir hata oluştu. Detaylar: {0}";
+        private const string ERROR_ROLE_FETCH_BY_ID = "ID: {0} olan rol getirilirken hata oluştu. Detaylar: {1}";
+        private const string ERROR_ID_MISMATCH = "Route ve body'deki ID'ler eşleşmiyor.";
+        private const string ERROR_ROLE_IN_USE = "Bu rol, bir veya daha fazla kullanıcı tarafından kullanılıyor ve silinemez.";
+        private const string ERROR_CONCURRENCY = "Rol güncellenirken bir eşzamanlılık hatası oluştu.";
 
         public RoleController(ApplicationDbContext context, ILogger<RoleController> logger)
         {
@@ -24,8 +36,6 @@ namespace Stock.API.Controllers
         {
             try
             {
-                _logger.LogInformation("Tüm roller getiriliyor...");
-                
                 // Döngüsel referans sorununu önlemek için Users dahil edilmiyor
                 var roles = await _context.Roles
                     .AsNoTracking() // Daha iyi performans için
@@ -40,13 +50,13 @@ namespace Stock.API.Controllers
                     })
                     .ToListAsync();
 
-                _logger.LogInformation($"{roles.Count} rol başarıyla getirildi.");
+                _logger.LogInformation("Roller getirildi. Toplam: {Count}", roles.Count);
                 return Ok(roles);
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Roller getirilirken hata oluştu");
-                return StatusCode(500, "Roller getirilirken bir hata oluştu. Detaylar: " + ex.Message);
+                return StatusCode(StatusCodes.Status500InternalServerError, string.Format(ERROR_ROLE_FETCH, ex.Message));
             }
         }
 
@@ -55,8 +65,6 @@ namespace Stock.API.Controllers
         {
             try
             {
-                _logger.LogInformation($"ID: {id} olan rol getiriliyor...");
-                
                 var role = await _context.Roles
                     .AsNoTracking() // Daha iyi performans için
                     .Select(r => new
@@ -80,17 +88,16 @@ namespace Stock.API.Controllers
 
                 if (role == null)
                 {
-                    _logger.LogWarning($"ID: {id} olan rol bulunamadı.");
-                    return NotFound();
+                    _logger.LogWarning("ID: {Id} olan rol bulunamadı", id);
+                    return NotFound(new { error = string.Format(ERROR_ROLE_NOT_FOUND, id) });
                 }
 
-                _logger.LogInformation($"ID: {id} olan rol başarıyla getirildi.");
                 return Ok(role);
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, $"ID: {id} olan rol getirilirken hata oluştu");
-                return StatusCode(500, $"Rol getirilirken bir hata oluştu. Detaylar: {ex.Message}");
+                _logger.LogError(ex, "ID: {Id} olan rol getirilirken hata oluştu", id);
+                return StatusCode(StatusCodes.Status500InternalServerError, string.Format(ERROR_ROLE_FETCH_BY_ID, id, ex.Message));
             }
         }
 
@@ -99,17 +106,16 @@ namespace Stock.API.Controllers
         {
             try
             {
-                _logger.LogInformation("Yeni rol oluşturuluyor...");
                 _context.Roles.Add(role);
                 await _context.SaveChangesAsync();
 
-                _logger.LogInformation($"Yeni rol başarıyla oluşturuldu. ID: {role.Id}");
+                _logger.LogInformation("Yeni rol oluşturuldu. ID: {Id}", role.Id);
                 return CreatedAtAction(nameof(GetRole), new { id = role.Id }, role);
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Rol oluşturulurken hata oluştu");
-                return StatusCode(500, "Rol oluşturulurken bir hata oluştu. Detaylar: " + ex.Message);
+                return StatusCode(StatusCodes.Status500InternalServerError, string.Format(ERROR_ROLE_CREATE, ex.Message));
             }
         }
 
@@ -118,20 +124,18 @@ namespace Stock.API.Controllers
         {
             if (id != role.Id)
             {
-                _logger.LogWarning($"Route ID {id} ile body ID {role.Id} eşleşmiyor.");
-                return BadRequest("Route ve body'deki ID'ler eşleşmiyor.");
+                _logger.LogWarning("Route ID {RouteId} ile body ID {BodyId} eşleşmiyor", id, role.Id);
+                return BadRequest(ERROR_ID_MISMATCH);
             }
 
             try
             {
-                _logger.LogInformation($"ID: {id} olan rol güncelleniyor...");
-                
                 // Sadece izin verilen alanları güncelle
                 var existingRole = await _context.Roles.FindAsync(id);
                 if (existingRole == null)
                 {
-                    _logger.LogWarning($"ID: {id} olan rol bulunamadı.");
-                    return NotFound();
+                    _logger.LogWarning("ID: {Id} olan rol bulunamadı", id);
+                    return NotFound(new { error = string.Format(ERROR_ROLE_NOT_FOUND, id) });
                 }
                 
                 // Alanları güncelle
@@ -141,26 +145,26 @@ namespace Stock.API.Controllers
                 
                 await _context.SaveChangesAsync();
                 
-                _logger.LogInformation($"ID: {id} olan rol başarıyla güncellendi.");
+                _logger.LogInformation("ID: {Id} olan rol güncellendi", id);
                 return NoContent();
             }
             catch (DbUpdateConcurrencyException ex)
             {
                 if (!await RoleExists(id))
                 {
-                    _logger.LogWarning($"ID: {id} olan rol bulunamadı.");
-                    return NotFound();
+                    _logger.LogWarning("ID: {Id} olan rol bulunamadı", id);
+                    return NotFound(new { error = string.Format(ERROR_ROLE_NOT_FOUND, id) });
                 }
                 else
                 {
-                    _logger.LogError(ex, $"ID: {id} olan rol güncellenirken eşzamanlılık hatası oluştu");
-                    return StatusCode(500, "Rol güncellenirken bir eşzamanlılık hatası oluştu.");
+                    _logger.LogError(ex, "ID: {Id} olan rol güncellenirken eşzamanlılık hatası oluştu", id);
+                    return StatusCode(StatusCodes.Status500InternalServerError, ERROR_CONCURRENCY);
                 }
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, $"ID: {id} olan rol güncellenirken hata oluştu");
-                return StatusCode(500, "Rol güncellenirken bir hata oluştu. Detaylar: " + ex.Message);
+                _logger.LogError(ex, "ID: {Id} olan rol güncellenirken hata oluştu", id);
+                return StatusCode(StatusCodes.Status500InternalServerError, string.Format(ERROR_ROLE_UPDATE, ex.Message));
             }
         }
 
@@ -169,33 +173,31 @@ namespace Stock.API.Controllers
         {
             try
             {
-                _logger.LogInformation($"ID: {id} olan rol siliniyor...");
-                
                 var role = await _context.Roles.FindAsync(id);
                 if (role == null)
                 {
-                    _logger.LogWarning($"ID: {id} olan rol bulunamadı.");
-                    return NotFound();
+                    _logger.LogWarning("ID: {Id} olan rol bulunamadı", id);
+                    return NotFound(new { error = string.Format(ERROR_ROLE_NOT_FOUND, id) });
                 }
 
                 // İlgili rolü kullanan kullanıcı var mı kontrol et
                 var usersWithRole = await _context.Users.AnyAsync(u => u.RoleId == id);
                 if (usersWithRole)
                 {
-                    _logger.LogWarning($"ID: {id} olan rol, kullanıcılar tarafından kullanılıyor ve silinemez.");
-                    return BadRequest("Bu rol, bir veya daha fazla kullanıcı tarafından kullanılıyor ve silinemez.");
+                    _logger.LogWarning("ID: {Id} olan rol, kullanıcılar tarafından kullanılıyor ve silinemez", id);
+                    return BadRequest(new { error = ERROR_ROLE_IN_USE });
                 }
                 
                 _context.Roles.Remove(role);
                 await _context.SaveChangesAsync();
 
-                _logger.LogInformation($"ID: {id} olan rol başarıyla silindi.");
+                _logger.LogInformation("ID: {Id} olan rol silindi", id);
                 return NoContent();
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, $"ID: {id} olan rol silinirken hata oluştu");
-                return StatusCode(500, "Rol silinirken bir hata oluştu. Detaylar: " + ex.Message);
+                _logger.LogError(ex, "ID: {Id} olan rol silinirken hata oluştu", id);
+                return StatusCode(StatusCodes.Status500InternalServerError, string.Format(ERROR_ROLE_DELETE, ex.Message));
             }
         }
 

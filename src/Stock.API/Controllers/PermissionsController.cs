@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using System;
+using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using Stock.Domain.Entities;
 using Stock.Infrastructure.Data;
@@ -23,6 +24,17 @@ namespace Stock.API.Controllers
         private readonly ApplicationDbContext _context;
         private readonly ILogger<PermissionsController> _logger;
 
+        // Sabit hata mesajları
+        private const string ERROR_PERMISSION_ASSIGN = "Kullanıcıya izinler atanırken bir hata oluştu: {0}";
+        private const string ERROR_MISSING_PERMISSIONS = "Eksik izinler eklenirken bir hata oluştu: {0}";
+        private const string ADMIN_ROLE = "Admin";
+        private const string PERMISSION_VIEW = "Permissions.View";
+        private const string ROLES_UPDATE = "Roles.Update";
+        private const string USERS_PERMISSIONS_ASSIGN = "Users.Permissions.Assign";
+        private const string USERS_PERMISSIONS_REMOVE = "Users.Permissions.Remove";
+        private const string USERS_PERMISSIONS_RESET = "Users.Permissions.Reset";
+        private const string PERMISSIONS_CHECK = "Permissions.Check";
+
         public PermissionsController(
             IPermissionService permissionService,
             ApplicationDbContext context,
@@ -34,7 +46,7 @@ namespace Stock.API.Controllers
         }
 
         [HttpGet]
-        [Authorize(Roles = "Admin")]
+        [Authorize(Roles = ADMIN_ROLE)]
         public async Task<ActionResult<List<PermissionDto>>> GetAll()
         {
             var permissions = await _permissionService.GetAllPermissionsAsync();
@@ -42,7 +54,7 @@ namespace Stock.API.Controllers
         }
 
         [HttpGet("groups")]
-        [Authorize(Roles = "Admin")]
+        [Authorize(Roles = ADMIN_ROLE)]
         public async Task<ActionResult<List<PermissionGroupDto>>> GetByGroups()
         {
             var permissionGroups = await _permissionService.GetPermissionsByGroupsAsync();
@@ -50,7 +62,7 @@ namespace Stock.API.Controllers
         }
 
         [HttpGet("role/{roleId}")]
-        [Authorize(Roles = "Admin")]
+        [Authorize(Roles = ADMIN_ROLE)]
         public async Task<ActionResult<List<PermissionDto>>> GetByRoleId(int roleId)
         {
             var permissions = await _permissionService.GetPermissionsByRoleIdAsync(roleId);
@@ -58,7 +70,7 @@ namespace Stock.API.Controllers
         }
 
         [HttpGet("user/{userId}")]
-        [RequirePermission("Permissions.View")]
+        [RequirePermission(PERMISSION_VIEW)]
         public async Task<ActionResult<List<PermissionDto>>> GetByUserId(int userId)
         {
             var permissions = await _permissionService.GetPermissionsByUserIdAsync(userId);
@@ -66,7 +78,7 @@ namespace Stock.API.Controllers
         }
 
         [HttpPost("role/{roleId}/assign")]
-        [RequirePermission("Roles.Update")]
+        [RequirePermission(ROLES_UPDATE)]
         public async Task<ActionResult<bool>> AssignPermissionsToRole(int roleId, [FromBody] AssignPermissionsRequest request)
         {
             var result = await _permissionService.AssignPermissionsToRoleAsync(roleId, request.PermissionIds);
@@ -74,12 +86,12 @@ namespace Stock.API.Controllers
         }
 
         [HttpPost("user/{userId}/assign")]
-        [RequirePermission("Users.Permissions.Assign")]
+        [RequirePermission(USERS_PERMISSIONS_ASSIGN)]
         public async Task<ActionResult<bool>> AssignPermissionsToUser(int userId, [FromBody] AssignPermissionsRequest request)
         {
             try
             {
-                _logger.LogInformation($"Kullanıcıya izinler atanıyor - Kullanıcı ID: {userId}, İzin sayısı: {request.PermissionIds.Count}");
+                _logger.LogInformation("Kullanıcıya izinler atanıyor - Kullanıcı ID: {UserId}, İzin sayısı: {PermissionCount}", userId, request.PermissionIds.Count);
                 
                 bool result = true;
                 foreach (var permissionId in request.PermissionIds)
@@ -88,7 +100,7 @@ namespace Stock.API.Controllers
                     if (!assignResult)
                     {
                         result = false;
-                        _logger.LogWarning($"İzin atanamadı - Kullanıcı ID: {userId}, İzin ID: {permissionId}");
+                        _logger.LogWarning("İzin atanamadı - Kullanıcı ID: {UserId}, İzin ID: {PermissionId}", userId, permissionId);
                     }
                 }
                 
@@ -96,13 +108,13 @@ namespace Stock.API.Controllers
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, $"Kullanıcıya izinler atanırken hata oluştu - Kullanıcı ID: {userId}");
-                return StatusCode(500, new { error = "Kullanıcıya izinler atanırken bir hata oluştu: " + ex.Message });
+                _logger.LogError(ex, "Kullanıcıya izinler atanırken hata oluştu - Kullanıcı ID: {UserId}", userId);
+                return StatusCode(StatusCodes.Status500InternalServerError, new { error = string.Format(ERROR_PERMISSION_ASSIGN, ex.Message) });
             }
         }
 
         [HttpPost("user/{userId}/assign/{permissionId}")]
-        [RequirePermission("Users.Permissions.Assign")]
+        [RequirePermission(USERS_PERMISSIONS_ASSIGN)]
         public async Task<ActionResult<bool>> AssignPermissionToUser(int userId, int permissionId, [FromQuery] bool isGranted = true)
         {
             var result = await _permissionService.AssignPermissionToUserAsync(userId, permissionId, isGranted);
@@ -110,7 +122,7 @@ namespace Stock.API.Controllers
         }
 
         [HttpDelete("user/{userId}/permission/{permissionId}")]
-        [RequirePermission("Users.Permissions.Remove")]
+        [RequirePermission(USERS_PERMISSIONS_REMOVE)]
         public async Task<ActionResult<bool>> RemoveUserPermission(int userId, int permissionId)
         {
             var result = await _permissionService.RemoveUserPermissionAsync(userId, permissionId);
@@ -118,7 +130,7 @@ namespace Stock.API.Controllers
         }
 
         [HttpPost("user/{userId}/reset")]
-        [RequirePermission("Users.Permissions.Reset")]
+        [RequirePermission(USERS_PERMISSIONS_RESET)]
         public async Task<ActionResult<bool>> ResetUserToRolePermissions(int userId)
         {
             var result = await _permissionService.ResetUserToRolePermissionsAsync(userId);
@@ -126,7 +138,7 @@ namespace Stock.API.Controllers
         }
 
         [HttpGet("user/{userId}/check/{permissionName}")]
-        [RequirePermission("Permissions.Check")]
+        [RequirePermission(PERMISSIONS_CHECK)]
         public async Task<ActionResult<bool>> UserHasPermission(int userId, string permissionName)
         {
             var result = await _permissionService.UserHasPermissionAsync(userId, permissionName);
@@ -134,13 +146,11 @@ namespace Stock.API.Controllers
         }
 
         [HttpGet("add-missing-permissions")]
-        [Authorize(Roles = "Admin")]
+        [Authorize(Roles = ADMIN_ROLE)]
         public async Task<ActionResult> AddMissingPermissionsManually()
         {
             try
             {
-                _logger.LogInformation("Eksik izinler ekleniyor...");
-                
                 // Revir izni ekle
                 var revirPermission = await _context.Permissions
                     .FirstOrDefaultAsync(p => p.Name == "Pages.Revir.View");
@@ -159,10 +169,6 @@ namespace Stock.API.Controllers
                     });
                     
                     _logger.LogInformation("Pages.Revir.View izni eklendi");
-                }
-                else
-                {
-                    _logger.LogInformation("Pages.Revir.View izni zaten mevcut");
                 }
                 
                 // Bilgi İşlem izni ekle
@@ -184,10 +190,6 @@ namespace Stock.API.Controllers
                     
                     _logger.LogInformation("Pages.BilgiIslem.View izni eklendi");
                 }
-                else
-                {
-                    _logger.LogInformation("Pages.BilgiIslem.View izni zaten mevcut");
-                }
                 
                 await _context.SaveChangesAsync();
                 
@@ -195,8 +197,8 @@ namespace Stock.API.Controllers
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Eksik izinler eklenirken bir hata oluştu.");
-                return StatusCode(500, "Eksik izinler eklenirken bir hata oluştu: " + ex.Message);
+                _logger.LogError(ex, "Eksik izinler eklenirken bir hata oluştu");
+                return StatusCode(StatusCodes.Status500InternalServerError, string.Format(ERROR_MISSING_PERMISSIONS, ex.Message));
             }
         }
     }
