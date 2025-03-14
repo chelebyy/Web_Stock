@@ -11,7 +11,7 @@ import { HttpStatusCodes } from './user.service';
   providedIn: 'root'
 })
 export class RoleService {
-  private apiUrl = `${environment.apiUrl}/api/roles`;
+  private apiUrl = `${environment.apiUrl}/api/role`;
 
   constructor(
     private http: HttpClient,

@@ -450,7 +450,7 @@ Admin paneline giriş yapıldığında, `LogService` sınıfındaki `syncPending
 - [X] Migration dosyasını düzenleyerek `ActivityLogs` tablosundaki UserId alanını nullable yapmak ve foreign key kısıtlamasını güncellemek için SQL komutları ekledik
 - [X] `ActivityLog` entity sınıfında UserId alanını nullable yaptık: `public int? UserId { get; set; }`
 - [X] Veritabanını güncelledik: `dotnet ef database update`
-- [X] Uygulamayı yeniden başlattık: `dotnet run`
+- [X] Uygulamayı yeniden başlattık ve sorunun çözüldüğünü doğruladık
 
 ### Öğrenilen Dersler
 1. Entity Framework Core ile çalışırken, yabancı anahtar ilişkilerini dikkatli bir şekilde tasarlamak önemlidir
@@ -725,3 +725,24 @@ Kod iyileştirme planı, `kod_iyilestirme_plani.md` dosyasında detaylı olarak 
 - [ ] Veri modeli standardizasyonu: Tüm bileşenlerde tutarlı bir veri modeli kullanılmalı
 - [ ] Hata yönetimi iyileştirmeleri: Daha kapsamlı bir hata yönetimi stratejisi uygulanmalı
 - [ ] Performans iyileştirmeleri: Kullanıcı ve rol verilerinin önbelleğe alınması düşünülmeli
+
+## API Endpoint Uyumluluğu Sorunu ve Çözümü
+
+### Tespit Edilen Sorun
+- [X] Kullanıcı yönetimi sayfasında roller yüklenirken 404 (Not Found) hatası alınıyor
+
+### Yapılan Değişiklikler
+- [X] `role.service.ts` dosyasındaki API URL'si düzeltildi
+- [X] `/api/roles` yerine `/api/role` kullanıldı
+- [X] Hata ve çözüm `errors.md` dosyasına belgelendi
+- [X] `knowledge-base/api-endpoint-uyumlulugu.md` dosyası oluşturuldu
+
+### Öğrenilen Dersler
+- Frontend ve backend arasındaki API endpoint'lerinin uyumlu olması önemlidir
+- ASP.NET Core'da controller adı ve route arasındaki ilişkiye dikkat edilmelidir
+- API çağrıları başarısız olduğunda, ilk kontrol edilmesi gereken şey endpoint'in doğru olup olmadığıdır
+
+### Sonraki Adımlar
+- [ ] Diğer servislerdeki API URL'lerini kontrol etmek
+- [ ] API dokümantasyonu oluşturmak veya güncellemek
+- [ ] Frontend-backend iletişimini iyileştirmek için Swagger/OpenAPI entegrasyonu düşünmek

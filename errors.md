@@ -777,3 +777,38 @@ if (role) {
 - Frontend'de veri yapılarının tutarlı olması önemlidir. Aynı veri farklı yerlerde farklı şekillerde (id/value, name/label) kullanılabilir, bu durumda her iki durumu da desteklemek gerekir.
 - Hata durumlarında kullanıcıya bilgi vermek ve varsayılan değerler sağlamak önemlidir.
 - Konsola detaylı log bilgileri yazmak hata ayıklamayı kolaylaştırır.
+
+## Rol Yükleme Hatası
+
+**Tarih:** 2023-11-15
+
+**Sorun Açıklaması:**  
+Kullanıcı yönetimi sayfasında roller yüklenirken 404 (Not Found) hatası alınıyordu.
+
+```
+GET http://localhost:5037/api/roles 404 (Not Found)
+```
+
+Hata mesajı:
+```
+Roller yüklenirken hata oluştu: Error: İstek yapılan kaynak bulunamadı.
+```
+
+**Sorunun Nedeni:**  
+Frontend'deki `role.service.ts` dosyasında API URL'si yanlış yapılandırılmıştı. Backend'de controller adı `RoleController` olduğu için, API endpoint'i `/api/role` olmalıydı, ancak `/api/roles` olarak tanımlanmıştı.
+
+**Çözüm:**  
+`role.service.ts` dosyasındaki API URL'si düzeltildi:
+
+```typescript
+// Önceki hali
+private apiUrl = `${environment.apiUrl}/api/roles`;
+
+// Düzeltilmiş hali
+private apiUrl = `${environment.apiUrl}/api/role`;
+```
+
+**Öğrenilen Dersler:**
+- Frontend ve backend arasındaki API endpoint'lerinin uyumlu olması önemlidir.
+- ASP.NET Core'da controller adı ve route arasındaki ilişkiye dikkat edilmelidir. `[Route("api/[controller]")]` attribute'u kullanıldığında, "Controller" son eki olmadan controller adı kullanılır.
+- API çağrıları başarısız olduğunda, ilk kontrol edilmesi gereken şey endpoint'in doğru olup olmadığıdır.
