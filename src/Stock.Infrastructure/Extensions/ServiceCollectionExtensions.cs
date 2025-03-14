@@ -20,7 +20,6 @@ namespace Stock.Infrastructure.Extensions
             );
 
             // Repositories
-            services.AddScoped<IUnitOfWork, UnitOfWork>();
             services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
             services.AddScoped<IUserRepository, UserRepository>();
             
@@ -28,6 +27,9 @@ namespace Stock.Infrastructure.Extensions
             services.AddScoped<IRoleRepository, CachedRoleRepository>();
             
             services.AddScoped<IPermissionRepository, PermissionRepository>();
+
+            // UnitOfWork
+            services.AddScoped<IUnitOfWork, Data.UnitOfWork>();
 
             // Caching
             services.AddMemoryCache();

@@ -63,9 +63,8 @@ namespace Stock.Infrastructure.Repositories
                 {
                     Id = u.Id,
                     Username = u.Username,
-                    Email = u.Email,
                     Sicil = u.Sicil,
-                    IsActive = u.IsActive,
+                    IsAdmin = u.IsAdmin,
                     Role = new Role { Name = u.Role.Name }
                 })
                 .ToListAsync();

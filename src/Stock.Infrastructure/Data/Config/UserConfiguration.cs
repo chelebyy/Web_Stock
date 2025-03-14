@@ -17,9 +17,6 @@ namespace Stock.Infrastructure.Data.Config
             builder.Property(u => u.PasswordHash)
                 .IsRequired();
 
-            builder.Property(u => u.Email)
-                .HasMaxLength(100);
-
             builder.Property(u => u.Sicil)
                 .HasMaxLength(20);
 
@@ -30,7 +27,6 @@ namespace Stock.Infrastructure.Data.Config
 
             // İndeksler
             builder.HasIndex(u => u.Username).IsUnique();
-            builder.HasIndex(u => u.Email);
             builder.HasIndex(u => u.Sicil);
             builder.HasIndex(u => u.IsDeleted);
             builder.HasIndex(u => u.RoleId);
