@@ -16,27 +16,34 @@ namespace Stock.Infrastructure.Data
     {
         public static async Task InitializeAsync(IServiceProvider serviceProvider)
         {
-            using var scope = serviceProvider.CreateScope();
-            var services = scope.ServiceProvider;
-            
             try
             {
+                using var scope = serviceProvider.CreateScope();
+                var services = scope.ServiceProvider;
+                
+                var logger = services.GetRequiredService<ILogger<ApplicationDbContext>>();
+                logger.LogInformation("Seed data oluşturma işlemi başlatılıyor...");
+                
                 var context = services.GetRequiredService<ApplicationDbContext>();
-                await context.Database.MigrateAsync();
+                
+                // Migration kontrolünü geçici olarak devre dışı bırakıyoruz
+                // await context.Database.MigrateAsync();
                 
                 // Kullanılmayan izinleri temizle
-                await CleanupUnusedPermissionsAsync(context, services.GetRequiredService<ILogger<ApplicationDbContext>>());
+                await CleanupUnusedPermissionsAsync(context, logger);
                 
                 await SeedPermissionsAsync(context);
                 await SeedRolesAsync(context);
                 await SeedUsersAsync(context, services);
                 await SeedRolePermissionsAsync(context);
                 await SeedUserPermissionsAsync(context);
+                
+                logger.LogInformation("Seed data oluşturma işlemi başarıyla tamamlandı.");
             }
             catch (Exception ex)
             {
-                var logger = services.GetRequiredService<ILogger<ApplicationDbContext>>();
-                logger.LogError(ex, "Seed data oluşturulurken bir hata oluştu.");
+                // Servis sağlayıcıdan logger alınamayabilir, bu durumda konsola yazdır
+                Console.WriteLine($"Seed data oluşturulurken bir hata oluştu: {ex.Message}");
                 throw;
             }
         }

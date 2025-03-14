@@ -1,31 +1,32 @@
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Stock.Application.Features.Users.Queries;
 using Stock.Application.Features.Users.Commands;
+using Stock.Application.Features.Users.Queries;
+using Stock.Application.Models.DTOs;
+using Stock.Infrastructure.Logging;
+using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
-using System;
 using Microsoft.AspNetCore.Http;
-using Stock.Infrastructure.Logging;
 using Stock.Application.Features.Users.Queries.GetPaginatedUsers;
 
 namespace Stock.API.Controllers
 {
-    [ApiController]
     [Route("api/[controller]")]
+    [ApiController]
     public class UsersController : ControllerBase
     {
         private readonly IMediator _mediator;
         private readonly ILoggerManager _logger;
 
-        // Sabit hata mesajları
-        private const string ERROR_USER_NOT_FOUND = "ID: {0} olan kullanıcı bulunamadı.";
-        private const string ERROR_USER_CREATE = "Kullanıcı eklenirken bir hata oluştu.";
-        private const string ERROR_USER_UPDATE = "Kullanıcı güncellenirken bir hata oluştu.";
-        private const string ERROR_USER_DELETE = "Kullanıcı silinirken bir hata oluştu.";
-        private const string ERROR_ID_MISMATCH = "URL'deki ID ile request body'deki ID eşleşmiyor.";
-        private const string ERROR_VALIDATION = "{0}";
+        // Hata mesajları için sabitler
+        private const string USER_NOT_FOUND = "Kullanıcı bulunamadı.";
+        private const string USER_CREATION_ERROR = "Kullanıcı oluşturulurken bir hata oluştu.";
+        private const string USER_UPDATE_ERROR = "Kullanıcı güncellenirken bir hata oluştu.";
+        private const string USER_DELETE_ERROR = "Kullanıcı silinirken bir hata oluştu.";
+        private const string ID_MISMATCH_ERROR = "URL'deki ID ile gönderilen ID eşleşmiyor.";
 
         public UsersController(IMediator mediator, ILoggerManager logger)
         {
@@ -40,7 +41,7 @@ namespace Stock.API.Controllers
             _logger.LogInfo("Tüm kullanıcılar getiriliyor.");
             var query = new GetAllUsersQuery();
             var result = await _mediator.Send(query);
-            _logger.LogInfo($"{result.Count} kullanıcı başarıyla getirildi.");
+            _logger.LogInfo($"{result.Count()} kullanıcı başarıyla getirildi.");
             return Ok(result);
         }
 
@@ -87,8 +88,8 @@ namespace Stock.API.Controllers
             
             if (result == null)
             {
-                _logger.LogWarn(string.Format(ERROR_USER_NOT_FOUND, id));
-                return NotFound(string.Format(ERROR_USER_NOT_FOUND, id));
+                _logger.LogWarn(string.Format(USER_NOT_FOUND, id));
+                return NotFound(string.Format(USER_NOT_FOUND, id));
             }
 
             _logger.LogInfo($"ID: {id} olan kullanıcı başarıyla getirildi.");
@@ -113,8 +114,8 @@ namespace Stock.API.Controllers
             }
             catch (Exception ex)
             {
-                _logger.LogError(ERROR_USER_CREATE, ex);
-                return StatusCode(StatusCodes.Status500InternalServerError, ERROR_USER_CREATE);
+                _logger.LogError(USER_CREATION_ERROR, ex);
+                return StatusCode(StatusCodes.Status500InternalServerError, USER_CREATION_ERROR);
             }
         }
 
@@ -126,8 +127,8 @@ namespace Stock.API.Controllers
             {
                 if (id != command.Id)
                 {
-                    _logger.LogWarn(ERROR_ID_MISMATCH);
-                    return BadRequest(ERROR_ID_MISMATCH);
+                    _logger.LogWarn(ID_MISMATCH_ERROR);
+                    return BadRequest(ID_MISMATCH_ERROR);
                 }
 
                 _logger.LogInfo($"ID: {id} olan kullanıcı güncelleniyor.");
@@ -135,8 +136,8 @@ namespace Stock.API.Controllers
 
                 if (result == null)
                 {
-                    _logger.LogWarn(string.Format(ERROR_USER_NOT_FOUND, id));
-                    return NotFound(string.Format(ERROR_USER_NOT_FOUND, id));
+                    _logger.LogWarn(string.Format(USER_NOT_FOUND, id));
+                    return NotFound(string.Format(USER_NOT_FOUND, id));
                 }
 
                 _logger.LogInfo($"ID: {id} olan kullanıcı başarıyla güncellendi.");
@@ -149,8 +150,8 @@ namespace Stock.API.Controllers
             }
             catch (Exception ex)
             {
-                _logger.LogError(ERROR_USER_UPDATE, ex);
-                return StatusCode(StatusCodes.Status500InternalServerError, ERROR_USER_UPDATE);
+                _logger.LogError(USER_UPDATE_ERROR, ex);
+                return StatusCode(StatusCodes.Status500InternalServerError, USER_UPDATE_ERROR);
             }
         }
 
@@ -166,8 +167,8 @@ namespace Stock.API.Controllers
 
                 if (!result)
                 {
-                    _logger.LogWarn(string.Format(ERROR_USER_NOT_FOUND, id));
-                    return NotFound(string.Format(ERROR_USER_NOT_FOUND, id));
+                    _logger.LogWarn(string.Format(USER_NOT_FOUND, id));
+                    return NotFound(string.Format(USER_NOT_FOUND, id));
                 }
 
                 _logger.LogInfo($"ID: {id} olan kullanıcı başarıyla silindi.");
@@ -175,8 +176,8 @@ namespace Stock.API.Controllers
             }
             catch (Exception ex)
             {
-                _logger.LogError(ERROR_USER_DELETE, ex);
-                return StatusCode(StatusCodes.Status500InternalServerError, ERROR_USER_DELETE);
+                _logger.LogError(USER_DELETE_ERROR, ex);
+                return StatusCode(StatusCodes.Status500InternalServerError, USER_DELETE_ERROR);
             }
         }
     }

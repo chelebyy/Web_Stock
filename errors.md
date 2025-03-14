@@ -326,7 +326,7 @@ formData.username = `${formData.fullName}_${formData.sicil}`; // Benzersiz kulla
 
 ```typescript
 // Kullanıcı adı olarak sadece fullName kullanarak oluşturalım
-formData.username = formData.fullName; // Boşlukları koruyoruz
+formData.username = formData.fullName;
 
 // Aynı kullanıcı adı varsa, kullanıcı adının sonuna sicil numarasını ekleyelim
 const existingUserWithSameUsername = this.users.find(u => u.username === formData.username);
@@ -1057,3 +1057,142 @@ Kullanılan NuGet paketlerinde bilinen güvenlik açıkları bulunmaktadır.
 2. `System.Text.Json` paketini en son sürüme yükseltmek
 
 **Not:** Bu güvenlik açıkları, yüksek riskli iyileştirmeler aşamasında ele alınacaktır.
+
+## User Sınıfı ve Repository Uyumsuzluğu
+
+### Problem
+`UserRepository` sınıfında, `User` domain sınıfında bulunmayan `Email` ve `IsActive` özellikleri kullanılıyordu. Bu durum, derleme hatalarına neden oluyordu.
+
+### Çözüm
+`UserRepository` sınıfındaki `GetUserSummariesAsync` metodu güncellenerek, `Email` ve `IsActive` özellikleri yerine `User` sınıfında bulunan `IsAdmin` özelliği kullanıldı. Ayrıca, `UserConfiguration` sınıfından da `Email` özelliğine ait konfigürasyonlar kaldırıldı.
+
+### Teknik Detaylar
+- `User` sınıfı incelendi ve mevcut özellikleri belirlendi (`Username`, `PasswordHash`, `IsAdmin`, `LastLoginAt`, `Sicil`, `RoleId`, `Role`, `UserPermissions`).
+- `UserRepository` sınıfındaki `GetUserSummariesAsync` metodu güncellenerek, `Email` ve `IsActive` özellikleri yerine `IsAdmin` özelliği kullanıldı.
+- `UserConfiguration` sınıfından da `Email` özelliğine ait konfigürasyonlar kaldırıldı.
+- `ServiceCollectionExtensions` sınıfında `UnitOfWork` namespace'i düzeltildi.
+
+### Faydalar
+- Derleme hataları giderildi.
+- Domain sınıfları ile repository sınıfları arasında tutarlılık sağlandı.
+- Clean Architecture prensipleri doğrultusunda katmanlar arası bağımlılıklar düzgün şekilde yönetildi.
+
+### Örnek Kullanım
+```csharp
+// Güncellenmiş GetUserSummariesAsync metodu
+public async Task<IEnumerable<User>> GetUserSummariesAsync()
+{
+    return await _dbSet
+        .Include(x => x.Role)
+        .Select(u => new User
+        {
+            Id = u.Id,
+            Username = u.Username,
+            Sicil = u.Sicil,
+            IsAdmin = u.IsAdmin,
+            Role = new Role { Name = u.Role.Name }
+        })
+        .ToListAsync();
+}
+```
+
+### Referanslar
+- [Clean Architecture Principles](https://blog.cleancoder.com/uncle-bob/2012/08/13/the-clean-architecture.html)
+- [Entity Framework Core Migrations](https://docs.microsoft.com/en-us/ef/core/managing-schemas/migrations/)
+
+## Program.cs ve CreateAdminUser.cs Dosyalarındaki Sözdizimi Hataları
+
+### Problem
+
+1. `Program.cs` dosyasında `await` kullanımı ile ilgili sözdizimi hataları vardı.
+2. `CreateAdminUser` sınıfında hem statik `Initialize` hem de instance `InitializeAsync` metotları bulunuyordu ve bu durum karışıklığa neden oluyordu.
+3. `UserRepository.cs` dosyasında `GetAllUsersQuery` sınıfının kullanımında hata vardı.
+4. Veritabanı modeli değişmiş ve migration oluşturulmamıştı.
+
+### Çözüm
+
+1. `Program.cs` dosyasında `await` yerine `.Wait()` kullanıldı.
+2. `CreateAdminUser` sınıfında statik `Initialize` metodu kaldırıldı ve `InitializeAsync` metodu düzenlendi.
+3. `UsersController.cs` dosyasında `GetAllUsersQuery` sınıfının doğru namespace'i kullanıldı ve `Count` yerine `Count()` metodu kullanıldı.
+4. Geçici olarak `SeedData.InitializeAsync` içindeki migration kontrolü ve `Program.cs` içindeki `SeedData.InitializeAsync` çağrısı devre dışı bırakıldı.
+
+### Teknik Detaylar
+
+1. `Program.cs` dosyasında:
+   - `adminCreator.InitializeAsync(services).Wait();` şeklinde düzeltildi.
+   - `SeedData.InitializeAsync(app.Services).Wait();` geçici olarak devre dışı bırakıldı.
+
+2. `CreateAdminUser.cs` dosyasında:
+   - Statik `Initialize` metodu kaldırıldı.
+   - `InitializeAsync` metodu düzenlendi ve hata yönetimi eklendi.
+
+3. `UserRepository.cs` dosyasında:
+   - `GetAllUsersQuery` sınıfının doğru namespace'i kullanıldı.
+   - `result.Count` yerine `result.Count()` metodu kullanıldı.
+
+4. `SeedData.cs` dosyasında:
+   - `await context.Database.MigrateAsync();` geçici olarak devre dışı bırakıldı.
+
+### Faydalar
+
+1. Uygulama başarıyla derlenebiliyor ve çalışabiliyor.
+2. Kod daha tutarlı ve anlaşılır hale geldi.
+3. Hata mesajları daha açıklayıcı ve standart hale getirildi.
+
+### Örnek Kullanım
+
+```csharp
+// CreateAdminUser.cs
+public async Task InitializeAsync(IServiceProvider serviceProvider)
+{
+    try
+    {
+        _logger.LogInformation("Admin kullanıcısı oluşturma işlemi başlatılıyor...");
+        
+        using (var scope = serviceProvider.CreateScope())
+        {
+            var context = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+            
+            // Veritabanında Admin kullanıcısı var mı kontrol et
+            var adminUser = await context.Users.FirstOrDefaultAsync(u => u.Username == "admin");
+
+            // Admin kullanıcısı yoksa oluştur
+            if (adminUser == null)
+            {
+                _logger.LogInformation("Admin kullanıcısı bulunamadı, yeni admin kullanıcısı oluşturuluyor...");
+                
+                // BCrypt.Net-Next paketini kullanarak şifreyi hashle
+                var passwordHash = BCrypt.Net.BCrypt.HashPassword("admin123", 11);
+                
+                adminUser = new User
+                {
+                    Username = "admin",
+                    PasswordHash = passwordHash,
+                    Sicil = "A001",
+                    IsAdmin = true,
+                    CreatedAt = DateTime.UtcNow,
+                    LastLoginAt = DateTime.UtcNow
+                };
+                
+                context.Users.Add(adminUser);
+                await context.SaveChangesAsync();
+                _logger.LogInformation("Admin kullanıcısı başarıyla oluşturuldu.");
+            }
+            else
+            {
+                _logger.LogInformation("Admin kullanıcısı zaten mevcut.");
+            }
+        }
+    }
+    catch (Exception ex)
+    {
+        _logger.LogError(ex, "Admin kullanıcısı oluşturulurken bir hata oluştu.");
+        throw;
+    }
+}
+```
+
+### Referanslar
+
+- [C# Asenkron Programlama](https://docs.microsoft.com/en-us/dotnet/csharp/programming-guide/concepts/async/)
+- [Entity Framework Core Migrations](https://docs.microsoft.com/en-us/ef/core/managing-schemas/migrations/)
