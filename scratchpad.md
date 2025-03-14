@@ -726,23 +726,24 @@ Kod iyileştirme planı, `kod_iyilestirme_plani.md` dosyasında detaylı olarak 
 - [ ] Hata yönetimi iyileştirmeleri: Daha kapsamlı bir hata yönetimi stratejisi uygulanmalı
 - [ ] Performans iyileştirmeleri: Kullanıcı ve rol verilerinin önbelleğe alınması düşünülmeli
 
-## API Endpoint Uyumluluğu Sorunu ve Çözümü
+## API Endpoint Uyumluluğu Sorunları ve Çözümleri
 
-### Tespit Edilen Sorun
+### Tespit Edilen Sorunlar
 - [X] Kullanıcı yönetimi sayfasında roller yüklenirken 404 (Not Found) hatası alınıyor
+- [X] İzinler yüklenirken 404 (Not Found) hatası alınabilir
 
 ### Yapılan Değişiklikler
-- [X] `role.service.ts` dosyasındaki API URL'si düzeltildi
-- [X] `/api/roles` yerine `/api/role` kullanıldı
-- [X] Hata ve çözüm `errors.md` dosyasına belgelendi
-- [X] `knowledge-base/api-endpoint-uyumlulugu.md` dosyası oluşturuldu
+- [X] `role.service.ts` dosyasındaki API URL'si düzeltildi: `/api/roles` -> `/api/role`
+- [X] `permission.service.ts` dosyasındaki API URL'si düzeltildi: `/api/permissions` -> `/api/Permissions`
 
 ### Öğrenilen Dersler
 - Frontend ve backend arasındaki API endpoint'lerinin uyumlu olması önemlidir
 - ASP.NET Core'da controller adı ve route arasındaki ilişkiye dikkat edilmelidir
 - API çağrıları başarısız olduğunda, ilk kontrol edilmesi gereken şey endpoint'in doğru olup olmadığıdır
+- Controller adlarının büyük/küçük harf duyarlılığına dikkat edilmelidir
 
 ### Sonraki Adımlar
 - [ ] Diğer servislerdeki API URL'lerini kontrol etmek
 - [ ] API dokümantasyonu oluşturmak veya güncellemek
 - [ ] Frontend-backend iletişimini iyileştirmek için Swagger/OpenAPI entegrasyonu düşünmek
+- [ ] Tüm API endpoint'lerini standartlaştırmak için bir naming convention belirlemek

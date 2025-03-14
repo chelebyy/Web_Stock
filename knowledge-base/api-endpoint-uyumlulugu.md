@@ -4,6 +4,8 @@
 
 Kullanıcı yönetimi sayfasında roller yüklenirken 404 (Not Found) hatası alındı. Frontend'deki `role.service.ts` dosyasında API URL'si yanlış yapılandırılmıştı. Backend'de controller adı `RoleController` olduğu için, API endpoint'i `/api/role` olmalıydı, ancak `/api/roles` olarak tanımlanmıştı.
 
+Benzer şekilde, izinler yüklenirken de 404 (Not Found) hatası alındı. Frontend'deki `permission.service.ts` dosyasında API URL'si yanlış yapılandırılmıştı. Backend'de controller adı `PermissionsController` olduğu için, API endpoint'i `/api/Permissions` olmalıydı, ancak `/api/permissions` olarak tanımlanmıştı.
+
 ## Çözüm
 
 `role.service.ts` dosyasındaki API URL'si düzeltildi:
@@ -14,6 +16,16 @@ private apiUrl = `${environment.apiUrl}/api/roles`;
 
 // Düzeltilmiş hali
 private apiUrl = `${environment.apiUrl}/api/role`;
+```
+
+`permission.service.ts` dosyasındaki API URL'si düzeltildi:
+
+```typescript
+// Önceki hali
+private apiUrl = `${environment.apiUrl}/api/permissions`;
+
+// Düzeltilmiş hali
+private apiUrl = `${environment.apiUrl}/api/Permissions`;
 ```
 
 ## ASP.NET Core'da Route ve Controller İlişkisi

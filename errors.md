@@ -812,3 +812,53 @@ private apiUrl = `${environment.apiUrl}/api/role`;
 - Frontend ve backend arasındaki API endpoint'lerinin uyumlu olması önemlidir.
 - ASP.NET Core'da controller adı ve route arasındaki ilişkiye dikkat edilmelidir. `[Route("api/[controller]")]` attribute'u kullanıldığında, "Controller" son eki olmadan controller adı kullanılır.
 - API çağrıları başarısız olduğunda, ilk kontrol edilmesi gereken şey endpoint'in doğru olup olmadığıdır.
+
+## API Endpoint Uyumluluğu Sorunları
+
+### Sorun 1: Roller Yüklenirken 404 Hatası
+
+**Hata Mesajı:**
+```
+GET http://localhost:5037/api/roles 404 (Not Found)
+```
+
+**Nedeni:**
+Frontend'deki `role.service.ts` dosyasında API URL'si yanlış yapılandırılmıştı. Backend'de controller adı `RoleController` olduğu için, API endpoint'i `/api/role` olmalıydı, ancak `/api/roles` olarak tanımlanmıştı.
+
+**Çözüm:**
+`role.service.ts` dosyasındaki API URL'si düzeltildi:
+
+```typescript
+// Önceki hali
+private apiUrl = `${environment.apiUrl}/api/roles`;
+
+// Düzeltilmiş hali
+private apiUrl = `${environment.apiUrl}/api/role`;
+```
+
+### Sorun 2: İzinler Yüklenirken 404 Hatası
+
+**Hata Mesajı:**
+```
+GET http://localhost:5037/api/permissions 404 (Not Found)
+```
+
+**Nedeni:**
+Frontend'deki `permission.service.ts` dosyasında API URL'si yanlış yapılandırılmıştı. Backend'de controller adı `PermissionsController` olduğu için, API endpoint'i `/api/Permissions` olmalıydı, ancak `/api/permissions` olarak tanımlanmıştı. ASP.NET Core'da route'lar büyük/küçük harf duyarlıdır.
+
+**Çözüm:**
+`permission.service.ts` dosyasındaki API URL'si düzeltildi:
+
+```typescript
+// Önceki hali
+private apiUrl = `${environment.apiUrl}/api/permissions`;
+
+// Düzeltilmiş hali
+private apiUrl = `${environment.apiUrl}/api/Permissions`;
+```
+
+**Öğrenilen Dersler:**
+- Frontend ve backend arasındaki API endpoint'lerinin uyumlu olması önemlidir.
+- ASP.NET Core'da controller adı ve route arasındaki ilişkiye dikkat edilmelidir.
+- Controller adlarının büyük/küçük harf duyarlılığına dikkat edilmelidir.
+- API çağrıları başarısız olduğunda, ilk kontrol edilmesi gereken şey endpoint'in doğru olup olmadığıdır.

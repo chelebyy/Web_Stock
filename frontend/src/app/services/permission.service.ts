@@ -17,7 +17,7 @@ interface PreserveFormat<T> {
   providedIn: 'root'
 })
 export class PermissionService {
-  private apiUrl = `${environment.apiUrl}/api/permissions`;
+  private apiUrl = `${environment.apiUrl}/api/Permissions`;
 
   constructor(
     private http: HttpClient,
