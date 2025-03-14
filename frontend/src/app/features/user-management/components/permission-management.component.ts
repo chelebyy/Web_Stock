@@ -243,20 +243,32 @@ export class PermissionManagementComponent implements OnInit {
                 this.loading = false;
               },
               error: (error: any) => {
-                console.error('Rol izinleri yüklenirken hata oluştu:', error);
                 this.loading = false;
+                this.messageService.add({
+                  severity: 'error',
+                  summary: 'Hata',
+                  detail: 'Rol izinleri yüklenirken bir hata oluştu'
+                });
               }
             });
           },
           error: (error: any) => {
-            console.error('Tüm izinler yüklenirken hata oluştu:', error);
             this.loading = false;
+            this.messageService.add({
+              severity: 'error',
+              summary: 'Hata',
+              detail: 'İzinler yüklenirken bir hata oluştu'
+            });
           }
         });
       },
       error: (error: any) => {
-        console.error('Rol bilgisi yüklenirken hata oluştu:', error);
         this.loading = false;
+        this.messageService.add({
+          severity: 'error',
+          summary: 'Hata',
+          detail: 'Rol bilgisi yüklenirken bir hata oluştu'
+        });
       }
     });
   }
@@ -301,39 +313,47 @@ export class PermissionManagementComponent implements OnInit {
                 this.loading = false;
               },
               error: (error: any) => {
-                console.error('Kullanıcı izinleri yüklenirken hata oluştu:', error);
                 this.loading = false;
+                this.messageService.add({
+                  severity: 'error',
+                  summary: 'Hata',
+                  detail: 'Kullanıcı izinleri yüklenirken bir hata oluştu'
+                });
               }
             });
           },
           error: (error: any) => {
-            console.error('Tüm izinler yüklenirken hata oluştu:', error);
             this.loading = false;
+            this.messageService.add({
+              severity: 'error',
+              summary: 'Hata',
+              detail: 'İzinler yüklenirken bir hata oluştu'
+            });
           }
         });
       },
       error: (error: any) => {
-        console.error('Kullanıcı bilgisi yüklenirken hata oluştu:', error);
         this.loading = false;
+        this.messageService.add({
+          severity: 'error',
+          summary: 'Hata',
+          detail: 'Kullanıcı bilgisi yüklenirken bir hata oluştu'
+        });
       }
     });
   }
   
   groupPermissions(): void {
-    console.log('groupPermissions çağrıldı, allPermissions:', this.allPermissions);
-    
     // İzinleri gruplarına göre ayır
     const groups: { [key: string]: Permission[] } = {};
     
     if (!this.allPermissions || !Array.isArray(this.allPermissions)) {
-      console.error('allPermissions dizi değil veya boş:', this.allPermissions);
       this.permissionGroups = [];
       return;
     }
     
     this.allPermissions.forEach(permission => {
       if (!permission.group) {
-        console.warn('Grup bilgisi olmayan izin:', permission);
         permission.group = 'Diğer';
       }
       
@@ -351,8 +371,6 @@ export class PermissionManagementComponent implements OnInit {
     
     // Grupları alfabetik sırala
     this.permissionGroups.sort((a, b) => a.group.localeCompare(b.group));
-    
-    console.log('Oluşturulan izin grupları:', this.permissionGroups);
   }
   
   savePermissions(): void {
@@ -384,7 +402,6 @@ export class PermissionManagementComponent implements OnInit {
         },
         error: (error: any) => {
           this.loading = false;
-          console.error('Rol izinleri kaydedilirken hata oluştu:', error);
           this.messageService.add({
             severity: 'error',
             summary: 'Hata',
@@ -413,7 +430,6 @@ export class PermissionManagementComponent implements OnInit {
         },
         error: (error: any) => {
           this.loading = false;
-          console.error('Kullanıcı izinleri kaydedilirken hata oluştu:', error);
           this.messageService.add({
             severity: 'error',
             summary: 'Hata',
@@ -449,7 +465,6 @@ export class PermissionManagementComponent implements OnInit {
       },
       error: (error: any) => {
         this.loading = false;
-        console.error('Kullanıcı izinleri sıfırlanırken hata oluştu:', error);
         this.messageService.add({
           severity: 'error',
           summary: 'Hata',

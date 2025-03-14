@@ -140,7 +140,6 @@ export class RoleManagementComponent implements OnInit {
           this.roleService.loadRoles();
         },
         error: (error) => {
-          console.error('Rol güncellenirken hata:', error);
           this.messageService.add({
             severity: 'error',
             summary: 'Hata',
@@ -170,7 +169,6 @@ export class RoleManagementComponent implements OnInit {
           this.roleService.loadRoles();
         },
         error: (error) => {
-          console.error('Rol oluşturulurken hata:', error);
           this.messageService.add({
             severity: 'error',
             summary: 'Hata',

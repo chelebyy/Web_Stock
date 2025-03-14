@@ -518,17 +518,10 @@ export class UserManagementComponent implements OnInit, AfterViewInit {
   }
 
   loadUsers() {
-    console.log('Kullanıcılar yükleniyor...');
-    
     this.userService.getUsers().subscribe({
       next: (data) => {
-        console.log('Kullanıcı verileri alındı:', data);
-        
         if (data && Array.isArray(data)) {
           this.users = data.map(user => {
-            console.log('Kullanıcı ID tipi:', typeof user.id, 'Değer:', user.id);
-            console.log('Kullanıcı rol bilgisi:', user.roleId, 'Rol adı:', this.getRoleName(user.roleId || null));
-            
             // fullName alanını oluştur
             const fullName = user.firstName && user.lastName 
               ? `${user.firstName} ${user.lastName}` 
@@ -549,7 +542,6 @@ export class UserManagementComponent implements OnInit, AfterViewInit {
           // Kullanıcılar yüklendiğinde selectedUsers nesnesini sıfırla
           this.clearSelectedUsers();
           
-          console.log('Kullanıcı verileri işlendi:', this.users);
           this.applyFilters();
         } else {
           console.error('Geçersiz kullanıcı verisi:', data);
@@ -605,10 +597,6 @@ export class UserManagementComponent implements OnInit, AfterViewInit {
     this.userForm.get('password')?.setValue('');
     
     this.userDialog = true;
-    
-    // Konsola bilgi yazdır
-    console.log('Düzenlenecek kullanıcı:', user);
-    console.log('Form değerleri:', this.userForm.value);
   }
 
   deleteUser(user: any) {
@@ -759,8 +747,6 @@ export class UserManagementComponent implements OnInit, AfterViewInit {
         });
         return;
       }
-      
-      console.log('Güncellenecek kullanıcı verisi:', formData);
     } else {
       // Yeni kullanıcı oluşturma
       // Kullanıcı adı olarak fullName kullan
@@ -802,8 +788,6 @@ export class UserManagementComponent implements OnInit, AfterViewInit {
         return;
       }
     }
-    
-    console.log('Gönderilecek veri:', formData);
     
     // Şifre kontrolü
     if (this.editMode && formData.password === '') {
@@ -997,17 +981,12 @@ export class UserManagementComponent implements OnInit, AfterViewInit {
   }
 
   loadRoles() {
-    console.log('Roller yükleniyor...');
-    
     // Role Service ile rolleri yükle
     this.roleService.getRoles().subscribe({
       next: (roles) => {
-        console.log('API\'den gelen roller:', roles);
-        
         if (roles && Array.isArray(roles)) {
           // API'den gelen roller için
           this.roles = roles.map(role => {
-            console.log('İşlenen rol:', role);
             return {
               label: role.name,
               value: role.id,
@@ -1021,9 +1000,6 @@ export class UserManagementComponent implements OnInit, AfterViewInit {
             { label: 'Tümü', value: null },
             ...this.roles
           ];
-          
-          console.log('Roller yüklendi:', this.roles);
-          console.log('Rol filtre seçenekleri:', this.roleFilterOptions);
           
           // Rolleri yükledikten sonra kullanıcıları yeniden yükle
           // Bu, kullanıcıların doğru rol bilgilerini almasını sağlar
@@ -1063,17 +1039,12 @@ export class UserManagementComponent implements OnInit, AfterViewInit {
       ...this.roles
     ];
     
-    console.log('Varsayılan roller yüklendi:', this.roles);
-    console.log('Varsayılan rol filtre seçenekleri:', this.roleFilterOptions);
-    
     // Yine de kullanıcıları yüklemeyi dene
     this.loadUsers();
   }
 
   // Rol filtresini uygula
   applyRoleFilter(roleId: number) {
-    console.log('Rol filtresi uygulanıyor:', roleId);
-    
     if (roleId === null) {
       // Tüm roller seçiliyse filtreleme yapma
       return [...this.users];
@@ -1156,7 +1127,6 @@ export class UserManagementComponent implements OnInit, AfterViewInit {
       this.selectedRole = role;
     }
     
-    console.log('Rol seçildi:', this.selectedRole);
     this.currentPage = 1; // İlk sayfaya dön
     this.applyFilters(); // Filtreleri uygula
   }
@@ -1244,33 +1214,22 @@ export class UserManagementComponent implements OnInit, AfterViewInit {
       }
     }
     
-    console.log('Seçilen rol:', this.selectedRole);
     this.currentPage = 1; // İlk sayfaya dön
     this.applyFilters(); // Filtreleri uygula
   }
 
   // Checkbox metodları
   toggleSelectAll() {
-    console.log('toggleSelectAll çağrıldı, önceki durum:', this.selectAllChecked);
     this.selectAllChecked = !this.selectAllChecked;
-    console.log('toggleSelectAll sonrası durum:', this.selectAllChecked);
     
     // Tüm kullanıcıların checkbox durumunu güncelle
     this.filteredUsers.forEach(user => {
       this.selectedUsers[user.id] = this.selectAllChecked;
     });
-    
-    console.log('Seçili kullanıcılar:', this.selectedUsers);
   }
   
   toggleUserSelection(userId: number) {
-    console.log('toggleUserSelection çağrıldı, kullanıcı ID:', userId);
-    console.log('Önceki durum:', this.selectedUsers[userId]);
-    
-    // Kullanıcının checkbox durumunu tersine çevir
     this.selectedUsers[userId] = !this.selectedUsers[userId];
-    
-    console.log('Sonraki durum:', this.selectedUsers[userId]);
     
     // Tüm kullanıcılar seçili mi kontrol et
     this.checkIfAllSelected();
@@ -1317,14 +1276,10 @@ export class UserManagementComponent implements OnInit, AfterViewInit {
   getRoleName(roleId: number | null): string {
     if (!roleId) return 'Rol Atanmamış';
     
-    console.log('getRoleName çağrıldı, roleId:', roleId);
-    console.log('Mevcut roller:', this.roles);
-    
     // Rol ID'si ile eşleşen rolü bul (hem value hem de id özelliklerini kontrol et)
     const role = this.roles.find(r => r.value === roleId || r.id === roleId);
     
     if (role) {
-      console.log('Rol bulundu:', role);
       return role.label || role.name;
     } else {
       console.warn(`ID: ${roleId} için rol bulunamadı!`);

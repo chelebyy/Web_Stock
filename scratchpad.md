@@ -675,6 +675,7 @@ Kod iyileştirme planı, `kod_iyilestirme_plani.md` dosyasında detaylı olarak 
 1. Frontend bileşenlerindeki gereksiz console.log ifadelerinin kaldırılması
 2. Backend controller'lardaki gereksiz log ifadelerinin kaldırılması
 3. Backend'de magic string ve magic number'ların sabit değişkenlere dönüştürülmesi
+4. Merkezi bir loglama mekanizması oluşturulması
 
 ## Öğrenilen Dersler
 1. Kod iyileştirme çalışmaları, mevcut işlevselliği bozmadan yapılmalıdır.
