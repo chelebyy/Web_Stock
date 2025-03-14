@@ -69,7 +69,7 @@ export class PasswordService {
       newPassword
     };
     
-    return this.http.post(`${this.apiUrl}/auth/change-password`, data, options)
+    return this.http.post(`${this.apiUrl}/Auth/change-password`, data, options)
       .pipe(
         catchError(this.handleError)
       );
@@ -82,7 +82,7 @@ export class PasswordService {
    */
   requestPasswordReset(email: string): Observable<any> {
     const options = { headers: new HttpHeaders({ 'Content-Type': 'application/json' }) };
-    return this.http.post(`${this.apiUrl}/auth/request-password-reset`, { email }, options)
+    return this.http.post(`${this.apiUrl}/FixPassword/request-password-reset`, { email }, options)
       .pipe(
         catchError(this.handleError)
       );

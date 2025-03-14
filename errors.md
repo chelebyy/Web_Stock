@@ -862,3 +862,29 @@ private apiUrl = `${environment.apiUrl}/api/Permissions`;
 - ASP.NET Core'da controller adı ve route arasındaki ilişkiye dikkat edilmelidir.
 - Controller adlarının büyük/küçük harf duyarlılığına dikkat edilmelidir.
 - API çağrıları başarısız olduğunda, ilk kontrol edilmesi gereken şey endpoint'in doğru olup olmadığıdır.
+
+### Sorun 3: Şifre Sıfırlama Endpoint'i Hatası
+
+**Hata Mesajı:**
+```
+POST http://localhost:5037/api/auth/request-password-reset 404 (Not Found)
+```
+
+**Nedeni:**
+Frontend'deki `password.service.ts` dosyasında şifre sıfırlama isteği için API endpoint'i yanlış yapılandırılmıştı. Şifre sıfırlama işlemi `AuthController`'da değil, `FixPasswordController`'da bulunmaktadır.
+
+**Çözüm:**
+`password.service.ts` dosyasındaki şifre sıfırlama endpoint'i düzeltildi:
+
+```typescript
+// Önceki hali
+return this.http.post(`${this.apiUrl}/auth/request-password-reset`, { email }, options)
+
+// Düzeltilmiş hali
+return this.http.post(`${this.apiUrl}/FixPassword/request-password-reset`, { email }, options)
+```
+
+**Öğrenilen Dersler:**
+- Frontend ve backend arasındaki API endpoint'lerinin uyumlu olması önemlidir.
+- API çağrıları başarısız olduğunda, ilk kontrol edilmesi gereken şey endpoint'in doğru olup olmadığıdır.
+- Şifre yönetimi gibi kritik işlevler için doğru controller ve endpoint'lerin kullanılması gerekir.

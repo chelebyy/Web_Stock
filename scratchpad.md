@@ -731,10 +731,13 @@ Kod iyileştirme planı, `kod_iyilestirme_plani.md` dosyasında detaylı olarak 
 ### Tespit Edilen Sorunlar
 - [X] Kullanıcı yönetimi sayfasında roller yüklenirken 404 (Not Found) hatası alınıyor
 - [X] İzinler yüklenirken 404 (Not Found) hatası alınabilir
+- [X] Şifre sıfırlama işlemi için 404 (Not Found) hatası alınabilir
 
 ### Yapılan Değişiklikler
 - [X] `role.service.ts` dosyasındaki API URL'si düzeltildi: `/api/roles` -> `/api/role`
 - [X] `permission.service.ts` dosyasındaki API URL'si düzeltildi: `/api/permissions` -> `/api/Permissions`
+- [X] `password.service.ts` dosyasındaki şifre sıfırlama endpoint'i düzeltildi: `/api/auth/request-password-reset` -> `/api/FixPassword/request-password-reset`
+- [X] `password.service.ts` dosyasındaki şifre değiştirme endpoint'i düzeltildi: `/api/auth/change-password` -> `/api/Auth/change-password` (büyük/küçük harf düzeltmesi)
 
 ### Öğrenilen Dersler
 - Frontend ve backend arasındaki API endpoint'lerinin uyumlu olması önemlidir

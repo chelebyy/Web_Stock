@@ -6,6 +6,8 @@ Kullanıcı yönetimi sayfasında roller yüklenirken 404 (Not Found) hatası al
 
 Benzer şekilde, izinler yüklenirken de 404 (Not Found) hatası alındı. Frontend'deki `permission.service.ts` dosyasında API URL'si yanlış yapılandırılmıştı. Backend'de controller adı `PermissionsController` olduğu için, API endpoint'i `/api/Permissions` olmalıydı, ancak `/api/permissions` olarak tanımlanmıştı.
 
+Ayrıca, şifre sıfırlama işlemi için de 404 (Not Found) hatası alınabilir. Frontend'deki `password.service.ts` dosyasında şifre sıfırlama isteği için API endpoint'i yanlış yapılandırılmıştı. Şifre sıfırlama işlemi `AuthController`'da değil, `FixPasswordController`'da bulunmaktadır.
+
 ## Çözüm
 
 `role.service.ts` dosyasındaki API URL'si düzeltildi:
@@ -26,6 +28,16 @@ private apiUrl = `${environment.apiUrl}/api/permissions`;
 
 // Düzeltilmiş hali
 private apiUrl = `${environment.apiUrl}/api/Permissions`;
+```
+
+`password.service.ts` dosyasındaki şifre sıfırlama endpoint'i düzeltildi:
+
+```typescript
+// Önceki hali
+return this.http.post(`${this.apiUrl}/auth/request-password-reset`, { email }, options)
+
+// Düzeltilmiş hali
+return this.http.post(`${this.apiUrl}/FixPassword/request-password-reset`, { email }, options)
 ```
 
 ## ASP.NET Core'da Route ve Controller İlişkisi
