@@ -307,6 +307,111 @@ builder.HasIndex(x => x.CreatedAt);
 builder.HasIndex(x => new { x.IsDeleted, x.Name });
 ```
 
+### PermissionRepository Optimizasyonu
+
+PermissionRepository sınıfında yapılan optimizasyonlar:
+
+1. Tüm okuma metodlarına `AsNoTracking()` eklendi:
+   - **GetByNameAsync**
+   - **GetPermissionsByGroupAsync**
+   - **GetPermissionsByRoleIdAsync**
+   - **GetByIdAsync**
+   - **GetAllAsync**
+
+2. **GetPermissionsByGroupAsync** metodunda:
+   - İsme göre sıralama eklendi
+   - `AsNoTracking()` kullanılarak performans artırıldı
+
+3. **GetPermissionsByRoleIdAsync** metodunda:
+   - Gruba ve isme göre sıralama eklendi
+   - `AsNoTracking()` kullanılarak performans artırıldı
+
+4. **AddRolePermissionsAsync** metodunda:
+   - Tekil eklemeler yerine toplu ekleme yapılarak performans artırıldı
+   - `AddRangeAsync` kullanılarak veritabanı çağrıları azaltıldı
+
+5. **GetPaginatedPermissionsAsync** metodu eklendi:
+   - Sayfalama ve filtreleme desteği
+   - Dinamik sıralama
+   - Performans için `AsNoTracking()` kullanımı
+
+```csharp
+// GetPaginatedPermissionsAsync metodunun implementasyonu
+public async Task<(IEnumerable<Permission> Permissions, int TotalCount)> GetPaginatedPermissionsAsync(
+    int pageNumber, 
+    int pageSize, 
+    string nameFilter = null,
+    string groupFilter = null,
+    string resourceTypeFilter = null,
+    string sortBy = "Name",
+    bool sortAscending = true)
+{
+    // Filtreleme için IQueryable oluştur
+    var query = _context.Permissions.AsQueryable();
+    
+    // Filtreleri uygula
+    if (!string.IsNullOrWhiteSpace(nameFilter))
+        query = query.Where(p => p.Name.Contains(nameFilter));
+        
+    if (!string.IsNullOrWhiteSpace(groupFilter))
+        query = query.Where(p => p.Group == groupFilter);
+        
+    if (!string.IsNullOrWhiteSpace(resourceTypeFilter))
+        query = query.Where(p => p.ResourceType == resourceTypeFilter);
+    
+    // Toplam kayıt sayısını hesapla - AsNoTracking() ile performans artışı
+    var totalCount = await query.AsNoTracking().CountAsync();
+    
+    // Sıralama uygula
+    query = sortBy?.ToLower() switch
+    {
+        "id" => sortAscending ? query.OrderBy(p => p.Id) : query.OrderByDescending(p => p.Id),
+        "group" => sortAscending ? query.OrderBy(p => p.Group) : query.OrderByDescending(p => p.Group),
+        "resourcetype" => sortAscending ? query.OrderBy(p => p.ResourceType) : query.OrderByDescending(p => p.ResourceType),
+        "description" => sortAscending ? query.OrderBy(p => p.Description) : query.OrderByDescending(p => p.Description),
+        _ => sortAscending ? query.OrderBy(p => p.Name) : query.OrderByDescending(p => p.Name) // Varsayılan sıralama
+    };
+    
+    // Sayfalama uygula
+    var permissions = await query
+        .AsNoTracking() // Performans için tracking'i devre dışı bırak
+        .Skip((pageNumber - 1) * pageSize)
+        .Take(pageSize)
+        .ToListAsync();
+        
+    return (permissions, totalCount);
+}
+```
+
+6. **GetAllPermissionGroupsAsync** ve **GetAllResourceTypesAsync** metodları eklendi:
+   - Tüm izin gruplarını ve kaynak tiplerini getirmek için
+   - Distinct kullanılarak tekrarlanan değerler elendi
+   - Sıralama eklendi
+   - `AsNoTracking()` kullanılarak performans artırıldı
+
+7. **GetAllAsync** metodunda:
+   - Gruba ve isme göre sıralama eklendi
+   - `AsNoTracking()` kullanılarak performans artırıldı
+
+8. **PermissionConfiguration** sınıfında indeksler eklendi:
+   - `Group` alanı için indeks
+   - `ResourceType` alanı için indeks
+   - `Group` ve `ResourceType` alanları için bileşik indeks
+
+```csharp
+// PermissionConfiguration sınıfında indeks tanımlamaları
+// Tekil indeksler
+builder.HasIndex(x => x.Name)
+    .IsUnique();
+    
+// Performans için ek indeksler
+builder.HasIndex(x => x.Group);
+builder.HasIndex(x => x.ResourceType);
+
+// Bileşik indeksler - sık kullanılan filtreleme kombinasyonları için
+builder.HasIndex(x => new { x.Group, x.ResourceType });
+```
+
 ## Performans Karşılaştırması
 
 Yapılan optimizasyonların performans etkisini ölçmek için bazı testler yapıldı. Aşağıdaki tablo, optimizasyon öncesi ve sonrası performans karşılaştırmasını göstermektedir:

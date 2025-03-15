@@ -30,6 +30,11 @@ namespace Stock.Infrastructure.Data.Config
 
             builder.HasIndex(x => x.Name)
                 .IsUnique();
+
+            builder.HasIndex(x => x.Group);
+            builder.HasIndex(x => x.ResourceType);
+
+            builder.HasIndex(x => new { x.Group, x.ResourceType });
         }
     }
 } 
