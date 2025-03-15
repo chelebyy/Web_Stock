@@ -1,82 +1,46 @@
 # Frontend Servis İyileştirmeleri
 
-## Genel Bakış
-
-Bu belge, Kod İyileştirme Planı'nın Aşama 1 kapsamında frontend servislerinde yapılan iyileştirmeleri ve temizlik çalışmalarını özetlemektedir. Ayrıca, Aşama 2.3 kapsamında oluşturulan BaseHttpService'i de içermektedir.
+Bu belge, frontend servislerinde yapılan iyileştirmeleri ve temizlik çalışmalarını özetlemektedir. Bu değişiklikler, kod iyileştirme planının Faz 1 (Düşük Riskli İyileştirmeler) ve Faz 2 (Orta Riskli İyileştirmeler) kapsamında gerçekleştirilmiştir.
 
 ## Yapılan İyileştirmeler
 
-### 1. Gereksiz `console.log` İfadelerinin Kaldırılması
+### 1. Gereksiz Console.log İfadelerinin Kaldırılması
 
-- Geliştirme aşamasında kullanılan debug amaçlı `console.log` ifadeleri kaldırıldı.
-- Bu değişiklik, performansı artırır ve güvenlik açısından da önemlidir (hassas bilgilerin konsola yazılması önlenir).
+Tüm servis dosyalarından geliştirme aşamasında kullanılan `console.log`, `console.warn` ve `console.error` ifadeleri kaldırıldı. Bu değişiklik:
 
-### 2. Sihirli String ve Sayıların Sabitlerle Değiştirilmesi
+- Üretim ortamında gereksiz log çıktılarını önler
+- Tarayıcı konsolunu temiz tutar
+- Performansı iyileştirir
+- Güvenlik açısından hassas bilgilerin konsola yazılmasını engeller
 
-- Kod içinde doğrudan kullanılan string ve sayılar, anlamlı isimlerle tanımlanmış sabitlere dönüştürüldü.
-- Örnek: `'http://localhost:5037/api'` yerine `${environment.apiUrl}/api` kullanımı.
+### 2. Sabit Değerlerin Tanımlanması
 
-### 3. Merkezi Hata Yönetimi
+Magic string ve magic number olarak kullanılan değerler sabit değişkenlere dönüştürüldü:
 
-- Tüm servislerde tekrarlanan hata yönetimi kodu, `handleError` metoduna taşındı.
-- Bu değişiklik, hata yönetimini standartlaştırır ve kod tekrarını azaltır.
+- HTTP durum kodları için `HttpStatusCodes` sabitleri oluşturuldu (200, 400, 401, 403, 404, 500, 0)
+- Hata kodları için `ErrorCodes` sabitleri oluşturuldu (DuplicateSicil, DuplicateUsername)
 
-### 4. API Yanıt İşleme İyileştirmeleri
+### 3. BaseHttpService Oluşturma
 
-- API'den gelen yanıtların işlenmesi için standart bir yaklaşım benimsendi.
-- ReferenceHandler.Preserve formatı ($values dizisi) için otomatik dönüşüm eklendi.
+Frontend tarafında HTTP isteklerini merkezi bir yerden yönetmek için `BaseHttpService` sınıfı oluşturuldu. Bu sınıf, tüm servisler tarafından kullanılabilecek ortak HTTP işlemlerini içerir.
 
-### 5. HTTP İsteklerinin Standartlaştırılması
+#### BaseHttpService Özellikleri
 
-- Tüm HTTP isteklerinde tutarlı header'lar kullanılması sağlandı.
-- Authorization token'ının tüm isteklerde doğru şekilde gönderilmesi sağlandı.
+- Tüm HTTP istekleri için ortak bir arayüz sağlar (GET, POST, PUT, DELETE)
+- Hata yönetimini merkezi bir yerden yapar
+- API yanıtlarını normalleştirir
+- HTTP başlıklarını otomatik olarak ekler
+- Dosya yükleme işlemlerini destekler
+- HTTP durum kodları için sabitler içerir
 
-### 6. Import İfadelerinin Düzenlenmesi
-
-- Kullanılmayan import ifadeleri kaldırıldı.
-- İlgili import ifadeleri gruplandırıldı.
-
-### 7. BaseHttpService Oluşturulması
-
-- Tüm HTTP isteklerini yönetmek için merkezi bir `BaseHttpService` sınıfı oluşturuldu.
-- Bu servis, tüm HTTP isteklerini standartlaştırır, hata yönetimini merkezileştirir ve kod tekrarını azaltır.
-- Aşağıdaki özellikler eklendi:
-  - Standart HTTP metodları (GET, POST, PUT, DELETE)
-  - Merkezi hata yönetimi
-  - Otomatik token yönetimi
-  - API yanıtı normalizasyonu
-  - Dosya yükleme ve indirme desteği
-
-## İyileştirilen Dosyalar
-
-- `user.service.ts`
-- `role.service.ts`
-- `auth.service.ts`
-- `product.service.ts`
-- `category.service.ts`
-- `order.service.ts`
-- `dashboard.service.ts`
-- `notification.service.ts`
-- `base-http.service.ts` (yeni oluşturuldu)
-- `core.module.ts` (yeni oluşturuldu)
-- `example.service.ts` (örnek olarak oluşturuldu)
-
-## BaseHttpService Kullanımı
-
-`BaseHttpService`, tüm HTTP isteklerini standartlaştırmak ve kod tekrarını azaltmak için oluşturulmuştur. Servislerinizin `BaseHttpService`'i kullanabilmesi için aşağıdaki adımları izleyin:
+#### Kullanım Örneği
 
 ```typescript
-import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
-import { Observable } from 'rxjs';
-import { BaseHttpService } from '../../../core/services/base-http.service';
-import { AuthService } from '../../../core/authentication/auth.service';
-
 @Injectable({
   providedIn: 'root'
 })
-export class MyService extends BaseHttpService {
-  private endpoint = '/api/my-endpoint';
+export class UserService extends BaseHttpService {
+  private userEndpoint = 'api/users';
 
   constructor(
     protected override http: HttpClient,
@@ -85,38 +49,224 @@ export class MyService extends BaseHttpService {
     super(http, authService);
   }
 
-  getItems(): Observable<Item[]> {
-    return this.get<Item[]>(this.endpoint);
+  getUsers(): Observable<User[]> {
+    return this.get<User[]>(this.userEndpoint);
   }
 
-  getItemById(id: number): Observable<Item> {
-    return this.get<Item>(`${this.endpoint}/${id}`);
+  getUser(id: number): Observable<User> {
+    return this.get<User>(`${this.userEndpoint}/${id}`);
   }
 
-  createItem(item: Omit<Item, 'id'>): Observable<Item> {
-    return this.post<Item>(this.endpoint, item);
+  createUser(user: User): Observable<any> {
+    return this.post<any>(this.userEndpoint, user);
   }
 
-  updateItem(id: number, item: Partial<Item>): Observable<Item> {
-    return this.put<Item>(`${this.endpoint}/${id}`, item);
+  updateUser(id: number, user: User): Observable<void> {
+    return this.put<void>(`${this.userEndpoint}/${id}`, user);
   }
 
-  deleteItem(id: number): Observable<void> {
-    return this.delete<void>(`${this.endpoint}/${id}`);
+  deleteUser(id: number): Observable<void> {
+    return this.delete<void>(`${this.userEndpoint}/${id}`);
   }
 }
 ```
 
-Daha detaylı bilgi için `knowledge-base/base-http-service.md` belgesine bakabilirsiniz.
+### 4. Shared Components Oluşturma
+
+Frontend tarafında tekrar kullanılabilir bileşenler oluşturuldu. Bu bileşenler, tüm uygulama genelinde kullanılabilecek ortak UI öğelerini içerir.
+
+#### Oluşturulan Shared Components
+
+1. **LoadingSpinner**: Yükleme göstergesi olarak kullanılır. Özelleştirilebilir renk, boyut ve mesaj özellikleri vardır.
+2. **ErrorMessage**: Hata mesajlarını göstermek için kullanılır. Farklı hata türleri (error, warning, info, success) desteklenir.
+3. **ConfirmationDialog**: Kullanıcıdan onay almak için kullanılır. Özelleştirilebilir başlık, mesaj, buton etiketleri ve türleri vardır.
+
+#### Shared Module
+
+Tüm paylaşılan bileşenler, direktifler ve pipe'lar `SharedModule` içinde toplanmıştır. Bu modül, diğer modüller tarafından import edilebilir ve böylece paylaşılan bileşenlere erişim sağlanabilir.
+
+```typescript
+@NgModule({
+  declarations: [],
+  imports: [
+    CommonModule,
+    FormsModule,
+    ReactiveFormsModule,
+    RouterModule,
+    
+    // PrimeNG Modules
+    ButtonModule,
+    TableModule,
+    // ... diğer PrimeNG modülleri
+    
+    // Standalone Components
+    LoadingSpinnerComponent,
+    ErrorMessageComponent,
+    ConfirmationDialogComponent
+  ],
+  exports: [
+    // Angular Modules
+    CommonModule,
+    FormsModule,
+    ReactiveFormsModule,
+    RouterModule,
+    
+    // PrimeNG Modules
+    ButtonModule,
+    TableModule,
+    // ... diğer PrimeNG modülleri
+    
+    // Standalone Components
+    LoadingSpinnerComponent,
+    ErrorMessageComponent,
+    ConfirmationDialogComponent
+  ]
+})
+export class SharedModule { }
+```
+
+#### Kullanım Örneği
+
+```typescript
+// Component içinde
+import { Component } from '@angular/core';
+import { SharedModule } from '../../shared/shared.module';
+
+@Component({
+  selector: 'app-user-list',
+  standalone: true,
+  imports: [SharedModule],
+  template: `
+    <app-loading-spinner *ngIf="loading" [overlay]="true" message="Kullanıcılar yükleniyor..."></app-loading-spinner>
+    
+    <app-error-message 
+      *ngIf="error" 
+      [message]="error" 
+      type="error"
+      [dismissible]="true"
+      (dismiss)="clearError()">
+    </app-error-message>
+    
+    <app-confirmation-dialog
+      [(visible)]="showConfirmDialog"
+      title="Kullanıcı Silme"
+      message="Bu kullanıcıyı silmek istediğinizden emin misiniz?"
+      (confirm)="confirmDeleteUser()"
+      (cancel)="cancelDeleteUser()">
+    </app-confirmation-dialog>
+    
+    <!-- Diğer içerik -->
+  `
+})
+export class UserListComponent {
+  // ... component kodu
+}
+```
+
+## İyileştirilen Dosyalar
+
+1. `user.service.ts`
+2. `role.service.ts`
+3. `permission.service.ts`
+4. `user-permission.service.ts`
+5. `password.service.ts`
 
 ## Sonraki Adımlar
 
-1. **BaseService Kullanımının Yaygınlaştırılması**: Diğer servislerin de BaseHttpService'i kullanacak şekilde güncellenmesi.
-2. **Kod Tekrarının Azaltılması**: Servislerde hala tekrarlanan kodların tespit edilmesi ve ortadan kaldırılması.
-3. **Tip Güvenliğinin Artırılması**: TypeScript'in tip güvenliği özelliklerinin daha etkin kullanılması.
-4. **Daha Kapsamlı Hata Yönetimi**: Hata yönetimi stratejisinin daha da geliştirilmesi.
-5. **İstek Önbelleğe Alma**: Sık kullanılan istekler için önbelleğe alma mekanizması eklenmesi.
-6. **İstek Yeniden Deneme**: Başarısız istekler için otomatik yeniden deneme mekanizması eklenmesi.
-7. **İstek İptal Etme**: Uzun süren istekleri iptal etme desteği eklenmesi.
-8. **İstek İlerleme Takibi**: Dosya yükleme gibi işlemler için ilerleme takibi eklenmesi.
-9. **İstek Önceliği**: İsteklere öncelik belirleme mekanizması eklenmesi. 
+Bu iyileştirmeler, kod iyileştirme planının ilk aşamasını oluşturmaktadır. Sonraki aşamalarda:
+
+1. Ortak işlevselliği içeren bir BaseService sınıfı oluşturulabilir
+2. Servisler arasındaki kod tekrarı daha da azaltılabilir
+3. Tip güvenliği artırılabilir (any tipinin azaltılması)
+4. Daha kapsamlı hata yönetimi ve loglama stratejisi uygulanabilir
+
+Bu değişiklikler, mevcut işlevselliği bozmadan kod kalitesini artırmayı hedeflemektedir.
+
+# Frontend Bileşen İyileştirmeleri
+
+## Gereksiz Console.log İfadelerinin Kaldırılması
+
+### Yapılan İyileştirmeler
+
+Frontend bileşenlerindeki gereksiz `console.log`, `console.error` ve `console.warn` ifadeleri kaldırıldı. Bu ifadeler genellikle geliştirme aşamasında hata ayıklama amacıyla kullanılır, ancak üretim ortamında gereksizdir ve performansı etkileyebilir.
+
+#### İyileştirilen Dosyalar:
+
+1. **user-management.component.ts**
+   - `loadUsers` metodundaki console.log ifadeleri kaldırıldı
+   - `loadRoles` metodundaki console.log ifadeleri kaldırıldı
+   - `handleRoleLoadError` metodundaki console.log ifadeleri kaldırıldı
+   - `applyRoleFilter` metodundaki console.log ifadeleri kaldırıldı
+   - `saveUser` metodundaki console.log ifadeleri kaldırıldı
+   - `getRoleName` metodundaki console.log ifadeleri kaldırıldı
+   - `toggleSelectAll` metodundaki console.log ifadeleri kaldırıldı
+   - `toggleUserSelection` metodundaki console.log ifadeleri kaldırıldı
+
+2. **role-management.component.ts**
+   - `saveRole` metodundaki console.error ifadeleri kaldırıldı
+
+3. **permission-management.component.ts**
+   - `loadRolePermissions` metodundaki console.error ifadeleri kaldırıldı
+   - `loadUserPermissions` metodundaki console.error ifadeleri kaldırıldı
+   - `groupPermissions` metodundaki console.log ve console.error ifadeleri kaldırıldı
+   - `savePermissions` metodundaki console.error ifadeleri kaldırıldı
+
+### Yapılan Değişiklikler
+
+1. **Gereksiz console.log İfadelerinin Kaldırılması**
+   - Geliştirme aşamasında kullanılan hata ayıklama amaçlı console.log ifadeleri kaldırıldı
+   - Üretim ortamında gereksiz olan ve performansı etkileyebilecek log ifadeleri temizlendi
+
+2. **Hata Mesajlarının İyileştirilmesi**
+   - console.error ifadeleri yerine, kullanıcıya daha anlamlı hata mesajları göstermek için MessageService kullanıldı
+   - Hata durumlarında kullanıcıya bilgi vermek için toast mesajları eklendi
+
+### Faydaları
+
+1. **Performans İyileştirmesi**
+   - Gereksiz log ifadelerinin kaldırılması, tarayıcı performansını artırır
+   - Özellikle büyük veri setleriyle çalışırken, console.log ifadeleri performansı önemli ölçüde etkileyebilir
+
+2. **Kod Kalitesinin Artması**
+   - Temiz ve bakımı kolay kod
+   - Üretim ortamında gereksiz log ifadelerinin olmaması
+
+3. **Güvenlik İyileştirmesi**
+   - Hassas bilgilerin konsola yazdırılmaması
+   - Potansiyel güvenlik açıklarının azaltılması
+
+4. **Kullanıcı Deneyiminin İyileştirilmesi**
+   - Hata durumlarında kullanıcıya daha anlamlı mesajlar gösterilmesi
+   - Kullanıcının hata durumlarında ne yapması gerektiği konusunda yönlendirilmesi
+
+### Sonraki Adımlar
+
+1. **Diğer Bileşenlerin İncelenmesi**
+   - Diğer frontend bileşenlerindeki gereksiz console.log ifadelerinin tespit edilmesi ve kaldırılması
+
+2. **Merkezi Loglama Mekanizması**
+   - Üretim ortamında hata ayıklama için merkezi bir loglama mekanizması oluşturulması
+   - Önemli hataların sunucu tarafında loglanması
+
+3. **Hata Yönetiminin İyileştirilmesi**
+   - Global exception handling mekanizması oluşturulması
+   - Hata mesajlarının standartlaştırılması
+
+4. **Kullanıcı Geri Bildirimi**
+   - Hata durumlarında kullanıcıya daha detaylı geri bildirim sağlanması
+   - Kullanıcının hata durumlarında ne yapması gerektiği konusunda yönlendirilmesi
+
+## Sonuç
+
+Frontend servis iyileştirmeleri kapsamında yapılan değişiklikler, kodun daha bakımı kolay, tekrar kullanılabilir ve tutarlı olmasını sağlamıştır. `BaseHttpService` ile HTTP istekleri merkezi bir yerden yönetilirken, shared components ile UI bileşenleri tekrar kullanılabilir hale getirilmiştir.
+
+Bu iyileştirmeler sayesinde:
+
+- Kod tekrarı azaltıldı
+- Hata yönetimi merkezileştirildi
+- UI bileşenleri standartlaştırıldı
+- Geliştirme süreci hızlandırıldı
+- Bakım maliyeti düşürüldü
+- Kod kalitesi arttırıldı
+
+Faz-2 kapsamında yapılan bu iyileştirmeler, uygulamanın daha sürdürülebilir ve genişletilebilir olmasını sağlamıştır. 
