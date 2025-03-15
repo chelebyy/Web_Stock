@@ -30,6 +30,10 @@ namespace Stock.Infrastructure.Data.Config
             builder.HasIndex(u => u.Sicil);
             builder.HasIndex(u => u.IsDeleted);
             builder.HasIndex(u => u.RoleId);
+            builder.HasIndex(u => u.IsActive);
+            
+            // Bileşik indeksler - sık kullanılan filtreleme kombinasyonları için
+            builder.HasIndex(u => new { u.RoleId, u.IsActive });
         }
     }
 } 
