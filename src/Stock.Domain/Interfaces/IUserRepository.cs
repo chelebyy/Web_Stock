@@ -10,10 +10,19 @@ namespace Stock.Domain.Interfaces
         Task<User?> GetBySicilAsync(string sicil);
         Task<IEnumerable<User>> GetUsersWithRolesAsync();
         
-        // Sayfalama için yeni metot
-        Task<(IEnumerable<User> Users, int TotalCount)> GetPaginatedUsersAsync(int pageNumber, int pageSize);
+        // Sayfalama ve filtreleme için geliştirilmiş metot
+        Task<(IEnumerable<User> Users, int TotalCount)> GetPaginatedUsersAsync(
+            int pageNumber, 
+            int pageSize, 
+            string usernameFilter = null, 
+            string sicilFilter = null, 
+            int? roleIdFilter = null, 
+            bool? isActiveFilter = null, 
+            bool? isAdminFilter = null,
+            string sortBy = "Username",
+            bool sortAscending = true);
         
-        // Projection için yeni metot - domain katmanında DTO kullanmak yerine, entity üzerinden çalışıyoruz
+        // Projection için optimize edilmiş metot
         Task<IEnumerable<User>> GetUserSummariesAsync();
     }
 } 

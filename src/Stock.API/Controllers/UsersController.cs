@@ -11,6 +11,7 @@ using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using Microsoft.AspNetCore.Http;
 using Stock.Application.Features.Users.Queries.GetPaginatedUsers;
+using System.Diagnostics;
 
 namespace Stock.API.Controllers
 {
@@ -47,19 +48,47 @@ namespace Stock.API.Controllers
 
         [HttpGet("paginated")]
         [Authorize(Roles = "Admin")]
-        public async Task<IActionResult> GetPaginated([FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10)
+        public async Task<IActionResult> GetPaginated(
+            [FromQuery] int pageNumber = 1, 
+            [FromQuery] int pageSize = 10,
+            [FromQuery] string usernameFilter = null,
+            [FromQuery] string sicilFilter = null,
+            [FromQuery] int? roleIdFilter = null,
+            [FromQuery] bool? isActiveFilter = null,
+            [FromQuery] bool? isAdminFilter = null,
+            [FromQuery] string sortBy = "Username",
+            [FromQuery] bool sortAscending = true)
         {
-            _logger.LogInfo($"Sayfalanmış kullanıcılar getiriliyor. Sayfa: {pageNumber}, Sayfa Boyutu: {pageSize}");
+            _logger.LogInfo($"Sayfalanmış kullanıcılar getiriliyor. Sayfa: {pageNumber}, Sayfa Boyutu: {pageSize}, Filtreler: " +
+                $"Username={usernameFilter}, Sicil={sicilFilter}, RoleId={roleIdFilter}, IsActive={isActiveFilter}, IsAdmin={isAdminFilter}, " +
+                $"Sıralama: {sortBy} {(sortAscending ? "Artan" : "Azalan")}");
+            
+            // Performans ölçümü için Stopwatch başlat
+            var stopwatch = Stopwatch.StartNew();
             
             var query = new GetPaginatedUsersQuery
             {
                 PageNumber = pageNumber < 1 ? 1 : pageNumber,
-                PageSize = pageSize < 1 ? 10 : (pageSize > 50 ? 50 : pageSize)
+                PageSize = pageSize < 1 ? 10 : (pageSize > 50 ? 50 : pageSize),
+                UsernameFilter = usernameFilter,
+                SicilFilter = sicilFilter,
+                RoleIdFilter = roleIdFilter,
+                IsActiveFilter = isActiveFilter,
+                IsAdminFilter = isAdminFilter,
+                SortBy = sortBy,
+                SortAscending = sortAscending
             };
             
             var result = await _mediator.Send(query);
             
-            _logger.LogInfo($"Toplam {result.TotalCount} kullanıcıdan {result.Items.Count()} kullanıcı başarıyla getirildi. Sayfa: {pageNumber}/{result.TotalPages}");
+            // Stopwatch'ı durdur ve geçen süreyi hesapla
+            stopwatch.Stop();
+            var elapsedMs = stopwatch.ElapsedMilliseconds;
+            
+            _logger.LogInfo($"Toplam {result.TotalCount} kullanıcıdan {result.Items.Count()} kullanıcı {elapsedMs}ms sürede başarıyla getirildi. Sayfa: {pageNumber}/{result.TotalPages}");
+            
+            // Response header'a performans bilgisini ekle
+            Response.Headers.Add("X-Response-Time-Ms", elapsedMs.ToString());
             
             return Ok(result);
         }
@@ -70,10 +99,20 @@ namespace Stock.API.Controllers
         {
             _logger.LogInfo("Kullanıcı özetleri getiriliyor.");
             
+            // Performans ölçümü için Stopwatch başlat
+            var stopwatch = Stopwatch.StartNew();
+            
             var query = new GetUserSummariesQuery();
             var result = await _mediator.Send(query);
             
-            _logger.LogInfo($"{result.Count()} kullanıcı özeti başarıyla getirildi.");
+            // Stopwatch'ı durdur ve geçen süreyi hesapla
+            stopwatch.Stop();
+            var elapsedMs = stopwatch.ElapsedMilliseconds;
+            
+            _logger.LogInfo($"{result.Count()} kullanıcı özeti {elapsedMs}ms sürede başarıyla getirildi.");
+            
+            // Response header'a performans bilgisini ekle
+            Response.Headers.Add("X-Response-Time-Ms", elapsedMs.ToString());
             
             return Ok(result);
         }

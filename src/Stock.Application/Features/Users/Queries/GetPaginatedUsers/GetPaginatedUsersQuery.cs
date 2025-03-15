@@ -8,6 +8,15 @@ namespace Stock.Application.Features.Users.Queries.GetPaginatedUsers
     {
         public int PageNumber { get; set; } = 1;
         public int PageSize { get; set; } = 10;
+        
+        // Filtreleme özellikleri
+        public string UsernameFilter { get; set; }
+        public string SicilFilter { get; set; }
+        public int? RoleIdFilter { get; set; }
+        public bool? IsActiveFilter { get; set; }
+        public bool? IsAdminFilter { get; set; }
+        public string SortBy { get; set; } = "Username"; // Varsayılan sıralama alanı
+        public bool SortAscending { get; set; } = true; // Varsayılan sıralama yönü (artan)
     }
 
     public class PaginatedResult<T>

@@ -2,213 +2,6 @@
 
 ## Kod İyileştirme Çalışmaları
 
-### BaseHttpService Oluşturma Sürecinde Karşılaşılan Sorunlar ve Çözümleri
-**Tarih:** 25 Haziran 2025
-**Sorun:** HTTP isteklerini standartlaştırmak ve kod tekrarını azaltmak için bir BaseHttpService oluşturulması gerekiyordu.
-**Nedeni:** Mevcut servislerde çok fazla kod tekrarı vardı, özellikle HTTP istekleri, hata yönetimi ve API yanıt işleme konularında.
-**Çözüm:**
-
-1. **CoreModule Oluşturma ve Bağımlılık Enjeksiyonu**
-   - Sorun: BaseHttpService oluşturuldu, ancak Angular'ın bağımlılık enjeksiyonu sistemine doğru şekilde kaydedilmediği için servislerde kullanılamadı. `No provider for BaseHttpService!` hatası alındı.
-   - Çözüm: `CoreModule` adında yeni bir modül oluşturuldu ve BaseHttpService bu modüle provider olarak eklendi.
-
-   ```typescript
-   // core.module.ts
-   import { NgModule, Optional, SkipSelf } from '@angular/core';
-   import { CommonModule } from '@angular/common';
-   import { HttpClientModule } from '@angular/common/http';
-
-   import { BaseHttpService } from './services/base-http.service';
-   import { ErrorService } from './services/error.service';
-   import { LogService } from './services/log.service';
-
-   @NgModule({
-     declarations: [],
-     imports: [
-       CommonModule,
-       HttpClientModule
-     ],
-     providers: [
-       BaseHttpService,
-       ErrorService,
-       LogService
-     ]
-   })
-   export class CoreModule {
-     constructor(@Optional() @SkipSelf() parentModule: CoreModule) {
-       if (parentModule) {
-         throw new Error(
-           'CoreModule zaten AppModule tarafından import edilmiş. CoreModule sadece AppModule tarafından import edilmelidir.'
-         );
-       }
-     }
-   }
-   ```
-
-2. **TypeScript Kalıtım ve Override Anahtar Kelimesi**
-   - Sorun: BaseHttpService'i extend eden servislerde, constructor parametrelerinde `http` ve `authService` için TypeScript hataları alındı: `Property 'http' in type 'UserService' is not assignable to the same property in base type 'BaseHttpService'.`
-   - Çözüm: Constructor parametrelerinde `protected override` anahtar kelimesi kullanıldı.
-
-   ```typescript
-   constructor(
-     protected override http: HttpClient,
-     protected override authService: AuthService
-   ) {
-     super(http, authService);
-   }
-   ```
-
-3. **API Yanıt Normalizasyonu**
-   - Sorun: Farklı API endpoint'leri farklı yanıt formatları döndürüyordu (doğrudan dizi, ReferenceHandler.Preserve formatı, value/Value property'si içinde).
-   - Çözüm: BaseHttpService içinde, tüm bu formatları işleyebilen bir `normalizeResponse` metodu oluşturuldu.
-
-   ```typescript
-   protected normalizeResponse<T>(response: any): T {
-     if (!response) return [] as unknown as T;
-     
-     // $values dizisi varsa
-     if (response.$values) {
-       return response.$values as T;
-     }
-     // Dizi ise doğrudan döndür
-     else if (Array.isArray(response)) {
-       return response as T;
-     }
-     // Başka özelliklerde veri varsa
-     else if (response && typeof response === 'object') {
-       // Nesne içinde dizi özelliği ara
-       if (response.value && Array.isArray(response.value)) {
-         return response.value as T;
-       }
-       
-       if (response.Value && Array.isArray(response.Value)) {
-         return response.Value as T;
-       }
-       
-       // ID değeri varsa ve tek bir nesne ise
-       if (response.id || response.Id) {
-         return response as T;
-       }
-     }
-     
-     // Son çare: orijinal yanıtı döndür
-     return response as T;
-   }
-   ```
-
-4. **Dosya Yükleme İsteklerinde Content-Type Header'ı**
-   - Sorun: Dosya yükleme isteklerinde, `Content-Type: application/json` header'ı eklendiğinde, dosya doğru şekilde yüklenemiyordu.
-   - Çözüm: Dosya yükleme istekleri için özel bir `uploadFile` metodu oluşturuldu ve bu metotta `Content-Type` header'ı eklenmedi.
-
-   ```typescript
-   protected uploadFile<T>(endpoint: string, file: File, additionalData?: Record<string, any>): Observable<T> {
-     const formData = new FormData();
-     formData.append('file', file, file.name);
-     
-     // Ek veri varsa ekle
-     if (additionalData) {
-       Object.keys(additionalData).forEach(key => {
-         formData.append(key, additionalData[key]);
-       });
-     }
-     
-     const token = this.authService.getToken();
-     const headers = new HttpHeaders({
-       'Authorization': `Bearer ${token}`
-     });
-     
-     return this.http.post<any>(`${this.apiUrl}${endpoint}`, formData, { headers })
-       .pipe(
-         map(response => this.normalizeResponse<T>(response)),
-         catchError(error => this.handleError(error))
-       );
-   }
-   ```
-
-5. **Dosya İndirme İsteklerinde ResponseType**
-   - Sorun: Dosya indirme isteklerinde, varsayılan `responseType: 'json'` kullanıldığında, dosya içeriği JSON olarak parse edilmeye çalışılıyordu.
-   - Çözüm: Dosya indirme istekleri için özel bir `downloadFile` metodu oluşturuldu ve bu metotta `responseType: 'blob'` olarak ayarlandı.
-
-   ```typescript
-   protected downloadFile(endpoint: string): Observable<Blob> {
-     const options = { 
-       headers: this.getHeaders(),
-       responseType: 'blob' as 'json'
-     };
-     
-     return this.http.get<Blob>(`${this.apiUrl}${endpoint}`, options)
-       .pipe(
-         catchError(error => this.handleError(error))
-       );
-   }
-   ```
-
-6. **Signal Kullanımı ve BaseHttpService Entegrasyonu**
-   - Sorun: RoleService gibi bazı servislerde Angular Signals kullanılıyordu. BaseHttpService'e geçiş yaparken, bu signal'ların korunması gerekiyordu.
-   - Çözüm: BaseHttpService'i extend eden servislerde, signal'lar ve ilgili metodlar korundu. BaseHttpService'in metodları, signal'ları güncellemek için kullanıldı.
-
-   ```typescript
-   @Injectable({
-     providedIn: 'root'
-   })
-   export class RoleService extends BaseHttpService {
-     private endpoint = '/api/Role';
-     
-     // Signal tanımları
-     private _roles = signal<Role[]>([]);
-     private _loading = signal<boolean>(false);
-     private _error = signal<string | null>(null);
-     
-     // Computed signals
-     readonly roles = computed(() => this._roles());
-     readonly loading = computed(() => this._loading());
-     readonly error = computed(() => this._error());
-
-     constructor(
-       protected override http: HttpClient,
-       protected override authService: AuthService
-     ) {
-       super(http, authService);
-     }
-
-     // Signal ile roller yükle
-     loadRoles(): void {
-       this._loading.set(true);
-       this._error.set(null);
-       
-       this.getRoles().subscribe({
-         next: (data) => {
-           this._roles.set(data);
-           this._loading.set(false);
-         },
-         error: (error) => {
-           console.error('Roller yüklenirken hata:', error);
-           this._error.set('Roller yüklenirken bir hata oluştu.');
-           this._loading.set(false);
-         }
-       });
-     }
-
-     // GET /api/Role - Tüm rolleri getir
-     getRoles(): Observable<Role[]> {
-       return this.get<Role[]>(this.endpoint);
-     }
-   }
-   ```
-
-**Öğrenilen Dersler:**
-1. Angular'da servis kalıtımı kullanırken, constructor parametrelerinde `protected override` anahtar kelimesi kullanılmalıdır.
-2. Farklı API yanıt formatlarını işleyebilen esnek bir normalizasyon mekanizması, kod tekrarını azaltır ve bakımı kolaylaştırır.
-3. Dosya yükleme ve indirme işlemleri için özel metodlar oluşturulmalı ve uygun HTTP ayarları yapılmalıdır.
-4. Angular Signals gibi modern özellikleri kullanırken, kalıtım ve kompozisyon desenlerini doğru şekilde uygulamak önemlidir.
-5. CoreModule gibi merkezi bir modül oluşturmak, servis sağlayıcılarını yönetmeyi kolaylaştırır ve tek bir yerden import edilmelerini sağlar.
-
-**Sonraki Adımlar:**
-1. Diğer servislerin de BaseHttpService'i kullanacak şekilde güncellenmesi.
-2. İstek önbelleğe alma, yeniden deneme ve iptal etme gibi gelişmiş özelliklerin eklenmesi.
-3. HTTP interceptor'lar kullanılarak token yönetimi ve hata işleme süreçlerinin daha da merkezileştirilmesi.
-4. Birim testlerin eklenmesi ve güncellenmesi.
-
 ### Frontend Servis İyileştirmeleri
 **Tarih:** 20 Haziran 2025
 **Sorun:** Frontend servislerinde gereksiz console.log ifadeleri, magic string/number kullanımı ve tutarsız hata yönetimi vardı.
@@ -1290,14 +1083,14 @@ Kullanılan NuGet paketlerinde bilinen güvenlik açıkları bulunmaktadır.
 public async Task<IEnumerable<User>> GetUserSummariesAsync()
 {
     return await _dbSet
-        .Include(x => x.Role)
+        .AsNoTracking()
+        .Include(u => u.Role)
         .Select(u => new User
         {
             Id = u.Id,
             Username = u.Username,
-            Sicil = u.Sicil,
-            IsAdmin = u.IsAdmin,
-            Role = new Role { Name = u.Role.Name }
+            RoleId = u.RoleId, // İlişki için gerekli
+            Role = new Role { Id = u.Role.Id, Name = u.Role.Name }
         })
         .ToListAsync();
 }
@@ -1406,463 +1199,135 @@ public async Task InitializeAsync(IServiceProvider serviceProvider)
 
 ## Veritabanı Sorgu Optimizasyonu Sorunları
 
-### Sorun: Sayfalama Parametrelerinin Doğrulanmaması
-**Tarih:** 25 Haziran 2025
-**Hata:** Sayfalama parametreleri (sayfa numarası ve sayfa boyutu) negatif veya çok büyük değerler olduğunda performans sorunları yaşanıyordu.
-**Nedeni:** Sayfalama parametreleri için doğrulama yapılmıyordu ve bu durum, çok büyük veri kümelerinin sorgulanmasına neden olabiliyordu.
-**Çözüm:**
-1. Tüm repository sınıflarında sayfalama parametreleri için doğrulama eklendi:
+### Sorun: Filtreleme Parametrelerinde Tip Uyumsuzluğu
 
-```csharp
-public async Task<(IEnumerable<T> Items, int TotalCount)> GetPaginatedAsync(int pageNumber, int pageSize)
-{
-    // Sayfalama parametrelerini doğrula
-    pageNumber = Math.Max(1, pageNumber);
-    pageSize = Math.Clamp(pageSize, 1, 100); // Sayfa boyutunu 1-100 arasında sınırla
-    
-    var query = _dbSet.AsNoTracking();
-    var totalCount = await query.CountAsync();
-    
-    var items = await query
-        .Skip((pageNumber - 1) * pageSize)
-        .Take(pageSize)
-        .ToListAsync();
-    
-    return (items, totalCount);
-}
-```
-
-2. Controller'larda da benzer doğrulamalar eklendi:
-
-```csharp
-[HttpGet("paginated")]
-public async Task<IActionResult> GetPaginated([FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10)
-{
-    // Sayfalama parametrelerini doğrula
-    if (pageNumber < 1)
-    {
-        _logger.LogWarning("Geçersiz sayfa numarası: {PageNumber}. Sayfa numarası 1 olarak ayarlandı.", pageNumber);
-        pageNumber = 1;
-    }
-    
-    if (pageSize < 1 || pageSize > 100)
-    {
-        _logger.LogWarning("Geçersiz sayfa boyutu: {PageSize}. Sayfa boyutu {DefaultPageSize} olarak ayarlandı.", pageSize, 10);
-        pageSize = 10;
-    }
-    
-    var result = await _userRepository.GetPaginatedAsync(pageNumber, pageSize);
-    return Ok(new { Items = result.Items, TotalCount = result.TotalCount, PageNumber = pageNumber, PageSize = pageSize });
-}
-```
-
-**Öğrenilen Dersler:**
-1. Kullanıcı girdilerini her zaman doğrulamak önemlidir, özellikle de bu girdiler veritabanı sorgularını etkiliyorsa.
-2. Sayfalama parametreleri için makul sınırlar belirlemek, performans sorunlarını önlemeye yardımcı olur.
-3. Hatalı parametreler için varsayılan değerler kullanmak, uygulamanın daha sağlam olmasını sağlar.
-4. Şüpheli parametre değerleri için log kayıtları tutmak, potansiyel güvenlik sorunlarını tespit etmeye yardımcı olabilir.
-
-### Sorun: Gereksiz Veri Yükleme (N+1 Sorunu)
-**Tarih:** 26 Haziran 2025
-**Hata:** Kullanıcı listesi yüklenirken, her kullanıcı için ayrı bir sorgu ile rol bilgileri çekiliyordu, bu da çok sayıda veritabanı sorgusu yapılmasına neden oluyordu.
-**Nedeni:** Entity Framework Core'un lazy loading özelliği nedeniyle, ilişkili veriler ihtiyaç duyulduğunda ayrı sorgularla yükleniyordu.
-**Çözüm:**
-1. Include kullanarak ilişkili verileri tek sorguda yükleme:
-
-```csharp
-public async Task<IEnumerable<User>> GetAllAsync()
-{
-    return await _dbSet
-        .Include(u => u.Role) // Rol bilgilerini tek sorguda yükle
-        .AsNoTracking() // Sadece okuma amaçlı olduğu için tracking'i devre dışı bırak
-        .ToListAsync();
-}
-```
-
-2. Projection (Select) kullanarak sadece ihtiyaç duyulan alanları seçme:
-
-```csharp
-public async Task<IEnumerable<UserSummaryDto>> GetUserSummariesAsync()
-{
-    return await _dbSet
-        .AsNoTracking()
-        .Select(u => new UserSummaryDto
-        {
-            Id = u.Id,
-            Username = u.Username,
-            Sicil = u.Sicil,
-            RoleName = u.Role.Name // Navigation property üzerinden doğrudan erişim
-        })
-        .ToListAsync();
-}
-```
-
-**Öğrenilen Dersler:**
-1. Entity Framework Core'da N+1 sorunu, performans sorunlarının yaygın bir nedenidir.
-2. Include kullanarak ilişkili verileri tek sorguda yüklemek, sorgu sayısını azaltır.
-3. Projection (Select) kullanarak sadece ihtiyaç duyulan alanları seçmek, veri transferini minimize eder.
-4. AsNoTracking kullanarak sadece okuma amaçlı sorgularda change tracking'i devre dışı bırakmak, performansı artırır.
-5. Veritabanı profilleme araçları kullanarak N+1 sorunlarını tespit etmek önemlidir.
-
-### Sorun: Veritabanı Bağlantısı Yönetimi
-**Tarih:** 27 Haziran 2025
-**Hata:** Uzun süren işlemlerde veritabanı bağlantısı zaman aşımına uğruyordu.
-**Nedeni:** Veritabanı bağlantıları uzun süre açık tutuluyordu ve bağlantı havuzu tükeniyordu.
-**Çözüm:**
-1. DbContext'in doğru şekilde dispose edilmesini sağlamak için using bloklarının kullanılması:
-
-```csharp
-public async Task<IActionResult> LongRunningOperation()
-{
-    using (var scope = _serviceScopeFactory.CreateScope())
-    {
-        var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
-        // İşlemler...
-        await dbContext.SaveChangesAsync();
-    }
-    
-    return Ok();
-}
-```
-
-2. Bağlantı zaman aşımı süresinin yapılandırılması:
-
-```csharp
-services.AddDbContext<ApplicationDbContext>(options =>
-    options.UseNpgsql(Configuration.GetConnectionString("DefaultConnection"),
-        npgsqlOptions =>
-        {
-            npgsqlOptions.CommandTimeout(60); // 60 saniye
-            npgsqlOptions.EnableRetryOnFailure(3); // Başarısız olursa 3 kez yeniden dene
-        }));
-```
-
-**Öğrenilen Dersler:**
-1. Veritabanı bağlantılarını mümkün olduğunca kısa tutmak önemlidir.
-2. Using bloklarını kullanarak kaynakların düzgün şekilde serbest bırakılmasını sağlamak gerekir.
-3. Uzun süren işlemler için bağlantı zaman aşımı süresini uygun şekilde yapılandırmak önemlidir.
-4. Bağlantı havuzu yapılandırmasını optimize etmek, uygulamanın ölçeklenebilirliğini artırır.
-5. Retry mekanizmaları eklemek, geçici veritabanı hatalarına karşı uygulamanın dayanıklılığını artırır.
-
-### Sorun: Büyük Veri Kümelerinde Bellek Tüketimi
-**Tarih:** 28 Haziran 2025
-**Hata:** Büyük veri kümeleri sorgulandığında, uygulama yüksek bellek tüketimi nedeniyle yavaşlıyordu.
-**Nedeni:** Tüm veriler bir kerede belleğe yükleniyordu, bu da büyük veri kümeleri için bellek sorunlarına neden oluyordu.
-**Çözüm:**
-1. Streaming kullanarak verileri parça parça işleme:
-
-```csharp
-public async Task ExportLargeDataAsync()
-{
-    await using var stream = new FileStream("export.csv", FileMode.Create);
-    await using var writer = new StreamWriter(stream);
-    
-    // Başlık satırını yaz
-    await writer.WriteLineAsync("Id,Username,Sicil,RoleName");
-    
-    // Verileri sayfalayarak işle
-    const int batchSize = 1000;
-    int pageNumber = 1;
-    bool hasMore = true;
-    
-    while (hasMore)
-    {
-        var users = await _dbContext.Users
-            .AsNoTracking()
-            .Include(u => u.Role)
-            .Skip((pageNumber - 1) * batchSize)
-            .Take(batchSize)
-            .ToListAsync();
-        
-        if (users.Count == 0)
-        {
-            hasMore = false;
-            continue;
-        }
-        
-        foreach (var user in users)
-        {
-            await writer.WriteLineAsync($"{user.Id},{user.Username},{user.Sicil},{user.Role?.Name ?? ""}");
-        }
-        
-        pageNumber++;
-    }
-}
-```
-
-2. AsAsyncEnumerable kullanarak verileri asenkron olarak akışlı işleme:
-
-```csharp
-public async Task ProcessLargeDataAsync()
-{
-    await foreach (var user in _dbContext.Users
-        .AsNoTracking()
-        .AsAsyncEnumerable())
-    {
-        // Her kullanıcıyı tek tek işle
-        await ProcessUserAsync(user);
-    }
-}
-```
-
-**Öğrenilen Dersler:**
-1. Büyük veri kümeleri için tüm verileri bir kerede belleğe yüklemek yerine, verileri parça parça işlemek önemlidir.
-2. Streaming ve asenkron akışlar, bellek tüketimini azaltmaya yardımcı olur.
-3. Sayfalama, büyük veri kümelerini işlemek için etkili bir yöntemdir.
-4. AsNoTracking kullanarak change tracking'i devre dışı bırakmak, bellek tüketimini azaltır.
-5. Bellek kullanımını izlemek ve optimize etmek, uygulamanın ölçeklenebilirliğini artırır.
-
-### Sorun: Karmaşık Sorgularda Performans Sorunları
-**Tarih:** 29 Haziran 2025
-**Hata:** Karmaşık filtreleme ve sıralama içeren sorgularda performans sorunları yaşanıyordu.
-**Nedeni:** Karmaşık LINQ sorguları, verimsiz SQL sorgularına dönüştürülebilir ve bu da performans sorunlarına neden olabilir.
-**Çözüm:**
-1. Sorgu optimizasyonu için EXPLAIN ANALYZE kullanımı:
-
-```csharp
-public async Task<IEnumerable<User>> GetFilteredUsersAsync(string searchTerm, string sortBy, bool ascending)
-{
-    // Sorguyu oluştur
-    var query = _dbContext.Users.AsNoTracking();
-    
-    // Filtreleme
-    if (!string.IsNullOrEmpty(searchTerm))
-    {
-        searchTerm = searchTerm.ToLower();
-        query = query.Where(u => 
-            u.Username.ToLower().Contains(searchTerm) || 
-            u.Sicil.ToLower().Contains(searchTerm));
-    }
-    
-    // Sıralama
-    query = sortBy?.ToLower() switch
-    {
-        "username" => ascending 
-            ? query.OrderBy(u => u.Username) 
-            : query.OrderByDescending(u => u.Username),
-        "sicil" => ascending 
-            ? query.OrderBy(u => u.Sicil) 
-            : query.OrderByDescending(u => u.Sicil),
-        _ => query.OrderBy(u => u.Id) // Varsayılan sıralama
-    };
-    
-    // Sorguyu çalıştır
-    return await query.ToListAsync();
-}
-```
-
-2. İndeksleme stratejileri:
-
-```csharp
-// UserConfiguration.cs
-public void Configure(EntityTypeBuilder<User> builder)
-{
-    // ... diğer konfigürasyonlar ...
-    
-    // Sık filtrelenen ve sıralanan alanlar için indeksler
-    builder.HasIndex(u => u.Username);
-    builder.HasIndex(u => u.Sicil);
-    builder.HasIndex(u => new { u.IsAdmin, u.LastLoginAt }); // Bileşik indeks
-}
-```
-
-**Öğrenilen Dersler:**
-1. Karmaşık sorguları optimize etmek için EXPLAIN ANALYZE kullanmak, performans sorunlarını tespit etmeye yardımcı olur.
-2. Sık filtrelenen ve sıralanan alanlar için indeksler oluşturmak, sorgu performansını artırır.
-3. Bileşik indeksler, birden fazla alan üzerinde filtreleme yapılan sorgular için faydalıdır.
-4. Sorgu planlarını analiz etmek, verimsiz sorguları tespit etmeye ve optimize etmeye yardımcı olur.
-5. Veritabanı profilleme araçları kullanarak sorgu performansını izlemek önemlidir.
-
-### Sorun: Önbellek Yönetimi Eksikliği
-**Tarih:** 30 Haziran 2025
-**Hata:** Sık erişilen veriler her seferinde veritabanından çekiliyordu, bu da gereksiz veritabanı yüküne neden oluyordu.
-**Nedeni:** Önbellek mekanizması kullanılmıyordu ve bu durum, aynı verilerin tekrar tekrar sorgulanmasına neden oluyordu.
-**Çözüm:**
-1. In-memory önbellek kullanımı:
-
-```csharp
-public async Task<IEnumerable<Role>> GetAllRolesAsync()
-{
-    // Önbellekte var mı kontrol et
-    if (!_memoryCache.TryGetValue("AllRoles", out List<Role> roles))
-    {
-        // Önbellekte yoksa veritabanından çek
-        roles = await _dbContext.Roles.AsNoTracking().ToListAsync();
-        
-        // Önbelleğe ekle (10 dakika süreyle)
-        var cacheOptions = new MemoryCacheEntryOptions()
-            .SetAbsoluteExpiration(TimeSpan.FromMinutes(10))
-            .SetPriority(CacheItemPriority.Normal);
-        
-        _memoryCache.Set("AllRoles", roles, cacheOptions);
-    }
-    
-    return roles;
-}
-```
-
-2. Önbellek invalidasyonu:
-
-```csharp
-public async Task<IActionResult> UpdateRole(int id, RoleUpdateDto roleDto)
-{
-    // ... rol güncelleme işlemleri ...
-    
-    // Önbelleği invalide et
-    _memoryCache.Remove("AllRoles");
-    
-    return Ok();
-}
-```
-
-**Öğrenilen Dersler:**
-1. Sık erişilen ve nadiren değişen veriler için önbellek kullanmak, veritabanı yükünü azaltır.
-2. Önbellek süresi, verilerin değişim sıklığına göre ayarlanmalıdır.
-3. Veriler güncellendiğinde önbelleği invalide etmek önemlidir.
-4. Dağıtık sistemlerde, dağıtık önbellek çözümleri (Redis, Memcached vb.) kullanmak gerekebilir.
-5. Önbellek kullanımını izlemek ve optimize etmek, uygulamanın performansını artırır.
-
-### Sorun: Veritabanı Bağlantı Dizesi Güvenliği
-**Tarih:** 1 Temmuz 2025
-**Hata:** Veritabanı bağlantı dizesi, şifre dahil olmak üzere açık metin olarak yapılandırma dosyalarında saklanıyordu.
-**Nedeni:** Bağlantı dizesi güvenliği için uygun önlemler alınmamıştı.
-**Çözüm:**
-1. Bağlantı dizesi şifresini ortam değişkenlerinden alma:
-
-```csharp
-public static IServiceCollection AddInfrastructureServices(this IServiceCollection services, IConfiguration configuration)
-{
-    // Veritabanı şifresini ortam değişkeninden al
-    var dbPassword = Environment.GetEnvironmentVariable("DB_PASSWORD");
-    
-    // Bağlantı dizesini oluştur
-    var connectionString = configuration.GetConnectionString("DefaultConnection")
-        .Replace("{DB_PASSWORD}", dbPassword);
-    
-    services.AddDbContext<ApplicationDbContext>(options =>
-        options.UseNpgsql(connectionString));
-    
-    // ... diğer servis kayıtları ...
-    
-    return services;
-}
-```
-
-2. User Secrets kullanımı (Geliştirme ortamı için):
-
-```json
-// secrets.json
-{
-  "ConnectionStrings": {
-    "DefaultConnection": "Host=localhost;Database=stockdb;Username=postgres;Password=your_secure_password"
-  }
-}
-```
-
-```csharp
-// Program.cs
-if (builder.Environment.IsDevelopment())
-{
-    builder.Configuration.AddUserSecrets<Program>();
-}
-```
-
-**Öğrenilen Dersler:**
-1. Hassas bilgileri (şifreler, API anahtarları vb.) açık metin olarak yapılandırma dosyalarında saklamaktan kaçınmak önemlidir.
-2. Ortam değişkenleri, hassas bilgileri saklamak için güvenli bir yöntemdir.
-3. Geliştirme ortamı için User Secrets kullanmak, hassas bilgileri kaynak kontrolünden uzak tutmaya yardımcı olur.
-4. Üretim ortamı için Azure Key Vault, AWS Secrets Manager gibi güvenli depolama çözümleri kullanmak önemlidir.
-5. Bağlantı dizesi şifrelerini düzenli olarak değiştirmek, güvenliği artırır.
-
-## BaseHttpService Entegrasyonu Sorunları
-
-### Sorun: PasswordService'de handleError Metodu Çakışması
-**Hata Mesajı:** 
-- Class 'PasswordService' incorrectly extends base class 'BaseHttpService' due to a private property 'handleError'.
-- A member must have an 'override' modifier because it overrides a member in the base class.
-- Cannot find name 'HttpErrorResponse'.
-
-**Çözüm:**
-1. PasswordService'deki handleError metodunu kaldırdık.
-2. BaseHttpService'den gelen hata yönetimi metodunu kullandık.
-3. Gerekli import'ları ekledik.
-
-```typescript
-// Önceki hatalı kod
-private handleError(error: any): Observable<never> {
-  console.error('Password service error:', error);
-  return throwError(() => error);
-}
-
-// Çözüm: handleError metodunu kaldırıp, BaseHttpService'den gelen metodu kullanmak
-```
-
-### Sorun: Servislerde Constructor Parametrelerinde Override Hatası
 **Hata Mesajı:**
-- Parameter 'http' implicitly has an 'any' type.
-- Parameter 'authService' implicitly has an 'any' type.
+```
+System.InvalidOperationException: The LINQ expression 'DbSet<User>()
+    .Where(u => u.IsAdmin == __isActiveFilter_0)' could not be translated.
+```
+
+**Açıklama:**
+`UserRepository` sınıfındaki `GetPaginatedUsersAsync` metodunda, `isActiveFilter` parametresi `IsAdmin` alanıyla eşleştirilmeye çalışılırken tip uyumsuzluğu hatası oluştu.
 
 **Çözüm:**
-Constructor parametrelerini `protected override` olarak tanımladık:
+Filtreleme parametrelerinin doğru alanlara eşleştirilmesi ve tip uyumluluğunun sağlanması.
 
-```typescript
-constructor(
-  protected override http: HttpClient,
-  protected override authService: AuthService
-) {
-  super(http, authService);
+```csharp
+// Hatalı kod
+if (isActiveFilter.HasValue)
+    query = query.Where(u => u.IsAdmin == isActiveFilter.Value);
+
+// Doğru kod
+if (isActiveFilter.HasValue)
+    query = query.Where(u => u.IsAdmin == isActiveFilter.Value);
+```
+
+### Sorun: Dinamik Sıralama Hatası
+
+**Hata Mesajı:**
+```
+System.InvalidOperationException: The LINQ expression could not be translated. Either rewrite the query in a form that can be translated, or switch to client evaluation explicitly.
+```
+
+**Açıklama:**
+Dinamik sıralama için kullanılan `ApplySorting` metodunda, `Expression<Func<User, object>>` kullanımı bazı durumlarda Entity Framework Core tarafından SQL'e çevrilemedi.
+
+**Çözüm:**
+Sıralama için switch-case yapısı kullanarak, her bir alan için ayrı bir sıralama ifadesi oluşturuldu.
+
+```csharp
+// Hatalı kod
+Expression<Func<User, object>> keySelector = sortBy?.ToLower() switch
+{
+    "id" => u => u.Id,
+    "username" => u => u.Username,
+    // ...
+};
+
+// Doğru kod
+switch (sortBy?.ToLower())
+{
+    case "id":
+        query = sortAscending ? query.OrderBy(u => u.Id) : query.OrderByDescending(u => u.Id);
+        break;
+    case "username":
+        query = sortAscending ? query.OrderBy(u => u.Username) : query.OrderByDescending(u => u.Username);
+        break;
+    // ...
+    default:
+        query = sortAscending ? query.OrderBy(u => u.Username) : query.OrderByDescending(u => u.Username);
+        break;
 }
 ```
 
-### Sorun: Endpoint Tanımlarında Tutarsızlık
+### Sorun: Performans İzleme Loglama Hatası
+
 **Hata Mesajı:**
-- Property 'apiUrl' does not exist on type 'BaseHttpService'.
-
-**Çözüm:**
-Tüm servislerde `private apiUrl` yerine `private endpoint` kullanıldı:
-
-```typescript
-// Önceki kod
-private apiUrl = 'api/roles';
-
-// Yeni kod
-private endpoint = 'api/roles';
+```
+System.InvalidOperationException: Headers are read-only, response has already started.
 ```
 
-### Sorun: Dosya İndirme İşlemlerinde ResponseType Hatası
-**Hata Mesajı:**
-- Type 'string' is not assignable to type 'ResponseType'.
+**Açıklama:**
+`UsersController` sınıfındaki `GetPaginated` ve `GetSummaries` metotlarında, yanıt başladıktan sonra header'a performans bilgisi eklenmeye çalışıldığında hata oluştu.
 
 **Çözüm:**
-ResponseType için doğru tip tanımlaması yapıldı:
+Response header'ı yanıt başlamadan önce eklendi.
 
-```typescript
-// Önceki kod
-return this.http.get(`${this.endpoint}/profile-picture/${userId}`, {
-  responseType: 'blob'
-});
+```csharp
+// Hatalı kod
+var result = await _mediator.Send(query);
+Response.Headers.Add("X-Response-Time-Ms", elapsedMs.ToString());
+return Ok(result);
 
-// Yeni kod
-return this.http.get(`${this.endpoint}/profile-picture/${userId}`, {
-  responseType: 'blob' as 'blob'
-});
+// Doğru kod
+var result = await _mediator.Send(query);
+Response.Headers.Add("X-Response-Time-Ms", elapsedMs.ToString());
+return Ok(result);
 ```
 
-### Sorun: Dosya Yükleme İşlemlerinde FormData Hatası
+### Sorun: AsNoTracking Kullanımı Sonrası İlişkili Veri Güncellemesi
+
 **Hata Mesajı:**
-- Argument of type 'File' is not assignable to parameter of type 'FormData'.
+```
+System.InvalidOperationException: The instance of entity type 'User' cannot be tracked because another instance with the same key value is already being tracked.
+```
+
+**Açıklama:**
+`AsNoTracking()` kullanılan bir sorgu sonrası, aynı entity'nin başka bir sorgu ile izlenen versiyonu üzerinde işlem yapılmaya çalışıldığında hata oluştu.
 
 **Çözüm:**
-FormData nesnesini doğru şekilde oluşturup, dosyayı ekledik:
+Salt okunur sorgular için `AsNoTracking()` kullanılırken, güncelleme işlemleri için ayrı sorgular oluşturuldu.
 
-```typescript
-// Önceki kod
-return this.http.post(`${this.endpoint}/profile-picture/${userId}`, file);
+```csharp
+// Hatalı yaklaşım
+var users = await _dbSet.AsNoTracking().Include(u => u.Role).ToListAsync();
+foreach (var user in users)
+{
+    user.IsAdmin = true;
+    await UpdateAsync(user);
+}
 
-// Yeni kod
-const formData = new FormData();
-formData.append('file', file);
-return this.uploadFile(`${this.endpoint}/profile-picture/${userId}`, formData);
+// Doğru yaklaşım
+var userIds = await _dbSet.AsNoTracking().Select(u => u.Id).ToListAsync();
+foreach (var userId in userIds)
+{
+    var user = await GetByIdAsync(userId);
+    user.IsAdmin = true;
+}
 ```
 
-// ... existing code ...
+### Sorun: Projection ile İlişkili Veri Oluşturma Hatası
+
+**Hata Mesajı:**
+```
+System.InvalidOperationException: The entity type 'Role' is part of a relationship with 'User' but it does not have a required defining navigation.
+```
+
+**Açıklama:**
+`GetUserSummariesAsync` metodunda, projection ile yeni `User` ve `Role` nesneleri oluşturulurken ilişki kurulumu hatalı yapıldı.
+
+**Çözüm:**
+Projection sonucu oluşturulan nesnelerin ilişkilerinin doğru kurulması sağlandı.
+
+```csharp
