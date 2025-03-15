@@ -1773,3 +1773,96 @@ if (builder.Environment.IsDevelopment())
 3. Geliştirme ortamı için User Secrets kullanmak, hassas bilgileri kaynak kontrolünden uzak tutmaya yardımcı olur.
 4. Üretim ortamı için Azure Key Vault, AWS Secrets Manager gibi güvenli depolama çözümleri kullanmak önemlidir.
 5. Bağlantı dizesi şifrelerini düzenli olarak değiştirmek, güvenliği artırır.
+
+## BaseHttpService Entegrasyonu Sorunları
+
+### Sorun: PasswordService'de handleError Metodu Çakışması
+**Hata Mesajı:** 
+- Class 'PasswordService' incorrectly extends base class 'BaseHttpService' due to a private property 'handleError'.
+- A member must have an 'override' modifier because it overrides a member in the base class.
+- Cannot find name 'HttpErrorResponse'.
+
+**Çözüm:**
+1. PasswordService'deki handleError metodunu kaldırdık.
+2. BaseHttpService'den gelen hata yönetimi metodunu kullandık.
+3. Gerekli import'ları ekledik.
+
+```typescript
+// Önceki hatalı kod
+private handleError(error: any): Observable<never> {
+  console.error('Password service error:', error);
+  return throwError(() => error);
+}
+
+// Çözüm: handleError metodunu kaldırıp, BaseHttpService'den gelen metodu kullanmak
+```
+
+### Sorun: Servislerde Constructor Parametrelerinde Override Hatası
+**Hata Mesajı:**
+- Parameter 'http' implicitly has an 'any' type.
+- Parameter 'authService' implicitly has an 'any' type.
+
+**Çözüm:**
+Constructor parametrelerini `protected override` olarak tanımladık:
+
+```typescript
+constructor(
+  protected override http: HttpClient,
+  protected override authService: AuthService
+) {
+  super(http, authService);
+}
+```
+
+### Sorun: Endpoint Tanımlarında Tutarsızlık
+**Hata Mesajı:**
+- Property 'apiUrl' does not exist on type 'BaseHttpService'.
+
+**Çözüm:**
+Tüm servislerde `private apiUrl` yerine `private endpoint` kullanıldı:
+
+```typescript
+// Önceki kod
+private apiUrl = 'api/roles';
+
+// Yeni kod
+private endpoint = 'api/roles';
+```
+
+### Sorun: Dosya İndirme İşlemlerinde ResponseType Hatası
+**Hata Mesajı:**
+- Type 'string' is not assignable to type 'ResponseType'.
+
+**Çözüm:**
+ResponseType için doğru tip tanımlaması yapıldı:
+
+```typescript
+// Önceki kod
+return this.http.get(`${this.endpoint}/profile-picture/${userId}`, {
+  responseType: 'blob'
+});
+
+// Yeni kod
+return this.http.get(`${this.endpoint}/profile-picture/${userId}`, {
+  responseType: 'blob' as 'blob'
+});
+```
+
+### Sorun: Dosya Yükleme İşlemlerinde FormData Hatası
+**Hata Mesajı:**
+- Argument of type 'File' is not assignable to parameter of type 'FormData'.
+
+**Çözüm:**
+FormData nesnesini doğru şekilde oluşturup, dosyayı ekledik:
+
+```typescript
+// Önceki kod
+return this.http.post(`${this.endpoint}/profile-picture/${userId}`, file);
+
+// Yeni kod
+const formData = new FormData();
+formData.append('file', file);
+return this.uploadFile(`${this.endpoint}/profile-picture/${userId}`, formData);
+```
+
+// ... existing code ...

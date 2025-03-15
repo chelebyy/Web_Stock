@@ -4,8 +4,8 @@ import { Observable, of, throwError } from 'rxjs';
 import { catchError, map } from 'rxjs/operators';
 import { User } from '../shared/models/user.model';
 import { CreateUserRequest } from '../core/authentication/auth.model';
-import { environment } from '../../environments/environment';
 import { AuthService } from '../core/authentication/auth.service';
+import { BaseHttpService } from '../core/services/base-http.service';
 
 // HTTP durum kodları için sabitler
 export const HttpStatusCodes = {
@@ -27,71 +27,28 @@ export const ErrorCodes = {
 @Injectable({
   providedIn: 'root'
 })
-export class UserService {
-  private apiUrl = `${environment.apiUrl}/api`;
+export class UserService extends BaseHttpService {
+  private usersEndpoint = '/api/Users';
+  private authEndpoint = '/api/auth';
 
   constructor(
-    private http: HttpClient,
-    private authService: AuthService
-  ) { }
-
-  // HTTP Headers oluştur
-  private getHeaders(): HttpHeaders {
-    const token = this.authService.getToken();
-    
-    return new HttpHeaders({
-      'Content-Type': 'application/json',
-      'Authorization': `Bearer ${token}`
-    });
+    protected override http: HttpClient,
+    protected override authService: AuthService
+  ) {
+    super(http, authService);
   }
 
   getUsers(): Observable<User[]> {
-    const options = { headers: this.getHeaders() };
-    
-    return this.http.get<any>(`${this.apiUrl}/Users`, options)
-      .pipe(
-        map(response => {
-          // ReferenceHandler.Preserve formatını işle ($id ve $values)
-          if (response && response.$values && Array.isArray(response.$values)) {
-            return response.$values as User[];
-          }
-          
-          // Normal dizi yanıtını işle
-          if (Array.isArray(response) && response.length > 0) {
-            return response as User[];
-          } else if (Array.isArray(response) && response.length === 0) {
-            return [] as User[];
-          } else {
-            // Diğer olası formatlara bak
-            if (response && typeof response === 'object') {
-              // value ya da Value içinde olabilir
-              if (response.value && Array.isArray(response.value)) {
-                return response.value as User[];
-              }
-              
-              if (response.Value && Array.isArray(response.Value)) {
-                return response.Value as User[];
-              }
-              
-              // Yanıt doğrudan bir nesne ise ve kullanıcı gibi görünüyorsa
-              if ('username' in response || 'id' in response) {
-                return [response as User];
-              }
-            }
-            
-            return [] as User[];
-          }
-        }),
-        catchError(error => {
-          // Boş dizi döndür ki uygulama çökmeden devam edebilsin
-          return of([] as User[]);
-        })
-      );
+    return this.get<User[]>(this.usersEndpoint).pipe(
+      catchError(error => {
+        // Boş dizi döndür ki uygulama çökmeden devam edebilsin
+        return of([] as User[]);
+      })
+    );
   }
 
   getUser(id: number): Observable<User> {
-    const options = { headers: this.getHeaders() };
-    return this.http.get<User>(`${this.apiUrl}/Users/${id}`, options);
+    return this.get<User>(`${this.usersEndpoint}/${id}`);
   }
 
   getUserById(id: number): Observable<User> {
@@ -138,8 +95,7 @@ export class UserService {
       return throwError(() => new Error('Sicil numarası boş olamaz'));
     }
     
-    const options = { headers: this.getHeaders() };
-    return this.http.post<any>(`${this.apiUrl}/auth/create-user`, createUserRequest, options)
+    return this.post<any>(`${this.authEndpoint}/create-user`, createUserRequest)
       .pipe(
         catchError(error => {
           // Hata mesajını düzenle
@@ -184,13 +140,11 @@ export class UserService {
   }
 
   updateUser(id: number, user: User): Observable<void> {
-    const options = { headers: this.getHeaders() };
-    return this.http.put<void>(`${this.apiUrl}/Users/${id}`, user, options);
+    return this.put<void>(`${this.usersEndpoint}/${id}`, user);
   }
 
   deleteUser(id: number): Observable<void> {
-    const options = { headers: this.getHeaders() };
-    return this.http.delete<void>(`${this.apiUrl}/Users/${id}`, options);
+    return this.delete<void>(`${this.usersEndpoint}/${id}`);
   }
 
   /**
@@ -199,9 +153,7 @@ export class UserService {
    * @returns Profil resmi blob verisi
    */
   getUserProfilePicture(userId: number): Observable<Blob> {
-    return this.http.get(`${this.apiUrl}/users/${userId}/profile-picture`, {
-      responseType: 'blob'
-    });
+    return this.downloadFile(`${this.usersEndpoint}/${userId}/profile-picture`);
   }
 
   /**
@@ -211,9 +163,6 @@ export class UserService {
    * @returns API yanıtı
    */
   updateProfilePicture(userId: number, file: File): Observable<any> {
-    const formData = new FormData();
-    formData.append('file', file);
-    
-    return this.http.post(`${this.apiUrl}/users/${userId}/profile-picture`, formData);
+    return this.uploadFile<any>(`${this.usersEndpoint}/${userId}/profile-picture`, file);
   }
 }

@@ -1,111 +1,63 @@
 import { Injectable } from '@angular/core';
-import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import { environment } from '../../environments/environment';
 import { Permission } from '../shared/models/permission.model';
 import { UserPermission } from '../shared/models/user-permission.model';
-import { map, catchError } from 'rxjs/operators';
 import { AuthService } from '../core/authentication/auth.service';
-import { HttpStatusCodes } from './user.service';
+import { BaseHttpService } from '../core/services/base-http.service';
 
 @Injectable({
   providedIn: 'root'
 })
-export class UserPermissionService {
-  private apiUrl = `${environment.apiUrl}/api/UserPermission`;
+export class UserPermissionService extends BaseHttpService {
+  private endpoint = '/api/UserPermission';
 
   constructor(
-    private http: HttpClient,
-    private authService: AuthService
-  ) { }
-
-  // HTTP Headers oluştur
-  private getHeaders(): HttpHeaders {
-    const token = this.authService.getToken();
-    
-    return new HttpHeaders({
-      'Content-Type': 'application/json',
-      'Authorization': `Bearer ${token}`
-    });
-  }
-
-  // API yanıtını normalize et
-  private normalizeResponse<T>(response: any): T[] {
-    if (!response) return [];
-    
-    // $values dizisi varsa (ReferenceHandler.Preserve formatı)
-    if (response.$values && Array.isArray(response.$values)) {
-      return response.$values as T[];
-    } 
-    // Dizi ise doğrudan döndür
-    else if (Array.isArray(response)) {
-      return response as T[];
-    } 
-    // Başka özelliklerde veri varsa
-    else if (response && typeof response === 'object') {
-      // value ya da Value içinde olabilir
-      if (response.value && Array.isArray(response.value)) {
-        return response.value as T[];
-      }
-      
-      if (response.Value && Array.isArray(response.Value)) {
-        return response.Value as T[];
-      }
-    }
-    
-    // Son çare: boş dizi döndür
-    return [];
+    protected override http: HttpClient,
+    protected override authService: AuthService
+  ) {
+    super(http, authService);
   }
 
   /**
    * Kullanıcının tüm izinlerini getirir (rol izinleri + özel izinler)
    */
   getUserPermissions(userId: number): Observable<Permission[]> {
-    const options = { headers: this.getHeaders() };
-    return this.http.get<any>(`${this.apiUrl}/user/${userId}`, options).pipe(
-      map(response => this.normalizeResponse<Permission>(response))
-    );
+    return this.get<Permission[]>(`${this.endpoint}/user/${userId}`);
   }
 
   /**
    * Kullanıcının sadece özel izinlerini getirir
    */
   getUserCustomPermissions(userId: number): Observable<UserPermission[]> {
-    const options = { headers: this.getHeaders() };
-    return this.http.get<any>(`${this.apiUrl}/user/${userId}/custom`, options).pipe(
-      map(response => this.normalizeResponse<UserPermission>(response))
-    );
+    return this.get<UserPermission[]>(`${this.endpoint}/user/${userId}/custom`);
   }
 
   /**
    * Kullanıcıya izin atar
    */
   assignPermissionToUser(userId: number, permissionId: number, isGranted: boolean = true): Observable<any> {
-    const options = { headers: this.getHeaders() };
-    return this.http.post(`${this.apiUrl}/user/${userId}/permission/${permissionId}?isGranted=${isGranted}`, {}, options);
+    return this.post<any>(`${this.endpoint}/user/${userId}/permission/${permissionId}?isGranted=${isGranted}`, {});
   }
 
   /**
    * Kullanıcıdan özel izni kaldırır
    */
   removeUserPermission(userId: number, permissionId: number): Observable<any> {
-    const options = { headers: this.getHeaders() };
-    return this.http.delete(`${this.apiUrl}/user/${userId}/permission/${permissionId}`, options);
+    return this.delete<any>(`${this.endpoint}/user/${userId}/permission/${permissionId}`);
   }
 
   /**
    * Kullanıcının tüm özel izinlerini kaldırarak rol izinlerine sıfırlar
    */
   resetUserToRolePermissions(userId: number): Observable<any> {
-    const options = { headers: this.getHeaders() };
-    return this.http.post(`${this.apiUrl}/user/${userId}/reset`, {}, options);
+    return this.post<any>(`${this.endpoint}/user/${userId}/reset`, {});
   }
 
   /**
    * Kullanıcının belirli bir izne sahip olup olmadığını kontrol eder
    */
   hasPermission(userId: number, permissionName: string): Observable<boolean> {
-    const options = { headers: this.getHeaders() };
-    return this.http.get<boolean>(`${this.apiUrl}/user/${userId}/check/${permissionName}`, options);
+    return this.get<boolean>(`${this.endpoint}/user/${userId}/check/${permissionName}`);
   }
 } 
