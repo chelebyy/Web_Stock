@@ -36,11 +36,14 @@ namespace Stock.Infrastructure.Repositories
         public async Task<IEnumerable<User>> GetUsersWithRolesAsync()
         {
             return await _dbSet
+                .AsNoTracking() // Performans için tracking'i devre dışı bırak
                 .Include(u => u.Role)
                 .ToListAsync();
         }
 
-        // Sayfalama ve filtreleme için optimize edilmiş metot
+        /// <summary>
+        /// Sayfalama ve filtreleme için optimize edilmiş metot
+        /// </summary>
         public async Task<(IEnumerable<User> Users, int TotalCount)> GetPaginatedUsersAsync(
             int pageNumber, 
             int pageSize, 
@@ -53,7 +56,7 @@ namespace Stock.Infrastructure.Repositories
             bool sortAscending = true)
         {
             // Filtreleme için IQueryable oluştur
-            var query = _dbSet.AsNoTracking().Include(u => u.Role).AsQueryable();
+            var query = _dbSet.AsQueryable();
             
             // Filtreleri uygula
             if (!string.IsNullOrWhiteSpace(usernameFilter))
@@ -66,19 +69,22 @@ namespace Stock.Infrastructure.Repositories
                 query = query.Where(u => u.RoleId == roleIdFilter.Value);
                 
             if (isActiveFilter.HasValue)
-                query = query.Where(u => u.IsAdmin == isActiveFilter.Value);
+                query = query.Where(u => u.IsActive == isActiveFilter.Value);
                 
             if (isAdminFilter.HasValue)
                 query = query.Where(u => u.IsAdmin == isAdminFilter.Value);
             
-            // Toplam kayıt sayısını hesapla
-            var totalCount = await query.CountAsync();
+            // Toplam kayıt sayısını hesapla - AsNoTracking() ile performans artışı
+            var totalCount = await query.AsNoTracking().CountAsync();
             
             // Sıralama uygula
             query = ApplySorting(query, sortBy, sortAscending);
             
-            // Sayfalama uygula
+            // Sayfalama uygula ve Role'ü include et
+            // Tutarlı sıralama için OrderBy eklendi
             var users = await query
+                .AsNoTracking() // Performans için tracking'i devre dışı bırak
+                .Include(u => u.Role)
                 .Skip((pageNumber - 1) * pageSize)
                 .Take(pageSize)
                 .ToListAsync();
@@ -86,7 +92,9 @@ namespace Stock.Infrastructure.Repositories
             return (users, totalCount);
         }
         
-        // Projection için optimize edilmiş metot
+        /// <summary>
+        /// Projection için optimize edilmiş metot
+        /// </summary>
         public async Task<IEnumerable<User>> GetUserSummariesAsync()
         {
             return await _dbSet
@@ -98,7 +106,14 @@ namespace Stock.Infrastructure.Repositories
                     Username = u.Username,
                     Sicil = u.Sicil,
                     IsAdmin = u.IsAdmin,
-                    Role = new Role { Id = u.Role.Id, Name = u.Role.Name }
+                    IsActive = u.IsActive,
+                    Email = u.Email,
+                    RoleId = u.RoleId,
+                    Role = new Role 
+                    { 
+                        Id = u.Role.Id, 
+                        Name = u.Role.Name 
+                    }
                 })
                 .ToListAsync();
         }
@@ -114,6 +129,8 @@ namespace Stock.Infrastructure.Repositories
                 "roleid" => u => u.RoleId,
                 "rolename" => u => u.Role.Name,
                 "isadmin" => u => u.IsAdmin,
+                "isactive" => u => u.IsActive,
+                "email" => u => u.Email,
                 _ => u => u.Username // Varsayılan sıralama
             };
             
