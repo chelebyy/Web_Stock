@@ -34,6 +34,19 @@ namespace Stock.API.Controllers
         private const string USERS_PERMISSIONS_REMOVE = "Users.Permissions.Remove";
         private const string USERS_PERMISSIONS_RESET = "Users.Permissions.Reset";
         private const string PERMISSIONS_CHECK = "Permissions.Check";
+        private const string ERROR_PERMISSION_NOT_FOUND = "İzin bulunamadı.";
+        private const string ERROR_USER_NOT_FOUND = "Kullanıcı bulunamadı.";
+        private const string ERROR_ROLE_NOT_FOUND = "Rol bulunamadı.";
+        private const string SUCCESS_PERMISSIONS_ADDED = "Eksik izinler başarıyla eklendi.";
+        private const string PERMISSION_REVIR_VIEW = "Pages.Revir.View";
+        private const string PERMISSION_BILGIISLEM_VIEW = "Pages.BilgiIslem.View";
+        private const string PERMISSION_GROUP_PAGE_ACCESS = "Sayfa Erişimi";
+        private const string RESOURCE_TYPE_PAGE = "Page";
+        private const string ACTION_VIEW = "View";
+        private const string RESOURCE_NAME_REVIR = "Revir";
+        private const string RESOURCE_NAME_BILGIISLEM = "BilgiIslem";
+        private const string LOG_PERMISSION_ADDED = "{0} izni eklendi";
+        private const string LOG_ERROR_MISSING_PERMISSIONS = "Eksik izinler eklenirken bir hata oluştu";
 
         public PermissionsController(
             IPermissionService permissionService,
@@ -153,51 +166,51 @@ namespace Stock.API.Controllers
             {
                 // Revir izni ekle
                 var revirPermission = await _context.Permissions
-                    .FirstOrDefaultAsync(p => p.Name == "Pages.Revir.View");
+                    .FirstOrDefaultAsync(p => p.Name == PERMISSION_REVIR_VIEW);
                 
                 if (revirPermission == null)
                 {
                     _context.Permissions.Add(new Stock.Domain.Entities.Permissions.Permission
                     {
-                        Name = "Pages.Revir.View",
+                        Name = PERMISSION_REVIR_VIEW,
                         Description = "Revir sayfasını görüntüleme",
-                        Group = "Sayfa Erişimi",
-                        ResourceType = "Page",
-                        ResourceName = "Revir",
-                        Action = "View",
+                        Group = PERMISSION_GROUP_PAGE_ACCESS,
+                        ResourceType = RESOURCE_TYPE_PAGE,
+                        ResourceName = RESOURCE_NAME_REVIR,
+                        Action = ACTION_VIEW,
                         CreatedAt = DateTime.UtcNow
                     });
                     
-                    _logger.LogInformation("Pages.Revir.View izni eklendi");
+                    _logger.LogInformation(string.Format(LOG_PERMISSION_ADDED, PERMISSION_REVIR_VIEW));
                 }
                 
                 // Bilgi İşlem izni ekle
                 var bilgiIslemPermission = await _context.Permissions
-                    .FirstOrDefaultAsync(p => p.Name == "Pages.BilgiIslem.View");
+                    .FirstOrDefaultAsync(p => p.Name == PERMISSION_BILGIISLEM_VIEW);
                 
                 if (bilgiIslemPermission == null)
                 {
                     _context.Permissions.Add(new Stock.Domain.Entities.Permissions.Permission
                     {
-                        Name = "Pages.BilgiIslem.View",
+                        Name = PERMISSION_BILGIISLEM_VIEW,
                         Description = "Bilgi İşlem sayfasını görüntüleme",
-                        Group = "Sayfa Erişimi",
-                        ResourceType = "Page",
-                        ResourceName = "BilgiIslem",
-                        Action = "View",
+                        Group = PERMISSION_GROUP_PAGE_ACCESS,
+                        ResourceType = RESOURCE_TYPE_PAGE,
+                        ResourceName = RESOURCE_NAME_BILGIISLEM,
+                        Action = ACTION_VIEW,
                         CreatedAt = DateTime.UtcNow
                     });
                     
-                    _logger.LogInformation("Pages.BilgiIslem.View izni eklendi");
+                    _logger.LogInformation(string.Format(LOG_PERMISSION_ADDED, PERMISSION_BILGIISLEM_VIEW));
                 }
                 
                 await _context.SaveChangesAsync();
                 
-                return Ok(new { message = "Eksik izinler başarıyla eklendi" });
+                return Ok(new { message = SUCCESS_PERMISSIONS_ADDED });
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Eksik izinler eklenirken bir hata oluştu");
+                _logger.LogError(ex, LOG_ERROR_MISSING_PERMISSIONS);
                 return StatusCode(StatusCodes.Status500InternalServerError, string.Format(ERROR_MISSING_PERMISSIONS, ex.Message));
             }
         }
