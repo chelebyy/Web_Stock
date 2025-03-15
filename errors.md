@@ -1331,3 +1331,40 @@ System.InvalidOperationException: The entity type 'Role' is part of a relationsh
 Projection sonucu oluşturulan nesnelerin ilişkilerinin doğru kurulması sağlandı.
 
 ```csharp
+```
+
+## Magic String'lerin Sabit Değişkenlere Dönüştürülmesi
+
+### Sorun
+Controller sınıflarında çok sayıda magic string kullanılmıştı. Bu durum kodun okunabilirliğini ve bakımını zorlaştırıyordu. Ayrıca, aynı string'in farklı yerlerde tekrar kullanılması durumunda yazım hataları oluşabiliyordu.
+
+### Çözüm
+Controller sınıflarındaki magic string'ler sabit değişkenlere (const) dönüştürüldü. Bu sayede:
+1. Kod daha okunabilir hale geldi
+2. Yazım hataları önlendi
+3. Değişiklik yapılması gerektiğinde tek bir yerden değişiklik yapılabilir oldu
+
+### Teknik Detaylar
+- `PermissionsController.cs` dosyasında bulunan magic string'ler sabit değişkenlere dönüştürüldü:
+  - İzin adları (örn. "Pages.Revir.View" -> `PERMISSION_REVIR_VIEW`)
+  - Kaynak tipleri (örn. "Page" -> `RESOURCE_TYPE_PAGE`)
+  - Eylem tipleri (örn. "View" -> `ACTION_VIEW`)
+  - Hata mesajları (örn. "İzin bulunamadı." -> `ERROR_PERMISSION_NOT_FOUND`)
+  - Log mesajları (örn. "Eksik izinler eklenirken bir hata oluştu" -> `LOG_ERROR_MISSING_PERMISSIONS`)
+
+### Faydalar
+- Kod daha okunabilir ve bakımı daha kolay hale geldi
+- Yazım hataları önlendi
+- Değişiklik yapılması gerektiğinde tek bir yerden değişiklik yapılabilir oldu
+- IDE'nin otomatik tamamlama özelliği sayesinde geliştirme süreci hızlandı
+
+### Örnek Kullanım
+```csharp
+// Önceki kullanım
+var revirPermission = await _context.Permissions
+    .FirstOrDefaultAsync(p => p.Name == "Pages.Revir.View");
+
+// Yeni kullanım
+var revirPermission = await _context.Permissions
+    .FirstOrDefaultAsync(p => p.Name == PERMISSION_REVIR_VIEW);
+```
