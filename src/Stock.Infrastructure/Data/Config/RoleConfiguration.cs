@@ -30,6 +30,10 @@ namespace Stock.Infrastructure.Data.Config
                 .IsUnique();
 
             builder.HasIndex(x => x.IsDeleted);
+            
+            builder.HasIndex(x => x.CreatedAt);
+            
+            builder.HasIndex(x => new { x.IsDeleted, x.Name });
         }
     }
 } 

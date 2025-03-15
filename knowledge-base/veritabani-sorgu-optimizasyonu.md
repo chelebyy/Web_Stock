@@ -216,6 +216,97 @@ public async Task<(IEnumerable<User> Users, int TotalCount)> GetPaginatedUsersAs
 }
 ```
 
+### RoleRepository Optimizasyonu
+
+RoleRepository sınıfında yapılan optimizasyonlar:
+
+1. Tüm okuma metodlarına `AsNoTracking()` eklendi:
+   - **GetByNameAsync**
+   - **GetRolesWithUsersAsync**
+   - **GetByIdAsync**
+   - **GetAllAsync**
+
+2. **GetRolesWithUsersAsync** metodunda:
+   - Sadece silinmemiş kullanıcıları dahil etmek için filtreleme eklendi
+   - `AsNoTracking()` kullanılarak performans artırıldı
+
+3. **GetAllAsync** metodunda:
+   - Sadece silinmemiş rolleri getirmek için filtreleme eklendi
+   - İsme göre sıralama eklendi
+   - `AsNoTracking()` kullanılarak performans artırıldı
+
+4. **GetPaginatedRolesAsync** metodu eklendi:
+   - Sayfalama ve filtreleme desteği
+   - İsteğe bağlı kullanıcı dahil etme
+   - Dinamik sıralama
+   - Performans için `AsNoTracking()` kullanımı
+
+```csharp
+// GetPaginatedRolesAsync metodunun implementasyonu
+public async Task<(IEnumerable<Role> Roles, int TotalCount)> GetPaginatedRolesAsync(
+    int pageNumber, 
+    int pageSize, 
+    string nameFilter = null,
+    bool includeUsers = false,
+    string sortBy = "Name",
+    bool sortAscending = true)
+{
+    // Filtreleme için IQueryable oluştur
+    var query = _dbSet.AsQueryable();
+    
+    // Filtreleri uygula
+    if (!string.IsNullOrWhiteSpace(nameFilter))
+        query = query.Where(r => r.Name.Contains(nameFilter));
+        
+    // Sadece silinmemiş rolleri getir
+    query = query.Where(r => !r.IsDeleted);
+    
+    // Toplam kayıt sayısını hesapla - AsNoTracking() ile performans artışı
+    var totalCount = await query.AsNoTracking().CountAsync();
+    
+    // Sıralama uygula
+    query = sortBy?.ToLower() switch
+    {
+        "id" => sortAscending ? query.OrderBy(r => r.Id) : query.OrderByDescending(r => r.Id),
+        "description" => sortAscending ? query.OrderBy(r => r.Description) : query.OrderByDescending(r => r.Description),
+        "createdat" => sortAscending ? query.OrderBy(r => r.CreatedAt) : query.OrderByDescending(r => r.CreatedAt),
+        _ => sortAscending ? query.OrderBy(r => r.Name) : query.OrderByDescending(r => r.Name) // Varsayılan sıralama
+    };
+    
+    // Kullanıcıları dahil et
+    if (includeUsers)
+        query = query.Include(r => r.Users.Where(u => !u.IsDeleted));
+    
+    // Sayfalama uygula
+    var roles = await query
+        .AsNoTracking() // Performans için tracking'i devre dışı bırak
+        .Skip((pageNumber - 1) * pageSize)
+        .Take(pageSize)
+        .ToListAsync();
+        
+    return (roles, totalCount);
+}
+```
+
+5. **RoleConfiguration** sınıfında indeksler eklendi:
+   - `CreatedAt` alanı için indeks
+   - `IsDeleted` ve `Name` alanları için bileşik indeks
+
+```csharp
+// RoleConfiguration sınıfında indeks tanımlamaları
+// Tekil indeksler
+builder.HasIndex(x => x.Name)
+    .IsUnique();
+
+builder.HasIndex(x => x.IsDeleted);
+
+// Performans için ek indeksler
+builder.HasIndex(x => x.CreatedAt);
+
+// Bileşik indeksler - sık kullanılan filtreleme kombinasyonları için
+builder.HasIndex(x => new { x.IsDeleted, x.Name });
+```
+
 ## Performans Karşılaştırması
 
 Yapılan optimizasyonların performans etkisini ölçmek için bazı testler yapıldı. Aşağıdaki tablo, optimizasyon öncesi ve sonrası performans karşılaştırmasını göstermektedir:
