@@ -40,6 +40,7 @@ Bu dosya, proje geliştirme sürecinde karşılaşılan hataları ve çözümler
 - [Dashboard Management Modülü Hataları](#dashboard-management-modülü-hataları)
 - [PrimeNG Tablo Bileşenleri Koyu Tema Sorunları](#primeNG-tablo-bileşenleri-koyu-tema-sorunları)
 - [Sorun: Sicil Numarası Benzersizlik Kısıtlaması Hatası](#sorun-sicil-numarası-benzersizlik-kısıtlaması-hatası)
+- [Backend Derleme Hataları (2023-11-15)](#backend-derleme-hataları-2023-11-15)
 
 ## Kullanıcı Aktivitesi Grafiği Yerine Log Kaydetme Sistemi
 
@@ -2133,3 +2134,21 @@ if (existingUserWithSameSicil) {
 2. Benzersizlik kısıtlamaları eklerken, veritabanında tekrarlanan değerler olup olmadığını kontrol etmek önemlidir.
 3. Frontend ve backend tarafında tutarlı veri doğrulama kontrolleri yapılmalıdır.
 4. Veritabanı değişiklikleri için migration oluşturmadan önce, değişikliklerin etkilerini analiz etmek gerekir.
+
+## Backend Derleme Hataları (2023-11-15)
+
+### Sorun
+Backend projesi derleme hataları veriyordu. Aşağıdaki sorunlar tespit edildi:
+1. `BaseEntity` sınıfındaki `IsDeleted` ve `CreatedAt` gibi özelliklerin erişim düzeyi sorunları
+2. `IUserRepository` arayüzünde eksik olan `DeleteAsync` ve `UpdateAsync` metotları
+3. `GetPaginatedUsersQueryHandler` sınıfında metot çağrılarında belirsizlik
+
+### Çözüm
+1. `BaseEntity` sınıfındaki özelliklerin erişim düzeylerini `protected set` yerine `set` olarak değiştirdik, böylece bu özelliklere dışarıdan erişim sağlandı.
+2. `IUserRepository` arayüzüne eksik olan `DeleteAsync` ve `UpdateAsync` metotlarını ekledik.
+3. `GetPaginatedUsersQueryHandler` sınıfında metot çağrılarını daha açık hale getirdik ve eksik `using` direktiflerini ekledik.
+
+### Öğrenilen Dersler
+- Arayüzleri genişletirken, bu arayüzleri kullanan tüm sınıfların etkilenebileceğini göz önünde bulundurmak gerekir.
+- Varlık sınıflarındaki erişim düzeyleri, bu varlıkları kullanan servisler ve depolar için önemlidir.
+- Metot çağrılarında belirsizlik olduğunda, parametreleri açıkça belirtmek daha iyi bir yaklaşımdır.
