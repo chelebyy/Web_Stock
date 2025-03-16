@@ -13,6 +13,13 @@ using NLog.Web;
 using System.IO;
 using Stock.API.Middleware;
 using Stock.Infrastructure.Extensions;
+using System;
+using Microsoft.AspNetCore.Builder;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
+using LogLevel = Microsoft.Extensions.Logging.LogLevel;
+using Stock.API.Extensions;
 
 // NLog yapılandırmasını yükle
 var logger = NLogBuilder.ConfigureNLog("nlog.config").GetCurrentClassLogger();
@@ -22,9 +29,11 @@ try
 {
     var builder = WebApplication.CreateBuilder(args);
 
-    // Logs klasörünü oluştur
-    Directory.CreateDirectory("logs");
-    Directory.CreateDirectory("logs/archives");
+    // NLog yapılandırması
+    LogManager.LoadConfiguration(string.Concat(Directory.GetCurrentDirectory(), "/nlog.config"));
+
+    // Log klasörlerini oluştur
+    EnsureLogDirectoryExists();
 
     // NLog'u yapılandır
     builder.Logging.ClearProviders();
@@ -41,24 +50,7 @@ try
     builder.Services.AddInfrastructure(builder.Configuration);
 
     // JWT yapılandırması
-    builder.Services.AddAuthentication(options =>
-    {
-        options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-        options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
-    })
-    .AddJwtBearer(options =>
-    {
-        options.TokenValidationParameters = new TokenValidationParameters
-        {
-            ValidateIssuer = true,
-            ValidateAudience = true,
-            ValidateLifetime = true,
-            ValidateIssuerSigningKey = true,
-            ValidIssuer = builder.Configuration["Jwt:Issuer"],
-            ValidAudience = builder.Configuration["Jwt:Audience"],
-            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"]))
-        };
-    });
+    builder.Services.ConfigureJWT(builder.Configuration);
 
     // JSON serialization ayarları
     builder.Services.AddControllers()
@@ -75,7 +67,13 @@ try
     // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
     builder.Services.AddEndpointsApiExplorer();
     builder.Services.AddSwaggerGen();
-    builder.Services.AddCors();
+    builder.Services.AddCors(options =>
+    {
+        options.AddPolicy("AllowAll", builder =>
+            builder.AllowAnyOrigin()
+                   .AllowAnyMethod()
+                   .AllowAnyHeader());
+    });
     builder.Services.AddHttpContextAccessor();
 
     var app = builder.Build();
@@ -112,10 +110,7 @@ try
     }
 
     // CORS politikasını ekle
-    app.UseCors(builder => builder
-        .AllowAnyOrigin()
-        .AllowAnyMethod()
-        .AllowAnyHeader());
+    app.UseCors("AllowAll");
 
     app.UseHttpsRedirection();
 
@@ -140,4 +135,17 @@ finally
 {
     // NLog'u düzgün şekilde kapat
     LogManager.Shutdown();
+}
+
+void EnsureLogDirectoryExists()
+{
+    var logDirectories = new[] { "logs", "logs/archive" };
+    foreach (var dir in logDirectories)
+    {
+        var path = Path.Combine(Directory.GetCurrentDirectory(), dir);
+        if (!Directory.Exists(path))
+        {
+            Directory.CreateDirectory(path);
+        }
+    }
 }

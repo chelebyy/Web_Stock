@@ -1,34 +1,25 @@
-using FluentValidation;
-using MediatR;
-using Microsoft.Extensions.DependencyInjection;
 using System.Reflection;
+using AutoMapper;
+using Microsoft.Extensions.DependencyInjection;
+using Stock.Application.Common.Mappings;
 
 namespace Stock.Application
 {
+    /// <summary>
+    /// Application katmanı için DI yapılandırması
+    /// </summary>
     public static class DependencyInjection
     {
+        /// <summary>
+        /// Application servislerini DI container'a kaydeder
+        /// </summary>
+        /// <param name="services">Servis koleksiyonu</param>
+        /// <returns>Servis koleksiyonu</returns>
         public static IServiceCollection AddApplication(this IServiceCollection services)
         {
-            // Register AutoMapper
+            // AutoMapper yapılandırması
             services.AddAutoMapper(Assembly.GetExecutingAssembly());
-
-            // Register MediatR
-            services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(Assembly.GetExecutingAssembly()));
-
-            // Register FluentValidation
-            var assembly = Assembly.GetExecutingAssembly();
-            var validatorType = typeof(IValidator<>);
-            var validatorTypes = assembly.GetTypes()
-                .Where(t => t.GetInterfaces().Any(i => i.IsGenericType && i.GetGenericTypeDefinition() == validatorType))
-                .ToList();
-
-            foreach (var validator in validatorTypes)
-            {
-                var validatorInterface = validator.GetInterfaces()
-                    .First(i => i.IsGenericType && i.GetGenericTypeDefinition() == validatorType);
-                services.AddTransient(validatorInterface, validator);
-            }
-
+            
             return services;
         }
     }

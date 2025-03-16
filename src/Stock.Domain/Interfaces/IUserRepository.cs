@@ -4,9 +4,12 @@ using Stock.Domain.Entities;
 
 namespace Stock.Domain.Interfaces
 {
-    public interface IUserRepository : IRepository<User>
+    public interface IUserRepository : IGenericRepository<User>
     {
-        Task<User?> GetByUsernameAsync(string username);
+        Task<User> GetByUsernameAsync(string username);
+        Task<User> GetByIdWithRoleAsync(int id);
+        Task<IEnumerable<User>> GetAllWithRolesAsync();
+        Task<(IEnumerable<User> Users, int TotalCount)> GetPaginatedUsersAsync(int pageNumber, int pageSize, string searchTerm = null);
         Task<User?> GetBySicilAsync(string sicil);
         Task<IEnumerable<User>> GetUsersWithRolesAsync();
         

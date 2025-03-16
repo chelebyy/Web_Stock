@@ -12,11 +12,17 @@ using Microsoft.Extensions.Logging;
 using Microsoft.AspNetCore.Http;
 using Stock.Application.Features.Users.Queries.GetPaginatedUsers;
 using System.Diagnostics;
+using Stock.Application.Common.CQRS;
+using Stock.Application.Common.Exceptions;
+using Stock.Application.Common.Interfaces;
+using Stock.Application.Features.Users.Commands.CreateUser;
+using Stock.Application.Features.Users.Queries.GetUserById;
 
 namespace Stock.API.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize]
     public class UsersController : ControllerBase
     {
         private readonly IMediator _mediator;
@@ -118,43 +124,49 @@ namespace Stock.API.Controllers
         }
 
         [HttpGet("{id}")]
-        [Authorize]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         public async Task<IActionResult> GetById(int id)
-        {
-            _logger.LogInfo($"ID: {id} olan kullanıcı getiriliyor.");
-            var query = new GetUserByIdQuery { Id = id };
-            var result = await _mediator.Send(query);
-            
-            if (result == null)
-            {
-                _logger.LogWarn(string.Format(USER_NOT_FOUND, id));
-                return NotFound(string.Format(USER_NOT_FOUND, id));
-            }
-
-            _logger.LogInfo($"ID: {id} olan kullanıcı başarıyla getirildi.");
-            return Ok(result);
-        }
-
-        [HttpPost]
-        [Authorize(Roles = "Admin")]
-        public async Task<IActionResult> Create(Stock.Application.Features.Users.Commands.CreateUserCommand command)
         {
             try
             {
-                _logger.LogInfo("Yeni kullanıcı oluşturuluyor.");
-                var result = await _mediator.Send(command);
-                _logger.LogInfo($"ID: {result.Id} olan kullanıcı başarıyla oluşturuldu.");
-                return CreatedAtAction(nameof(GetById), new { id = result.Id }, result);
+                var query = new GetUserByIdQuery { Id = id };
+                var result = await _mediator.Send(query);
+                return Ok(result);
             }
-            catch (Exception ex) when (ex.Message.Contains("unique constraint"))
+            catch (NotFoundException ex)
             {
-                _logger.LogError($"Kullanıcı oluşturulurken benzersizlik hatası: {ex.Message}");
-                return Conflict("Bu e-posta adresi veya kullanıcı adı zaten kullanılıyor.");
+                _logger.LogWarn(ex.Message);
+                return NotFound(new { message = ex.Message });
             }
             catch (Exception ex)
             {
-                _logger.LogError(USER_CREATION_ERROR, ex);
-                return StatusCode(StatusCodes.Status500InternalServerError, USER_CREATION_ERROR);
+                _logger.LogError($"Kullanıcı getirme sırasında hata: {ex.Message}");
+                return StatusCode(StatusCodes.Status500InternalServerError, new { message = "İsteğiniz işlenirken bir hata oluştu." });
+            }
+        }
+
+        [HttpPost]
+        [ProducesResponseType(StatusCodes.Status201Created)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        public async Task<IActionResult> Create(CreateUserCommand command)
+        {
+            try
+            {
+                var userId = await _mediator.Send(command);
+                return CreatedAtAction(nameof(GetById), new { id = userId }, userId);
+            }
+            catch (ApplicationException ex)
+            {
+                _logger.LogWarn(ex.Message);
+                return BadRequest(new { message = ex.Message });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError($"Kullanıcı oluşturma sırasında hata: {ex.Message}");
+                return StatusCode(StatusCodes.Status500InternalServerError, new { message = "İsteğiniz işlenirken bir hata oluştu." });
             }
         }
 
