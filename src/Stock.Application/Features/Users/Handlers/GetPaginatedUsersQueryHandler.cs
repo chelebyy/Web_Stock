@@ -3,9 +3,11 @@ using MediatR;
 using Stock.Application.Features.Users.Queries.GetPaginatedUsers;
 using Stock.Application.Models.DTOs;
 using Stock.Domain.Interfaces;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using Stock.Application.Common.Interfaces;
 
 namespace Stock.Application.Features.Users.Handlers
 {
@@ -22,10 +24,22 @@ namespace Stock.Application.Features.Users.Handlers
 
         public async Task<PaginatedResult<UserDto>> Handle(GetPaginatedUsersQuery request, CancellationToken cancellationToken)
         {
-            var (users, totalCount) = await _unitOfWork.Users.GetPaginatedUsersAsync(request.PageNumber, request.PageSize);
-            
+            var result = await _unitOfWork.Users.GetPaginatedUsersAsync(
+                request.PageNumber,
+                request.PageSize,
+                usernameFilter: request.UsernameFilter,
+                sicilFilter: request.SicilFilter,
+                roleIdFilter: request.RoleIdFilter,
+                isActiveFilter: request.IsActiveFilter,
+                isAdminFilter: request.IsAdminFilter,
+                sortBy: request.SortBy,
+                sortAscending: request.SortAscending);
+
+            var users = result.Users;
+            var totalCount = result.TotalCount;
+
             var userDtos = _mapper.Map<IEnumerable<UserDto>>(users);
-            
+
             return new PaginatedResult<UserDto>
             {
                 Items = userDtos,

@@ -14,27 +14,27 @@ namespace Stock.Domain.Entities
         /// <summary>
         /// Entity ID
         /// </summary>
-        public int Id { get; protected set; }
+        public int Id { get; set; }
 
         /// <summary>
         /// Aktif mi?
         /// </summary>
-        public bool IsActive { get; protected set; } = true;
+        public bool IsActive { get; set; } = true;
 
         /// <summary>
         /// Silinmiş mi?
         /// </summary>
-        public bool IsDeleted { get; protected set; } = false;
+        public bool IsDeleted { get; set; } = false;
 
         /// <summary>
         /// Oluşturulma tarihi
         /// </summary>
-        public DateTime CreatedAt { get; protected set; } = DateTime.UtcNow;
+        public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
         /// <summary>
         /// Güncellenme tarihi
         /// </summary>
-        public DateTime? UpdatedAt { get; protected set; }
+        public DateTime? UpdatedAt { get; set; }
 
         /// <summary>
         /// Domain olayları

@@ -27,5 +27,9 @@ namespace Stock.Domain.Interfaces
         
         // Projection için optimize edilmiş metot
         Task<IEnumerable<User>> GetUserSummariesAsync();
+
+        // Eksik metotlar
+        Task UpdateAsync(User user);
+        Task DeleteAsync(User user);
     }
 } 
