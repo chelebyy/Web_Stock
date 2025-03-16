@@ -10,5 +10,7 @@ namespace Stock.Application.Features.Users.Commands
         public bool IsAdmin { get; set; }
         public int? RoleId { get; set; }
         public string Sicil { get; set; } = string.Empty;
+        public string Email { get; set; } = string.Empty;
+        public string FullName { get; set; } = string.Empty;
     }
 } 

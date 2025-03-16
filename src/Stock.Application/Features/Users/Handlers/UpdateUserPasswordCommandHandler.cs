@@ -44,7 +44,7 @@ namespace Stock.Application.Features.Users.Handlers
             }
 
             // Şifreyi hashle
-            string passwordHash = BCrypt.HashPassword(request.Password);
+            string passwordHash = BCrypt.Net.BCrypt.HashPassword(request.Password);
             
             // Şifreyi güncelle
             user.PasswordHash = passwordHash;
