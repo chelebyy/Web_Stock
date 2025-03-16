@@ -8,7 +8,7 @@ using Stock.Application.Features.Users.Commands;
 using Stock.Application.Models.DTOs;
 using Stock.Domain.Entities;
 using Stock.Domain.Interfaces;
-using BC = BCrypt.Net.BCrypt;
+using BCrypt.Net;
 
 namespace Stock.Application.Features.Users.Handlers
 {
@@ -44,7 +44,7 @@ namespace Stock.Application.Features.Users.Handlers
             }
 
             // Şifreyi hashle
-            string passwordHash = BC.HashPassword(request.Password);
+            string passwordHash = BCrypt.HashPassword(request.Password);
             
             // Şifreyi güncelle
             user.PasswordHash = passwordHash;
