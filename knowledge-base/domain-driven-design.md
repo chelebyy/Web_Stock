@@ -2,528 +2,308 @@
 
 ## Genel Bakış
 
-Domain-Driven Design (DDD), karmaşık yazılım projelerinde iş mantığını ve teknik uygulamayı birbirine bağlayan bir yazılım geliştirme yaklaşımıdır. Bu yaklaşım, iş mantığını domain modelleri etrafında organize ederek, kodun daha anlaşılır, bakımı daha kolay ve iş gereksinimlerine daha uygun olmasını sağlar.
+Domain-Driven Design (DDD), karmaşık yazılım projelerinde iş mantığını ve teknik uygulamayı birbirine bağlayan bir yazılım geliştirme yaklaşımıdır. Bu belge, Stock projemizde DDD prensiplerinin nasıl uygulandığını detaylandırmaktadır.
 
 ## DDD'nin Temel Prensipleri
 
-### 1. Ubiquitous Language (Yaygın Dil)
-
-Geliştirme ekibi ve domain uzmanları arasında ortak bir dil oluşturulması, iletişim sorunlarını azaltır ve herkesin aynı terminolojiyi kullanmasını sağlar.
-
-- **Uygulama**: Tüm kod tabanında, veritabanı şemalarında, API'lerde ve dokümantasyonda tutarlı bir terminoloji kullanılacak.
-- **Örnek**: "Kullanıcı" yerine "Personel" veya "Çalışan" gibi domain-spesifik terimler kullanılacak.
-
-### 2. Bounded Contexts (Sınırlı Bağlamlar)
-
-Büyük ve karmaşık domainleri daha küçük, yönetilebilir parçalara bölmek, her bir parçanın kendi modelini ve sınırlarını tanımlamasını sağlar.
-
-- **Uygulama**: Projemiz için şu bounded context'ler tanımlanacak:
-  - Kullanıcı Yönetimi
-  - Stok Yönetimi
-  - Sipariş İşleme
-  - Raporlama
-- **Örnek**: "Kullanıcı" kavramı, Kullanıcı Yönetimi bağlamında tam profil bilgileriyle, Sipariş İşleme bağlamında ise sadece temel bilgilerle temsil edilebilir.
-
-### 3. Entities (Varlıklar)
-
-Kimliği olan ve yaşam döngüsü boyunca değişebilen nesnelerdir.
-
-- **Uygulama**: Tüm entity sınıfları için aşağıdaki özellikler sağlanacak:
-  - Benzersiz kimlik (ID)
-  - Değişmezlik garantisi (immutability) için özel metotlar
-  - İş kurallarının uygulanması için domain mantığı
-- **Örnek**: `User`, `Product`, `Order` gibi sınıflar entity olarak modellenecek.
-
-### 4. Value Objects (Değer Nesneleri)
-
-Kimliği olmayan, değerleriyle tanımlanan ve değişmez (immutable) olan nesnelerdir.
-
-- **Uygulama**: Aşağıdaki kavramlar value object olarak modellenecek:
-  - Adres
-  - Para Birimi ve Miktar
-  - Tarih Aralığı
-  - Ölçü Birimleri
-- **Örnek**: `Money`, `DateRange`, `Address` gibi sınıflar value object olarak modellenecek.
-
-### 5. Aggregates (Kümeler)
-
-Bir kök entity (root entity) etrafında gruplanmış, birlikte tutarlılık sınırını oluşturan nesneler kümesidir.
-
-- **Uygulama**: Aşağıdaki aggregate'ler tanımlanacak:
-  - Order Aggregate (Order root entity, OrderItem child entities)
-  - Product Aggregate (Product root entity, ProductVariant child entities)
-  - User Aggregate (User root entity, UserPreferences value object)
-- **Örnek**: Bir sipariş (Order) ve sipariş kalemleri (OrderItems) bir aggregate oluşturur, ve sipariş kalemleri doğrudan erişilemez, sadece sipariş üzerinden erişilebilir.
-
-### 6. Repositories (Depolar)
-
-Aggregate'lerin kalıcı depolanması ve alınması için kullanılan soyutlamalardır.
-
-- **Uygulama**: Her aggregate için bir repository tanımlanacak:
-  - IOrderRepository
-  - IProductRepository
-  - IUserRepository
-- **Örnek**: `IProductRepository` sadece `Product` aggregate'ini yönetir, içindeki `ProductVariant`'ları doğrudan yönetmez.
-
-### 7. Domain Services (Domain Servisleri)
-
-Doğal olarak bir entity veya value object'e ait olmayan domain mantığını içeren servislerdir.
-
-- **Uygulama**: Aşağıdaki domain servisleri oluşturulacak:
-  - StockAllocationService
-  - PricingService
-  - AuthorizationService
-- **Örnek**: `PricingService`, ürün fiyatlandırması için karmaşık iş kurallarını uygular.
-
-### 8. Application Services (Uygulama Servisleri)
-
-Domain servislerini ve repository'leri kullanarak use case'leri uygulayan servislerdir.
-
-- **Uygulama**: CQRS pattern ile entegre edilecek:
-  - Command Handler'lar
-  - Query Handler'lar
-- **Örnek**: `CreateOrderCommandHandler`, bir sipariş oluşturma use case'ini uygular.
-
-### 9. Domain Events (Domain Olayları)
-
-Domain'de meydana gelen önemli olayları temsil eden ve diğer bounded context'lerin bu olaylara tepki vermesini sağlayan nesnelerdir.
-
-- **Uygulama**: Aşağıdaki domain olayları tanımlanacak:
-  - OrderCreatedEvent
-  - ProductStockChangedEvent
-  - UserRegisteredEvent
-- **Örnek**: Bir sipariş oluşturulduğunda, `OrderCreatedEvent` yayınlanır ve stok yönetimi bu olaya tepki vererek stok miktarlarını günceller.
+1. **Ubiquitous Language (Yaygın Dil)**: Teknik ekip ve domain uzmanları arasında ortak bir dil oluşturulması
+2. **Bounded Contexts (Sınırlı Bağlamlar)**: Büyük domain modellerinin daha küçük, yönetilebilir parçalara bölünmesi
+3. **Entities (Varlıklar)**: Kimliği olan ve yaşam döngüsü boyunca değişebilen nesneler
+4. **Value Objects (Değer Nesneleri)**: Değerleriyle tanımlanan, değişmez (immutable) nesneler
+5. **Aggregates (Kümeler)**: İlişkili entity ve value object'lerin bir arada tutulduğu kümeler
+6. **Domain Events (Domain Olayları)**: Domain'de meydana gelen önemli olaylar
+7. **Repositories (Depolar)**: Domain nesnelerinin kalıcı depolanması için arayüzler
+8. **Domain Services (Domain Servisleri)**: Entity veya value object'lere ait olmayan domain mantığı
 
 ## Uygulama Adımları
 
-### 1. Domain Modelinin Oluşturulması
+### 1. Domain Katmanının Yeniden Yapılandırılması
+
+Domain katmanı, iş mantığının merkezi olarak yeniden yapılandırıldı:
 
 ```csharp
 // src/Stock.Domain/Entities/Product.cs
 namespace Stock.Domain.Entities
 {
-    /// <summary>
-    /// Ürün entity'si
-    /// </summary>
-    public class Product : BaseEntity
+    public class Product : BaseEntity, IAggregateRoot
     {
-        private List<ProductVariant> _variants = new List<ProductVariant>();
-        
-        /// <summary>
-        /// Ürün adı
-        /// </summary>
         public string Name { get; private set; }
-        
-        /// <summary>
-        /// Ürün kodu
-        /// </summary>
-        public string Code { get; private set; }
-        
-        /// <summary>
-        /// Ürün açıklaması
-        /// </summary>
         public string Description { get; private set; }
-        
-        /// <summary>
-        /// Kategori ID
-        /// </summary>
-        public int CategoryId { get; private set; }
-        
-        /// <summary>
-        /// Stok miktarı
-        /// </summary>
+        public decimal Price { get; private set; }
         public int StockQuantity { get; private set; }
+        public int CategoryId { get; private set; }
+        public Category Category { get; private set; }
         
-        /// <summary>
-        /// Birim fiyatı
-        /// </summary>
-        public Money UnitPrice { get; private set; }
+        // Value Objects
+        public ProductStatus Status { get; private set; }
+        public Money Cost { get; private set; }
         
-        /// <summary>
-        /// Ürün varyantları
-        /// </summary>
-        public IReadOnlyCollection<ProductVariant> Variants => _variants.AsReadOnly();
+        // Domain Events
+        private readonly List<IDomainEvent> _domainEvents = new List<IDomainEvent>();
+        public IReadOnlyCollection<IDomainEvent> DomainEvents => _domainEvents.AsReadOnly();
         
-        /// <summary>
-        /// Kategori
-        /// </summary>
-        public virtual Category Category { get; private set; }
-        
-        // Private constructor for EF Core
-        private Product() { }
-        
-        /// <summary>
-        /// Yeni bir ürün oluşturur
-        /// </summary>
-        public Product(string name, string code, string description, int categoryId, int stockQuantity, Money unitPrice)
+        // Factory Method
+        public static Product Create(string name, string description, decimal price, int stockQuantity, int categoryId)
         {
-            if (string.IsNullOrWhiteSpace(name))
-                throw new DomainException("Ürün adı boş olamaz.");
-                
-            if (string.IsNullOrWhiteSpace(code))
-                throw new DomainException("Ürün kodu boş olamaz.");
-                
-            if (stockQuantity < 0)
-                throw new DomainException("Stok miktarı negatif olamaz.");
-                
-            Name = name;
-            Code = code;
-            Description = description;
-            CategoryId = categoryId;
-            StockQuantity = stockQuantity;
-            UnitPrice = unitPrice;
+            var product = new Product
+            {
+                Name = name,
+                Description = description,
+                Price = price,
+                StockQuantity = stockQuantity,
+                CategoryId = categoryId,
+                Status = ProductStatus.Active
+            };
+            
+            product._domainEvents.Add(new ProductCreatedDomainEvent(product.Id));
+            
+            return product;
         }
         
-        /// <summary>
-        /// Ürün bilgilerini günceller
-        /// </summary>
-        public void Update(string name, string description, int categoryId, Money unitPrice)
-        {
-            if (string.IsNullOrWhiteSpace(name))
-                throw new DomainException("Ürün adı boş olamaz.");
-                
-            Name = name;
-            Description = description;
-            CategoryId = categoryId;
-            UnitPrice = unitPrice;
-        }
-        
-        /// <summary>
-        /// Stok miktarını günceller
-        /// </summary>
+        // Domain Logic
         public void UpdateStock(int quantity)
         {
-            if (StockQuantity + quantity < 0)
-                throw new DomainException("Stok miktarı yetersiz.");
+            if (quantity < 0 && Math.Abs(quantity) > StockQuantity)
+                throw new DomainException("Stok miktarı yetersiz");
                 
             StockQuantity += quantity;
             
-            // Domain event yayınla
-            AddDomainEvent(new ProductStockChangedEvent(Id, StockQuantity));
+            if (quantity < 0)
+                _domainEvents.Add(new ProductStockDecreasedDomainEvent(Id, Math.Abs(quantity)));
+            else
+                _domainEvents.Add(new ProductStockIncreasedDomainEvent(Id, quantity));
         }
         
-        /// <summary>
-        /// Varyant ekler
-        /// </summary>
-        public void AddVariant(ProductVariant variant)
+        public void ClearDomainEvents()
         {
-            if (_variants.Any(v => v.VariantCode == variant.VariantCode))
-                throw new DomainException($"'{variant.VariantCode}' kodlu varyant zaten mevcut.");
-                
-            _variants.Add(variant);
-        }
-        
-        /// <summary>
-        /// Varyant siler
-        /// </summary>
-        public void RemoveVariant(string variantCode)
-        {
-            var variant = _variants.FirstOrDefault(v => v.VariantCode == variantCode);
-            if (variant == null)
-                throw new DomainException($"'{variantCode}' kodlu varyant bulunamadı.");
-                
-            _variants.Remove(variant);
+            _domainEvents.Clear();
         }
     }
 }
 ```
 
-### 2. Value Objects Oluşturulması
+### 2. Value Objects Uygulaması
+
+Değer nesneleri, değişmez (immutable) ve değerleriyle tanımlanan nesnelerdir:
 
 ```csharp
 // src/Stock.Domain/ValueObjects/Money.cs
 namespace Stock.Domain.ValueObjects
 {
-    /// <summary>
-    /// Para birimi ve miktar value object'i
-    /// </summary>
     public class Money : ValueObject
     {
-        /// <summary>
-        /// Miktar
-        /// </summary>
-        public decimal Amount { get; private set; }
+        public decimal Amount { get; }
+        public string Currency { get; }
         
-        /// <summary>
-        /// Para birimi
-        /// </summary>
-        public string Currency { get; private set; }
-        
-        // Private constructor for EF Core
         private Money() { }
         
-        /// <summary>
-        /// Yeni bir Money nesnesi oluşturur
-        /// </summary>
         public Money(decimal amount, string currency)
         {
+            if (amount < 0)
+                throw new DomainException("Para miktarı negatif olamaz");
+                
             if (string.IsNullOrWhiteSpace(currency))
-                throw new ArgumentException("Para birimi boş olamaz.", nameof(currency));
+                throw new DomainException("Para birimi belirtilmelidir");
                 
             Amount = amount;
             Currency = currency;
         }
         
-        /// <summary>
-        /// Para birimlerini toplar
-        /// </summary>
-        public static Money operator +(Money left, Money right)
+        public Money Add(Money money)
         {
-            if (left.Currency != right.Currency)
-                throw new InvalidOperationException("Farklı para birimleri toplanamaz.");
+            if (Currency != money.Currency)
+                throw new DomainException("Farklı para birimleri toplanamaz");
                 
-            return new Money(left.Amount + right.Amount, left.Currency);
+            return new Money(Amount + money.Amount, Currency);
         }
         
-        /// <summary>
-        /// Para birimlerini çıkarır
-        /// </summary>
-        public static Money operator -(Money left, Money right)
+        public Money Subtract(Money money)
         {
-            if (left.Currency != right.Currency)
-                throw new InvalidOperationException("Farklı para birimleri çıkarılamaz.");
+            if (Currency != money.Currency)
+                throw new DomainException("Farklı para birimleri çıkarılamaz");
                 
-            return new Money(left.Amount - right.Amount, left.Currency);
+            return new Money(Amount - money.Amount, Currency);
         }
         
-        /// <summary>
-        /// Para birimini bir sayı ile çarpar
-        /// </summary>
-        public static Money operator *(Money money, decimal multiplier)
-        {
-            return new Money(money.Amount * multiplier, money.Currency);
-        }
-        
-        /// <summary>
-        /// Value object karşılaştırması için kullanılır
-        /// </summary>
         protected override IEnumerable<object> GetEqualityComponents()
         {
             yield return Amount;
             yield return Currency;
         }
-        
-        /// <summary>
-        /// String temsilini döndürür
-        /// </summary>
-        public override string ToString()
-        {
-            return $"{Amount} {Currency}";
-        }
     }
 }
 ```
 
-### 3. Domain Events Oluşturulması
+### 3. Domain Events Uygulaması
+
+Domain olayları, domain'de meydana gelen önemli olayları temsil eder:
 
 ```csharp
-// src/Stock.Domain/Events/ProductStockChangedEvent.cs
+// src/Stock.Domain/Events/ProductCreatedDomainEvent.cs
 namespace Stock.Domain.Events
 {
-    /// <summary>
-    /// Ürün stok değişikliği domain olayı
-    /// </summary>
-    public class ProductStockChangedEvent : DomainEvent
+    public class ProductCreatedDomainEvent : IDomainEvent
     {
-        /// <summary>
-        /// Ürün ID
-        /// </summary>
         public int ProductId { get; }
+        public DateTime OccurredOn { get; }
         
-        /// <summary>
-        /// Yeni stok miktarı
-        /// </summary>
-        public int NewStockQuantity { get; }
-        
-        /// <summary>
-        /// Yeni bir ProductStockChangedEvent oluşturur
-        /// </summary>
-        public ProductStockChangedEvent(int productId, int newStockQuantity)
+        public ProductCreatedDomainEvent(int productId)
         {
             ProductId = productId;
-            NewStockQuantity = newStockQuantity;
+            OccurredOn = DateTime.UtcNow;
         }
     }
 }
 ```
 
-### 4. Repository Interfaces Oluşturulması
+### 4. Repository Pattern Uygulaması
+
+Repository pattern, domain nesnelerinin kalıcı depolanması için arayüzler sağlar:
 
 ```csharp
 // src/Stock.Domain/Interfaces/IProductRepository.cs
 namespace Stock.Domain.Interfaces
 {
-    /// <summary>
-    /// Ürün repository arayüzü
-    /// </summary>
     public interface IProductRepository : IRepository<Product>
     {
-        /// <summary>
-        /// Ürün koduna göre ürün getirir
-        /// </summary>
-        Task<Product> GetByCodeAsync(string code);
-        
-        /// <summary>
-        /// Kategori ID'sine göre ürünleri getirir
-        /// </summary>
+        Task<Product> GetByIdWithCategoryAsync(int id);
         Task<IEnumerable<Product>> GetByCategoryIdAsync(int categoryId);
-        
-        /// <summary>
-        /// Stok miktarı belirtilen değerin altında olan ürünleri getirir
-        /// </summary>
         Task<IEnumerable<Product>> GetLowStockProductsAsync(int threshold);
     }
 }
+
+// src/Stock.Infrastructure/Repositories/ProductRepository.cs
+namespace Stock.Infrastructure.Repositories
+{
+    public class ProductRepository : Repository<Product>, IProductRepository
+    {
+        public ProductRepository(ApplicationDbContext context) : base(context)
+        {
+        }
+        
+        public async Task<Product> GetByIdWithCategoryAsync(int id)
+        {
+            return await _context.Products
+                .Include(p => p.Category)
+                .FirstOrDefaultAsync(p => p.Id == id);
+        }
+        
+        public async Task<IEnumerable<Product>> GetByCategoryIdAsync(int categoryId)
+        {
+            return await _context.Products
+                .Where(p => p.CategoryId == categoryId)
+                .ToListAsync();
+        }
+        
+        public async Task<IEnumerable<Product>> GetLowStockProductsAsync(int threshold)
+        {
+            return await _context.Products
+                .Where(p => p.StockQuantity < threshold)
+                .ToListAsync();
+        }
+    }
+}
 ```
 
-### 5. Domain Services Oluşturulması
+### 5. Domain Services Uygulaması
+
+Domain servisleri, entity veya value object'lere ait olmayan domain mantığını içerir:
 
 ```csharp
-// src/Stock.Domain/Services/StockAllocationService.cs
+// src/Stock.Domain/Services/InventoryService.cs
 namespace Stock.Domain.Services
 {
-    /// <summary>
-    /// Stok tahsisi domain servisi
-    /// </summary>
-    public class StockAllocationService
+    public class InventoryService : IDomainService
     {
-        /// <summary>
-        /// Sipariş için stok tahsisi yapar
-        /// </summary>
-        public bool AllocateStock(Product product, int quantity)
+        public bool CanFulfillOrder(Product product, int quantity)
         {
-            if (product == null)
-                throw new ArgumentNullException(nameof(product));
-                
-            if (quantity <= 0)
-                throw new ArgumentException("Miktar pozitif olmalıdır.", nameof(quantity));
-                
-            if (product.StockQuantity < quantity)
-                return false;
-                
-            product.UpdateStock(-quantity);
-            return true;
+            return product.StockQuantity >= quantity;
         }
         
-        /// <summary>
-        /// Stok tahsisini iptal eder
-        /// </summary>
-        public void DeallocateStock(Product product, int quantity)
+        public void ProcessStockMovement(Product product, int quantity, StockMovementType movementType)
         {
-            if (product == null)
-                throw new ArgumentNullException(nameof(product));
-                
-            if (quantity <= 0)
-                throw new ArgumentException("Miktar pozitif olmalıdır.", nameof(quantity));
-                
-            product.UpdateStock(quantity);
+            switch (movementType)
+            {
+                case StockMovementType.Addition:
+                    product.UpdateStock(Math.Abs(quantity));
+                    break;
+                case StockMovementType.Reduction:
+                    product.UpdateStock(-Math.Abs(quantity));
+                    break;
+                default:
+                    throw new DomainException("Geçersiz stok hareketi tipi");
+            }
         }
     }
 }
 ```
 
-### 6. Application Services (CQRS ile Entegrasyon)
+### 6. Aggregate Roots Tanımlanması
+
+Aggregate root'lar, ilişkili entity ve value object'lerin bir arada tutulduğu kümelerdir:
 
 ```csharp
-// src/Stock.Application/Features/Products/Commands/CreateProduct/CreateProductCommand.cs
-namespace Stock.Application.Features.Products.Commands.CreateProduct
+// src/Stock.Domain/Interfaces/IAggregateRoot.cs
+namespace Stock.Domain.Interfaces
 {
-    /// <summary>
-    /// Yeni ürün oluşturma komutu
-    /// </summary>
-    public class CreateProductCommand : IRequest<int>
+    public interface IAggregateRoot
     {
-        /// <summary>
-        /// Ürün adı
-        /// </summary>
+    }
+}
+```
+
+### 7. CQRS ile Entegrasyon
+
+DDD, CQRS (Command Query Responsibility Segregation) ile entegre edildi:
+
+```csharp
+// src/Stock.Application/Products/Commands/CreateProduct/CreateProductCommand.cs
+namespace Stock.Application.Products.Commands.CreateProduct
+{
+    public class CreateProductCommand : ICommand<int>
+    {
         public string Name { get; set; }
-        
-        /// <summary>
-        /// Ürün kodu
-        /// </summary>
-        public string Code { get; set; }
-        
-        /// <summary>
-        /// Ürün açıklaması
-        /// </summary>
         public string Description { get; set; }
-        
-        /// <summary>
-        /// Kategori ID
-        /// </summary>
-        public int CategoryId { get; set; }
-        
-        /// <summary>
-        /// Stok miktarı
-        /// </summary>
+        public decimal Price { get; set; }
         public int StockQuantity { get; set; }
-        
-        /// <summary>
-        /// Birim fiyat miktarı
-        /// </summary>
-        public decimal UnitPriceAmount { get; set; }
-        
-        /// <summary>
-        /// Birim fiyat para birimi
-        /// </summary>
-        public string UnitPriceCurrency { get; set; }
+        public int CategoryId { get; set; }
     }
-}
-```
-
-```csharp
-// src/Stock.Application/Features/Products/Commands/CreateProduct/CreateProductCommandHandler.cs
-namespace Stock.Application.Features.Products.Commands.CreateProduct
-{
-    /// <summary>
-    /// Yeni ürün oluşturma komut işleyicisi
-    /// </summary>
-    public class CreateProductCommandHandler : IRequestHandler<CreateProductCommand, int>
+    
+    public class CreateProductCommandHandler : ICommandHandler<CreateProductCommand, int>
     {
+        private readonly IProductRepository _productRepository;
         private readonly IUnitOfWork _unitOfWork;
-        private readonly ILoggerManager _logger;
+        private readonly IDomainEventDispatcher _domainEventDispatcher;
         
-        /// <summary>
-        /// Yeni bir CreateProductCommandHandler örneği oluşturur
-        /// </summary>
-        public CreateProductCommandHandler(IUnitOfWork unitOfWork, ILoggerManager logger)
+        public CreateProductCommandHandler(
+            IProductRepository productRepository,
+            IUnitOfWork unitOfWork,
+            IDomainEventDispatcher domainEventDispatcher)
         {
+            _productRepository = productRepository;
             _unitOfWork = unitOfWork;
-            _logger = logger;
+            _domainEventDispatcher = domainEventDispatcher;
         }
         
-        /// <summary>
-        /// Komutu işler
-        /// </summary>
         public async Task<int> Handle(CreateProductCommand request, CancellationToken cancellationToken)
         {
-            _logger.LogInfo($"Yeni ürün oluşturuluyor: {request.Code}");
+            var product = Product.Create(
+                request.Name,
+                request.Description,
+                request.Price,
+                request.StockQuantity,
+                request.CategoryId);
+                
+            await _productRepository.AddAsync(product);
+            await _unitOfWork.SaveChangesAsync(cancellationToken);
             
-            // Ürün kodunun benzersiz olduğunu kontrol et
-            var existingProduct = await _unitOfWork.Products.GetByCodeAsync(request.Code);
-            if (existingProduct != null)
+            // Domain olaylarını yayınla
+            foreach (var domainEvent in product.DomainEvents)
             {
-                _logger.LogWarn($"Ürün kodu zaten mevcut: {request.Code}");
-                throw new ApplicationException($"'{request.Code}' ürün kodu zaten kullanılıyor.");
+                await _domainEventDispatcher.Dispatch(domainEvent, cancellationToken);
             }
             
-            // Money value object'i oluştur
-            var unitPrice = new Money(request.UnitPriceAmount, request.UnitPriceCurrency);
-            
-            // Yeni ürün domain entity'si oluştur
-            var product = new Product(
-                request.Name,
-                request.Code,
-                request.Description,
-                request.CategoryId,
-                request.StockQuantity,
-                unitPrice);
-            
-            // Ürünü veritabanına ekle
-            await _unitOfWork.Products.AddAsync(product);
-            await _unitOfWork.SaveChangesAsync();
-            
-            _logger.LogInfo($"Ürün başarıyla oluşturuldu. ID: {product.Id}");
+            product.ClearDomainEvents();
             
             return product.Id;
         }
@@ -531,14 +311,73 @@ namespace Stock.Application.Features.Products.Commands.CreateProduct
 }
 ```
 
-## Sonuç ve Faydalar
+### 8. Domain Event Dispatcher Uygulaması
 
-Domain-Driven Design prensiplerinin uygulanması, aşağıdaki faydaları sağlayacaktır:
+Domain olaylarını yayınlamak için bir dispatcher uygulandı:
 
-1. **İş Mantığının Netleşmesi**: Domain modelleri, iş mantığını açık ve anlaşılır bir şekilde temsil eder.
-2. **Bakım Kolaylığı**: Kodun organizasyonu, değişikliklerin daha kolay yapılmasını sağlar.
-3. **Ölçeklenebilirlik**: Bounded context'ler, sistemin bağımsız olarak ölçeklendirilebilir parçalara bölünmesini sağlar.
-4. **Test Edilebilirlik**: Domain mantığı, altyapı detaylarından ayrıldığı için daha kolay test edilebilir.
-5. **İletişim İyileştirmesi**: Ubiquitous language, teknik ekip ve domain uzmanları arasındaki iletişimi iyileştirir.
+```csharp
+// src/Stock.Infrastructure/DomainEvents/DomainEventDispatcher.cs
+namespace Stock.Infrastructure.DomainEvents
+{
+    public class DomainEventDispatcher : IDomainEventDispatcher
+    {
+        private readonly IMediator _mediator;
+        
+        public DomainEventDispatcher(IMediator mediator)
+        {
+            _mediator = mediator;
+        }
+        
+        public async Task Dispatch(IDomainEvent domainEvent, CancellationToken cancellationToken = default)
+        {
+            await _mediator.Publish(domainEvent, cancellationToken);
+        }
+    }
+}
+```
 
-Bu yaklaşım, CQRS ve Mediator pattern ile birlikte kullanıldığında, sistemin modülerliğini, bakım yapılabilirliğini ve ölçeklenebilirliğini önemli ölçüde artıracaktır. 
+### 9. Domain Event Handlers Uygulaması
+
+Domain olaylarını işlemek için handler'lar uygulandı:
+
+```csharp
+// src/Stock.Application/Products/EventHandlers/ProductCreatedDomainEventHandler.cs
+namespace Stock.Application.Products.EventHandlers
+{
+    public class ProductCreatedDomainEventHandler : INotificationHandler<ProductCreatedDomainEvent>
+    {
+        private readonly ILogger<ProductCreatedDomainEventHandler> _logger;
+        
+        public ProductCreatedDomainEventHandler(ILogger<ProductCreatedDomainEventHandler> logger)
+        {
+            _logger = logger;
+        }
+        
+        public Task Handle(ProductCreatedDomainEvent notification, CancellationToken cancellationToken)
+        {
+            _logger.LogInformation("Yeni ürün oluşturuldu: {ProductId}", notification.ProductId);
+            
+            // Burada e-posta gönderme, bildirim oluşturma gibi yan etkiler gerçekleştirilebilir
+            
+            return Task.CompletedTask;
+        }
+    }
+}
+```
+
+## Faydalar
+
+Domain-Driven Design'ın uygulanması aşağıdaki faydaları sağlamıştır:
+
+1. **İş Mantığının Merkezileştirilmesi**: Domain katmanı, iş mantığının tek kaynağı haline geldi.
+2. **Daha İyi İletişim**: Teknik ekip ve domain uzmanları arasında ortak bir dil oluşturuldu.
+3. **Daha Modüler Yapı**: Bounded context'ler sayesinde sistem daha modüler hale geldi.
+4. **Daha Sağlam Domain Modeli**: Entity'ler, value object'ler ve aggregate'ler sayesinde daha sağlam bir domain modeli oluşturuldu.
+5. **Daha İyi Test Edilebilirlik**: Domain mantığı, altyapı detaylarından ayrıldığı için daha kolay test edilebilir hale geldi.
+6. **Daha Esnek Mimari**: DDD, CQRS ve Event-Driven Architecture ile entegre edilerek daha esnek bir mimari oluşturuldu.
+
+## Sonraki Adımlar
+
+1. **Bounded Context'lerin Belirlenmesi**: Sistemdeki bounded context'lerin daha net belirlenmesi ve dokümante edilmesi.
+2. **Context Map Oluşturulması**: Bounded context'ler arasındaki ilişkilerin belirlenmesi ve dokümante edilmesi.
+3. **Mikroservis Mimarisine Geçiş**: DDD prensipleri kullanılarak mikroservis mimarisine geçiş hazırlığı yapılması. 
