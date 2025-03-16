@@ -1,6 +1,6 @@
 using AutoMapper;
 using MediatR;
-using Stock.Application.Interfaces;
+using Stock.Application.Common.Interfaces;
 using Stock.Application.Models.DTOs;
 using System.Collections.Generic;
 using System.Linq;

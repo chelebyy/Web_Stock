@@ -1,18 +1,17 @@
 using System.Threading;
 using System.Threading.Tasks;
 using AutoMapper;
-using Stock.Application.Common.CQRS;
+using MediatR;
 using Stock.Application.Common.Exceptions;
 using Stock.Application.Common.Interfaces;
 using Stock.Application.Features.Users.Dtos;
-using Stock.Domain.Interfaces;
 
 namespace Stock.Application.Features.Users.Queries.GetUserById
 {
     /// <summary>
     /// ID'ye göre kullanıcı sorgulama işleyicisi
     /// </summary>
-    public class GetUserByIdQueryHandler : IQueryHandler<GetUserByIdQuery, UserDto>
+    public class GetUserByIdQueryHandler : IRequestHandler<GetUserByIdQuery, UserDto>
     {
         private readonly IUnitOfWork _unitOfWork;
         private readonly IMapper _mapper;
@@ -37,18 +36,18 @@ namespace Stock.Application.Features.Users.Queries.GetUserById
         /// <summary>
         /// Sorguyu işler
         /// </summary>
-        /// <param name="query">İşlenecek sorgu</param>
+        /// <param name="request">İşlenecek sorgu</param>
         /// <param name="cancellationToken">İptal token'ı</param>
         /// <returns>Kullanıcı bilgileri</returns>
-        public async Task<UserDto> Handle(GetUserByIdQuery query, CancellationToken cancellationToken)
+        public async Task<UserDto> Handle(GetUserByIdQuery request, CancellationToken cancellationToken)
         {
-            _logger.LogInfo($"ID'ye göre kullanıcı sorgulanıyor: {query.Id}");
+            _logger.LogInfo($"ID'ye göre kullanıcı sorgulanıyor: {request.Id}");
 
-            var user = await _unitOfWork.Users.GetByIdWithRoleAsync(query.Id);
+            var user = await _unitOfWork.Users.GetByIdWithRoleAsync(request.Id);
             if (user == null)
             {
-                _logger.LogWarn($"Kullanıcı bulunamadı. ID: {query.Id}");
-                throw new NotFoundException("Kullanıcı", query.Id);
+                _logger.LogWarn($"Kullanıcı bulunamadı. ID: {request.Id}");
+                throw new NotFoundException("Kullanıcı", request.Id);
             }
 
             var userDto = _mapper.Map<UserDto>(user);

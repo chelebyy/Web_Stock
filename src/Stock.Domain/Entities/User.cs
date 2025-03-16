@@ -14,6 +14,12 @@ namespace Stock.Domain.Entities
         [Required]
         public string PasswordHash { get; set; } = string.Empty;
 
+        [StringLength(100)]
+        public string Email { get; set; } = string.Empty;
+
+        [StringLength(100)]
+        public string FullName { get; set; } = string.Empty;
+
         public bool IsAdmin { get; set; }
 
         public DateTime? LastLoginAt { get; set; }

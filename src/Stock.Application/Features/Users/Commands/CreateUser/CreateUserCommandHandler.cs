@@ -1,17 +1,16 @@
 using System;
 using System.Threading;
 using System.Threading.Tasks;
-using Stock.Application.Common.CQRS;
+using MediatR;
 using Stock.Application.Common.Interfaces;
 using Stock.Domain.Entities;
-using Stock.Domain.Interfaces;
 
 namespace Stock.Application.Features.Users.Commands.CreateUser
 {
     /// <summary>
     /// Yeni kullanıcı oluşturma komut işleyicisi
     /// </summary>
-    public class CreateUserCommandHandler : ICommandHandler<CreateUserCommand, int>
+    public class CreateUserCommandHandler : IRequestHandler<CreateUserCommand, int>
     {
         private readonly IUnitOfWork _unitOfWork;
         private readonly IPasswordService _passwordService;
@@ -36,32 +35,32 @@ namespace Stock.Application.Features.Users.Commands.CreateUser
         /// <summary>
         /// Komutu işler
         /// </summary>
-        /// <param name="command">İşlenecek komut</param>
+        /// <param name="request">İşlenecek komut</param>
         /// <param name="cancellationToken">İptal token'ı</param>
         /// <returns>Oluşturulan kullanıcının ID'si</returns>
-        public async Task<int> Handle(CreateUserCommand command, CancellationToken cancellationToken)
+        public async Task<int> Handle(CreateUserCommand request, CancellationToken cancellationToken)
         {
-            _logger.LogInfo($"Yeni kullanıcı oluşturuluyor: {command.Username}");
+            _logger.LogInfo($"Yeni kullanıcı oluşturuluyor: {request.Username}");
 
             // Kullanıcı adının benzersiz olduğunu kontrol et
-            var existingUser = await _unitOfWork.Users.GetByUsernameAsync(command.Username);
+            var existingUser = await _unitOfWork.Users.GetByUsernameAsync(request.Username);
             if (existingUser != null)
             {
-                _logger.LogWarn($"Kullanıcı adı zaten mevcut: {command.Username}");
-                throw new ApplicationException($"'{command.Username}' kullanıcı adı zaten kullanılıyor.");
+                _logger.LogWarn($"Kullanıcı adı zaten mevcut: {request.Username}");
+                throw new ApplicationException($"'{request.Username}' kullanıcı adı zaten kullanılıyor.");
             }
 
             // Şifreyi hashle
-            var passwordHash = _passwordService.HashPassword(command.Password);
+            var passwordHash = _passwordService.HashPassword(request.Password);
 
             // Yeni kullanıcı oluştur
             var user = new User
             {
-                Username = command.Username,
+                Username = request.Username,
                 PasswordHash = passwordHash,
-                Email = command.Email,
-                FullName = command.FullName,
-                RoleId = command.RoleId,
+                Email = request.Email,
+                FullName = request.FullName,
+                RoleId = request.RoleId,
                 IsAdmin = false,
                 IsDeleted = false,
                 CreatedAt = DateTime.UtcNow
