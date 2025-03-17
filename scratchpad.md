@@ -87,3 +87,27 @@ Backend kodunda bulunan sihirli string ve sayıları (magic strings/numbers) sab
 - [X] Önceliklerin belirlenmesi
 - [X] Uygulama stratejisinin oluşturulması
 - [X] Risk değerlendirmesinin yapılması
+
+# Kod İyileştirme Çalışması
+
+## Mevcut Durum
+- Kod iyileştirme planı oluşturuldu ve GitHub'a yüklendi.
+- Faz 1'deki "Sihirli string ve sayıların sabit değişkenlerle değiştirilmesi" görevi tamamlandı.
+  - Constants klasörü oluşturuldu
+  - ApiConstants.cs, ErrorMessages.cs, LogMessages.cs, PermissionNames.cs, RoleNames.cs dosyaları oluşturuldu
+  - AuthController, PermissionsController, RoleController ve UsersController dosyalarında sihirli string ve sayılar sabit değişkenlerle değiştirildi
+
+## Yapılacaklar
+- [X] Sihirli string ve sayıların sabit değişkenlerle değiştirilmesi
+- [ ] Yorum satırlarının iyileştirilmesi
+- [ ] Kod formatının düzenlenmesi
+- [ ] Değişken isimlerinin standardizasyonu
+- [ ] Global exception handling mekanizmasının kurulması
+
+## Bir Sonraki Adım
+Faz 1'deki "Yorum satırlarının iyileştirilmesi" görevine başlanacak. Bu görev için:
+1. Mevcut yorum satırları incelenecek
+2. Eksik yorum satırları belirlenecek
+3. Yorum satırları standart bir formatta düzenlenecek
+4. Özellikle karmaşık kod bloklarına açıklayıcı yorumlar eklenecek
+5. Gereksiz veya yanıltıcı yorum satırları kaldırılacak
