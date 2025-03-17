@@ -2,78 +2,63 @@
 
 ## Kod İyileştirme Çalışmaları
 
-### Frontend Servis İyileştirmeleri
-**Tarih:** 20 Haziran 2025
-**Sorun:** Frontend servislerinde gereksiz console.log ifadeleri, magic string/number kullanımı ve tutarsız hata yönetimi vardı.
-**Nedeni:** Geliştirme sürecinde debug amaçlı eklenen console.log ifadeleri temizlenmemiş, sabit değerler doğrudan kodda kullanılmış ve hata yönetimi her serviste farklı şekilde uygulanmıştı.
+### Kod İyileştirme Durumu Analizi
+
+**Hata:** Kod iyileştirme durumu belgesinde tüm fazların %100 tamamlandığı belirtilmesine rağmen, gerçek durum farklı.
+
 **Çözüm:**
-1. Tüm servis dosyalarından gereksiz console.log, console.warn ve console.error ifadeleri kaldırıldı.
-2. HTTP durum kodları ve hata kodları için sabit değişkenler oluşturuldu:
-   ```typescript
-   export const HttpStatusCodes = {
-     OK: 200,
-     BAD_REQUEST: 400,
-     UNAUTHORIZED: 401,
-     FORBIDDEN: 403,
-     NOT_FOUND: 404,
-     SERVER_ERROR: 500,
-     CONNECTION_ERROR: 0
-   };
-   
-   export const ErrorCodes = {
-     DUPLICATE_SICIL: 'DuplicateSicil',
-     DUPLICATE_USERNAME: 'DuplicateUsername'
-   };
-   ```
-3. Tüm servislerde tutarlı bir hata yönetimi yaklaşımı uygulandı:
-   ```typescript
-   private handleError(error: HttpErrorResponse): Observable<never> {
-     let errorMessage = 'Bir hata oluştu';
-     
-     if (error.error instanceof ErrorEvent) {
-       // İstemci taraflı hata
-       errorMessage = `Hata: ${error.error.message}`;
-     } else {
-       // Sunucu taraflı hata
-       if (error.status === HttpStatusCodes.UNAUTHORIZED) {
-         errorMessage = 'Oturum süresi dolmuş veya yetkiniz yok. Lütfen tekrar giriş yapın.';
-       } else if (error.status === HttpStatusCodes.FORBIDDEN) {
-         errorMessage = 'Bu işlemi gerçekleştirmek için yetkiniz yok.';
-       } else if (error.status === HttpStatusCodes.NOT_FOUND) {
-         errorMessage = 'İstek yapılan kaynak bulunamadı.';
-       } else if (error.status === HttpStatusCodes.SERVER_ERROR) {
-         errorMessage = 'Sunucu hatası. Lütfen daha sonra tekrar deneyin.';
-       } else if (error.status === HttpStatusCodes.CONNECTION_ERROR) {
-         errorMessage = 'Sunucuya bağlanılamadı. İnternet bağlantınızı kontrol edin.';
-       } else {
-         errorMessage = `Sunucu hatası: ${error.status}, mesaj: ${error.message}`;
-       }
-     }
-     
-     return throwError(() => new Error(errorMessage));
-   }
-   ```
-4. API yanıtlarını işleyen normalizeResponse metodu iyileştirildi ve tüm servislerde tutarlı hale getirildi.
-5. Tüm HTTP isteklerinde Authorization token'ı ve Content-Type header'ları eklendi.
-6. İyileştirilen dosyalar:
-   - user.service.ts
-   - role.service.ts
-   - permission.service.ts
-   - user-permission.service.ts
-   - password.service.ts
+1. Kod tabanı detaylı bir şekilde incelendi
+2. Gerçek tamamlanma oranları tespit edildi:
+   - Faz 1 (Düşük Riskli İyileştirmeler): ~70% tamamlandı
+   - Faz 2 (Orta Riskli İyileştirmeler): ~40% tamamlandı
+   - Faz 3 (Yüksek Riskli İyileştirmeler): ~10% tamamlandı
+3. Tamamlanmamış görevler önceliklendirildi
+4. Yeni bir plan oluşturuldu: `kod_iyilestirme_yeni_plan.md`
 
 **Öğrenilen Dersler:**
-1. Üretim kodunda console.log ifadeleri bulunmamalıdır. Geliştirme sürecinde eklenen log ifadeleri, geliştirme tamamlandığında temizlenmelidir.
-2. Magic string ve magic number kullanımından kaçınılmalı, bunun yerine anlamlı isimlerle sabit değişkenler kullanılmalıdır.
-3. Hata yönetimi tüm uygulamada tutarlı olmalıdır. Benzer hatalar için benzer mesajlar gösterilmelidir.
-4. HTTP istekleri için standart bir yaklaşım benimsenmeli ve tüm servislerde uygulanmalıdır.
-5. Kod tekrarından kaçınmak için ortak işlevsellik (örneğin, API yanıt işleme) merkezileştirilmelidir.
+- Kod iyileştirme çalışmalarının durumunu düzenli olarak takip etmek önemli
+- Belgelendirmeyi güncel tutmak, projenin gerçek durumunu anlamak için kritik
+- Tamamlanmamış görevleri önceliklendirmek, kaynakları daha verimli kullanmayı sağlar
+- Her değişiklikten sonra sistemi test etmek, mevcut işlevselliğin korunduğundan emin olmak için gerekli
 
-**Sonraki Adımlar:**
-1. Ortak işlevselliği içeren bir BaseService sınıfı oluşturulabilir.
-2. Tip güvenliği artırılabilir (any tipinin azaltılması).
-3. HTTP istekleri için interceptor oluşturulabilir.
-4. Daha kapsamlı hata yönetimi ve loglama stratejisi uygulanabilir.
+### Frontend Servis İyileştirmeleri
+
+**Tespit Edilen İyileştirmeler:**
+- HTTP durum kodları için sabitler eklenmiş (`HttpStatusCodes`)
+- Hata kodları için sabitler eklenmiş (`ErrorCodes`)
+- Hata yönetimi iyileştirilmiş
+- API yanıt işleme iyileştirilmiş
+- HTTP istekleri standartlaştırılmış
+
+**Yapılması Gereken İyileştirmeler:**
+- BaseHttpService sınıfı oluşturulması
+- ErrorMessage bileşeni oluşturulması
+- Tüm servislerin BaseHttpService'i kullanacak şekilde güncellenmesi
+
+### Backend İyileştirmeleri
+
+**Tespit Edilen Sorunlar:**
+- Controller'larda magic string ve number kullanımları mevcut
+- Global exception handling mekanizması yok
+- Merkezi loglama mekanizması eksik
+- Hata yönetimi her controller'da farklı şekilde uygulanmış
+
+**Yapılması Gereken İyileştirmeler:**
+- Magic string ve number'ların sabit değişkenlere dönüştürülmesi
+- ExceptionMiddleware sınıfı oluşturulması
+- ILoggerManager arayüzü ve LoggerManager sınıfı oluşturulması
+- Hata yönetiminin tüm controller'larda standartlaştırılması
+
+### Belgelendirme İyileştirmeleri
+
+**Tespit Edilen Sorunlar:**
+- Frontend servis iyileştirmeleri belgelenmiş, ancak backend iyileştirmeleri belgelenmemiş
+- Kod iyileştirme durumu belgesi güncel değil
+
+**Yapılması Gereken İyileştirmeler:**
+- Backend iyileştirmelerinin belgelendirilmesi
+- Kod iyileştirme durumu belgesinin güncellenmesi
+- Her tamamlanan görev için ilgili belgelendirmenin güncellenmesi
 
 ## Kullanıcı Sayfa İzinleri Yönetimi Sayfası Sorunları ve Çözümleri
 
@@ -321,14 +306,14 @@ formData.username = `${formData.fullName}_${formData.sicil}`; // Benzersiz kulla
 **Çözüm:**
 1. Kullanıcı adı oluşturma mantığını değiştirdik.
 2. Kullanıcı adı olarak sadece kullanıcının tam adını (fullName) kullanıyoruz.
-3. Aynı isimde bir kullanıcı varsa, kullanıcı adının sonuna sicil numarasını ekleyerek benzersizlik sağlıyoruz.
+3. Aynı kullanıcı adı varsa, kullanıcı adının sonuna sicil numarasını ekleyerek benzersizlik sağlıyoruz.
 4. Bu şekilde, kullanıcı adları mümkün olduğunca basit ve anlaşılır kalıyor, ancak gerektiğinde benzersizlik de sağlanıyor.
 
 ```typescript
 // Kullanıcı adı olarak sadece fullName kullanarak oluşturalım
 formData.username = formData.fullName; // Boşlukları koruyoruz
 
-// Aynı kullanıcı adı varsa, kullanıcı adının sonuna sicil numarasını ekleyelim
+// Aynı kullanıcı adı varsa, kullanıcı adının sonuna sicil numarasını ekle
 const existingUserWithSameUsername = this.users.find(u => u.username === formData.username);
 if (existingUserWithSameUsername) {
   // Kullanıcı adının sonuna sicil numarasını ekle
