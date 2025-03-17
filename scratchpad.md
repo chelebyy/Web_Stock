@@ -47,3 +47,43 @@ Kod iyileştirme durumunu analiz etmek, gerçek tamamlanma oranlarını belirlem
 - Belgelendirmeyi güncel tutmak, projenin gerçek durumunu anlamak için kritik
 - Tamamlanmamış görevleri önceliklendirmek, kaynakları daha verimli kullanmayı sağlar
 - Her değişiklikten sonra sistemi test etmek, mevcut işlevselliğin korunduğundan emin olmak için gerekli
+
+# Scratchpad
+
+## Mevcut Görev: Kod İyileştirme - Sihirli String ve Sayıların Sabit Değişkenlerle Değiştirilmesi
+
+### Görev Açıklaması
+Backend kodunda bulunan sihirli string ve sayıları (magic strings/numbers) sabit değişkenlerle değiştirerek kodun okunabilirliğini ve bakımını kolaylaştırmak.
+
+### Yapılan İşlemler
+- [X] Constants klasörü oluşturuldu
+- [X] ApiConstants.cs dosyası oluşturuldu (API endpoint'leri ve yanıt mesajları için)
+- [X] ErrorMessages.cs dosyası oluşturuldu (Hata mesajları için)
+- [X] LogMessages.cs dosyası oluşturuldu (Log mesajları için)
+- [X] PermissionNames.cs dosyası oluşturuldu (İzin isimleri için)
+- [X] RoleNames.cs dosyası oluşturuldu (Rol isimleri için)
+- [X] PermissionsController.cs dosyasında sihirli string ve sayılar sabit değişkenlerle değiştirildi
+- [X] AuthController.cs dosyasında sihirli string ve sayılar sabit değişkenlerle değiştirildi
+- [X] RoleController.cs dosyasında sihirli string ve sayılar sabit değişkenlerle değiştirildi
+- [X] UsersController.cs dosyasında sihirli string ve sayılar sabit değişkenlerle değiştirildi
+
+### Sonraki Adımlar
+- [ ] Diğer controller'larda sihirli string ve sayıların sabit değişkenlerle değiştirilmesi
+- [ ] Service katmanında sihirli string ve sayıların sabit değişkenlerle değiştirilmesi
+- [ ] Repository katmanında sihirli string ve sayıların sabit değişkenlerle değiştirilmesi
+
+### Notlar
+- Sabit değişkenler, ilgili sınıflar içinde gruplandırıldı (API sabitleri, hata mesajları, log mesajları, izin isimleri, rol isimleri)
+- Sabit değişkenler, Türkçe olarak tanımlandı (projenin dili Türkçe olduğu için)
+- Sabit değişkenler, anlamlı isimlerle tanımlandı (örn. ApiConstants.ApiBaseRoute, ErrorMessages.UserNotFound)
+- Sabit değişkenler, ilgili sınıflar içinde kategorilere ayrıldı (örn. genel hata mesajları, kullanıcı ile ilgili hata mesajları)
+
+## Önceki Görevler
+
+### Kod İyileştirme Durumu Analizi ve Yeni Plan Oluşturma
+- [X] Mevcut kod iyileştirme durumunun analizi
+- [X] Gerçek tamamlanma oranlarının belirlenmesi
+- [X] Yeni kod iyileştirme planının oluşturulması
+- [X] Önceliklerin belirlenmesi
+- [X] Uygulama stratejisinin oluşturulması
+- [X] Risk değerlendirmesinin yapılması
