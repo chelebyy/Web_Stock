@@ -1,0 +1,1 @@
+kRUC:\Users\muham\OneDrive\Masa√ºst√º\Stock\tests\Stock.UnitTests\Stock.UnitTests.csproj¢net9.0ÚCSharp13

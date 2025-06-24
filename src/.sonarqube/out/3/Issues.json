@@ -1,0 +1,668 @@
+{
+  "$schema": "http://json.schemastore.org/sarif-1.0.0",
+  "version": "1.0.0",
+  "runs": [
+    {
+      "tool": {
+        "name": "Microsoft (R) Visual C# Derleyicisi",
+        "version": "4.12.0.0",
+        "fileVersion": "4.12.0-3.24473.3 (5ef52ae3)",
+        "semanticVersion": "4.12.0",
+        "language": "tr-TR"
+      },
+      "results": [
+        {
+          "ruleId": "CS8604",
+          "level": "warning",
+          "message": "'ProductDescription ProductDescription.From(string value)' içindeki 'value' parametresi için olası null başvuru bağımsız değişkeni.",
+          "locations": [
+            {
+              "resultFile": {
+                "uri": "file:///C:/Users/muham/OneDrive/Masa%C3%BCst%C3%BC/Stock/tests/Stock.UnitTests/Domain/ValueObjects/ProductDescriptionTests.cs",
+                "region": {
+                  "startLine": 17,
+                  "startColumn": 55,
+                  "endLine": 17,
+                  "endColumn": 60
+                }
+              }
+            }
+          ],
+          "properties": {
+            "warningLevel": 1
+          }
+        },
+        {
+          "ruleId": "CS8625",
+          "level": "warning",
+          "message": "Null sabit değer, boş değer atanamayan başvuru türüne dönüştürülemiyor.",
+          "locations": [
+            {
+              "resultFile": {
+                "uri": "file:///C:/Users/muham/OneDrive/Masa%C3%BCst%C3%BC/Stock/tests/Stock.UnitTests/Domain/ValueObjects/ProductDescriptionTests.cs",
+                "region": {
+                  "startLine": 28,
+                  "startColumn": 55,
+                  "endLine": 28,
+                  "endColumn": 59
+                }
+              }
+            }
+          ],
+          "properties": {
+            "warningLevel": 1
+          }
+        },
+        {
+          "ruleId": "CS8604",
+          "level": "warning",
+          "message": "'ProductName ProductName.From(string value)' içindeki 'value' parametresi için olası null başvuru bağımsız değişkeni.",
+          "locations": [
+            {
+              "resultFile": {
+                "uri": "file:///C:/Users/muham/OneDrive/Masa%C3%BCst%C3%BC/Stock/tests/Stock.UnitTests/Domain/ValueObjects/ProductNameTests.cs",
+                "region": {
+                  "startLine": 32,
+                  "startColumn": 34,
+                  "endLine": 32,
+                  "endColumn": 45
+                }
+              }
+            }
+          ],
+          "properties": {
+            "warningLevel": 1
+          }
+        },
+        {
+          "ruleId": "CS8625",
+          "level": "warning",
+          "message": "Null sabit değer, boş değer atanamayan başvuru türüne dönüştürülemiyor.",
+          "locations": [
+            {
+              "resultFile": {
+                "uri": "file:///C:/Users/muham/OneDrive/Masa%C3%BCst%C3%BC/Stock/tests/Stock.UnitTests/Domain/ValueObjects/ProductDescriptionTests.cs",
+                "region": {
+                  "startLine": 72,
+                  "startColumn": 55,
+                  "endLine": 72,
+                  "endColumn": 59
+                }
+              }
+            }
+          ],
+          "properties": {
+            "warningLevel": 1
+          }
+        },
+        {
+          "ruleId": "CS8600",
+          "level": "warning",
+          "message": "Null sabit değeri veya olası null değeri, boş değer atanamaz türe dönüştürülüyor.",
+          "locations": [
+            {
+              "resultFile": {
+                "uri": "file:///C:/Users/muham/OneDrive/Masa%C3%BCst%C3%BC/Stock/tests/Stock.UnitTests/Domain/ValueObjects/ProductDescriptionTests.cs",
+                "region": {
+                  "startLine": 99,
+                  "startColumn": 46,
+                  "endLine": 99,
+                  "endColumn": 50
+                }
+              }
+            }
+          ],
+          "properties": {
+            "warningLevel": 1
+          }
+        },
+        {
+          "ruleId": "CS8604",
+          "level": "warning",
+          "message": "'ProductDescription.implicit operator string(ProductDescription description)' içindeki 'description' parametresi için olası null başvuru bağımsız değişkeni.",
+          "locations": [
+            {
+              "resultFile": {
+                "uri": "file:///C:/Users/muham/OneDrive/Masa%C3%BCst%C3%BC/Stock/tests/Stock.UnitTests/Domain/ValueObjects/ProductDescriptionTests.cs",
+                "region": {
+                  "startLine": 102,
+                  "startColumn": 29,
+                  "endLine": 102,
+                  "endColumn": 40
+                }
+              }
+            }
+          ],
+          "properties": {
+            "warningLevel": 1
+          }
+        },
+        {
+          "ruleId": "CS8602",
+          "level": "warning",
+          "message": "Olası bir null başvurunun başvurma işlemi.",
+          "locations": [
+            {
+              "resultFile": {
+                "uri": "file:///C:/Users/muham/OneDrive/Masa%C3%BCst%C3%BC/Stock/tests/Stock.UnitTests/Application/ProductServiceTests.cs",
+                "region": {
+                  "startLine": 38,
+                  "startColumn": 13,
+                  "endLine": 38,
+                  "endColumn": 46
+                }
+              }
+            }
+          ],
+          "properties": {
+            "warningLevel": 1
+          }
+        },
+        {
+          "ruleId": "CS8600",
+          "level": "warning",
+          "message": "Null sabit değeri veya olası null değeri, boş değer atanamaz türe dönüştürülüyor.",
+          "locations": [
+            {
+              "resultFile": {
+                "uri": "file:///C:/Users/muham/OneDrive/Masa%C3%BCst%C3%BC/Stock/tests/Stock.UnitTests/Domain/ValueObjects/ProductDescriptionTests.cs",
+                "region": {
+                  "startLine": 134,
+                  "startColumn": 40,
+                  "endLine": 134,
+                  "endColumn": 44
+                }
+              }
+            }
+          ],
+          "properties": {
+            "warningLevel": 1
+          }
+        },
+        {
+          "ruleId": "CS8600",
+          "level": "warning",
+          "message": "Null sabit değeri veya olası null değeri, boş değer atanamaz türe dönüştürülüyor.",
+          "locations": [
+            {
+              "resultFile": {
+                "uri": "file:///C:/Users/muham/OneDrive/Masa%C3%BCst%C3%BC/Stock/tests/Stock.UnitTests/Domain/ValueObjects/ProductDescriptionTests.cs",
+                "region": {
+                  "startLine": 135,
+                  "startColumn": 40,
+                  "endLine": 135,
+                  "endColumn": 44
+                }
+              }
+            }
+          ],
+          "properties": {
+            "warningLevel": 1
+          }
+        },
+        {
+          "ruleId": "CS8604",
+          "level": "warning",
+          "message": "'bool ValueObject.operator ==(ValueObject left, ValueObject right)' içindeki 'left' parametresi için olası null başvuru bağımsız değişkeni.",
+          "locations": [
+            {
+              "resultFile": {
+                "uri": "file:///C:/Users/muham/OneDrive/Masa%C3%BCst%C3%BC/Stock/tests/Stock.UnitTests/Domain/ValueObjects/ProductDescriptionTests.cs",
+                "region": {
+                  "startLine": 139,
+                  "startColumn": 25,
+                  "endLine": 139,
+                  "endColumn": 30
+                }
+              }
+            }
+          ],
+          "properties": {
+            "warningLevel": 1
+          }
+        },
+        {
+          "ruleId": "CS8604",
+          "level": "warning",
+          "message": "'bool ValueObject.operator ==(ValueObject left, ValueObject right)' içindeki 'right' parametresi için olası null başvuru bağımsız değişkeni.",
+          "locations": [
+            {
+              "resultFile": {
+                "uri": "file:///C:/Users/muham/OneDrive/Masa%C3%BCst%C3%BC/Stock/tests/Stock.UnitTests/Domain/ValueObjects/ProductDescriptionTests.cs",
+                "region": {
+                  "startLine": 139,
+                  "startColumn": 34,
+                  "endLine": 139,
+                  "endColumn": 39
+                }
+              }
+            }
+          ],
+          "properties": {
+            "warningLevel": 1
+          }
+        },
+        {
+          "ruleId": "CS8600",
+          "level": "warning",
+          "message": "Null sabit değeri veya olası null değeri, boş değer atanamaz türe dönüştürülüyor.",
+          "locations": [
+            {
+              "resultFile": {
+                "uri": "file:///C:/Users/muham/OneDrive/Masa%C3%BCst%C3%BC/Stock/tests/Stock.UnitTests/Domain/ValueObjects/ProductDescriptionTests.cs",
+                "region": {
+                  "startLine": 146,
+                  "startColumn": 40,
+                  "endLine": 146,
+                  "endColumn": 44
+                }
+              }
+            }
+          ],
+          "properties": {
+            "warningLevel": 1
+          }
+        },
+        {
+          "ruleId": "CS8604",
+          "level": "warning",
+          "message": "'bool ValueObject.operator !=(ValueObject left, ValueObject right)' içindeki 'left' parametresi için olası null başvuru bağımsız değişkeni.",
+          "locations": [
+            {
+              "resultFile": {
+                "uri": "file:///C:/Users/muham/OneDrive/Masa%C3%BCst%C3%BC/Stock/tests/Stock.UnitTests/Domain/ValueObjects/ProductDescriptionTests.cs",
+                "region": {
+                  "startLine": 151,
+                  "startColumn": 25,
+                  "endLine": 151,
+                  "endColumn": 30
+                }
+              }
+            }
+          ],
+          "properties": {
+            "warningLevel": 1
+          }
+        },
+        {
+          "ruleId": "CS8625",
+          "level": "warning",
+          "message": "Null sabit değer, boş değer atanamayan başvuru türüne dönüştürülemiyor.",
+          "locations": [
+            {
+              "resultFile": {
+                "uri": "file:///C:/Users/muham/OneDrive/Masa%C3%BCst%C3%BC/Stock/tests/Stock.UnitTests/Application/Features/Products/Commands/CreateProductCommandHandlerTests.cs",
+                "region": {
+                  "startLine": 94,
+                  "startColumn": 41,
+                  "endLine": 94,
+                  "endColumn": 45
+                }
+              }
+            }
+          ],
+          "properties": {
+            "warningLevel": 1
+          }
+        },
+        {
+          "ruleId": "CS8601",
+          "level": "warning",
+          "message": "Olası null başvuru ataması.",
+          "locations": [
+            {
+              "resultFile": {
+                "uri": "file:///C:/Users/muham/OneDrive/Masa%C3%BCst%C3%BC/Stock/tests/Stock.UnitTests/Application/Features/Products/Commands/CreateProductCommandHandlerTests.cs",
+                "region": {
+                  "startLine": 136,
+                  "startColumn": 24,
+                  "endLine": 136,
+                  "endColumn": 35
+                }
+              }
+            }
+          ],
+          "properties": {
+            "warningLevel": 1
+          }
+        },
+        {
+          "ruleId": "CS8625",
+          "level": "warning",
+          "message": "Null sabit değer, boş değer atanamayan başvuru türüne dönüştürülemiyor.",
+          "locations": [
+            {
+              "resultFile": {
+                "uri": "file:///C:/Users/muham/OneDrive/Masa%C3%BCst%C3%BC/Stock/tests/Stock.UnitTests/Application/ProductServiceTests.cs",
+                "region": {
+                  "startLine": 178,
+                  "startColumn": 18,
+                  "endLine": 178,
+                  "endColumn": 22
+                }
+              }
+            }
+          ],
+          "properties": {
+            "warningLevel": 1
+          }
+        },
+        {
+          "ruleId": "CS8625",
+          "level": "warning",
+          "message": "Null sabit değer, boş değer atanamayan başvuru türüne dönüştürülemiyor.",
+          "locations": [
+            {
+              "resultFile": {
+                "uri": "file:///C:/Users/muham/OneDrive/Masa%C3%BCst%C3%BC/Stock/tests/Stock.UnitTests/Application/ProductServiceTests.cs",
+                "region": {
+                  "startLine": 205,
+                  "startColumn": 34,
+                  "endLine": 205,
+                  "endColumn": 38
+                }
+              }
+            }
+          ],
+          "properties": {
+            "warningLevel": 1
+          }
+        },
+        {
+          "ruleId": "CS1998",
+          "level": "warning",
+          "message": "Bu zaman uyumsuz yöntemde 'await' işleçleri yok ve zaman uyumlu çalışacak. 'await' işlecini kullanarak engelleyici olmayan API çağrılarını beklemeyi veya 'await Task.Run(...)' kullanarak bir arka plan iş parçacığında CPU bağlantılı iş yapmayı düşünün.",
+          "locations": [
+            {
+              "resultFile": {
+                "uri": "file:///C:/Users/muham/OneDrive/Masa%C3%BCst%C3%BC/Stock/tests/Stock.UnitTests/Application/ProductServiceTests.cs",
+                "region": {
+                  "startLine": 219,
+                  "startColumn": 27,
+                  "endLine": 219,
+                  "endColumn": 99
+                }
+              }
+            }
+          ],
+          "properties": {
+            "warningLevel": 1
+          }
+        },
+        {
+          "ruleId": "S2699",
+          "level": "warning",
+          "message": "Add at least one assertion to this test case.",
+          "locations": [
+            {
+              "resultFile": {
+                "uri": "file:///C:/Users/muham/OneDrive/Masa%C3%BCst%C3%BC/Stock/tests/Stock.UnitTests/UnitTest1.cs",
+                "region": {
+                  "startLine": 6,
+                  "startColumn": 17,
+                  "endLine": 6,
+                  "endColumn": 22
+                }
+              }
+            }
+          ],
+          "properties": {
+            "warningLevel": 1
+          }
+        },
+        {
+          "ruleId": "xUnit1012",
+          "level": "warning",
+          "message": "Null should not be used for type parameter 'invalidName' of type 'string'. Use a non-null value, or convert the parameter to a nullable type.",
+          "locations": [
+            {
+              "resultFile": {
+                "uri": "file:///C:/Users/muham/OneDrive/Masa%C3%BCst%C3%BC/Stock/tests/Stock.UnitTests/Domain/ProductTests.cs",
+                "region": {
+                  "startLine": 34,
+                  "startColumn": 21,
+                  "endLine": 34,
+                  "endColumn": 25
+                }
+              }
+            }
+          ],
+          "properties": {
+            "warningLevel": 1,
+            "customProperties": {
+              "ParameterIndex": "0",
+              "ParameterName": "invalidName"
+            }
+          }
+        },
+        {
+          "ruleId": "CA1816",
+          "level": "note",
+          "message": "UnitOfWorkTests.Dispose() öğesini GC.SuppressFinalize(object) çağrısı yapacak şekilde değiştirin. Bu, bir sonlandırıcı sunan türetilmiş türlerin 'IDisposable' çağrısı yapabilmesi için bunu yeniden uygulamak zorunda kalmasını engeller.",
+          "locations": [
+            {
+              "resultFile": {
+                "uri": "file:///C:/Users/muham/OneDrive/Masa%C3%BCst%C3%BC/Stock/tests/Stock.UnitTests/Infrastructure/Data/UnitOfWorkTests.cs",
+                "region": {
+                  "startLine": 140,
+                  "startColumn": 21,
+                  "endLine": 140,
+                  "endColumn": 28
+                }
+              }
+            }
+          ],
+          "properties": {
+            "warningLevel": 1
+          }
+        },
+        {
+          "ruleId": "CA1816",
+          "level": "note",
+          "message": "ProductRepositoryTests.Dispose() öğesini GC.SuppressFinalize(object) çağrısı yapacak şekilde değiştirin. Bu, bir sonlandırıcı sunan türetilmiş türlerin 'IDisposable' çağrısı yapabilmesi için bunu yeniden uygulamak zorunda kalmasını engeller.",
+          "locations": [
+            {
+              "resultFile": {
+                "uri": "file:///C:/Users/muham/OneDrive/Masa%C3%BCst%C3%BC/Stock/tests/Stock.UnitTests/Infrastructure/Data/Repositories/ProductRepositoryTests.cs",
+                "region": {
+                  "startLine": 187,
+                  "startColumn": 17,
+                  "endLine": 187,
+                  "endColumn": 24
+                }
+              }
+            }
+          ],
+          "properties": {
+            "warningLevel": 1
+          }
+        },
+        {
+          "ruleId": "S2699",
+          "level": "warning",
+          "message": "Add at least one assertion to this test case.",
+          "locations": [
+            {
+              "resultFile": {
+                "uri": "file:///C:/Users/muham/OneDrive/Masa%C3%BCst%C3%BC/Stock/tests/Stock.UnitTests/Application/ProductServiceTests.cs",
+                "region": {
+                  "startLine": 219,
+                  "startColumn": 27,
+                  "endLine": 219,
+                  "endColumn": 99
+                }
+              }
+            }
+          ],
+          "properties": {
+            "warningLevel": 1
+          }
+        },
+        {
+          "ruleId": "CA1859",
+          "level": "note",
+          "message": "Daha iyi performans için 'Stock.Application.Features.Products.Services.IProductService' olan '_productService' alan türünü 'Stock.Application.Features.Products.Services.ProductService' olarak değiştirin",
+          "locations": [
+            {
+              "resultFile": {
+                "uri": "file:///C:/Users/muham/OneDrive/Masa%C3%BCst%C3%BC/Stock/tests/Stock.UnitTests/Application/ProductServiceTests.cs",
+                "region": {
+                  "startLine": 19,
+                  "startColumn": 42,
+                  "endLine": 19,
+                  "endColumn": 57
+                }
+              }
+            }
+          ],
+          "properties": {
+            "warningLevel": 1
+          }
+        }
+      ],
+      "rules": {
+        "CA1816": {
+          "id": "CA1816",
+          "shortDescription": "Dispose yöntemleri tarafından SuppressFinalize çağrılmalıdır",
+          "fullDescription": "Dispose uygulaması olan bir metot GC.SuppressFinalize çağrısı yapmıyor, Dispose uygulaması olmayan bir metot GC.SuppressFinalize çağrısı yapıyor ya da bir metot GC.SuppressFinalize çağrısı yapıyor ve this (Visual Basic’te Me) dışında bir şey geçiriyor.",
+          "defaultLevel": "note",
+          "helpUri": "https://learn.microsoft.com/dotnet/fundamentals/code-analysis/quality-rules/ca1816",
+          "properties": {
+            "category": "Usage",
+            "isEnabledByDefault": true,
+            "tags": [
+              "PortedFromFxCop",
+              "Telemetry",
+              "EnabledRuleInAggressiveMode"
+            ]
+          }
+        },
+        "CA1859": {
+          "id": "CA1859",
+          "shortDescription": "Daha iyi performans için mümkün olduğunda somut türler kullanın",
+          "fullDescription": "Somut türlerin kullanımı, sanal veya arabirim çağrısı ek yükünü önler ve satır içine alma sağlar.",
+          "defaultLevel": "note",
+          "helpUri": "https://learn.microsoft.com/dotnet/fundamentals/code-analysis/quality-rules/ca1859",
+          "properties": {
+            "category": "Performance",
+            "isEnabledByDefault": true,
+            "tags": [
+              "Telemetry",
+              "EnabledRuleInAggressiveMode"
+            ]
+          }
+        },
+        "CS1998": {
+          "id": "CS1998",
+          "shortDescription": "Zaman uyumsuz yöntemde 'await' işleçleri yok ve zaman uyumlu çalışacak",
+          "defaultLevel": "warning",
+          "helpUri": "https://msdn.microsoft.com/query/roslyn.query?appId=roslyn&k=k(CS1998)",
+          "properties": {
+            "category": "Compiler",
+            "isEnabledByDefault": true,
+            "tags": [
+              "Compiler",
+              "Telemetry"
+            ]
+          }
+        },
+        "CS8600": {
+          "id": "CS8600",
+          "shortDescription": "Null sabit değeri veya olası null değeri, boş değer atanamaz türe dönüştürülüyor.",
+          "defaultLevel": "warning",
+          "helpUri": "https://msdn.microsoft.com/query/roslyn.query?appId=roslyn&k=k(CS8600)",
+          "properties": {
+            "category": "Compiler",
+            "isEnabledByDefault": true,
+            "tags": [
+              "Compiler",
+              "Telemetry"
+            ]
+          }
+        },
+        "CS8601": {
+          "id": "CS8601",
+          "shortDescription": "Olası null başvuru ataması.",
+          "defaultLevel": "warning",
+          "helpUri": "https://msdn.microsoft.com/query/roslyn.query?appId=roslyn&k=k(CS8601)",
+          "properties": {
+            "category": "Compiler",
+            "isEnabledByDefault": true,
+            "tags": [
+              "Compiler",
+              "Telemetry"
+            ]
+          }
+        },
+        "CS8602": {
+          "id": "CS8602",
+          "shortDescription": "Olası bir null başvurunun başvurma işlemi.",
+          "defaultLevel": "warning",
+          "helpUri": "https://msdn.microsoft.com/query/roslyn.query?appId=roslyn&k=k(CS8602)",
+          "properties": {
+            "category": "Compiler",
+            "isEnabledByDefault": true,
+            "tags": [
+              "Compiler",
+              "Telemetry"
+            ]
+          }
+        },
+        "CS8604": {
+          "id": "CS8604",
+          "shortDescription": "Olası null başvuru bağımsız değişkeni.",
+          "defaultLevel": "warning",
+          "helpUri": "https://msdn.microsoft.com/query/roslyn.query?appId=roslyn&k=k(CS8604)",
+          "properties": {
+            "category": "Compiler",
+            "isEnabledByDefault": true,
+            "tags": [
+              "Compiler",
+              "Telemetry"
+            ]
+          }
+        },
+        "CS8625": {
+          "id": "CS8625",
+          "shortDescription": "Null sabit değer, boş değer atanamayan başvuru türüne dönüştürülemiyor.",
+          "defaultLevel": "warning",
+          "helpUri": "https://msdn.microsoft.com/query/roslyn.query?appId=roslyn&k=k(CS8625)",
+          "properties": {
+            "category": "Compiler",
+            "isEnabledByDefault": true,
+            "tags": [
+              "Compiler",
+              "Telemetry"
+            ]
+          }
+        },
+        "S2699": {
+          "id": "S2699",
+          "shortDescription": "Tests should include assertions",
+          "fullDescription": "The rule targets test methods that lack an assertion and consist solely of an action and, optionally, a setup.",
+          "defaultLevel": "warning",
+          "helpUri": "https://rules.sonarsource.com/csharp/RSPEC-2699",
+          "properties": {
+            "category": "Blocker Code Smell",
+            "isEnabledByDefault": true,
+            "tags": [
+              "C#",
+              "TestSourceScope",
+              "SonarWay"
+            ]
+          }
+        },
+        "xUnit1012": {
+          "id": "xUnit1012",
+          "shortDescription": "Null should only be used for nullable parameters",
+          "defaultLevel": "warning",
+          "helpUri": "https://xunit.net/xunit.analyzers/rules/xUnit1012",
+          "properties": {
+            "category": "Usage",
+            "isEnabledByDefault": true
+          }
+        }
+      }
+    }
+  ]
+}

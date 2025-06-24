@@ -1,0 +1,109 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+---
+description: Proje belgelerinin ve klasörlerinin organizasyonu, takibi ve yönetimi için kurallar
+globs: ["*.md", "knowledge-base/**/*.md"]
+alwaysApply: true
+---
+---
+name: document-management-rules
+description: Proje belgelerinin ve klasörlerinin organizasyonu, takibi ve yönetimi için kurallar
+globs: ["*.md", "knowledge-base/**/*.md"]
+---
+
+# Belge ve Klasör Yönetimi Kuralları
+
+## 1. Belge Hiyerarşisi
+
+### 1.1. Ana Belgeler (Kök Dizinde)
+- **README.md**: Proje genel bakışı, belge referansları ve kurulum adımları
+- **scratchpad.md**: Aktif çalışma notları, görevler ve yapılacaklar
+- **errors.md**: Hata kayıtları ve çözüm yöntemleri
+- **PRD.md**: Ürün gereksinimleri belgesi
+
+### 1.2. Knowledge Base Klasörü
+- **knowledge-base/**: Tüm teknik belgelerin ana klasörü
+  - **feature_modules/**: Feature modüllerine özel belgeler
+  - **angular-19-migration/**: Angular 19 geçişi ile ilgili belgeler
+  - Diğer teknik belgeler (sistem başlatma, component belgeleri, vb.)
+
+## 2. Belge Güncelleme Kuralları
+
+### 2.1. Yeni Belge Oluşturma
+- **Feature Modülleri**: Yeni bir feature modülü eklendiğinde, `knowledge-base/feature_modules/` klasörüne ilgili belge eklenmelidir
+- **Teknik Belgeler**: Yeni bir teknik çözüm veya yaklaşım belgelendiğinde, uygun klasöre eklenmelidir
+- **Tüm Yeni Belgeler**: README.md'de ilgili bağlantı güncellenmelidir
+
+### 2.2. Belge Güncelleme
+- **scratchpad.md**: Her yeni görev başlangıcında ve sonu tamamlandığında güncellenmelidir
+- **errors.md**: Yeni hatalar ve çözümleri eklendiğinde güncellenmelidir
+- **Feature Modülü Belgeleri**: Modül yapısında değişiklik olduğunda güncellenmelidir
+
+## 3. Belge İçerik Standartları
+
+### 3.1. Feature Modülü Belgeleri
+- Modül genel bakışı
+- Modül yapısı şeması
+- Bileşen açıklamaları ve özellikleri
+- Servis açıklamaları ve metotları
+- API entegrasyonu detayları
+- Lazy loading yapılandırması
+- Migrasyon notları
+- Test senaryoları
+- Bağlantılı belgeler
+
+### 3.2. Hata Kayıtları (errors.md)
+- Hata başlığı ve tarihi
+- Hata mesajı
+- Hatanın nedeni
+- Çözüm adımları
+- Teknik detaylar
+- Öğrenilen dersler
+
+### 3.3. Scratchpad Notları
+- Görev durumu ([ ], [X] formatında)
+- İlerleme yüzdesi
+- Tamamlananlar
+- Devam eden görevler
+- Sonraki adımlar
+- Öğrenilen dersler
+
+## 4. Belge Referansları ve Bağlantılar
+
+### 4.1. Dokümanlar Arası Bağlantılar
+- Aynı klasördeki belgelere göreceli bağlantılar: `[Belge Adı](mdc:belge_adi.md)`
+- Farklı klasördeki belgelere bağlantılar: `[Belge Adı](mdc:../klasor/belge_adi.md)`
+- README.md'de tüm önemli belgelere bağlantılar bulunmalıdır
+
+### 4.2. Kod Referansları
+- Belgelerde kod yollarına referanslar: `/frontend/src/app/path/to/file.ts`
+- Kod parçaları için dil belirtilerek: ```typescript ... ```
+
+## 5. Belge Kontrol ve Takip İşlemi
+
+### 5.1. Haftalık Belge Gözden Geçirme
+- Tüm aktif belgeler haftalık olarak güncelliklerini koruyup korumadıkları kontrol edilmelidir
+- README.md referansları kontrol edilmelidir
+- scratchpad.md'deki görevler ve durumları güncellenmelidir
+
+### 5.2. Yeni Feature Geliştirme Süreci
+1. PRD.md'de gereksinimlerin belgelendiğinden emin olunmalıdır
+2. Feature geliştirme başlamadan önce knowledge-base'de taslak belge oluşturulmalıdır
+3. Geliştirme sırasında scratchpad.md güncellenmelidir
+4. Karşılaşılan hatalar errors.md'ye eklenmelidir
+5. Feature tamamlandığında belge tamamlanmalı ve README.md'ye referans eklenmelidir
+
+## 6. Versiyonlama ve Tarih Bilgisi
+
+- Belgelerde son güncelleme tarihi bulunmalıdır: `Son Güncelleme: 08.03.2025`
+- Önemli değişiklikler için versiyon bilgisi eklenebilir: `Versiyon: 1.2`
+- Değişiklik geçmişi belgenin sonunda tutulabilir
+
+## 7. İleride Oluşturulacak Modüller İçin Planlama
+
+- Bilgi İşlem ve Revir modülleri için planlama belgeleri oluşturulmuştur
+- Bu modüller Angular 19 geçişi tamamlandıktan sonra gerçekleştirilecektir
+- Planlama belgeleri modül geliştirme başlamadan önce güncellenmelidir

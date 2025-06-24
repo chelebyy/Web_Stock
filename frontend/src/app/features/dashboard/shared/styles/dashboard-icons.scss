@@ -1,0 +1,123 @@
+/* Dashboard Modülü İkon Stilleri */
+
+/* Kalem (Düzenle) İkonu */
+button.p-button.p-button-rounded.p-button-text.p-button-info.dashboard-edit-icon {
+  width: 2.5rem !important;
+  height: 2.5rem !important;
+  border-radius: 50% !important;
+  background: #26c6da !important;
+  border: none !important;
+  transition: all 0.3s ease !important;
+  box-shadow: 0 4px 12px rgba(38, 198, 218, 0.5) !important;
+  
+  &:hover {
+    background: #00acc1 !important;
+    transform: translateY(-3px) !important;
+    box-shadow: 0 6px 16px rgba(38, 198, 218, 0.6) !important;
+  }
+  
+  &:active {
+    transform: translateY(-1px) !important;
+    box-shadow: 0 3px 8px rgba(38, 198, 218, 0.4) !important;
+  }
+  
+  .p-button-icon {
+    color: white !important;
+    font-size: 1.1rem !important;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2) !important;
+  }
+}
+
+/* Çöp Kutusu (Sil) İkonu */
+button.p-button.p-button-rounded.p-button-text.p-button-danger.dashboard-delete-icon {
+  width: 2.5rem !important;
+  height: 2.5rem !important;
+  border-radius: 50% !important;
+  background: #ef5350 !important;
+  border: none !important;
+  transition: all 0.3s ease !important;
+  box-shadow: 0 4px 12px rgba(239, 83, 80, 0.5) !important;
+  
+  &:hover {
+    background: #e53935 !important;
+    transform: translateY(-3px) !important;
+    box-shadow: 0 6px 16px rgba(239, 83, 80, 0.6) !important;
+  }
+  
+  &:active {
+    transform: translateY(-1px) !important;
+    box-shadow: 0 3px 8px rgba(239, 83, 80, 0.4) !important;
+  }
+  
+  .p-button-icon {
+    color: white !important;
+    font-size: 1.1rem !important;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2) !important;
+  }
+}
+
+/* İzin (Anahtar) İkonu */
+button.p-button.p-button-rounded.p-button-text.p-button-success.dashboard-permission-icon {
+  width: 2.5rem !important;
+  height: 2.5rem !important;
+  border-radius: 50% !important;
+  background: #42a5f5 !important;
+  border: none !important;
+  transition: all 0.3s ease !important;
+  box-shadow: 0 4px 12px rgba(66, 165, 245, 0.5) !important;
+  
+  &:hover {
+    background: #1e88e5 !important;
+    transform: translateY(-3px) !important;
+    box-shadow: 0 6px 16px rgba(66, 165, 245, 0.6) !important;
+  }
+  
+  &:active {
+    transform: translateY(-1px) !important;
+    box-shadow: 0 3px 8px rgba(66, 165, 245, 0.4) !important;
+  }
+  
+  .p-button-icon {
+    color: white !important;
+    font-size: 1.1rem !important;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2) !important;
+  }
+}
+
+/* Artı (Ekle) İkonu */
+button.p-button.p-button-rounded.p-button-text.p-button-warning.dashboard-add-icon {
+  width: 2.5rem !important;
+  height: 2.5rem !important;
+  border-radius: 50% !important;
+  background: #ffb74d !important;
+  border: none !important;
+  transition: all 0.3s ease !important;
+  box-shadow: 0 4px 12px rgba(255, 183, 77, 0.5) !important;
+  
+  &:hover {
+    background: #ffa726 !important;
+    transform: translateY(-3px) !important;
+    box-shadow: 0 6px 16px rgba(255, 183, 77, 0.6) !important;
+  }
+  
+  &:active {
+    transform: translateY(-1px) !important;
+    box-shadow: 0 3px 8px rgba(255, 183, 77, 0.4) !important;
+  }
+  
+  .p-button-icon {
+    color: white !important;
+    font-size: 1.1rem !important;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2) !important;
+  }
+}
+
+/* Tooltip Stilleri */
+.dashboard-tooltip {
+  font-size: 0.85rem;
+  padding: 0.5rem 0.75rem;
+  background: rgba(33, 33, 33, 0.9);
+  color: white;
+  border-radius: 4px;
+  box-shadow: 0 3px 12px rgba(0, 0, 0, 0.2);
+} 

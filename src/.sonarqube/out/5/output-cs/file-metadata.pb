@@ -1,0 +1,11 @@
+�
+}C:\Users\muham\OneDrive\Masaüstü\Stock\tests\Stock.IntegrationTests\obj\Debug\net9.0\Stock.IntegrationTests.AssemblyInfo.csutf-8�
+�C:\Users\muham\OneDrive\Masaüstü\Stock\tests\Stock.IntegrationTests\obj\Debug\net9.0\.NETCoreApp,Version=v9.0.AssemblyAttributes.csutf-8�
+C:\Users\muham\OneDrive\Masaüstü\Stock\tests\Stock.IntegrationTests\obj\Debug\net9.0\Stock.IntegrationTests.GlobalUsings.g.csutf-8~
+sC:\Users\muham\.nuget\packages\microsoft.net.test.sdk\17.11.1\build\netcoreapp3.1\Microsoft.NET.Test.Sdk.Program.csutf-8[
+RC:\Users\muham\OneDrive\Masaüstü\Stock\tests\Stock.IntegrationTests\UnitTest1.csutf-8m
+dC:\Users\muham\OneDrive\Masaüstü\Stock\tests\Stock.IntegrationTests\CustomWebApplicationFactory.csutf-8u
+lC:\Users\muham\OneDrive\Masaüstü\Stock\tests\Stock.IntegrationTests\Controllers\ProductsControllerTests.csutf-8t
+kC:\Users\muham\OneDrive\Masaüstü\Stock\tests\Stock.IntegrationTests\Controllers\ProductControllerTests.csutf-8a
+XC:\Users\muham\OneDrive\Masaüstü\Stock\tests\Stock.IntegrationTests\Common\TestBase.csutf-8t
+kC:\Users\muham\OneDrive\Masaüstü\Stock\tests\Stock.IntegrationTests\Common\CustomWebApplicationFactory.csutf-8

@@ -1,0 +1,20 @@
+---
+description: dotnet core best practices
+globs: 
+alwaysApply: false
+---
+# .NET Core Best Practices
+
+This document outlines the best practices for developing applications using .NET Core within this project.
+Use async/await for non-blocking operations throughout the application
+- Implement proper error handling and logging using .NET Core's built-in features
+- Use dependency injection for better testability and modularity
+- Implement authentication and authorization using ASP.NET Identity or JWT tokens
+- Use HTTPS for all web communications and implement appropriate CORS policies
+- Create API documentation using Swagger/OpenAPI for better API discoverability
+- Use Entity Framework Core for database operations and migrations
+- Implement proper input validation using FluentValidation or DataAnnotations
+
+
+
+

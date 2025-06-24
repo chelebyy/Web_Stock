@@ -1,0 +1,43 @@
+<div class="permission-management-container">
+  <div class="page-header">
+    <div class="page-title-container">
+      @if (role) {
+        <h1 class="page-title">{{ role.name }} - İzin Yönetimi</h1>
+      }
+      <p class="page-subtitle">Bu rol için izinleri düzenleyin ve yönetin</p>
+    </div>
+    <button pButton pRipple icon="pi pi-arrow-left" label="Geri Dön" class="p-button-outlined back-button" (click)="goBack()"></button>
+  </div>
+
+  @if (loading) {
+    <div class="loading-container">
+      <p-progressSpinner styleClass="w-4rem h-4rem" strokeWidth="4" fill="var(--surface-ground)" animationDuration=".5s"></p-progressSpinner>
+      <span>Bilgiler yükleniyor...</span>
+    </div>
+  }
+  
+  @if (!loading && role) {
+    <div class="content-container">
+      <!-- İçerik tamamen silindi -->
+    </div>
+  }
+  
+  <!-- Hata Durumu -->
+  @if (!loading && loadError) {
+    <div class="error-container">
+      <i class="pi pi-exclamation-triangle error-icon"></i>
+      <h2>Veriler Yüklenemedi</h2>
+      <p>İzin bilgileri yüklenirken bir hata oluştu. Lütfen tekrar deneyin.</p>
+      <button pButton pRipple icon="pi pi-refresh" label="Yeniden Dene" 
+              class="p-button-primary retry-button" 
+              (click)="loadRoleData()"></button>
+    </div>
+  }
+</div>
+
+@defer {
+  <p-toast position="top-right" styleClass="modern-toast"></p-toast>
+} @placeholder {
+  <!-- Toast için placeholder -->
+  <div class="toast-placeholder"></div>
+} 

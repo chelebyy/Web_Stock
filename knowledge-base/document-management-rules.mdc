@@ -1,0 +1,83 @@
+# Belge Yönetim Kuralları
+
+## Genel Kurallar
+
+1. **Klasör Yapısı**: Tüm belgeler ilgili klasörlerde organize edilmelidir:
+   - `/knowledge-base`: Ana bilgi tabanı klasörü
+   - `/knowledge-base/feature_modules`: Özellik modülleri için belgeler
+   - `/knowledge-base/technical`: Teknik belgeler
+   - `/knowledge-base/guides`: Kullanım kılavuzları
+
+2. **Dosya Adlandırma**: Tüm dosya adları küçük harflerle yazılmalı ve kelimeler arasında alt çizgi kullanılmalıdır (örn. `user_page_permissions_knowledge_base.md`).
+
+3. **Belge Formatı**: Tüm belgeler Markdown formatında olmalıdır.
+
+4. **Başlık Yapısı**: Her belge, belgenin içeriğini açıklayan bir başlık ile başlamalıdır.
+
+5. **İçindekiler**: 500 satırdan uzun belgeler için içindekiler bölümü eklenmelidir.
+
+## Belge Türleri ve İçerikleri
+
+### Özellik Modülü Belgeleri
+
+Her özellik modülü için aşağıdaki bilgileri içeren bir belge oluşturulmalıdır:
+
+1. **Genel Bakış**: Modülün amacı ve temel işlevleri
+2. **Bileşen Yapısı**: HTML, TypeScript ve SCSS yapısı
+3. **Teknik Detaylar**: Kullanılan bileşenler, API'ler, vb.
+4. **Kullanım Kılavuzu**: Modülün nasıl kullanılacağına dair adımlar
+5. **Hata Giderme**: Yaygın sorunlar ve çözümleri
+6. **Gelecek Geliştirmeler**: Planlanan iyileştirmeler
+
+### Hata Kayıtları
+
+`errors.md` dosyası, projede karşılaşılan hataları ve çözümlerini belgelemek için kullanılır:
+
+1. **Hata Başlığı**: Hatanın kısa açıklaması
+2. **Tarih**: Hatanın oluştuğu tarih
+3. **Hata Mesajı**: Tam hata mesajı (varsa)
+4. **Nedeni**: Hatanın nedeni
+5. **Çözüm**: Hatanın nasıl çözüldüğü
+6. **Kod Örneği**: Çözüm için kullanılan kod (varsa)
+
+### Scratchpad
+
+`scratchpad.md` dosyası, görev planlaması ve ilerleme takibi için kullanılır:
+
+1. **Görev Tanımı**: Yapılacak işin açıklaması
+2. **Yapılan Değişiklikler ve İlerleme**: Kontrol listesi formatında ilerleme
+3. **Öğrenilen Dersler**: Görev sırasında öğrenilen dersler
+4. **Sonraki Adımlar**: Gelecekte yapılacak işler
+
+## Belge Güncellemeleri
+
+1. **README.md Güncellemeleri**: Yeni bir belge oluşturulduğunda, `README.md` dosyasındaki belge referansları güncellenmelidir.
+
+2. **Versiyon Kontrolü**: Önemli değişiklikler için belgelerin üst kısmına versiyon bilgisi eklenmelidir:
+   ```
+   Versiyon: 1.0
+   Son Güncelleme: 12.03.2025
+   ```
+
+3. **Değişiklik Kaydı**: Önemli belge değişiklikleri için belgenin sonuna bir değişiklik kaydı eklenmelidir:
+   ```
+   ## Değişiklik Kaydı
+   - 12.03.2025: İlk versiyon oluşturuldu
+   - 15.03.2025: Hata giderme bölümü eklendi
+   ```
+
+## Belge İnceleme ve Onay
+
+1. **İnceleme**: Yeni oluşturulan veya önemli güncellemeler yapılan belgeler, en az bir takım üyesi tarafından incelenmelidir.
+
+2. **Onay**: İncelenen belgeler, proje yöneticisi tarafından onaylanmalıdır.
+
+3. **Geri Bildirim**: Belge incelemelerinde alınan geri bildirimler, belgeye eklenmelidir.
+
+## Belge Erişimi ve Paylaşımı
+
+1. **Erişim**: Tüm belgeler, proje ekibi için erişilebilir olmalıdır.
+
+2. **Paylaşım**: Belgeler, proje dışındaki kişilerle paylaşılmadan önce gözden geçirilmelidir.
+
+3. **Gizlilik**: Hassas bilgiler içeren belgeler, uygun şekilde işaretlenmeli ve erişim kısıtlamaları uygulanmalıdır. 

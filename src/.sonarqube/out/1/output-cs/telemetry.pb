@@ -1,0 +1,1 @@
+mRWC:\Users\muham\OneDrive\Masa√ºst√º\Stock\src\Stock.Application\Stock.Application.csproj¢net9.0ÚCSharp13

@@ -1,0 +1,14 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+---
+description: Best practices for database operations and migrations using Entity Framework Core
+globs: **/*.{cs}
+alwaysApply: true
+---
+- Use migrations to manage database schema changes and ensure consistency across environments
+- Implement proper database indexing to optimize query performance
+- Use asynchronous database operations to improve scalability
+- Leverage LINQ for efficient and type-safe database queries

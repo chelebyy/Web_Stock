@@ -1,0 +1,339 @@
+.user-info {
+    padding: 16px;
+    background-color: #f0f7ff;
+    border-radius: 8px;
+    margin-bottom: 20px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.user-info h4 {
+    margin-bottom: 12px;
+    color: #1e3a8a;
+    font-weight: 600;
+}
+
+.user-info p {
+    margin-bottom: 8px;
+    color: #334155;
+}
+
+.user-info strong {
+    font-weight: 600;
+    color: #0f172a;
+}
+
+.permission-accordion {
+    margin-bottom: 20px;
+}
+
+.has-permission {
+    background-color: rgba(40, 167, 69, 0.1);
+}
+
+.custom-permission {
+    font-weight: 600;
+}
+
+::ng-deep .permission-accordion .p-accordion-header a {
+    background-color: #f8fafc;
+    color: #1e3a8a;
+    font-weight: 600;
+    padding: 1rem;
+    border-radius: 8px 8px 0 0;
+    transition: all 0.2s ease;
+}
+
+::ng-deep .permission-accordion .p-accordion-header:not(.p-disabled).p-highlight a {
+    background-color: #eff6ff;
+    border-color: #bfdbfe;
+}
+
+::ng-deep .permission-accordion .p-accordion-content {
+    padding: 0;
+    border: 1px solid #e2e8f0;
+    border-top: none;
+    border-radius: 0 0 8px 8px;
+}
+
+/* Tablo stilleri */
+::ng-deep .p-datatable .p-datatable-thead > tr > th {
+    background-color: #f8fafc;
+    color: #334155;
+    font-weight: 600;
+    padding: 0.75rem 1rem;
+    border-color: #e2e8f0;
+}
+
+::ng-deep .p-datatable .p-datatable-tbody > tr {
+    background-color: #ffffff;
+    transition: background-color 0.2s;
+}
+
+::ng-deep .p-datatable .p-datatable-tbody > tr:hover {
+    background-color: #f1f5f9;
+}
+
+::ng-deep .p-datatable .p-datatable-tbody > tr > td {
+    padding: 0.75rem 1rem;
+    border-color: #e2e8f0;
+    color: #334155;
+}
+
+/* Nested cards within the main card */
+.card {
+    background-color: #ffffff;
+    border-radius: 8px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+    margin-bottom: 1.5rem;
+}
+
+.card .card-header {
+    background-color: #f8fafc;
+    padding: 1rem 1.5rem;
+    border-bottom: 1px solid #e2e8f0;
+    border-radius: 8px 8px 0 0;
+}
+
+.card .card-header h3, 
+.card .card-header h5 {
+    margin: 0;
+    color: #1e3a8a;
+    font-weight: 600;
+}
+
+.card .card-body {
+    padding: 1.5rem;
+}
+
+.card .card {
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.03);
+    border: 1px solid #e2e8f0;
+    margin-bottom: 1rem;
+}
+
+.card .card .card-header {
+    background-color: #f8fafc;
+    padding: 0.75rem 1rem;
+    font-weight: 500;
+}
+
+.badge {
+    padding: 0.4rem 0.6rem;
+    border-radius: 4px;
+    font-weight: 500;
+    font-size: 0.75rem;
+}
+
+.badge.bg-success {
+    background-color: #10b981 !important;
+    color: white !important;
+}
+
+.badge.bg-danger {
+    background-color: #ef4444 !important;
+    color: white !important;
+}
+
+.badge.bg-info {
+    background-color: #3b82f6 !important;
+    color: white !important;
+}
+
+.badge.ms-1 {
+    margin-left: 5px;
+}
+
+/* PickList stilleri */
+::ng-deep .p-picklist {
+    display: flex;
+    flex-direction: row;
+}
+
+::ng-deep .p-picklist .p-picklist-list {
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    background-color: #ffffff;
+}
+
+::ng-deep .p-picklist .p-picklist-header {
+    background-color: #f8fafc;
+    color: #334155;
+    font-weight: 600;
+    padding: 0.75rem 1rem;
+    border-bottom: 1px solid #e2e8f0;
+}
+
+::ng-deep .p-picklist .p-picklist-filter-container {
+    padding: 0.5rem;
+    background-color: #ffffff;
+    border-bottom: 1px solid #e2e8f0;
+}
+
+::ng-deep .p-picklist .p-picklist-filter-container .p-picklist-filter {
+    padding: 0.5rem;
+    border-radius: 4px;
+}
+
+::ng-deep .p-picklist .p-picklist-item {
+    padding: 0.75rem 1rem;
+    border-bottom: 1px solid #f1f5f9;
+    color: #334155;
+    transition: background-color 0.2s;
+}
+
+::ng-deep .p-picklist .p-picklist-item:hover {
+    background-color: #f1f5f9;
+}
+
+::ng-deep .p-picklist .p-picklist-item.p-highlight {
+    background-color: #eff6ff;
+    color: #1e3a8a;
+}
+
+/* Buton stilleri */
+::ng-deep .p-button {
+    border-radius: 6px;
+    padding: 0.5rem 1rem;
+    font-weight: 500;
+    transition: all 0.2s ease;
+}
+
+::ng-deep .p-button:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+::ng-deep .p-button.p-button-danger {
+    background-color: #ef4444;
+    border-color: #ef4444;
+}
+
+::ng-deep .p-button.p-button-danger:hover {
+    background-color: #dc2626;
+    border-color: #dc2626;
+}
+
+::ng-deep .p-button.p-button-secondary {
+    background-color: #64748b;
+    border-color: #64748b;
+}
+
+::ng-deep .p-button.p-button-secondary:hover {
+    background-color: #475569;
+    border-color: #475569;
+}
+
+/* Yükleme göstergesi */
+::ng-deep .p-progress-spinner {
+    width: 50px;
+    height: 50px;
+}
+
+::ng-deep .p-progress-spinner-circle {
+    stroke: #3b82f6;
+    stroke-width: 4;
+}
+
+/* PickList içindeki öğeler için stiller */
+::ng-deep .custom-picklist .permission-item {
+  padding: 8px;
+  border-radius: 4px;
+  transition: all 0.2s ease;
+}
+
+::ng-deep .custom-picklist .permission-item:hover {
+  background-color: #f1f5f9;
+}
+
+::ng-deep .custom-picklist .permission-name {
+  font-weight: 600;
+  color: #1e3a8a;
+  margin-bottom: 4px;
+}
+
+::ng-deep .custom-picklist .permission-description {
+  color: #334155;
+  font-size: 0.9rem;
+  margin-bottom: 4px;
+}
+
+::ng-deep .custom-picklist .permission-group {
+  color: #64748b;
+  font-size: 0.8rem;
+  font-style: italic;
+}
+
+/* PickList butonları için stiller */
+::ng-deep .p-picklist-buttons {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  margin: 0 0.5rem;
+}
+
+::ng-deep .p-picklist-buttons .p-button {
+  margin: 0.25rem 0;
+  background-color: #3b82f6;
+  border-color: #3b82f6;
+}
+
+::ng-deep .p-picklist-buttons .p-button:hover {
+  background-color: #2563eb;
+  border-color: #2563eb;
+}
+
+::ng-deep .p-picklist-buttons .p-button:focus {
+  box-shadow: 0 0 0 0.2rem rgba(59, 130, 246, 0.25);
+}
+
+/* PickList filtre alanı için stiller */
+::ng-deep .p-picklist-filter-container {
+  position: relative;
+}
+
+::ng-deep .p-picklist-filter-container .p-picklist-filter-icon {
+  position: absolute;
+  top: 50%;
+  right: 0.75rem;
+  transform: translateY(-50%);
+  color: #64748b;
+}
+
+::ng-deep .p-picklist-filter-container .p-inputtext {
+  width: 100%;
+  padding: 0.5rem 2rem 0.5rem 0.75rem;
+  border-radius: 4px;
+  border: 1px solid #e2e8f0;
+  color: #334155;
+  transition: all 0.2s ease;
+}
+
+::ng-deep .p-picklist-filter-container .p-inputtext:focus {
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 0.2rem rgba(59, 130, 246, 0.25);
+  outline: none;
+}
+
+/* Boş liste mesajı için stiller */
+::ng-deep .p-picklist-list-wrapper .p-picklist-empty-message {
+  padding: 1rem;
+  color: #64748b;
+  text-align: center;
+  font-style: italic;
+}
+
+/* Responsive düzenlemeler */
+@media (max-width: 768px) {
+  ::ng-deep .p-picklist {
+    flex-direction: column;
+  }
+  
+  ::ng-deep .p-picklist-buttons {
+    flex-direction: row;
+    margin: 0.5rem 0;
+  }
+  
+  ::ng-deep .p-picklist-buttons .p-button {
+    margin: 0 0.25rem;
+  }
+} 

@@ -1,0 +1,17 @@
+---
+description: Best practices for using SASS in Angular applications
+globs: 
+alwaysApply: false
+---
+
+# SASS Best Practices
+
+This document outlines the best practices for writing maintainable and scalable SASS code within this Angular project.
+
+- Use nested selectors to improve readability and maintainability
+- Implement variables for consistent theming across the application
+- Use mixins for reusable style patterns
+- Implement proper naming conventions (e.g., BEM) for better CSS organization
+- Use partials to modularize styles and improve reusability
+- Avoid deep nesting to prevent overly specific selectors
+- Use the `@extend` directive judiciously to reduce CSS bloat

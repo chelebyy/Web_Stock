@@ -1,0 +1,16 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+---
+description: Knowledge Base Management
+globs: 
+alwaysApply: true
+---
+Ben `başla` dediğimde aşağıdaki işlemleri yap
+- A `knowledge_base.md` file should be created for each page created in the project. For example, when a "Computers" page is created, a `computer_knowledge_base.md` file should be created.- This file should note how each step was developed, the errors encountered, and the methods used to resolve these errors.- When the same error is encountered again, ineffective solution methods should be avoided, and care should be taken not to disrupt the existing working system when updating a feature.
+
+Have it create the files resulting from these operations under the `knowledge-base`  folder.
+
+Write all errors, solutions, and solution methods in the `errors.md`file.

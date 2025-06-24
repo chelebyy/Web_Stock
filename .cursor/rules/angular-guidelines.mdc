@@ -1,0 +1,228 @@
+---
+description: Angular Development Guidelines
+globs: 
+alwaysApply: false
+---
+---
+Description : Angular Development Guidelines
+globs: **/*.{ts,html,scss,css}
+autoAttach: true
+---
+# Angular Development Guidelines
+
+This document outlines the best practices and guidelines for developing Angular applications within this project.
+
+## Table of Contents
+1. [Architecture & Modularity](mdc:#architecture--modularity)
+2. [State Management & Performance](mdc:#state-management--performance)
+3. [Template Optimization](mdc:#template-optimization)
+4. [Forms](mdc:#forms)
+5. [Routing](mdc:#routing)
+6. [Testing](mdc:#testing)
+7. [Security & Best Practices](mdc:#security--best-practices)
+8. [File Structure & Naming Conventions](mdc:#file-structure--naming-conventions)
+9. [Code Style & Guidelines](mdc:#code-style--guidelines)
+10. [Performance Optimization](mdc:#performance-optimization)
+11. [Common Patterns and Anti-patterns](mdc:#common-patterns-and-anti-patterns)
+12. [Security Best Practices](mdc:#security-best-practices)
+13. [Common Pitfalls and Gotchas](mdc:#common-pitfalls-and-gotchas)
+
+## Architecture & Modularity
+- Use standalone components for better modularity and reusability.
+- Follow a feature-based directory structure for better maintainability.
+- Implement lazy loading for feature modules to improve initial load time.
+- Create a `shared` module for commonly used components, directives, pipes, and services.
+- Create a `core` module for application-wide services and singleton instances.
+- Use the `forRoot()` pattern for modules that provide singleton services.
+- Distinguish between smart (container) components and dumb (presentational) components.
+
+### Directory Structure Example
+```
+frontend/
+├── src/
+│   ├── app/
+│   │   ├── core/                  # Core services and interceptors
+│   │   │   ├── authentication/
+│   │   │   ├── http/
+│   │   │   ├── guards/
+│   │   │   └── services/
+│   │   ├── shared/                # Shared components and directives
+│   │   │   ├── components/
+│   │   │   ├── directives/
+│   │   │   ├── pipes/
+│   │   │   └── ui/
+│   │   ├── features/              # Feature modules
+│   │   │   ├── auth/
+│   │   │   ├── dashboard/
+│   │   │   ├── user-management/
+│   │   │   └── ...
+│   │   ├── models/                # Data models
+│   │   └── services/              # General services
+│   ├── assets/                    # Static files
+│   └── environments/              # Environment configurations
+└── angular.json
+```
+
+## State Management & Performance
+- Leverage Angular Signals for efficient and reactive state management.
+- Use Signal-based forms for enhanced type safety and validation.
+- Implement Zoneless Change Detection to improve performance.
+- Optimize rendering with Deferrable Views by delaying non-critical component loads.
+- Use Route-Level Render Mode for granular performance control.
+- Consider using state management libraries (NgRx, Akita, MobX) for complex applications.
+- Treat state as immutable to simplify change detection and debugging.
+- Use selectors to efficiently retrieve data from the store.
+
+## Template Optimization
+- Use the async pipe for observables to simplify subscription management.
+- Optimize list rendering with trackBy functions in ngFor.
+- Implement pure pipes to prevent unnecessary recalculations.
+- Use NgOptimizedImage to enhance image loading performance.
+- Minimize DOM manipulation as it can be expensive.
+- Use CSS transforms instead of modifying layout properties.
+- Implement debouncing and throttling to reduce the frequency of event handlers.
+
+## Forms
+- Use Signal-based Forms for enhanced type safety and scalability.
+- Choose Reactive Forms for complex data handling.
+- Use template-driven forms for simpler cases.
+- Implement form validation with signals.
+- Use typed form controls for better type safety.
+- Implement form array signals for dynamic forms.
+- Use proper form state tracking with computed signals.
+
+## Routing
+- Implement route-level render modes (client, server, or hybrid).
+- Use lazy loading for routes.
+- Implement proper route guards with signals.
+- Use the new Router API with signals.
+- Implement route resolvers effectively.
+- Use router events for analytics and performance tracking.
+- Split your application into modules based on routes.
+
+## Testing
+- Write unit tests for components and services.
+- Implement integration tests for feature workflows.
+- Use Angular TestBed for component testing.
+- Keep test files co-located with their implementation.
+- Use component harness testing for UI interactions.
+- Implement signal testing utilities.
+- Use TestBed with signals for testing reactive state.
+- Implement E2E testing with Playwright.
+- Use proper component isolation in tests.
+- Follow the Arrange-Act-Assert pattern for tests.
+- Mirror your source code directory structure in your test directory.
+- Use consistent naming conventions for test files (e.g., `user.component.spec.ts`).
+
+## Security & Best Practices
+- Use Angular's built-in sanitization to prevent XSS attacks.
+- Implement Content Security Policy (CSP) and other security measures.
+- Enable strict mode with all TypeScript strict flags for better type safety.
+- Perform client-side validation to provide immediate feedback to the user.
+- Perform server-side validation to ensure data integrity.
+- Use HTTPS for secure communication between the client and the server.
+- Implement authentication to verify the user's identity.
+- Implement authorization to control access to resources based on roles.
+- Use JWTs for secure authentication and authorization.
+
+## File Structure & Naming Conventions
+- Use kebab-case for file names (e.g., `user-profile.component.ts`).
+- Follow the `feature.type.ts` convention (e.g., `user.component.ts`, `user.service.ts`).
+- Use descriptive names that clearly indicate the purpose of the file.
+- Naming conventions for different file types:
+  - `*.component.ts` for Components
+  - `*.service.ts` for Services
+  - `*.module.ts` for Modules
+  - `*.directive.ts` for Directives
+  - `*.pipe.ts` for Pipes
+  - `*.spec.ts` for Tests
+
+## Code Style & Guidelines
+- Use single quotes for string literals.
+- Indent with 2 spaces.
+- Ensure clean code with no trailing whitespace.
+- Use `const` for immutable variables.
+- Use template strings for string interpolation and multi-line strings.
+- Define data structures with interfaces for type safety.
+- Avoid `any` type, utilize the type system fully.
+- Organize files: imports, definition, implementation.
+- Utilize optional chaining and nullish coalescing.
+- Use the `inject` function for service injection.
+
+### Import Order
+1. Angular core and common modules
+2. RxJS modules
+3. Other Angular modules
+4. Application core imports
+5. Shared module imports
+6. Environment-specific imports
+7. Relative path imports
+
+## Performance Optimization
+- Use `OnPush` change detection strategy for pure components.
+- Implement lazy loading for feature modules.
+- Use `trackBy` with `ngFor` for optimized rendering.
+- Implement Incremental Hydration for faster initial load.
+- Optimize images by compressing and using appropriate formats.
+- Regularly scan components for unnecessary imports.
+- Utilize Zoneless Change Detection for more efficient change detection.
+- Use esbuild for faster compilation.
+- Implement virtualization for large lists.
+- Use tree shaking to remove unused code from your bundle.
+- Split your application into smaller chunks to improve load time.
+- Preload modules in the background to improve perceived performance.
+- Focus on optimizing Web Vitals like LCP, INP, and CLS.
+
+## Common Patterns and Anti-patterns
+### Design Patterns
+- Use Dependency Injection (DI) to manage dependencies between components and services.
+- Use RxJS Observables for handling asynchronous data streams.
+- Use services for encapsulating reusable business logic.
+- Use pipes for transforming data in templates.
+- Use directives for manipulating the DOM.
+
+### Anti-patterns to Avoid
+- Deeply nested component hierarchies which can make it difficult to manage state.
+- Large components (break them into smaller, reusable components).
+- Complex logic in templates (move it to the component class).
+- Direct DOM manipulation (use Angular's data binding and directives instead).
+- Unnecessary subscriptions (unsubscribe to prevent memory leaks).
+- Using `any` type (it bypasses type checking).
+- Logic duplication across components.
+
+### Error Handling Patterns
+- Implement centralized error handling using an `ErrorHandler`.
+- Use HTTP interceptors to handle errors from backend APIs.
+- Display user-friendly error messages to the user.
+- Log errors to a central logging service for debugging and monitoring.
+- Implement retry mechanism for failed requests using RxJS retry operators.
+- Use proper error handling in services and components.
+- Use custom error types or factories when needed.
+
+## Security Best Practices
+- Sanitize user input and avoid the use of `innerHTML` to prevent XSS attacks.
+- Use anti-CSRF tokens to prevent CSRF attacks.
+- Validate user input to prevent injection attacks.
+- Encrypt sensitive data at rest and in transit.
+- Hash passwords before storing them in the database.
+- Implement rate limiting to prevent abuse of your API.
+- Sanitize dynamic content with Angular's built-in tools.
+
+## Common Pitfalls and Gotchas
+- Forgetting to unsubscribe from Observables (leading to memory leaks).
+- Not handling asynchronous operations correctly.
+- Ignoring error handling.
+- Not keeping dependencies up to date.
+- Not handling edge cases like empty arrays or null values.
+- Not being aware of breaking changes in new versions of Angular.
+- Browser and device compatibility issues.
+
+### Debugging Strategies
+- Use browser developer tools to debug your code.
+- Use logging to track the flow of execution and identify errors.
+- Use debugging tools like VS Code's debugger to step through your code.
+- Implement comprehensive logging for debugging and monitoring.
+
+---
+
+This document combines multiple Angular guidelines into a single, comprehensive reference. Follow these best practices to build maintainable, performant, and secure Angular applications.

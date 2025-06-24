@@ -1,0 +1,121 @@
+<div class="p-grid">
+  <div class="p-col-12">
+    <p-card styleClass="card">
+      <ng-template pTemplate="title">
+        <div class="flex justify-content-between align-items-center">
+          <h2>Kategori Yönetimi</h2>
+          <button pButton pRipple type="button" icon="pi pi-arrow-left" label="Geri Dön" class="p-button-secondary" (click)="goBack()"></button>
+        </div>
+      </ng-template>
+      
+      <ng-template pTemplate="content">
+        <!-- Araç Çubuğu -->
+        <p-toolbar styleClass="mb-4">
+          <ng-template pTemplate="left">
+            <div class="toolbar-left-items">
+              <button pButton pRipple label="Yeni Kategori" icon="pi pi-plus" class="p-button-success mr-2" (click)="openDialog()"></button>
+            </div>
+          </ng-template>
+          
+          <ng-template pTemplate="right">
+            <div class="toolbar-right-items flex">
+              <div class="p-inputgroup" style="width: 250px">
+                <span class="p-inputgroup-addon">
+                  <i class="pi pi-search"></i>
+                </span>
+                <input pInputText type="text" placeholder="Kategori ara..." (input)="filterCategories($any($event.target).value)">
+              </div>
+            </div>
+          </ng-template>
+        </p-toolbar>
+        
+        <!-- Kategori Tablosu -->
+        <p-table 
+          [value]="getFilteredCategories()"
+          [paginator]="true" 
+          [rows]="10" 
+          [rowsPerPageOptions]="[5, 10, 25, 50]"
+          [globalFilterFields]="['name', 'description']"
+          styleClass="p-datatable-gridlines p-datatable-sm"
+          [tableStyle]="{'min-width': '50rem'}"
+          [scrollable]="true"
+          dataKey="id">
+          
+          <ng-template pTemplate="header">
+            <tr>
+              <th pSortableColumn="id" style="width: 5%">ID <p-sortIcon field="id"></p-sortIcon></th>
+              <th pSortableColumn="name" style="width: 25%">Kategori Adı <p-sortIcon field="name"></p-sortIcon></th>
+              <th pSortableColumn="description" style="width: 50%">Açıklama <p-sortIcon field="description"></p-sortIcon></th>
+              <th style="width: 20%">İşlemler</th>
+            </tr>
+          </ng-template>
+          
+          <ng-template pTemplate="body" let-category>
+            <tr>
+              <td>{{category.id}}</td>
+              <td>{{category.name}}</td>
+              <td>{{category.description}}</td>
+              <td>
+                <button pButton pRipple icon="pi pi-pencil" class="p-button-rounded p-button-warning mr-2" 
+                  pTooltip="Düzenle" tooltipPosition="top" (click)="openDialog(category)"></button>
+                <button pButton pRipple icon="pi pi-trash" class="p-button-rounded p-button-danger" 
+                  pTooltip="Sil" tooltipPosition="top" (click)="deleteCategory(category)"></button>
+              </td>
+            </tr>
+          </ng-template>
+          
+          <ng-template pTemplate="emptymessage">
+            <tr>
+              <td colspan="4" class="text-center p-4">Kategori bulunamadı</td>
+            </tr>
+          </ng-template>
+        </p-table>
+      </ng-template>
+    </p-card>
+  </div>
+</div>
+
+<!-- Kategori Ekleme/Düzenleme Dialog -->
+<p-dialog 
+  [visible]="categoryDialog()" 
+  (visibleChange)="categoryDialog.set($event)"
+  [style]="{width: '450px'}" 
+  [header]="editMode() ? 'Kategori Düzenle' : 'Yeni Kategori Ekle'" 
+  [modal]="true" 
+  styleClass="p-fluid"
+  (onHide)="hideDialog()">
+  
+  <ng-template pTemplate="content">
+    <form [formGroup]="categoryForm">
+      <div class="field">
+        <label for="name">Kategori Adı *</label>
+        <input type="text" pInputText id="name" formControlName="name" required [ngClass]="{'ng-invalid ng-dirty': categoryForm.get('name')?.invalid && categoryForm.get('name')?.touched}" />
+        <small class="p-error" *ngIf="categoryForm.get('name')?.invalid && categoryForm.get('name')?.touched">Kategori adı gereklidir.</small>
+      </div>
+      
+      <div class="field">
+        <label for="description">Açıklama</label>
+        <textarea pInputTextarea id="description" formControlName="description" rows="3"></textarea>
+      </div>
+    </form>
+  </ng-template>
+  
+  <ng-template pTemplate="footer">
+    <button pButton pRipple label="İptal" icon="pi pi-times" class="p-button-text" (click)="hideDialog()"></button>
+    <button pButton pRipple label="Kaydet" icon="pi pi-check" class="p-button-text" (click)="saveCategory()" [disabled]="categoryForm.invalid"></button>
+  </ng-template>
+</p-dialog>
+
+<!-- Silme Onay Dialogu -->
+<app-delete-confirmation-dialog
+  [visible]="deleteDialogVisible()"
+  (visibleChange)="deleteDialogVisible.set($event)"
+  [title]="'Kategori Silme'"
+  [message]="'Bu kategoriyi silmek istediğinizden emin misiniz?'"
+  [itemName]="categoryToDelete?.name"
+  (onCancel)="cancelDelete()"
+  (onConfirm)="confirmDelete()"
+></app-delete-confirmation-dialog>
+
+<!-- Bildirimler -->
+<p-toast></p-toast> 

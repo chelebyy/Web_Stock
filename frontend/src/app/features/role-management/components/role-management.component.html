@@ -1,0 +1,141 @@
+<div class="role-management-container">
+  <div class="page-header">
+    <div class="page-title-container">
+      <h1 class="page-title">Rol Yönetimi</h1>
+      <p class="page-subtitle">Sistem kullanıcı rollerini yönetin ve gerekli izinleri atayın</p>
+    </div>
+    <button pButton pRipple icon="pi pi-arrow-left" label="Geri Dön" class="p-button-outlined back-button" (click)="goBack()"></button>
+  </div>
+
+  <div class="card">
+    <p-table 
+      #dt 
+      styleClass="p-datatable-modern"
+      [value]="state.roles()" 
+      [loading]="state.loading()" 
+      [totalRecords]="state.totalRecords()" 
+      [rows]="10" 
+      (onLazyLoad)="onLazyLoad($event)"
+      [paginator]="true" 
+      [lazy]="true" 
+      [rowsPerPageOptions]="[10, 20, 30]" 
+      [showCurrentPageReport]="true"
+      currentPageReportTemplate="{first} - {last} / {totalRecords} arası"
+      [globalFilterFields]="['name', 'description']"
+      responsiveLayout="scroll">
+
+      <ng-template pTemplate="caption">
+        <div class="table-header">
+          <h2 class="table-title">Rol Yönetimi</h2>
+          <div class="table-actions">
+            <span class="p-input-icon-left">
+              <i class="pi pi-search"></i>
+              <input pInputText type="text" placeholder="Rol ara..." #searchInput (input)="onSearch($event)" />
+            </span>
+            <button pButton pRipple label="Yenile" icon="pi pi-refresh" class="p-button-secondary" (click)="loadRoles()"></button>
+            <button pButton pRipple label="Yeni Rol Ekle" icon="pi pi-plus" class="p-button-success" (click)="openDialog()"></button>
+          </div>
+        </div>
+      </ng-template>
+
+      <ng-template pTemplate="header">
+        <tr>
+          <th pSortableColumn="name">İsim <p-sortIcon field="name"></p-sortIcon></th>
+          <th pSortableColumn="description">Açıklama <p-sortIcon field="description"></p-sortIcon></th>
+          <th>İşlemler</th>
+        </tr>
+      </ng-template>
+
+      <ng-template pTemplate="body" let-role>
+        <tr>
+          <td>{{ role.name }}</td>
+          <td>{{ role.description }}</td>
+          <td>
+            <div class="action-buttons">
+              <button pButton pRipple icon="pi pi-pencil" class="p-button-rounded p-button-info" (click)="openDialog(role)" pTooltip="Düzenle"></button>
+              <button pButton pRipple icon="pi pi-trash" class="p-button-rounded p-button-danger" (click)="deleteRole(role)" pTooltip="Sil"></button>
+            </div>
+          </td>
+        </tr>
+      </ng-template>
+
+      <ng-template pTemplate="emptymessage">
+        <tr>
+          <td colspan="3" class="text-center">
+            @if (state.loading()) {
+              <p>Roller yükleniyor...</p>
+            } @else if (state.error()) {
+              <div class="error-message">
+                <i class="pi pi-times-circle"></i>
+                <p>Hata: {{ state.error() }}</p>
+                <button pButton pRipple label="Tekrar Dene" icon="pi pi-refresh" class="p-button-sm"
+                  (click)="loadRoles()"></button>
+              </div>
+            } @else {
+              <p>Kayıtlı rol bulunamadı.</p>
+            }
+          </td>
+        </tr>
+      </ng-template>
+
+      <ng-template pTemplate="paginatorleft">
+        <!-- Paginator Left Content -->
+      </ng-template>
+
+      <ng-template pTemplate="paginatorright">
+        @if (state.totalRecords() > 0) {
+          <div class="table-summary">Toplam {{ state.totalRecords() }} rol</div>
+        }
+      </ng-template>
+    </p-table>
+  </div>
+</div>
+
+<!-- Rol Dialog -->
+<p-dialog [visible]="roleDialog()" (visibleChange)="roleDialog.set($event)" [style]="{width: '500px'}" [header]="editMode() ? 'Rolü Düzenle' : 'Yeni Rol Ekle'" 
+          [modal]="true" [draggable]="false" [resizable]="false" styleClass="role-dialog modern-dialog custom-light-dialog" 
+          [closeOnEscape]="true" [dismissableMask]="true">
+  <div class="dialog-content">
+    <form [formGroup]="roleForm" class="role-form">
+      <div class="field">
+        <label for="name" class="form-label">Rol Adı</label>
+        <input type="text" pInputText id="name" formControlName="name" autocomplete="off" 
+               class="w-full custom-input" style="background-color: #ffffff !important; color: #1e293b !important; padding-left: 0.75rem !important;" />
+        @if (roleForm.get('name')?.errors?.['required'] && roleForm.get('name')?.touched) {
+          <small class="p-error">Rol adı gereklidir.</small>
+        }
+      </div>
+      
+      <div class="field">
+        <label for="description" class="form-label">Açıklama</label>
+        <textarea pTextarea id="description" formControlName="description" rows="3" 
+                  class="w-full custom-textarea" style="background-color: #ffffff !important; color: #1e293b !important; padding-left: 0.75rem !important;"></textarea>
+        @if (roleForm.get('description')?.errors?.['required'] && roleForm.get('description')?.touched) {
+          <small class="p-error">Açıklama gereklidir.</small>
+        }
+      </div>
+    </form>
+  </div>
+
+  <ng-template pTemplate="footer">
+    <div class="dialog-footer">
+      <button pButton pRipple type="button" label="İptal" icon="pi pi-times" 
+              class="p-button-outlined p-button-secondary cancel-button" (click)="hideDialog()"></button>
+      <button pButton pRipple type="button" [label]="editMode() ? 'Güncelle' : 'Kaydet'" icon="pi pi-check" 
+              class="p-button-primary save-button" (click)="saveRole()" 
+              [disabled]="roleForm.invalid || roleForm.pristine"></button>
+    </div>
+  </ng-template>
+</p-dialog>
+
+<!-- Özel Silme Onay Dialogu -->
+<app-delete-confirmation-dialog
+  [visible]="deleteDialogVisible"
+  [itemName]="roleToDelete?.name || ''"
+  title="Rolü Sil"
+  message="Bu rolü silmek istediğinizden emin misiniz? Bu işlem geri alınamaz."
+  (confirm)="confirmDelete()"
+  (cancel)="cancelDelete()">
+</app-delete-confirmation-dialog>
+
+<p-toast position="top-right" styleClass="modern-toast"></p-toast> 

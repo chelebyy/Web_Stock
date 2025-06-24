@@ -1,0 +1,117 @@
+<div class="animated-background">
+  <div class="cube"></div>
+  <div class="cube"></div>
+  <div class="cube"></div>
+  <div class="cube"></div>
+  <div class="cube"></div>
+  <div class="lines"></div>
+</div>
+
+<p-toast></p-toast>
+<div class="dashboard-container">
+  <div class="glass-card">
+    <div class="header">
+      <div class="header-title">
+        <h1>Kullanıcı Paneli</h1>
+        <p class="welcome-text">Hoş geldiniz, <span class="username">{{ username }}</span></p>
+      </div>
+      <div class="admin-dropdown">
+        <div class="admin-button" (click)="toggleAdminMenu($event)">
+          <img [src]="profileImageUrl" alt="Profil" class="admin-avatar" onerror="this.src='assets/images/default-avatar.png'">
+          <span class="admin-name">{{ username }}</span>
+          <i class="pi" [ngClass]="{'pi-chevron-down': !showAdminMenu, 'pi-chevron-up': showAdminMenu}"></i>
+        </div>
+        <div class="admin-menu" *ngIf="showAdminMenu">
+          <div class="menu-header">
+            <img [src]="profileImageUrl" alt="Profil" class="menu-avatar" onerror="this.src='assets/images/default-avatar.png'">
+            <div class="menu-user-info">
+              <span class="menu-username">{{ username }}</span>
+              <span class="menu-role">Kullanıcı</span>
+            </div>
+          </div>
+          <div class="menu-item" (click)="showPasswordChange = true; showAdminMenu = false;">
+            <i class="pi pi-key"></i>
+            <span>Şifre Değiştir</span>
+          </div>
+          <div class="menu-item logout" (click)="logout()">
+            <i class="pi pi-sign-out"></i>
+            <span>Çıkış</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="password-change-form" *ngIf="showPasswordChange" cdkDrag cdkDragBoundary=".dashboard-container">
+      <div class="password-form-header" cdkDragHandle>
+        <h2>Şifre Değiştir</h2>
+        <button class="close-button" (click)="showPasswordChange = false">
+          <i class="pi pi-times"></i>
+        </button>
+      </div>
+      <div class="p-fluid">
+        <div class="field">
+          <div class="p-inputgroup">
+            <span class="p-inputgroup-addon">
+              <i class="pi pi-lock"></i>
+            </span>
+            <input [type]="showCurrentPassword ? 'text' : 'password'" pInputText id="currentPassword" [(ngModel)]="currentPassword" placeholder="Mevcut Şifre" class="modern-input" />
+            <button pButton type="button" class="p-button-text p-button-rounded p-button-plain" (click)="toggleCurrentPasswordVisibility()">
+              <i class="pi" [ngClass]="showCurrentPassword ? 'pi-eye' : 'pi-eye-slash'"></i>
+            </button>
+          </div>
+        </div>
+        <div class="field">
+          <div class="p-inputgroup">
+            <span class="p-inputgroup-addon">
+              <i class="pi pi-key"></i>
+            </span>
+            <input [type]="showNewPassword ? 'text' : 'password'" pInputText id="newPassword" [(ngModel)]="newPassword" placeholder="Yeni Şifre" class="modern-input" />
+            <button pButton type="button" class="p-button-text p-button-rounded p-button-plain" (click)="toggleNewPasswordVisibility()">
+              <i class="pi" [ngClass]="showNewPassword ? 'pi-eye' : 'pi-eye-slash'"></i>
+            </button>
+          </div>
+        </div>
+        <div class="field">
+          <div class="p-inputgroup">
+            <span class="p-inputgroup-addon">
+              <i class="pi pi-key"></i>
+            </span>
+            <input [type]="showConfirmPassword ? 'text' : 'password'" pInputText id="confirmPassword" [(ngModel)]="confirmPassword" placeholder="Yeni Şifre (Tekrar)" class="modern-input" />
+            <button pButton type="button" class="p-button-text p-button-rounded p-button-plain" (click)="toggleConfirmPasswordVisibility()">
+              <i class="pi" [ngClass]="showConfirmPassword ? 'pi-eye' : 'pi-eye-slash'"></i>
+            </button>
+          </div>
+        </div>
+        <div class="password-actions">
+          <button pButton class="p-button-sm p-button-primary change-button" label="Değiştir" icon="pi pi-check" (click)="changePassword()"></button>
+          <button pButton class="p-button-sm p-button-outlined p-button-secondary cancel-button" label="İptal" icon="pi pi-times" (click)="showPasswordChange = false"></button>
+        </div>
+      </div>
+    </div>
+
+    <div class="main-content">
+      <div class="admin-modules">
+        <div class="module-card" *hasPermission="'Pages.AdminDashboard'">
+          <div class="card-content" (click)="navigateToAdminDashboard()">
+            <i class="pi pi-cog"></i>
+            <h3>ADMİN PANELİ</h3>
+          </div>
+        </div>
+        
+        <div class="module-card" *hasPermission="'Pages.BilgiIslem.View'">
+          <div class="card-content" (click)="navigateToBilgiIslem()">
+            <i class="pi pi-desktop"></i>
+            <h3>BİLGİ İŞLEM</h3>
+          </div>
+        </div>
+        
+        <div class="module-card" *hasPermission="'Pages.Revir.View'">
+          <div class="card-content" (click)="navigateToRevir()">
+            <i class="pi pi-heart"></i>
+            <h3>REVİR</h3>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

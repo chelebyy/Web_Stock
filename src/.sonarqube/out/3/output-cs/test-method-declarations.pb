@@ -1,0 +1,85 @@
+Ç
+KC:\Users\muham\OneDrive\Masa√ºst√º\Stock\tests\Stock.UnitTests\UnitTest1.csStock.UnitTests"
+Stock.UnitTests.UnitTest1Test1Õ
+eC:\Users\muham\OneDrive\Masa√ºst√º\Stock\tests\Stock.UnitTests\Infrastructure\Data\UnitOfWorkTests.csStock.UnitTestsg
+3Stock.UnitTests.Infrastructure.Data.UnitOfWorkTests0GetRepository_ShouldReturn_CorrectRepositoryType^
+3Stock.UnitTests.Infrastructure.Data.UnitOfWorkTests'Products_ShouldReturn_ProductRepositoryY
+3Stock.UnitTests.Infrastructure.Data.UnitOfWorkTests"SaveChangesAsync_ShouldSaveProductW
+3Stock.UnitTests.Infrastructure.Data.UnitOfWorkTests GetByIdAsync_ShouldReturnProductV
+3Stock.UnitTests.Infrastructure.Data.UnitOfWorkTestsDeleteAsync_ShouldRemoveProduct•
+yC:\Users\muham\OneDrive\Masa√ºst√º\Stock\tests\Stock.UnitTests\Infrastructure\Data\Repositories\ProductRepositoryTests.csStock.UnitTestsk
+GStock.UnitTests.Infrastructure.Data.Repositories.ProductRepositoryTests GetByIdAsync_ShouldReturnProduct|
+GStock.UnitTests.Infrastructure.Data.Repositories.ProductRepositoryTests1GetByIdAsync_ShouldReturnNull_WhenProductNotFoundn
+GStock.UnitTests.Infrastructure.Data.Repositories.ProductRepositoryTests#GetAllAsync_ShouldReturnAllProductsd
+GStock.UnitTests.Infrastructure.Data.Repositories.ProductRepositoryTestsAddAsync_ShouldAddProductj
+GStock.UnitTests.Infrastructure.Data.Repositories.ProductRepositoryTestsUpdateAsync_ShouldUpdateProductj
+GStock.UnitTests.Infrastructure.Data.Repositories.ProductRepositoryTestsDeleteAsync_ShouldRemoveProduct„	
+eC:\Users\muham\OneDrive\Masa√ºst√º\Stock\tests\Stock.UnitTests\Domain\ValueObjects\StockLevelTests.csStock.UnitTestsa
+3Stock.UnitTests.Domain.ValueObjects.StockLevelTests*From_WithValidValue_ShouldCreateStockLevelh
+3Stock.UnitTests.Domain.ValueObjects.StockLevelTests1From_WithNegativeValue_ShouldThrowDomainExceptionc
+3Stock.UnitTests.Domain.ValueObjects.StockLevelTests,Increase_WithValidAmount_ShouldIncreaseValuem
+3Stock.UnitTests.Domain.ValueObjects.StockLevelTests6Increase_WithNegativeAmount_ShouldThrowDomainExceptionc
+3Stock.UnitTests.Domain.ValueObjects.StockLevelTests,Decrease_WithValidAmount_ShouldDecreaseValuem
+3Stock.UnitTests.Domain.ValueObjects.StockLevelTests6Decrease_WithNegativeAmount_ShouldThrowDomainExceptiond
+3Stock.UnitTests.Domain.ValueObjects.StockLevelTests-Decrease_BelowZero_ShouldThrowDomainExceptiona
+3Stock.UnitTests.Domain.ValueObjects.StockLevelTests*ImplicitConversion_ToInt_ShouldReturnValue\
+3Stock.UnitTests.Domain.ValueObjects.StockLevelTests%Equals_WithSameValue_ShouldReturnTrueb
+3Stock.UnitTests.Domain.ValueObjects.StockLevelTests+Equals_WithDifferentValue_ShouldReturnFalsei
+3Stock.UnitTests.Domain.ValueObjects.StockLevelTests2GetHashCode_WithSameValue_ShouldReturnSameHashCode›
+fC:\Users\muham\OneDrive\Masa√ºst√º\Stock\tests\Stock.UnitTests\Domain\ValueObjects\ProductNameTests.csStock.UnitTestsb
+4Stock.UnitTests.Domain.ValueObjects.ProductNameTests*From_WithValidName_ShouldCreateProductNameg
+4Stock.UnitTests.Domain.ValueObjects.ProductNameTests/From_WithInvalidName_ShouldThrowDomainExceptione
+4Stock.UnitTests.Domain.ValueObjects.ProductNameTests-ImplicitConversion_ToString_ShouldReturnValue]
+4Stock.UnitTests.Domain.ValueObjects.ProductNameTests%Equals_WithSameValue_ShouldReturnTruec
+4Stock.UnitTests.Domain.ValueObjects.ProductNameTests+Equals_WithDifferentValue_ShouldReturnFalsej
+4Stock.UnitTests.Domain.ValueObjects.ProductNameTests2GetHashCode_WithSameValue_ShouldReturnSameHashCode¢
+mC:\Users\muham\OneDrive\Masa√ºst√º\Stock\tests\Stock.UnitTests\Domain\ValueObjects\ProductDescriptionTests.csStock.UnitTestso
+;Stock.UnitTests.Domain.ValueObjects.ProductDescriptionTests0From_WithAnyValue_ShouldCreateProductDescriptionq
+;Stock.UnitTests.Domain.ValueObjects.ProductDescriptionTests2From_WithNullValue_ReturnsDescriptionWithNullValueu
+;Stock.UnitTests.Domain.ValueObjects.ProductDescriptionTests6From_WithEmptyString_ReturnsDescriptionWithEmptyStringk
+;Stock.UnitTests.Domain.ValueObjects.ProductDescriptionTests,From_WithValidDescription_ReturnsDescription
+;Stock.UnitTests.Domain.ValueObjects.ProductDescriptionTests@From_WithDescriptionExceeding500Characters_ThrowsDomainExceptionh
+;Stock.UnitTests.Domain.ValueObjects.ProductDescriptionTests)ToString_WithNullValue_ReturnsEmptyString
+;Stock.UnitTests.Domain.ValueObjects.ProductDescriptionTests@ImplicitConversion_FromProductDescriptionToString_WorksCorrectlyÄ
+;Stock.UnitTests.Domain.ValueObjects.ProductDescriptionTestsAImplicitConversion_FromNullProductDescriptionToString_ReturnsNull_
+;Stock.UnitTests.Domain.ValueObjects.ProductDescriptionTests Equals_WithSameValue_ReturnsTruee
+;Stock.UnitTests.Domain.ValueObjects.ProductDescriptionTests&Equals_WithDifferentValue_ReturnsFalse_
+;Stock.UnitTests.Domain.ValueObjects.ProductDescriptionTests Equals_BothNull_ShouldReturnTrue_
+;Stock.UnitTests.Domain.ValueObjects.ProductDescriptionTests Equals_OneNull_ShouldReturnFalseq
+;Stock.UnitTests.Domain.ValueObjects.ProductDescriptionTests2GetHashCode_WithSameValue_ShouldReturnSameHashCodel
+;Stock.UnitTests.Domain.ValueObjects.ProductDescriptionTests-GetHashCode_BothNull_ShouldReturnSameHashCodeÔ
+aC:\Users\muham\OneDrive\Masa√ºst√º\Stock\tests\Stock.UnitTests\Application\ProductServiceTests.csStock.UnitTestsd
+/Stock.UnitTests.Application.ProductServiceTests1GetProductById_WithExistingId_ShouldReturnProductY
+/Stock.UnitTests.Application.ProductServiceTests&GetAllProducts_ShouldReturnAllProductsk
+/Stock.UnitTests.Application.ProductServiceTests8CreateProduct_WithValidData_ShouldCreateAndReturnProductb
+/Stock.UnitTests.Application.ProductServiceTests/UpdateProduct_WithValidData_ShouldUpdateProductc
+/Stock.UnitTests.Application.ProductServiceTests0DeleteProduct_WithExistingId_ShouldDeleteProductÑ
+/Stock.UnitTests.Application.ProductServiceTestsQCreateProduct_WithNullDescription_ShouldCreateAndReturnProductWithNullDescription{
+/Stock.UnitTests.Application.ProductServiceTestsHUpdateProduct_WithNullDescription_ShouldUpdateProductWithNullDescription‘
+UC:\Users\muham\OneDrive\Masa√ºst√º\Stock\tests\Stock.UnitTests\Domain\ProductTests.csStock.UnitTestsM
+#Stock.UnitTests.Domain.ProductTests&Create_Should_Set_Properties_CorrectlyY
+#Stock.UnitTests.Domain.ProductTests2Create_Should_Throw_Exception_When_Name_Is_Invalid_
+#Stock.UnitTests.Domain.ProductTests8Create_Should_Throw_Exception_When_StockLevel_Is_Invalid_
+#Stock.UnitTests.Domain.ProductTests8Create_Should_Throw_Exception_When_CategoryId_Is_InvalidÇ
+
+^C:\Users\muham\OneDrive\Masa√ºst√º\Stock\tests\Stock.UnitTests\Domain\Entities\ProductTests.csStock.UnitTestsV
+,Stock.UnitTests.Domain.Entities.ProductTests&Create_Should_Set_Properties_Correctly_
+,Stock.UnitTests.Domain.Entities.ProductTests/Create_Should_Throw_Exception_When_Name_Is_Nullh
+,Stock.UnitTests.Domain.Entities.ProductTests8Create_Should_Throw_Exception_When_StockLevel_Is_Invalidh
+,Stock.UnitTests.Domain.Entities.ProductTests8Create_Should_Throw_Exception_When_CategoryId_Is_InvalidM
+,Stock.UnitTests.Domain.Entities.ProductTestsUpdateName_Should_Change_Namec
+,Stock.UnitTests.Domain.Entities.ProductTests3UpdateName_Should_Throw_Exception_When_Name_Is_Null[
+,Stock.UnitTests.Domain.Entities.ProductTests+UpdateDescription_Should_Change_DescriptionX
+,Stock.UnitTests.Domain.Entities.ProductTests(IncreaseStock_Should_Increase_StockLevelX
+,Stock.UnitTests.Domain.Entities.ProductTests(DecreaseStock_Should_Decrease_StockLevelr
+,Stock.UnitTests.Domain.Entities.ProductTestsBDecreaseStock_Should_Throw_Exception_When_Result_Would_Be_NegativeW
+,Stock.UnitTests.Domain.Entities.ProductTests'ChangeCategory_Should_Update_CategoryIdp
+,Stock.UnitTests.Domain.Entities.ProductTests@ChangeCategory_Should_Throw_Exception_When_CategoryId_Is_Invalid¸
+âC:\Users\muham\OneDrive\Masa√ºst√º\Stock\tests\Stock.UnitTests\Application\Features\Products\Commands\CreateProductCommandHandlerTests.csStock.UnitTestsÇ
+WStock.UnitTests.Application.Features.Products.Commands.CreateProductCommandHandlerTests'Handle_ValidCommand_ShouldCreateProductò
+WStock.UnitTests.Application.Features.Products.Commands.CreateProductCommandHandlerTests=Handle_NullDescription_ShouldCreateProductWithNullDescriptionà
+WStock.UnitTests.Application.Features.Products.Commands.CreateProductCommandHandlerTests-Handle_InvalidName_ShouldThrowDomainExceptioné
+WStock.UnitTests.Application.Features.Products.Commands.CreateProductCommandHandlerTests3Handle_InvalidCategoryId_ShouldThrowDomainExceptionê
+WStock.UnitTests.Application.Features.Products.Commands.CreateProductCommandHandlerTests5Handle_NonExistentCategory_ShouldThrowDomainExceptioná
+WStock.UnitTests.Application.Features.Products.Commands.CreateProductCommandHandlerTests,Handle_SaveChangesFails_ShouldThrowExceptionÉ
+WStock.UnitTests.Application.Features.Products.Commands.CreateProductCommandHandlerTests(Handle_MappingFails_ShouldThrowException

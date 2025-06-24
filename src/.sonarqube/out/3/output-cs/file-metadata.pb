@@ -1,0 +1,15 @@
+z
+oC:\Users\muham\OneDrive\Masaüstü\Stock\tests\Stock.UnitTests\obj\Debug\net9.0\Stock.UnitTests.AssemblyInfo.csutf-8�
+~C:\Users\muham\OneDrive\Masaüstü\Stock\tests\Stock.UnitTests\obj\Debug\net9.0\.NETCoreApp,Version=v9.0.AssemblyAttributes.csutf-8|
+qC:\Users\muham\OneDrive\Masaüstü\Stock\tests\Stock.UnitTests\obj\Debug\net9.0\Stock.UnitTests.GlobalUsings.g.csutf-8~
+sC:\Users\muham\.nuget\packages\microsoft.net.test.sdk\17.11.1\build\netcoreapp3.1\Microsoft.NET.Test.Sdk.Program.csutf-8T
+KC:\Users\muham\OneDrive\Masaüstü\Stock\tests\Stock.UnitTests\UnitTest1.csutf-8n
+eC:\Users\muham\OneDrive\Masaüstü\Stock\tests\Stock.UnitTests\Infrastructure\Data\UnitOfWorkTests.csutf-8�
+yC:\Users\muham\OneDrive\Masaüstü\Stock\tests\Stock.UnitTests\Infrastructure\Data\Repositories\ProductRepositoryTests.csutf-8n
+eC:\Users\muham\OneDrive\Masaüstü\Stock\tests\Stock.UnitTests\Domain\ValueObjects\StockLevelTests.csutf-8o
+fC:\Users\muham\OneDrive\Masaüstü\Stock\tests\Stock.UnitTests\Domain\ValueObjects\ProductNameTests.csutf-8v
+mC:\Users\muham\OneDrive\Masaüstü\Stock\tests\Stock.UnitTests\Domain\ValueObjects\ProductDescriptionTests.csutf-8^
+UC:\Users\muham\OneDrive\Masaüstü\Stock\tests\Stock.UnitTests\Domain\ProductTests.csutf-8g
+^C:\Users\muham\OneDrive\Masaüstü\Stock\tests\Stock.UnitTests\Domain\Entities\ProductTests.csutf-8j
+aC:\Users\muham\OneDrive\Masaüstü\Stock\tests\Stock.UnitTests\Application\ProductServiceTests.csutf-8�
+�C:\Users\muham\OneDrive\Masaüstü\Stock\tests\Stock.UnitTests\Application\Features\Products\Commands\CreateProductCommandHandlerTests.csutf-8

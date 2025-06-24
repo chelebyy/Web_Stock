@@ -1,0 +1,165 @@
+// PrimeNG Tema Özelleştirmeleri
+
+// Tablo Stilleri
+.p-datatable {
+  .p-datatable-header {
+    background-color: #f8f9fa;
+    border: none;
+    padding: 1rem;
+  }
+  
+  .p-datatable-thead > tr > th {
+    background-color: #f8f9fa;
+    color: #495057;
+    font-weight: 600;
+    padding: 1rem;
+    border-color: #e9ecef;
+  }
+  
+  .p-datatable-tbody > tr {
+    background-color: #ffffff;
+    transition: background-color 0.2s;
+    
+    &:hover {
+      background-color: rgba(59, 130, 246, 0.05);
+    }
+    
+    > td {
+      padding: 1rem;
+      border-color: #e9ecef;
+    }
+  }
+  
+  .p-paginator {
+    background-color: #f8f9fa;
+    border: none;
+    padding: 1rem;
+    
+    .p-paginator-current {
+      color: var(--text-color-secondary);
+    }
+  }
+}
+
+// Buton Stilleri
+.p-button {
+  &.p-button-primary {
+    background: linear-gradient(135deg, #3B82F6, #2563eb);
+    border: none;
+    box-shadow: 0 4px 6px rgba(37, 99, 235, 0.2);
+    
+    &:hover {
+      background: linear-gradient(135deg, #2563eb, #1d4ed8);
+      box-shadow: 0 6px 10px rgba(37, 99, 235, 0.25);
+    }
+  }
+  
+  &.p-button-secondary {
+    &.p-button-text {
+      color: #64748b;
+      
+      &:hover {
+        background-color: var(--surface-200);
+      }
+    }
+  }
+  
+  &.p-button-info {
+    color: #0ea5e9;
+  }
+  
+  &.p-button-danger {
+    color: #ef4444;
+  }
+  
+  &.p-button-success {
+    color: #10b981;
+  }
+}
+
+// Dialog Stilleri
+.p-dialog {
+  .p-dialog-header {
+    padding: 1.5rem;
+    border-bottom: 1px solid #e2e8f0;
+    background-color: #ffffff;
+    color: #1e293b;
+    font-weight: 600;
+  }
+  
+  .p-dialog-content {
+    padding: 1.5rem;
+    background-color: #ffffff;
+  }
+  
+  .p-dialog-footer {
+    padding: 1.5rem;
+    border-top: 1px solid #e2e8f0;
+    background-color: #ffffff;
+  }
+}
+
+// Tabview Stilleri
+.p-tabview {
+  .p-tabview-nav-container {
+    background-color: #1976d2;
+    border-color: #1976d2;
+  }
+  
+  .p-tabview-nav {
+    background-color: #1976d2;
+    border-color: #1976d2;
+    
+    li {
+      .p-tabview-nav-link {
+        color: white;
+        padding: 1rem 1.5rem;
+        transition: all 0.2s;
+        
+        &:hover {
+          color: rgba(255, 255, 255, 0.9);
+          background-color: rgba(255, 255, 255, 0.1);
+        }
+      }
+      
+      &.p-highlight .p-tabview-nav-link {
+        color: white;
+        border-bottom: 2px solid white;
+        font-weight: 600;
+      }
+    }
+  }
+  
+  .p-tabview-panels {
+    background-color: #ffffff;
+    padding: 1.5rem;
+  }
+}
+
+// Dropdown Stilleri
+.p-dropdown {
+  .p-dropdown-label {
+    padding: 0.75rem;
+  }
+  
+  .p-dropdown-trigger {
+    width: 3rem;
+  }
+  
+  .p-dropdown-panel {
+    .p-dropdown-items {
+      .p-dropdown-item {
+        padding: 0.75rem 1rem;
+        
+        &:hover {
+          background-color: rgba(59, 130, 246, 0.05);
+        }
+        
+        &.p-highlight {
+          background-color: rgba(59, 130, 246, 0.1);
+          color: var(--primary-color);
+        }
+      }
+    }
+  }
+} 

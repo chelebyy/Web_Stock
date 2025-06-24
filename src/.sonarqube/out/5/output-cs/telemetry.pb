@@ -1,0 +1,1 @@
+yRcC:\Users\muham\OneDrive\Masa√ºst√º\Stock\tests\Stock.IntegrationTests\Stock.IntegrationTests.csproj¢net9.0ÚCSharp13

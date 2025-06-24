@@ -1,0 +1,1421 @@
+{
+  "$schema": "http://json.schemastore.org/sarif-1.0.0",
+  "version": "1.0.0",
+  "runs": [
+    {
+      "tool": {
+        "name": "Microsoft (R) Visual C# Derleyicisi",
+        "version": "4.12.0.0",
+        "fileVersion": "4.12.0-3.24473.3 (5ef52ae3)",
+        "semanticVersion": "4.12.0",
+        "language": "tr-TR"
+      },
+      "results": [
+        {
+          "ruleId": "CS8765",
+          "level": "warning",
+          "message": "'obj' parametresinin null atanabilirliği geçersiz kılınmış üyeyle eşleşmiyor (muhtemelen null atanabilirlik öznitelikleri nedeniyle).",
+          "locations": [
+            {
+              "resultFile": {
+                "uri": "file:///C:/Users/muham/OneDrive/Masa%C3%BCst%C3%BC/Stock/src/Stock.Domain/Common/ValueObject.cs",
+                "region": {
+                  "startLine": 11,
+                  "startColumn": 30,
+                  "endLine": 11,
+                  "endColumn": 36
+                }
+              }
+            }
+          ],
+          "properties": {
+            "warningLevel": 1
+          }
+        },
+        {
+          "ruleId": "CS8767",
+          "level": "warning",
+          "message": "'other' parametresinin 'bool ValueObject.Equals(ValueObject other)' türündeki başvuru türlerinin null atanabilirliği örtük olarak uygulanan 'bool IEquatable<ValueObject>.Equals(ValueObject? other)' üyesiyle eşleşmiyor (muhtemelen null atanabilirlik öznitelikleri nedeniyle).",
+          "locations": [
+            {
+              "resultFile": {
+                "uri": "file:///C:/Users/muham/OneDrive/Masa%C3%BCst%C3%BC/Stock/src/Stock.Domain/Common/ValueObject.cs",
+                "region": {
+                  "startLine": 29,
+                  "startColumn": 21,
+                  "endLine": 29,
+                  "endColumn": 27
+                }
+              }
+            }
+          ],
+          "properties": {
+            "warningLevel": 1
+          }
+        },
+        {
+          "ruleId": "CS8618",
+          "level": "warning",
+          "message": "Null atanamaz özellik 'Name', oluşturucudan çıkış yaparken null olmayan bir değer içermelidir. 'Gerekli' değiştiricisini ekleyin veya özellik değerini null atanabilir olarak bildirmeyi göz önünde bulundurun.",
+          "locations": [
+            {
+              "resultFile": {
+                "uri": "file:///C:/Users/muham/OneDrive/Masa%C3%BCst%C3%BC/Stock/src/Stock.Domain/Entities/Category.cs",
+                "region": {
+                  "startLine": 7,
+                  "startColumn": 23,
+                  "endLine": 7,
+                  "endColumn": 27
+                }
+              }
+            }
+          ],
+          "relatedLocations": [
+            {
+              "physicalLocation": {
+                "uri": "file:///C:/Users/muham/OneDrive/Masa%C3%BCst%C3%BC/Stock/src/Stock.Domain/Entities/Category.cs",
+                "region": {
+                  "startLine": 7,
+                  "startColumn": 23,
+                  "endLine": 7,
+                  "endColumn": 27
+                }
+              }
+            }
+          ],
+          "properties": {
+            "warningLevel": 1
+          }
+        },
+        {
+          "ruleId": "CS8618",
+          "level": "warning",
+          "message": "Null atanamaz özellik 'Description', oluşturucudan çıkış yaparken null olmayan bir değer içermelidir. 'Gerekli' değiştiricisini ekleyin veya özellik değerini null atanabilir olarak bildirmeyi göz önünde bulundurun.",
+          "locations": [
+            {
+              "resultFile": {
+                "uri": "file:///C:/Users/muham/OneDrive/Masa%C3%BCst%C3%BC/Stock/src/Stock.Domain/Entities/Category.cs",
+                "region": {
+                  "startLine": 8,
+                  "startColumn": 23,
+                  "endLine": 8,
+                  "endColumn": 34
+                }
+              }
+            }
+          ],
+          "relatedLocations": [
+            {
+              "physicalLocation": {
+                "uri": "file:///C:/Users/muham/OneDrive/Masa%C3%BCst%C3%BC/Stock/src/Stock.Domain/Entities/Category.cs",
+                "region": {
+                  "startLine": 8,
+                  "startColumn": 23,
+                  "endLine": 8,
+                  "endColumn": 34
+                }
+              }
+            }
+          ],
+          "properties": {
+            "warningLevel": 1
+          }
+        },
+        {
+          "ruleId": "CS8618",
+          "level": "warning",
+          "message": "Null atanamaz özellik 'Products', oluşturucudan çıkış yaparken null olmayan bir değer içermelidir. 'Gerekli' değiştiricisini ekleyin veya özellik değerini null atanabilir olarak bildirmeyi göz önünde bulundurun.",
+          "locations": [
+            {
+              "resultFile": {
+                "uri": "file:///C:/Users/muham/OneDrive/Masa%C3%BCst%C3%BC/Stock/src/Stock.Domain/Entities/Category.cs",
+                "region": {
+                  "startLine": 9,
+                  "startColumn": 37,
+                  "endLine": 9,
+                  "endColumn": 45
+                }
+              }
+            }
+          ],
+          "relatedLocations": [
+            {
+              "physicalLocation": {
+                "uri": "file:///C:/Users/muham/OneDrive/Masa%C3%BCst%C3%BC/Stock/src/Stock.Domain/Entities/Category.cs",
+                "region": {
+                  "startLine": 9,
+                  "startColumn": 37,
+                  "endLine": 9,
+                  "endColumn": 45
+                }
+              }
+            }
+          ],
+          "properties": {
+            "warningLevel": 1
+          }
+        },
+        {
+          "ruleId": "CS8618",
+          "level": "warning",
+          "message": "Null atanamaz özellik 'User', oluşturucudan çıkış yaparken null olmayan bir değer içermelidir. 'Gerekli' değiştiricisini ekleyin veya özellik değerini null atanabilir olarak bildirmeyi göz önünde bulundurun.",
+          "locations": [
+            {
+              "resultFile": {
+                "uri": "file:///C:/Users/muham/OneDrive/Masa%C3%BCst%C3%BC/Stock/src/Stock.Domain/Entities/Permissions/UserPermission.cs",
+                "region": {
+                  "startLine": 13,
+                  "startColumn": 21,
+                  "endLine": 13,
+                  "endColumn": 25
+                }
+              }
+            }
+          ],
+          "relatedLocations": [
+            {
+              "physicalLocation": {
+                "uri": "file:///C:/Users/muham/OneDrive/Masa%C3%BCst%C3%BC/Stock/src/Stock.Domain/Entities/Permissions/UserPermission.cs",
+                "region": {
+                  "startLine": 13,
+                  "startColumn": 21,
+                  "endLine": 13,
+                  "endColumn": 25
+                }
+              }
+            }
+          ],
+          "properties": {
+            "warningLevel": 1
+          }
+        },
+        {
+          "ruleId": "CS8618",
+          "level": "warning",
+          "message": "Null atanamaz özellik 'Permission', oluşturucudan çıkış yaparken null olmayan bir değer içermelidir. 'Gerekli' değiştiricisini ekleyin veya özellik değerini null atanabilir olarak bildirmeyi göz önünde bulundurun.",
+          "locations": [
+            {
+              "resultFile": {
+                "uri": "file:///C:/Users/muham/OneDrive/Masa%C3%BCst%C3%BC/Stock/src/Stock.Domain/Entities/Permissions/UserPermission.cs",
+                "region": {
+                  "startLine": 14,
+                  "startColumn": 27,
+                  "endLine": 14,
+                  "endColumn": 37
+                }
+              }
+            }
+          ],
+          "relatedLocations": [
+            {
+              "physicalLocation": {
+                "uri": "file:///C:/Users/muham/OneDrive/Masa%C3%BCst%C3%BC/Stock/src/Stock.Domain/Entities/Permissions/UserPermission.cs",
+                "region": {
+                  "startLine": 14,
+                  "startColumn": 27,
+                  "endLine": 14,
+                  "endColumn": 37
+                }
+              }
+            }
+          ],
+          "properties": {
+            "warningLevel": 1
+          }
+        },
+        {
+          "ruleId": "CS8604",
+          "level": "warning",
+          "message": "'Result<T>.Result(bool isSuccess, T value, string error)' içindeki 'value' parametresi için olası null başvuru bağımsız değişkeni.",
+          "locations": [
+            {
+              "resultFile": {
+                "uri": "file:///C:/Users/muham/OneDrive/Masa%C3%BCst%C3%BC/Stock/src/Stock.Domain/Common/Result.cs",
+                "region": {
+                  "startLine": 22,
+                  "startColumn": 75,
+                  "endLine": 22,
+                  "endColumn": 85
+                }
+              }
+            }
+          ],
+          "properties": {
+            "warningLevel": 1
+          }
+        },
+        {
+          "ruleId": "CS8618",
+          "level": "warning",
+          "message": "Null atanamaz özellik 'Role', oluşturucudan çıkış yaparken null olmayan bir değer içermelidir. 'Gerekli' değiştiricisini ekleyin veya özellik değerini null atanabilir olarak bildirmeyi göz önünde bulundurun.",
+          "locations": [
+            {
+              "resultFile": {
+                "uri": "file:///C:/Users/muham/OneDrive/Masa%C3%BCst%C3%BC/Stock/src/Stock.Domain/Entities/Permissions/RolePermission.cs",
+                "region": {
+                  "startLine": 12,
+                  "startColumn": 21,
+                  "endLine": 12,
+                  "endColumn": 25
+                }
+              }
+            }
+          ],
+          "relatedLocations": [
+            {
+              "physicalLocation": {
+                "uri": "file:///C:/Users/muham/OneDrive/Masa%C3%BCst%C3%BC/Stock/src/Stock.Domain/Entities/Permissions/RolePermission.cs",
+                "region": {
+                  "startLine": 12,
+                  "startColumn": 21,
+                  "endLine": 12,
+                  "endColumn": 25
+                }
+              }
+            }
+          ],
+          "properties": {
+            "warningLevel": 1
+          }
+        },
+        {
+          "ruleId": "CS8618",
+          "level": "warning",
+          "message": "Null atanamaz özellik 'Permission', oluşturucudan çıkış yaparken null olmayan bir değer içermelidir. 'Gerekli' değiştiricisini ekleyin veya özellik değerini null atanabilir olarak bildirmeyi göz önünde bulundurun.",
+          "locations": [
+            {
+              "resultFile": {
+                "uri": "file:///C:/Users/muham/OneDrive/Masa%C3%BCst%C3%BC/Stock/src/Stock.Domain/Entities/Permissions/RolePermission.cs",
+                "region": {
+                  "startLine": 13,
+                  "startColumn": 27,
+                  "endLine": 13,
+                  "endColumn": 37
+                }
+              }
+            }
+          ],
+          "relatedLocations": [
+            {
+              "physicalLocation": {
+                "uri": "file:///C:/Users/muham/OneDrive/Masa%C3%BCst%C3%BC/Stock/src/Stock.Domain/Entities/Permissions/RolePermission.cs",
+                "region": {
+                  "startLine": 13,
+                  "startColumn": 27,
+                  "endLine": 13,
+                  "endColumn": 37
+                }
+              }
+            }
+          ],
+          "properties": {
+            "warningLevel": 1
+          }
+        },
+        {
+          "ruleId": "CS8618",
+          "level": "warning",
+          "message": "Null atanamaz özellik 'Name', oluşturucudan çıkış yaparken null olmayan bir değer içermelidir. 'Gerekli' değiştiricisini ekleyin veya özellik değerini null atanabilir olarak bildirmeyi göz önünde bulundurun.",
+          "locations": [
+            {
+              "resultFile": {
+                "uri": "file:///C:/Users/muham/OneDrive/Masa%C3%BCst%C3%BC/Stock/src/Stock.Domain/Entities/Product.cs",
+                "region": {
+                  "startLine": 17,
+                  "startColumn": 17,
+                  "endLine": 17,
+                  "endColumn": 24
+                }
+              }
+            }
+          ],
+          "relatedLocations": [
+            {
+              "physicalLocation": {
+                "uri": "file:///C:/Users/muham/OneDrive/Masa%C3%BCst%C3%BC/Stock/src/Stock.Domain/Entities/Product.cs",
+                "region": {
+                  "startLine": 10,
+                  "startColumn": 28,
+                  "endLine": 10,
+                  "endColumn": 32
+                }
+              }
+            }
+          ],
+          "properties": {
+            "warningLevel": 1
+          }
+        },
+        {
+          "ruleId": "CS8618",
+          "level": "warning",
+          "message": "Null atanamaz özellik 'Description', oluşturucudan çıkış yaparken null olmayan bir değer içermelidir. 'Gerekli' değiştiricisini ekleyin veya özellik değerini null atanabilir olarak bildirmeyi göz önünde bulundurun.",
+          "locations": [
+            {
+              "resultFile": {
+                "uri": "file:///C:/Users/muham/OneDrive/Masa%C3%BCst%C3%BC/Stock/src/Stock.Domain/Entities/Product.cs",
+                "region": {
+                  "startLine": 17,
+                  "startColumn": 17,
+                  "endLine": 17,
+                  "endColumn": 24
+                }
+              }
+            }
+          ],
+          "relatedLocations": [
+            {
+              "physicalLocation": {
+                "uri": "file:///C:/Users/muham/OneDrive/Masa%C3%BCst%C3%BC/Stock/src/Stock.Domain/Entities/Product.cs",
+                "region": {
+                  "startLine": 11,
+                  "startColumn": 35,
+                  "endLine": 11,
+                  "endColumn": 46
+                }
+              }
+            }
+          ],
+          "properties": {
+            "warningLevel": 1
+          }
+        },
+        {
+          "ruleId": "CS8618",
+          "level": "warning",
+          "message": "Null atanamaz özellik 'StockLevel', oluşturucudan çıkış yaparken null olmayan bir değer içermelidir. 'Gerekli' değiştiricisini ekleyin veya özellik değerini null atanabilir olarak bildirmeyi göz önünde bulundurun.",
+          "locations": [
+            {
+              "resultFile": {
+                "uri": "file:///C:/Users/muham/OneDrive/Masa%C3%BCst%C3%BC/Stock/src/Stock.Domain/Entities/Product.cs",
+                "region": {
+                  "startLine": 17,
+                  "startColumn": 17,
+                  "endLine": 17,
+                  "endColumn": 24
+                }
+              }
+            }
+          ],
+          "relatedLocations": [
+            {
+              "physicalLocation": {
+                "uri": "file:///C:/Users/muham/OneDrive/Masa%C3%BCst%C3%BC/Stock/src/Stock.Domain/Entities/Product.cs",
+                "region": {
+                  "startLine": 12,
+                  "startColumn": 27,
+                  "endLine": 12,
+                  "endColumn": 37
+                }
+              }
+            }
+          ],
+          "properties": {
+            "warningLevel": 1
+          }
+        },
+        {
+          "ruleId": "CS8618",
+          "level": "warning",
+          "message": "Null atanamaz özellik 'Category', oluşturucudan çıkış yaparken null olmayan bir değer içermelidir. 'Gerekli' değiştiricisini ekleyin veya özellik değerini null atanabilir olarak bildirmeyi göz önünde bulundurun.",
+          "locations": [
+            {
+              "resultFile": {
+                "uri": "file:///C:/Users/muham/OneDrive/Masa%C3%BCst%C3%BC/Stock/src/Stock.Domain/Entities/Product.cs",
+                "region": {
+                  "startLine": 17,
+                  "startColumn": 17,
+                  "endLine": 17,
+                  "endColumn": 24
+                }
+              }
+            }
+          ],
+          "relatedLocations": [
+            {
+              "physicalLocation": {
+                "uri": "file:///C:/Users/muham/OneDrive/Masa%C3%BCst%C3%BC/Stock/src/Stock.Domain/Entities/Product.cs",
+                "region": {
+                  "startLine": 15,
+                  "startColumn": 25,
+                  "endLine": 15,
+                  "endColumn": 33
+                }
+              }
+            }
+          ],
+          "properties": {
+            "warningLevel": 1
+          }
+        },
+        {
+          "ruleId": "CS8618",
+          "level": "warning",
+          "message": "Null atanamaz özellik 'Name', oluşturucudan çıkış yaparken null olmayan bir değer içermelidir. 'Gerekli' değiştiricisini ekleyin veya özellik değerini null atanabilir olarak bildirmeyi göz önünde bulundurun.",
+          "locations": [
+            {
+              "resultFile": {
+                "uri": "file:///C:/Users/muham/OneDrive/Masa%C3%BCst%C3%BC/Stock/src/Stock.Domain/Entities/Permissions/Permission.cs",
+                "region": {
+                  "startLine": 9,
+                  "startColumn": 23,
+                  "endLine": 9,
+                  "endColumn": 27
+                }
+              }
+            }
+          ],
+          "relatedLocations": [
+            {
+              "physicalLocation": {
+                "uri": "file:///C:/Users/muham/OneDrive/Masa%C3%BCst%C3%BC/Stock/src/Stock.Domain/Entities/Permissions/Permission.cs",
+                "region": {
+                  "startLine": 9,
+                  "startColumn": 23,
+                  "endLine": 9,
+                  "endColumn": 27
+                }
+              }
+            }
+          ],
+          "properties": {
+            "warningLevel": 1
+          }
+        },
+        {
+          "ruleId": "CS8618",
+          "level": "warning",
+          "message": "Null atanamaz özellik 'Description', oluşturucudan çıkış yaparken null olmayan bir değer içermelidir. 'Gerekli' değiştiricisini ekleyin veya özellik değerini null atanabilir olarak bildirmeyi göz önünde bulundurun.",
+          "locations": [
+            {
+              "resultFile": {
+                "uri": "file:///C:/Users/muham/OneDrive/Masa%C3%BCst%C3%BC/Stock/src/Stock.Domain/Entities/Permissions/Permission.cs",
+                "region": {
+                  "startLine": 10,
+                  "startColumn": 23,
+                  "endLine": 10,
+                  "endColumn": 34
+                }
+              }
+            }
+          ],
+          "relatedLocations": [
+            {
+              "physicalLocation": {
+                "uri": "file:///C:/Users/muham/OneDrive/Masa%C3%BCst%C3%BC/Stock/src/Stock.Domain/Entities/Permissions/Permission.cs",
+                "region": {
+                  "startLine": 10,
+                  "startColumn": 23,
+                  "endLine": 10,
+                  "endColumn": 34
+                }
+              }
+            }
+          ],
+          "properties": {
+            "warningLevel": 1
+          }
+        },
+        {
+          "ruleId": "CS8618",
+          "level": "warning",
+          "message": "Null atanamaz özellik 'ResourceType', oluşturucudan çıkış yaparken null olmayan bir değer içermelidir. 'Gerekli' değiştiricisini ekleyin veya özellik değerini null atanabilir olarak bildirmeyi göz önünde bulundurun.",
+          "locations": [
+            {
+              "resultFile": {
+                "uri": "file:///C:/Users/muham/OneDrive/Masa%C3%BCst%C3%BC/Stock/src/Stock.Domain/Entities/Permissions/Permission.cs",
+                "region": {
+                  "startLine": 11,
+                  "startColumn": 23,
+                  "endLine": 11,
+                  "endColumn": 35
+                }
+              }
+            }
+          ],
+          "relatedLocations": [
+            {
+              "physicalLocation": {
+                "uri": "file:///C:/Users/muham/OneDrive/Masa%C3%BCst%C3%BC/Stock/src/Stock.Domain/Entities/Permissions/Permission.cs",
+                "region": {
+                  "startLine": 11,
+                  "startColumn": 23,
+                  "endLine": 11,
+                  "endColumn": 35
+                }
+              }
+            }
+          ],
+          "properties": {
+            "warningLevel": 1
+          }
+        },
+        {
+          "ruleId": "CS8618",
+          "level": "warning",
+          "message": "Null atanamaz özellik 'ResourceName', oluşturucudan çıkış yaparken null olmayan bir değer içermelidir. 'Gerekli' değiştiricisini ekleyin veya özellik değerini null atanabilir olarak bildirmeyi göz önünde bulundurun.",
+          "locations": [
+            {
+              "resultFile": {
+                "uri": "file:///C:/Users/muham/OneDrive/Masa%C3%BCst%C3%BC/Stock/src/Stock.Domain/Entities/Permissions/Permission.cs",
+                "region": {
+                  "startLine": 12,
+                  "startColumn": 23,
+                  "endLine": 12,
+                  "endColumn": 35
+                }
+              }
+            }
+          ],
+          "relatedLocations": [
+            {
+              "physicalLocation": {
+                "uri": "file:///C:/Users/muham/OneDrive/Masa%C3%BCst%C3%BC/Stock/src/Stock.Domain/Entities/Permissions/Permission.cs",
+                "region": {
+                  "startLine": 12,
+                  "startColumn": 23,
+                  "endLine": 12,
+                  "endColumn": 35
+                }
+              }
+            }
+          ],
+          "properties": {
+            "warningLevel": 1
+          }
+        },
+        {
+          "ruleId": "CS8618",
+          "level": "warning",
+          "message": "Null atanamaz özellik 'Action', oluşturucudan çıkış yaparken null olmayan bir değer içermelidir. 'Gerekli' değiştiricisini ekleyin veya özellik değerini null atanabilir olarak bildirmeyi göz önünde bulundurun.",
+          "locations": [
+            {
+              "resultFile": {
+                "uri": "file:///C:/Users/muham/OneDrive/Masa%C3%BCst%C3%BC/Stock/src/Stock.Domain/Entities/Permissions/Permission.cs",
+                "region": {
+                  "startLine": 13,
+                  "startColumn": 23,
+                  "endLine": 13,
+                  "endColumn": 29
+                }
+              }
+            }
+          ],
+          "relatedLocations": [
+            {
+              "physicalLocation": {
+                "uri": "file:///C:/Users/muham/OneDrive/Masa%C3%BCst%C3%BC/Stock/src/Stock.Domain/Entities/Permissions/Permission.cs",
+                "region": {
+                  "startLine": 13,
+                  "startColumn": 23,
+                  "endLine": 13,
+                  "endColumn": 29
+                }
+              }
+            }
+          ],
+          "properties": {
+            "warningLevel": 1
+          }
+        },
+        {
+          "ruleId": "CS8618",
+          "level": "warning",
+          "message": "Null atanamaz özellik 'Group', oluşturucudan çıkış yaparken null olmayan bir değer içermelidir. 'Gerekli' değiştiricisini ekleyin veya özellik değerini null atanabilir olarak bildirmeyi göz önünde bulundurun.",
+          "locations": [
+            {
+              "resultFile": {
+                "uri": "file:///C:/Users/muham/OneDrive/Masa%C3%BCst%C3%BC/Stock/src/Stock.Domain/Entities/Permissions/Permission.cs",
+                "region": {
+                  "startLine": 14,
+                  "startColumn": 23,
+                  "endLine": 14,
+                  "endColumn": 28
+                }
+              }
+            }
+          ],
+          "relatedLocations": [
+            {
+              "physicalLocation": {
+                "uri": "file:///C:/Users/muham/OneDrive/Masa%C3%BCst%C3%BC/Stock/src/Stock.Domain/Entities/Permissions/Permission.cs",
+                "region": {
+                  "startLine": 14,
+                  "startColumn": 23,
+                  "endLine": 14,
+                  "endColumn": 28
+                }
+              }
+            }
+          ],
+          "properties": {
+            "warningLevel": 1
+          }
+        },
+        {
+          "ruleId": "CS8618",
+          "level": "warning",
+          "message": "Null atanamaz özellik 'RolePermissions', oluşturucudan çıkış yaparken null olmayan bir değer içermelidir. 'Gerekli' değiştiricisini ekleyin veya özellik değerini null atanabilir olarak bildirmeyi göz önünde bulundurun.",
+          "locations": [
+            {
+              "resultFile": {
+                "uri": "file:///C:/Users/muham/OneDrive/Masa%C3%BCst%C3%BC/Stock/src/Stock.Domain/Entities/Permissions/Permission.cs",
+                "region": {
+                  "startLine": 17,
+                  "startColumn": 44,
+                  "endLine": 17,
+                  "endColumn": 59
+                }
+              }
+            }
+          ],
+          "relatedLocations": [
+            {
+              "physicalLocation": {
+                "uri": "file:///C:/Users/muham/OneDrive/Masa%C3%BCst%C3%BC/Stock/src/Stock.Domain/Entities/Permissions/Permission.cs",
+                "region": {
+                  "startLine": 17,
+                  "startColumn": 44,
+                  "endLine": 17,
+                  "endColumn": 59
+                }
+              }
+            }
+          ],
+          "properties": {
+            "warningLevel": 1
+          }
+        },
+        {
+          "ruleId": "CS8618",
+          "level": "warning",
+          "message": "Null atanamaz özellik 'UserPermissions', oluşturucudan çıkış yaparken null olmayan bir değer içermelidir. 'Gerekli' değiştiricisini ekleyin veya özellik değerini null atanabilir olarak bildirmeyi göz önünde bulundurun.",
+          "locations": [
+            {
+              "resultFile": {
+                "uri": "file:///C:/Users/muham/OneDrive/Masa%C3%BCst%C3%BC/Stock/src/Stock.Domain/Entities/Permissions/Permission.cs",
+                "region": {
+                  "startLine": 18,
+                  "startColumn": 44,
+                  "endLine": 18,
+                  "endColumn": 59
+                }
+              }
+            }
+          ],
+          "relatedLocations": [
+            {
+              "physicalLocation": {
+                "uri": "file:///C:/Users/muham/OneDrive/Masa%C3%BCst%C3%BC/Stock/src/Stock.Domain/Entities/Permissions/Permission.cs",
+                "region": {
+                  "startLine": 18,
+                  "startColumn": 44,
+                  "endLine": 18,
+                  "endColumn": 59
+                }
+              }
+            }
+          ],
+          "properties": {
+            "warningLevel": 1
+          }
+        },
+        {
+          "ruleId": "CS8625",
+          "level": "warning",
+          "message": "Null sabit değer, boş değer atanamayan başvuru türüne dönüştürülemiyor.",
+          "locations": [
+            {
+              "resultFile": {
+                "uri": "file:///C:/Users/muham/OneDrive/Masa%C3%BCst%C3%BC/Stock/src/Stock.Domain/Entities/Product.cs",
+                "region": {
+                  "startLine": 21,
+                  "startColumn": 25,
+                  "endLine": 21,
+                  "endColumn": 29
+                }
+              }
+            }
+          ],
+          "properties": {
+            "warningLevel": 1
+          }
+        },
+        {
+          "ruleId": "CS8625",
+          "level": "warning",
+          "message": "Null sabit değer, boş değer atanamayan başvuru türüne dönüştürülemiyor.",
+          "locations": [
+            {
+              "resultFile": {
+                "uri": "file:///C:/Users/muham/OneDrive/Masa%C3%BCst%C3%BC/Stock/src/Stock.Domain/Entities/Product.cs",
+                "region": {
+                  "startLine": 22,
+                  "startColumn": 31,
+                  "endLine": 22,
+                  "endColumn": 35
+                }
+              }
+            }
+          ],
+          "properties": {
+            "warningLevel": 1
+          }
+        },
+        {
+          "ruleId": "CS8625",
+          "level": "warning",
+          "message": "Null sabit değer, boş değer atanamayan başvuru türüne dönüştürülemiyor.",
+          "locations": [
+            {
+              "resultFile": {
+                "uri": "file:///C:/Users/muham/OneDrive/Masa%C3%BCst%C3%BC/Stock/src/Stock.Domain/Entities/Product.cs",
+                "region": {
+                  "startLine": 36,
+                  "startColumn": 28,
+                  "endLine": 36,
+                  "endColumn": 32
+                }
+              }
+            }
+          ],
+          "properties": {
+            "warningLevel": 1
+          }
+        },
+        {
+          "ruleId": "CS8601",
+          "level": "warning",
+          "message": "Olası null başvuru ataması.",
+          "locations": [
+            {
+              "resultFile": {
+                "uri": "file:///C:/Users/muham/OneDrive/Masa%C3%BCst%C3%BC/Stock/src/Stock.Domain/ValueObjects/ProductDescription.cs",
+                "region": {
+                  "startLine": 19,
+                  "startColumn": 21,
+                  "endLine": 19,
+                  "endColumn": 26
+                }
+              }
+            }
+          ],
+          "properties": {
+            "warningLevel": 1
+          }
+        },
+        {
+          "ruleId": "CS8618",
+          "level": "warning",
+          "message": "Null atanamaz özellik 'Value', oluşturucudan çıkış yaparken null olmayan bir değer içermelidir. 'Gerekli' değiştiricisini ekleyin veya özellik değerini null atanabilir olarak bildirmeyi göz önünde bulundurun.",
+          "locations": [
+            {
+              "resultFile": {
+                "uri": "file:///C:/Users/muham/OneDrive/Masa%C3%BCst%C3%BC/Stock/src/Stock.Domain/ValueObjects/ProductDescription.cs",
+                "region": {
+                  "startLine": 12,
+                  "startColumn": 17,
+                  "endLine": 12,
+                  "endColumn": 35
+                }
+              }
+            }
+          ],
+          "relatedLocations": [
+            {
+              "physicalLocation": {
+                "uri": "file:///C:/Users/muham/OneDrive/Masa%C3%BCst%C3%BC/Stock/src/Stock.Domain/ValueObjects/ProductDescription.cs",
+                "region": {
+                  "startLine": 10,
+                  "startColumn": 23,
+                  "endLine": 10,
+                  "endColumn": 28
+                }
+              }
+            }
+          ],
+          "properties": {
+            "warningLevel": 1
+          }
+        },
+        {
+          "ruleId": "CS8603",
+          "level": "warning",
+          "message": "Olası null başvuru dönüşü.",
+          "locations": [
+            {
+              "resultFile": {
+                "uri": "file:///C:/Users/muham/OneDrive/Masa%C3%BCst%C3%BC/Stock/src/Stock.Domain/Specifications/Users/UserWithRoleAndPermissionsSpecification.cs",
+                "region": {
+                  "startLine": 11,
+                  "startColumn": 29,
+                  "endLine": 11,
+                  "endColumn": 35
+                }
+              }
+            }
+          ],
+          "properties": {
+            "warningLevel": 1
+          }
+        },
+        {
+          "ruleId": "CS8625",
+          "level": "warning",
+          "message": "Null sabit değer, boş değer atanamayan başvuru türüne dönüştürülemiyor.",
+          "locations": [
+            {
+              "resultFile": {
+                "uri": "file:///C:/Users/muham/OneDrive/Masa%C3%BCst%C3%BC/Stock/src/Stock.Domain/Entities/Product.cs",
+                "region": {
+                  "startLine": 61,
+                  "startColumn": 24,
+                  "endLine": 61,
+                  "endColumn": 28
+                }
+              }
+            }
+          ],
+          "properties": {
+            "warningLevel": 1
+          }
+        },
+        {
+          "ruleId": "CS8604",
+          "level": "warning",
+          "message": "'bool ValueObject.Equals(ValueObject other)' içindeki 'other' parametresi için olası null başvuru bağımsız değişkeni.",
+          "locations": [
+            {
+              "resultFile": {
+                "uri": "file:///C:/Users/muham/OneDrive/Masa%C3%BCst%C3%BC/Stock/src/Stock.Domain/Common/ValueObject.cs",
+                "region": {
+                  "startLine": 40,
+                  "startColumn": 63,
+                  "endLine": 40,
+                  "endColumn": 68
+                }
+              }
+            }
+          ],
+          "properties": {
+            "warningLevel": 1
+          }
+        },
+        {
+          "ruleId": "CS8603",
+          "level": "warning",
+          "message": "Olası null başvuru dönüşü.",
+          "locations": [
+            {
+              "resultFile": {
+                "uri": "file:///C:/Users/muham/OneDrive/Masa%C3%BCst%C3%BC/Stock/src/Stock.Domain/ValueObjects/ProductDescription.cs",
+                "region": {
+                  "startLine": 32,
+                  "startColumn": 83,
+                  "endLine": 32,
+                  "endColumn": 101
+                }
+              }
+            }
+          ],
+          "properties": {
+            "warningLevel": 1
+          }
+        },
+        {
+          "ruleId": "CS8603",
+          "level": "warning",
+          "message": "Olası null başvuru dönüşü.",
+          "locations": [
+            {
+              "resultFile": {
+                "uri": "file:///C:/Users/muham/OneDrive/Masa%C3%BCst%C3%BC/Stock/src/Stock.Domain/Specifications/UsersWithRolesSpecification.cs",
+                "region": {
+                  "startLine": 20,
+                  "startColumn": 29,
+                  "endLine": 20,
+                  "endColumn": 35
+                }
+              }
+            }
+          ],
+          "properties": {
+            "warningLevel": 1
+          }
+        },
+        {
+          "ruleId": "CS8603",
+          "level": "warning",
+          "message": "Olası null başvuru dönüşü.",
+          "locations": [
+            {
+              "resultFile": {
+                "uri": "file:///C:/Users/muham/OneDrive/Masa%C3%BCst%C3%BC/Stock/src/Stock.Domain/Specifications/UserBySicilSpecification.cs",
+                "region": {
+                  "startLine": 22,
+                  "startColumn": 33,
+                  "endLine": 22,
+                  "endColumn": 39
+                }
+              }
+            }
+          ],
+          "properties": {
+            "warningLevel": 1
+          }
+        },
+        {
+          "ruleId": "CS8603",
+          "level": "warning",
+          "message": "Olası null başvuru dönüşü.",
+          "locations": [
+            {
+              "resultFile": {
+                "uri": "file:///C:/Users/muham/OneDrive/Masa%C3%BCst%C3%BC/Stock/src/Stock.Domain/Specifications/UsersWithRolesSpecification.cs",
+                "region": {
+                  "startLine": 41,
+                  "startColumn": 29,
+                  "endLine": 41,
+                  "endColumn": 35
+                }
+              }
+            }
+          ],
+          "properties": {
+            "warningLevel": 1
+          }
+        },
+        {
+          "ruleId": "S125",
+          "level": "warning",
+          "message": "Remove this commented out code.",
+          "locations": [
+            {
+              "resultFile": {
+                "uri": "file:///C:/Users/muham/OneDrive/Masa%C3%BCst%C3%BC/Stock/src/Stock.Domain/Common/Result.cs",
+                "region": {
+                  "startLine": 25,
+                  "startColumn": 5,
+                  "endLine": 25,
+                  "endColumn": 77
+                }
+              }
+            }
+          ],
+          "properties": {
+            "warningLevel": 1
+          }
+        },
+        {
+          "ruleId": "S2094",
+          "level": "warning",
+          "message": "Remove this empty class, write its code or make it an \"interface\".",
+          "locations": [
+            {
+              "resultFile": {
+                "uri": "file:///C:/Users/muham/OneDrive/Masa%C3%BCst%C3%BC/Stock/src/Stock.Domain/Class1.cs",
+                "region": {
+                  "startLine": 3,
+                  "startColumn": 14,
+                  "endLine": 3,
+                  "endColumn": 20
+                }
+              }
+            }
+          ],
+          "properties": {
+            "warningLevel": 1
+          }
+        },
+        {
+          "ruleId": "S125",
+          "level": "warning",
+          "message": "Remove this commented out code.",
+          "locations": [
+            {
+              "resultFile": {
+                "uri": "file:///C:/Users/muham/OneDrive/Masa%C3%BCst%C3%BC/Stock/src/Stock.Domain/Specifications/AllPermissionsSpecification.cs",
+                "region": {
+                  "startLine": 14,
+                  "startColumn": 13,
+                  "endLine": 14,
+                  "endColumn": 42
+                }
+              }
+            }
+          ],
+          "properties": {
+            "warningLevel": 1
+          }
+        },
+        {
+          "ruleId": "S125",
+          "level": "warning",
+          "message": "Remove this commented out code.",
+          "locations": [
+            {
+              "resultFile": {
+                "uri": "file:///C:/Users/muham/OneDrive/Masa%C3%BCst%C3%BC/Stock/src/Stock.Domain/Specifications/RoleByIdSpecification.cs",
+                "region": {
+                  "startLine": 20,
+                  "startColumn": 13,
+                  "endLine": 20,
+                  "endColumn": 41
+                }
+              }
+            }
+          ],
+          "properties": {
+            "warningLevel": 1
+          }
+        },
+        {
+          "ruleId": "S4035",
+          "level": "warning",
+          "message": "Seal class 'ValueObject' or implement 'IEqualityComparer<T>' instead.",
+          "locations": [
+            {
+              "resultFile": {
+                "uri": "file:///C:/Users/muham/OneDrive/Masa%C3%BCst%C3%BC/Stock/src/Stock.Domain/Common/ValueObject.cs",
+                "region": {
+                  "startLine": 7,
+                  "startColumn": 27,
+                  "endLine": 7,
+                  "endColumn": 38
+                }
+              }
+            }
+          ],
+          "properties": {
+            "warningLevel": 1
+          }
+        },
+        {
+          "ruleId": "S4136",
+          "level": "warning",
+          "message": "All 'Equals' method overloads should be adjacent.",
+          "locations": [
+            {
+              "resultFile": {
+                "uri": "file:///C:/Users/muham/OneDrive/Masa%C3%BCst%C3%BC/Stock/src/Stock.Domain/Common/ValueObject.cs",
+                "region": {
+                  "startLine": 11,
+                  "startColumn": 30,
+                  "endLine": 11,
+                  "endColumn": 36
+                }
+              }
+            }
+          ],
+          "relatedLocations": [
+            {
+              "physicalLocation": {
+                "uri": "file:///C:/Users/muham/OneDrive/Masa%C3%BCst%C3%BC/Stock/src/Stock.Domain/Common/ValueObject.cs",
+                "region": {
+                  "startLine": 29,
+                  "startColumn": 21,
+                  "endLine": 29,
+                  "endColumn": 27
+                }
+              }
+            }
+          ],
+          "properties": {
+            "warningLevel": 1,
+            "customProperties": {
+              "0": "Non-adjacent overload"
+            }
+          }
+        },
+        {
+          "ruleId": "S125",
+          "level": "warning",
+          "message": "Remove this commented out code.",
+          "locations": [
+            {
+              "resultFile": {
+                "uri": "file:///C:/Users/muham/OneDrive/Masa%C3%BCst%C3%BC/Stock/src/Stock.Domain/Specifications/UserPermissions/UserPermissionSpecification.cs",
+                "region": {
+                  "startLine": 13,
+                  "startColumn": 13,
+                  "endLine": 13,
+                  "endColumn": 48
+                }
+              }
+            }
+          ],
+          "properties": {
+            "warningLevel": 1
+          }
+        },
+        {
+          "ruleId": "S125",
+          "level": "warning",
+          "message": "Remove this commented out code.",
+          "locations": [
+            {
+              "resultFile": {
+                "uri": "file:///C:/Users/muham/OneDrive/Masa%C3%BCst%C3%BC/Stock/src/Stock.Domain/ValueObjects/ProductName.cs",
+                "region": {
+                  "startLine": 18,
+                  "startColumn": 13,
+                  "endLine": 18,
+                  "endColumn": 39
+                }
+              }
+            }
+          ],
+          "properties": {
+            "warningLevel": 1
+          }
+        },
+        {
+          "ruleId": "S3604",
+          "level": "warning",
+          "message": "Remove the member initializer, all constructors set an initial value for the member.",
+          "locations": [
+            {
+              "resultFile": {
+                "uri": "file:///C:/Users/muham/OneDrive/Masa%C3%BCst%C3%BC/Stock/src/Stock.Domain/Entities/User.cs",
+                "region": {
+                  "startLine": 34,
+                  "startColumn": 82,
+                  "endLine": 34,
+                  "endColumn": 113
+                }
+              }
+            }
+          ],
+          "properties": {
+            "warningLevel": 1
+          }
+        },
+        {
+          "ruleId": "CA1862",
+          "level": "note",
+          "message": "Büyük/küçük harfe duyarsız bir karşılaştırma gerçekleştirmek için 'string.Equals(string, StringComparison)' kullanmayı tercih edin ancak bunun davranışta küçük değişikliklere neden olabileceğini unutmayın. Bu nedenle, öneriyi uyguladıktan sonra mutlaka kapsamlı testler yapın veya kültürel açıdan hassas karşılaştırma gerekmiyorsa 'StringComparer.OrdinalIgnoreCase' kullanmayı göz önünde bulundurun",
+          "locations": [
+            {
+              "resultFile": {
+                "uri": "file:///C:/Users/muham/OneDrive/Masa%C3%BCst%C3%BC/Stock/src/Stock.Domain/Specifications/RoleByNameSpecification.cs",
+                "region": {
+                  "startLine": 18,
+                  "startColumn": 25,
+                  "endLine": 18,
+                  "endColumn": 59
+                }
+              }
+            }
+          ],
+          "properties": {
+            "warningLevel": 1,
+            "customProperties": {
+              "LeftOffendingMethod": "ToLower",
+              "RightOffendingMethod": "ToLower"
+            }
+          }
+        }
+      ],
+      "rules": {
+        "CA1862": {
+          "id": "CA1862",
+          "shortDescription": "Büyük/küçük harfe duyarsız dize karşılaştırmaları gerçekleştirmek için 'StringComparison' metodu aşırı yüklemelerini kullanın",
+          "fullDescription": "Ayırmaya yol açtıklarından 'string.ToLower() == string.ToLower()' gibi büyük/küçük harfe duyarsız dize karşılaştırmaları gerçekleştirmek için 'ToLower', 'ToUpper', 'ToLowerInvariant' ve 'ToUpperInvariant' çağırmaktan kaçının. Bunun yerine, büyük/küçük harfe duyarsız karşılaştırma yapmak için 'string.Equals(string, StringComparison)' parametresini kullanmayı tercih edin. 'StringComparer' alan bir aşırı yüklemeye geçmek geçmek davranışta küçük değişikliklere neden olabileceğinden öneriyi uyguladıktan sonra mutlaka kapsamlı test yapılmalıdır. Ayrıca, kültürel açıdan hassas karşılaştırma gerekmiyorsa 'StringComparer.OrdinalIgnoreCase' kullanmayı göz önünde bulundurun.",
+          "defaultLevel": "note",
+          "helpUri": "https://learn.microsoft.com/dotnet/fundamentals/code-analysis/quality-rules/ca1862",
+          "properties": {
+            "category": "Performance",
+            "isEnabledByDefault": true,
+            "tags": [
+              "Telemetry",
+              "EnabledRuleInAggressiveMode"
+            ]
+          }
+        },
+        "CS8601": {
+          "id": "CS8601",
+          "shortDescription": "Olası null başvuru ataması.",
+          "defaultLevel": "warning",
+          "helpUri": "https://msdn.microsoft.com/query/roslyn.query?appId=roslyn&k=k(CS8601)",
+          "properties": {
+            "category": "Compiler",
+            "isEnabledByDefault": true,
+            "tags": [
+              "Compiler",
+              "Telemetry"
+            ]
+          }
+        },
+        "CS8603": {
+          "id": "CS8603",
+          "shortDescription": "Olası null başvuru dönüşü.",
+          "defaultLevel": "warning",
+          "helpUri": "https://msdn.microsoft.com/query/roslyn.query?appId=roslyn&k=k(CS8603)",
+          "properties": {
+            "category": "Compiler",
+            "isEnabledByDefault": true,
+            "tags": [
+              "Compiler",
+              "Telemetry"
+            ]
+          }
+        },
+        "CS8604": {
+          "id": "CS8604",
+          "shortDescription": "Olası null başvuru bağımsız değişkeni.",
+          "defaultLevel": "warning",
+          "helpUri": "https://msdn.microsoft.com/query/roslyn.query?appId=roslyn&k=k(CS8604)",
+          "properties": {
+            "category": "Compiler",
+            "isEnabledByDefault": true,
+            "tags": [
+              "Compiler",
+              "Telemetry"
+            ]
+          }
+        },
+        "CS8618": {
+          "id": "CS8618",
+          "shortDescription": "Null atanamaz alan, oluşturucudan çıkış yaparken null olmayan bir değer içermelidir. 'Gerekli' değiştiricisini ekleyin veya null atanabilir olarak bildirmeyi göz önünde bulundurun.",
+          "defaultLevel": "warning",
+          "helpUri": "https://msdn.microsoft.com/query/roslyn.query?appId=roslyn&k=k(CS8618)",
+          "properties": {
+            "category": "Compiler",
+            "isEnabledByDefault": true,
+            "tags": [
+              "Compiler",
+              "Telemetry"
+            ]
+          }
+        },
+        "CS8625": {
+          "id": "CS8625",
+          "shortDescription": "Null sabit değer, boş değer atanamayan başvuru türüne dönüştürülemiyor.",
+          "defaultLevel": "warning",
+          "helpUri": "https://msdn.microsoft.com/query/roslyn.query?appId=roslyn&k=k(CS8625)",
+          "properties": {
+            "category": "Compiler",
+            "isEnabledByDefault": true,
+            "tags": [
+              "Compiler",
+              "Telemetry"
+            ]
+          }
+        },
+        "CS8765": {
+          "id": "CS8765",
+          "shortDescription": "Parametre türünün null atanabilirliği geçersiz kılınmış üyeyle eşleşmiyor (muhtemelen null atanabilirlik öznitelikleri nedeniyle).",
+          "defaultLevel": "warning",
+          "helpUri": "https://msdn.microsoft.com/query/roslyn.query?appId=roslyn&k=k(CS8765)",
+          "properties": {
+            "category": "Compiler",
+            "isEnabledByDefault": true,
+            "tags": [
+              "Compiler",
+              "Telemetry"
+            ]
+          }
+        },
+        "CS8767": {
+          "id": "CS8767",
+          "shortDescription": "Parametre türündeki başvuru türlerinin null atanabilirliği örtük olarak uygulanan üyeyle eşleşmiyor (muhtemelen null atanabilirlik öznitelikleri nedeniyle).",
+          "defaultLevel": "warning",
+          "helpUri": "https://msdn.microsoft.com/query/roslyn.query?appId=roslyn&k=k(CS8767)",
+          "properties": {
+            "category": "Compiler",
+            "isEnabledByDefault": true,
+            "tags": [
+              "Compiler",
+              "Telemetry"
+            ]
+          }
+        },
+        "S125": {
+          "id": "S125",
+          "shortDescription": "Sections of code should not be commented out",
+          "fullDescription": "Commented-out code distracts the focus from the actual executed code. It creates a noise that increases maintenance code. And because it is never executed, it quickly becomes out of date and invalid.",
+          "defaultLevel": "warning",
+          "helpUri": "https://rules.sonarsource.com/csharp/RSPEC-125",
+          "properties": {
+            "category": "Major Code Smell",
+            "isEnabledByDefault": true,
+            "tags": [
+              "C#",
+              "MainSourceScope",
+              "TestSourceScope",
+              "SonarWay"
+            ]
+          }
+        },
+        "S2094": {
+          "id": "S2094",
+          "shortDescription": "Classes should not be empty",
+          "fullDescription": "There is no good excuse for an empty class. If it’s being used simply as a common extension point, it should be replaced with an interface. If it was stubbed in as a placeholder for future development it should be fleshed-out. In any other case, it should be eliminated.",
+          "defaultLevel": "warning",
+          "helpUri": "https://rules.sonarsource.com/csharp/RSPEC-2094",
+          "properties": {
+            "category": "Minor Code Smell",
+            "isEnabledByDefault": true,
+            "tags": [
+              "C#",
+              "MainSourceScope",
+              "TestSourceScope",
+              "SonarWay"
+            ]
+          }
+        },
+        "S3604": {
+          "id": "S3604",
+          "shortDescription": "Member initializer values should not be redundant",
+          "fullDescription": "Fields, properties and events can be initialized either inline or in the constructor. Initializing them inline and in the constructor at the same time is redundant; the inline initialization will be overridden.",
+          "defaultLevel": "warning",
+          "helpUri": "https://rules.sonarsource.com/csharp/RSPEC-3604",
+          "properties": {
+            "category": "Minor Code Smell",
+            "isEnabledByDefault": true,
+            "tags": [
+              "C#",
+              "MainSourceScope",
+              "TestSourceScope",
+              "SonarWay"
+            ]
+          }
+        },
+        "S4035": {
+          "id": "S4035",
+          "shortDescription": "Classes implementing \"IEquatable<T>\" should be sealed",
+          "fullDescription": "When a class implements the IEquatable<T> interface, it enters a contract that, in effect, states \"I know how to compare two instances of type T or any type derived from T for equality.\". However if that class is derived, it is very unlikely that the base class will know how to make a meaningful comparison. Therefore that implicit contract is now broken.",
+          "defaultLevel": "warning",
+          "helpUri": "https://rules.sonarsource.com/csharp/RSPEC-4035",
+          "properties": {
+            "category": "Major Code Smell",
+            "isEnabledByDefault": true,
+            "tags": [
+              "C#",
+              "MainSourceScope",
+              "TestSourceScope",
+              "SonarWay"
+            ]
+          }
+        },
+        "S4136": {
+          "id": "S4136",
+          "shortDescription": "Method overloads should be grouped together",
+          "fullDescription": "For clarity, all overloads of the same method should be grouped together. That lets both users and maintainers quickly understand all the current available options.",
+          "defaultLevel": "warning",
+          "helpUri": "https://rules.sonarsource.com/csharp/RSPEC-4136",
+          "properties": {
+            "category": "Minor Code Smell",
+            "isEnabledByDefault": true,
+            "tags": [
+              "C#",
+              "MainSourceScope",
+              "TestSourceScope",
+              "SonarWay"
+            ]
+          }
+        }
+      }
+    }
+  ]
+}

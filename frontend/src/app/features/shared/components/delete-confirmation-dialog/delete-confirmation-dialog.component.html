@@ -1,0 +1,34 @@
+<p-dialog 
+  [(visible)]="visible" 
+  [modal]="true" 
+  [style]="{width: '450px'}" 
+  [header]="dialogTitle"
+  [closeOnEscape]="true"
+  [dismissableMask]="true"
+  (onHide)="onHide()">
+  
+  <div class="confirmation-content">
+    <i class="pi pi-exclamation-triangle mr-3" style="font-size: 2rem; color: #f59e0b;"></i>
+    <span>
+      <!-- Özel mesaj varsa göster -->
+      <ng-container *ngIf="dialogMessage">
+        {{ dialogMessage }}
+      </ng-container>
+      
+      <!-- Özel mesaj yoksa varsayılan mesajı göster -->
+      <ng-container *ngIf="!dialogMessage">
+        <ng-container *ngIf="itemName">
+          <strong>{{ itemName }}</strong> adlı öğeyi silmek istediğinizden emin misiniz?
+        </ng-container>
+        <ng-container *ngIf="!itemName">
+          Bu öğeyi silmek istediğinizden emin misiniz?
+        </ng-container>
+      </ng-container>
+    </span>
+  </div>
+  
+  <ng-template pTemplate="footer">
+    <button pButton pRipple label="Hayır" icon="pi pi-times" class="p-button-text p-button-secondary" (click)="onCancelClick()"></button>
+    <button pButton pRipple label="Evet" icon="pi pi-check" class="p-button-danger" (click)="onConfirmClick()"></button>
+  </ng-template>
+</p-dialog>

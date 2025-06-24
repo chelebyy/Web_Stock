@@ -1,0 +1,1 @@
+sR]C:\Users\muham\OneDrive\Masa√ºst√º\Stock\src\Stock.Infrastructure\Stock.Infrastructure.csproj¢net9.0ÚCSharp13

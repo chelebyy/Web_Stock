@@ -1,0 +1,14 @@
+---
+description: Best practices for authentication and authorization using ASP.NET Identity
+globs: 
+alwaysApply: false
+---
+# ASP.NET Identity Best Practices
+
+This document outlines the best practices for implementing authentication and authorization using ASP.NET Identity in this project.
+
+- Use ASP.NET Identity for user management, authentication, and authorization
+- Implement role-based authorization to control access to resources
+- Use JWT tokens for stateless authentication in API scenarios
+- Enable two-factor authentication for enhanced security
+

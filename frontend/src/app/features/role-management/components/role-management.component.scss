@@ -1,0 +1,811 @@
+.role-management-container {
+  padding: 2rem;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  background-color: var(--surface-ground);
+}
+
+// Sayfa başlığı
+.page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 1.5rem;
+  
+  .page-title-container {
+    .page-title {
+      font-size: 2.25rem;
+      font-weight: 700;
+      color: #1e3a8a; // Koyu mavi başlık (beyaz tema için)
+      margin: 0;
+      margin-bottom: 0.5rem;
+      position: relative;
+      letter-spacing: -0.5px;
+      
+      &::after {
+        content: '';
+        position: absolute;
+        bottom: -10px;
+        left: 0;
+        width: 60px;
+        height: 4px;
+        background: linear-gradient(90deg, #3B82F6, #60a5fa);
+        border-radius: 4px;
+      }
+    }
+    
+    .page-subtitle {
+      color: #64748b; // Slate 500
+      font-size: 1.1rem;
+      margin: 1.25rem 0 0 0;
+      font-weight: 400;
+    }
+  }
+  
+  .back-button {
+    transition: all 0.2s ease;
+    align-self: flex-start;
+    margin-top: 0.5rem;
+    
+    &:hover {
+      transform: translateX(-5px);
+    }
+  }
+}
+
+// Ana kart
+.main-card {
+  background-color: var(--surface-card);
+  border-radius: 12px;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  overflow: hidden;
+  margin-bottom: 2rem;
+  
+  .card-header {
+    padding: 1.25rem 1.5rem;
+    border-bottom: 1px solid var(--surface-border);
+    
+    .card-header-content {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      
+      .search-container {
+        flex: 1;
+        max-width: 400px;
+        
+        input {
+          width: 100%;
+          padding: 0.75rem 0.75rem 0.75rem 2.5rem;
+          border-radius: 8px;
+          font-size: 1rem;
+          
+          &:focus {
+            box-shadow: 0 0 0 2px #bfdbfe;
+          }
+        }
+        
+        i {
+          left: 0.75rem;
+          color: #64748b;
+        }
+      }
+      
+      .create-button {
+        transition: all 0.2s ease;
+        
+        &:hover {
+          transform: translateY(-2px);
+          box-shadow: 0 4px 6px -1px rgba(59, 130, 246, 0.5);
+        }
+      }
+    }
+  }
+}
+
+// Tablo stilleri
+:host ::ng-deep {
+  .p-datatable {
+    .p-datatable-header {
+      background-color: transparent;
+      border: none;
+      padding: 1rem 1.5rem;
+    }
+    
+    .p-datatable-thead > tr > th {
+      background-color: var(--surface-section);
+      color: var(--text-color);
+      padding: 1rem 1.5rem;
+      font-weight: 600;
+      border-color: var(--surface-border);
+    }
+    
+    .p-datatable-tbody > tr {
+      background-color: var(--surface-card);
+      transition: all 0.2s ease;
+      
+      &:hover {
+        background-color: var(--surface-hover);
+      }
+      
+      > td {
+        padding: 1rem 1.5rem;
+        border-color: var(--surface-border);
+        color: var(--text-color);
+        
+        .id-badge {
+          background-color: #4f46e5;
+          color: #ffffff;
+          padding: 0.25rem 0.5rem;
+          border-radius: 4px;
+          font-weight: 600;
+          font-size: 0.875rem;
+          display: inline-block;
+        }
+        
+        .role-name {
+          font-weight: 600;
+          color: #1e293b;
+          font-size: 1rem;
+        }
+        
+        .role-description {
+          color: #475569;
+          font-size: 0.875rem;
+          max-width: 400px;
+          white-space: nowrap;
+          overflow: hidden;
+          text-overflow: ellipsis;
+        }
+      }
+    }
+    
+    .p-paginator {
+      padding: 1rem 1.5rem;
+      background-color: transparent;
+      border-color: var(--surface-border);
+      
+      .p-paginator-current {
+        color: var(--text-color-secondary);
+      }
+    }
+  }
+  
+  .action-column {
+    width: 150px;
+    text-align: center;
+  }
+  
+  .action-buttons {
+    display: flex;
+    justify-content: center;
+    gap: 0.5rem;
+    
+    .p-button {
+      width: 2.5rem;
+      height: 2.5rem;
+      
+      &.p-button-info {
+        color: #0ea5e9;
+      }
+      
+      &.p-button-danger {
+        color: #ef4444;
+      }
+      
+      &.p-button-success {
+        color: #10b981;
+      }
+      
+      &:hover {
+        background-color: var(--surface-hover);
+      }
+    }
+  }
+  
+  // Boş durum mesajı
+  .empty-message {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 3rem 1rem;
+    text-align: center;
+    
+    .empty-icon {
+      font-size: 3rem;
+      color: #cbd5e1;
+      margin-bottom: 1rem;
+    }
+    
+    p {
+      color: #64748b;
+      font-size: 1.1rem;
+      margin-bottom: 1.5rem;
+    }
+  }
+  
+  // Tablo özeti
+  .table-summary {
+    color: var(--text-color-secondary);
+    font-size: 0.875rem;
+  }
+}
+
+// Dialog stilleri
+:host ::ng-deep {
+  .role-dialog {
+    .p-dialog-header {
+      padding: 1.5rem;
+      border-bottom: 1px solid #e2e8f0;
+      background-color: #ffffff !important;
+      color: #1e293b !important;
+      font-weight: 600;
+    }
+    
+    .p-dialog-content {
+      padding: 1.5rem;
+      background-color: #ffffff !important;
+      color: #1e293b !important;
+    }
+    
+    .p-dialog-footer {
+      padding: 1.25rem 1.5rem;
+      background-color: #ffffff !important;
+      border-top: 1px solid #e2e8f0;
+    }
+    
+    .dialog-content {
+      .role-form {
+        .field {
+          margin-bottom: 1.5rem;
+          
+          label.form-label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+            color: #1e293b !important;
+          }
+          
+          input, textarea {
+            width: 100%;
+            padding: 0.75rem;
+            border-radius: 6px;
+            border: 1px solid #e2e8f0;
+            background-color: #ffffff !important;
+            color: #1e293b !important;
+            font-size: 1rem;
+            transition: all 0.2s ease;
+            
+            &:focus {
+              border-color: #3b82f6;
+              box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.25);
+            }
+          }
+          
+          .custom-input, .custom-textarea {
+            background-color: #ffffff !important;
+            color: #1e293b !important;
+            border: 1px solid #cbd5e1 !important;
+            
+            &:focus {
+              border-color: #3b82f6 !important;
+              box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.25) !important;
+            }
+          }
+          
+          .p-error {
+            color: #ef4444;
+            font-size: 0.875rem;
+            margin-top: 0.25rem;
+            display: block;
+          }
+        }
+      }
+    }
+    
+    .dialog-footer {
+      display: flex;
+      justify-content: flex-end;
+      gap: 0.75rem;
+      
+      .cancel-button, .save-button {
+        min-width: 100px;
+      }
+    }
+  }
+  
+  // PrimeNG bileşenlerinin stillerini geçersiz kılma - daha özgül seçiciler
+  .p-dialog.p-component .p-dialog-content .p-inputtext, 
+  .p-dialog.p-component .p-dialog-content .p-inputtextarea,
+  .p-dialog.p-component .p-dialog-content input[type="text"],
+  .p-dialog.p-component .p-dialog-content textarea {
+    background-color: #ffffff !important;
+    color: #1e293b !important;
+    border: 1px solid #e2e8f0 !important;
+    padding-left: 0.75rem !important;
+  }
+  
+  .p-dialog.p-component .p-dialog-content .p-inputtext:enabled:focus, 
+  .p-dialog.p-component .p-dialog-content .p-inputtextarea:enabled:focus,
+  .p-dialog.p-component .p-dialog-content input[type="text"]:focus,
+  .p-dialog.p-component .p-dialog-content textarea:focus {
+    box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.25) !important;
+    border-color: #3b82f6 !important;
+  }
+  
+  // Özel input ve textarea stilleri - daha özgül seçiciler
+  .p-dialog.p-component .p-dialog-content .custom-input, 
+  .p-dialog.p-component .p-dialog-content .custom-textarea {
+    background-color: #ffffff !important;
+    color: #1e293b !important;
+    border: 1px solid #cbd5e1 !important;
+    font-size: 1rem !important;
+    padding-left: 0.75rem !important;
+    
+    &:focus {
+      border-color: #3b82f6 !important;
+      box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.25) !important;
+    }
+    
+    &::placeholder {
+      color: #94a3b8 !important;
+    }
+  }
+  
+  // Koyu tema için özel stiller
+  .p-dialog.p-component[ng-reflect-style-class*="p-dialog-dark"] .p-dialog-content,
+  .p-dialog.p-component.p-dialog-dark .p-dialog-content {
+    background-color: #ffffff !important;
+    
+    input, textarea, .p-inputtext, .p-inputtextarea {
+      background-color: #ffffff !important;
+      color: #1e293b !important;
+    }
+  }
+  
+  .modern-dialog {
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+    
+    .p-dialog-header-close {
+      width: 2rem;
+      height: 2rem;
+      border-radius: 50%;
+      background-color: #f1f5f9;
+      color: #64748b;
+      transition: all 0.2s ease;
+      
+      &:hover {
+        background-color: #e2e8f0;
+        color: #334155;
+      }
+      
+      .p-dialog-header-close-icon {
+        font-size: 1rem;
+      }
+    }
+  }
+  
+  // Toast stilleri
+  .modern-toast {
+    .p-toast-message {
+      border-radius: 8px;
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+      
+      &.p-toast-message-success {
+        background-color: #f0fdf4;
+        border-left: 6px solid #10b981;
+        color: #065f46;
+      }
+      
+      &.p-toast-message-error {
+        background-color: #fef2f2;
+        border-left: 6px solid #ef4444;
+        color: #991b1b;
+      }
+      
+      &.p-toast-message-info {
+        background-color: #eff6ff;
+        border-left: 6px solid #3b82f6;
+        color: #1e40af;
+      }
+      
+      &.p-toast-message-warn {
+        background-color: #fffbeb;
+        border-left: 6px solid #f59e0b;
+        color: #92400e;
+      }
+      
+      .p-toast-message-content {
+        padding: 1rem;
+        
+        .p-toast-summary {
+          font-weight: 600;
+          font-size: 1rem;
+        }
+        
+        .p-toast-detail {
+          font-size: 0.875rem;
+          margin-top: 0.25rem;
+        }
+      }
+    }
+  }
+  
+  // Onay diyaloğu için tamamen yeni stiller - daha basit ve doğrudan
+  .p-confirm-dialog {
+    .p-dialog-header {
+      background-color: #ffffff !important;
+      
+      .p-dialog-title {
+        color: #000000 !important;
+        font-weight: 700 !important;
+        font-size: 1.2rem !important;
+      }
+    }
+    
+    .p-dialog-content {
+      background-color: #ffffff !important;
+      
+      .p-confirm-dialog-message {
+        color: #000000 !important;
+        font-weight: 500 !important;
+        font-size: 1.1rem !important;
+      }
+      
+      .p-confirm-dialog-icon {
+        color: #f59e0b !important;
+        font-size: 1.5rem !important;
+      }
+    }
+    
+    .p-dialog-footer {
+      background-color: #ffffff !important;
+      
+      .p-button {
+        .p-button-label {
+          color: #000000 !important;
+          font-weight: 500 !important;
+        }
+      }
+      
+      .p-button-danger {
+        background-color: #ef4444 !important;
+        
+        .p-button-label {
+          color: #ffffff !important;
+          font-weight: 500 !important;
+        }
+      }
+    }
+  }
+}
+
+// Özel açık tema diyalog sınıfı
+:host ::ng-deep {
+  .custom-light-dialog {
+    .p-dialog-header {
+      background-color: #ffffff !important;
+      color: #1e293b !important;
+      border-bottom: 1px solid #e2e8f0 !important;
+    }
+    
+    .p-dialog-content {
+      background-color: #ffffff !important;
+      color: #1e293b !important;
+      
+      input, textarea, .p-inputtext, .p-inputtextarea {
+        background-color: #ffffff !important;
+        color: #1e293b !important;
+        border: 1px solid #cbd5e1 !important;
+      }
+      
+      label {
+        color: #1e293b !important;
+      }
+      
+      .p-confirm-dialog-message {
+        color: #1e293b !important;
+      }
+      
+      .p-confirm-dialog-icon {
+        color: #f59e0b !important;
+      }
+    }
+    
+    .p-dialog-footer {
+      background-color: #ffffff !important;
+      border-top: 1px solid #e2e8f0 !important;
+    }
+    
+    .p-confirm-dialog {
+      .p-dialog-content {
+        span, div, p {
+          color: #1e293b !important;
+        }
+      }
+    }
+  }
+  
+  // Onay diyaloğu için ek stiller
+  .p-confirm-dialog {
+    .p-dialog-content {
+      color: #1e293b !important;
+      
+      .p-confirm-dialog-message {
+        color: #1e293b !important;
+        font-weight: 400;
+      }
+      
+      .p-confirm-dialog-icon {
+        color: #f59e0b !important;
+      }
+    }
+    
+    .p-dialog-footer {
+      button {
+        span {
+          color: inherit !important;
+        }
+      }
+    }
+  }
+}
+
+// Inline stil geçersiz kılma
+input[style*="background-color: #ffffff"],
+textarea[style*="background-color: #ffffff"] {
+  background-color: #ffffff !important;
+  color: #1e293b !important;
+}
+
+// Özel onay diyaloğu stilleri
+:host ::ng-deep {
+  .custom-confirm-dialog {
+    .p-dialog-header, 
+    .p-dialog-content, 
+    .p-dialog-footer {
+      background-color: #ffffff !important;
+      color: #000000 !important;
+      border: none !important;
+    }
+    
+    .p-dialog-header {
+      border-bottom: 1px solid #e2e8f0 !important;
+      
+      .p-dialog-title {
+        color: #000000 !important;
+        font-weight: 700 !important;
+        font-size: 1.2rem !important;
+        visibility: visible !important;
+        opacity: 1 !important;
+        display: block !important;
+      }
+      
+      .p-dialog-header-icons {
+        .p-dialog-header-icon {
+          color: #000000 !important;
+          visibility: visible !important;
+          opacity: 1 !important;
+        }
+      }
+    }
+    
+    .p-dialog-footer {
+      border-top: 1px solid #e2e8f0 !important;
+    }
+    
+    .p-dialog-content {
+      .p-confirm-dialog-message {
+        color: #000000 !important;
+        font-weight: 500 !important;
+        font-size: 1.1rem !important;
+        visibility: visible !important;
+        opacity: 1 !important;
+        display: block !important;
+      }
+      
+      .p-confirm-dialog-icon {
+        color: #f59e0b !important;
+        font-size: 1.5rem !important;
+        visibility: visible !important;
+        opacity: 1 !important;
+        display: block !important;
+      }
+      
+      /* Genel metin seçicisi - tüm olası metin öğelerini kapsar */
+      span, p, div, h1, h2, h3, h4, h5, h6, label, a {
+        color: #000000 !important;
+        visibility: visible !important;
+        opacity: 1 !important;
+        display: block !important;
+      }
+    }
+    
+    .p-button {
+      font-weight: 600;
+      
+      &.p-button-danger {
+        background-color: #ef4444 !important;
+        border-color: #ef4444 !important;
+        
+        &:hover {
+          background-color: #dc2626 !important;
+          border-color: #dc2626 !important;
+        }
+        
+        .p-button-label {
+          color: #ffffff !important;
+          visibility: visible !important;
+          opacity: 1 !important;
+          display: inline-block !important;
+        }
+      }
+      
+      &.p-button-raised {
+        box-shadow: 0 2px 3px rgba(0, 0, 0, 0.1);
+        
+        .p-button-label {
+          color: #000000 !important;
+          visibility: visible !important;
+          opacity: 1 !important;
+          display: inline-block !important;
+        }
+      }
+    }
+  }
+}
+
+// Form alanları için genel stiller
+.role-form {
+  .field {
+    margin-bottom: 1.5rem;
+    
+    .form-label {
+      display: block;
+      margin-bottom: 0.5rem;
+      font-weight: 500;
+      color: #1e293b;
+    }
+    
+    input, textarea {
+      width: 100%;
+      padding: 0.75rem;
+      border-radius: 6px;
+      border: 1px solid #cbd5e1;
+      font-size: 1rem;
+      
+      &:focus {
+        outline: none;
+        border-color: #3b82f6;
+        box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.25);
+      }
+    }
+    
+    .p-error {
+      color: #ef4444;
+      font-size: 0.875rem;
+      margin-top: 0.25rem;
+      display: block;
+    }
+  }
+}
+
+// Role yönetimi sayfasına özel stiller
+:host ::ng-deep {
+  .role-name {
+    font-weight: 600;
+    color: #1e293b;
+    font-size: 1rem;
+  }
+  
+  .role-description {
+    color: #475569;
+    font-size: 0.875rem;
+    max-width: 400px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  
+  .id-badge {
+    background-color: #4f46e5;
+    color: #ffffff;
+    padding: 0.25rem 0.5rem;
+    border-radius: 4px;
+    font-weight: 600;
+    font-size: 0.875rem;
+    display: inline-block;
+  }
+  
+  .action-column {
+    width: 150px;
+    text-align: center;
+  }
+  
+  .action-buttons {
+    display: flex;
+    justify-content: center;
+    gap: 0.5rem;
+    
+    .p-button {
+      width: 2.5rem;
+      height: 2.5rem;
+    }
+  }
+  
+  // Role detay sayfasına özel stiller
+  .role-detail-header {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+    
+    .role-header-info {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+      
+      .role-name-large {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: #1e293b;
+      }
+      
+      .role-meta {
+        display: flex;
+        gap: 1rem;
+        flex-wrap: wrap;
+        
+        .meta-item {
+          display: flex;
+          align-items: center;
+          gap: 0.5rem;
+          color: #64748b;
+          font-size: 0.875rem;
+          
+          i {
+            color: var(--primary-color);
+            opacity: 0.7;
+          }
+        }
+      }
+    }
+  }
+  
+  // Role formu özel stiller
+  .role-form {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+    
+    .form-field {
+      margin-bottom: 1.5rem;
+      
+      label {
+        display: block;
+        margin-bottom: 0.5rem;
+        font-weight: 500;
+        color: #334155;
+      }
+      
+      small {
+        display: block;
+        color: #ef4444;
+        margin-top: 0.25rem;
+        font-size: 0.75rem;
+      }
+    }
+    
+    .form-actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 1rem;
+      margin-top: 1rem;
+    }
+  }
+} 

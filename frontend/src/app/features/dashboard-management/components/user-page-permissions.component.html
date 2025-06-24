@@ -1,0 +1,206 @@
+<div class="user-page-permissions-container">
+  <div class="page-header">
+    <div class="page-title-container">
+      <h1 class="page-title">{{ pageName }} - İzin Yönetimi</h1>
+      <p class="page-subtitle">Kullanıcıların sayfa erişim izinlerini yönetin ve düzenleyin</p>
+    </div>
+    <button pButton pRipple icon="pi pi-arrow-left" label="Geri Dön" class="p-button-outlined back-button" (click)="navigateBack()"></button>
+  </div>
+
+  <p-toast position="top-right" styleClass="modern-toast"></p-toast>
+
+  <!-- Sayfa Seçim Butonları -->
+  <div class="page-navigation">
+    <button pButton pRipple [ngClass]="{'p-button-primary': activePage === 'users', 'p-button-outlined': activePage !== 'users'}" 
+      icon="pi pi-users" label="Kullanıcılar" (click)="switchPage('users')"></button>
+    <button pButton pRipple [ngClass]="{'p-button-primary': activePage === 'permissions', 'p-button-outlined': activePage !== 'permissions'}" 
+      icon="pi pi-key" label="İzinler" (click)="switchPage('permissions')"></button>
+  </div>
+
+  <!-- Kullanıcılar Sayfası -->
+  <div class="main-card" *ngIf="activePage === 'users'">
+    <div class="card-header">
+      <div class="card-header-content">
+        <h2 class="card-title">Kullanıcılar</h2>
+        <div class="search-container">
+          <span class="p-input-icon-left">
+            <i class="pi pi-search"></i>
+            <input pInputText type="text" [(ngModel)]="usersSearchText" (input)="searchUsers($event)" placeholder="Kullanıcı ara..." />
+          </span>
+          <button *ngIf="usersSearchText" pButton pRipple type="button" icon="pi pi-times" class="p-button-text clear-button" (click)="clearUsersSearch()"></button>
+        </div>
+      </div>
+    </div>
+
+    <div class="card-content">
+      <!-- Yükleniyor Göstergesi -->
+      <div class="loading-container" *ngIf="loading">
+        <i class="pi pi-spin pi-spinner loading-icon"></i>
+        <p>Kullanıcılar yükleniyor...</p>
+      </div>
+
+      <!-- Boş Durum Mesajı -->
+      <div class="empty-state" *ngIf="!loading && filteredUsers.length === 0">
+        <i class="pi pi-info-circle empty-icon"></i>
+        <p>Kullanıcı bulunamadı.</p>
+      </div>
+
+      <!-- Kullanıcı Kartları -->
+      <div class="user-cards" *ngIf="!loading && filteredUsers.length > 0">
+        <div class="user-card" *ngFor="let user of filteredUsers.slice((currentUserPage-1) * usersPerPage, currentUserPage * usersPerPage)">
+          <div class="user-actions">
+            <button *ngIf="!user.hasPagePermission" pButton pRipple type="button" 
+              icon="pi pi-plus"
+              class="p-button-rounded p-button-text p-button-success action-button"
+              [disabled]="!user.isActive || processing"
+              (click)="grantPermission(user)"
+              pTooltip="Bu kullanıcıya sayfa izni ver"
+              tooltipPosition="left"></button>
+            
+            <button *ngIf="user.hasPagePermission" pButton pRipple type="button" 
+              icon="pi pi-check"
+              class="p-button-rounded p-button-text p-button-success action-button"
+              disabled
+              pTooltip="Bu kullanıcıya izin verilmiş"
+              tooltipPosition="left"></button>
+          </div>
+          
+          <div class="user-info">
+            <div class="user-avatar">
+              <i class="pi pi-user"></i>
+            </div>
+            <div class="user-details">
+              <h3 class="user-name">{{ user.fullName }}</h3>
+              <p class="user-sicil">{{ user.sicil }}</p>
+            </div>
+          </div>
+          
+          <div class="user-status">
+            <div class="status-badge" [ngClass]="user.hasPagePermission ? 'status-active' : 'status-inactive'">
+              <i class="pi" [ngClass]="user.hasPagePermission ? 'pi-check-circle' : 'pi-times-circle'"></i>
+              <span>{{ user.hasPagePermission ? 'Aktif' : 'Pasif' }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Sayfalama -->
+      <div class="pagination-container" *ngIf="!loading && filteredUsers.length > 0">
+        <div class="pagination-info">
+          Toplam {{ users.length }} kullanıcı
+        </div>
+        <div class="pagination-controls">
+          <button pButton pRipple icon="pi pi-angle-double-left" class="p-button-text" 
+            [disabled]="currentUserPage === 1" 
+            (click)="goToUserPage(1)"
+            pTooltip="İlk Sayfa"
+            tooltipPosition="top"></button>
+          <button pButton pRipple icon="pi pi-angle-left" class="p-button-text" 
+            [disabled]="currentUserPage === 1" 
+            (click)="goToUserPage(currentUserPage - 1)"
+            pTooltip="Önceki Sayfa"
+            tooltipPosition="top"></button>
+          <span class="pagination-page">{{ currentUserPage }} / {{ totalUserPages }}</span>
+          <button pButton pRipple icon="pi pi-angle-right" class="p-button-text" 
+            [disabled]="currentUserPage === totalUserPages" 
+            (click)="goToUserPage(currentUserPage + 1)"
+            pTooltip="Sonraki Sayfa"
+            tooltipPosition="top"></button>
+          <button pButton pRipple icon="pi pi-angle-double-right" class="p-button-text" 
+            [disabled]="currentUserPage === totalUserPages" 
+            (click)="goToUserPage(totalUserPages)"
+            pTooltip="Son Sayfa"
+            tooltipPosition="top"></button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- İzinler Sayfası -->
+  <div class="main-card" *ngIf="activePage === 'permissions'">
+    <div class="card-header">
+      <div class="card-header-content">
+        <h2 class="card-title">İzinler</h2>
+        <div class="search-container">
+          <span class="p-input-icon-left">
+            <i class="pi pi-search"></i>
+            <input pInputText type="text" [(ngModel)]="permissionsSearchText" (input)="searchPermissions($event)" placeholder="İzin ara..." />
+          </span>
+          <button *ngIf="permissionsSearchText" pButton pRipple type="button" icon="pi pi-times" class="p-button-text clear-button" (click)="clearPermissionsSearch()"></button>
+        </div>
+      </div>
+    </div>
+
+    <div class="card-content">
+      <!-- Yükleniyor Göstergesi -->
+      <div class="loading-container" *ngIf="loading">
+        <i class="pi pi-spin pi-spinner loading-icon"></i>
+        <p>İzinler yükleniyor...</p>
+      </div>
+
+      <!-- Boş Durum Mesajı -->
+      <div class="empty-state" *ngIf="!loading && filteredPagePermissions.length === 0">
+        <i class="pi pi-info-circle empty-icon"></i>
+        <p>İzin bulunamadı.</p>
+      </div>
+
+      <!-- İzin Kartları -->
+      <div class="permission-cards" *ngIf="!loading && filteredPagePermissions.length > 0">
+        <div class="permission-card" *ngFor="let permission of filteredPagePermissions.slice((currentPermissionPage-1) * permissionsPerPage, currentPermissionPage * permissionsPerPage)">
+          <div class="permission-actions">
+            <button pButton pRipple type="button" icon="pi pi-trash" 
+              class="p-button-rounded p-button-text p-button-danger action-button"
+              [disabled]="processing"
+              (click)="revokePermission(permission)"
+              pTooltip="Bu kullanıcının sayfa iznini kaldır"
+              tooltipPosition="left"></button>
+          </div>
+          
+          <div class="permission-info">
+            <div class="permission-avatar">
+              <i class="pi pi-user"></i>
+            </div>
+            <div class="permission-details">
+              <h3 class="permission-name">{{ permission.fullName }}</h3>
+              <p class="permission-sicil">{{ permission.sicil }}</p>
+              <p class="permission-date">
+                <i class="pi pi-calendar"></i>
+                {{ permission.grantedAt | date:'dd.MM.yyyy HH:mm' }}
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Sayfalama -->
+      <div class="pagination-container" *ngIf="!loading && filteredPagePermissions.length > 0">
+        <div class="pagination-info">
+          Toplam {{ pagePermissions.length }} izin
+        </div>
+        <div class="pagination-controls">
+          <button pButton pRipple icon="pi pi-angle-double-left" class="p-button-text" 
+            [disabled]="currentPermissionPage === 1" 
+            (click)="goToPermissionPage(1)"
+            pTooltip="İlk Sayfa"
+            tooltipPosition="top"></button>
+          <button pButton pRipple icon="pi pi-angle-left" class="p-button-text" 
+            [disabled]="currentPermissionPage === 1" 
+            (click)="goToPermissionPage(currentPermissionPage - 1)"
+            pTooltip="Önceki Sayfa"
+            tooltipPosition="top"></button>
+          <span class="pagination-page">{{ currentPermissionPage }} / {{ totalPermissionPages }}</span>
+          <button pButton pRipple icon="pi pi-angle-right" class="p-button-text" 
+            [disabled]="currentPermissionPage === totalPermissionPages" 
+            (click)="goToPermissionPage(currentPermissionPage + 1)"
+            pTooltip="Sonraki Sayfa"
+            tooltipPosition="top"></button>
+          <button pButton pRipple icon="pi pi-angle-double-right" class="p-button-text" 
+            [disabled]="currentPermissionPage === totalPermissionPages" 
+            (click)="goToPermissionPage(totalPermissionPages)"
+            pTooltip="Son Sayfa"
+            tooltipPosition="top"></button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div> 

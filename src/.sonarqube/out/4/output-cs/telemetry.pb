@@ -1,0 +1,1 @@
+]RGC:\Users\muham\OneDrive\Masa√ºst√º\Stock\src\Stock.API\Stock.API.csproj¢net9.0ÚCSharp13

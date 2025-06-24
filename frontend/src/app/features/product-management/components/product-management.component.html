@@ -1,0 +1,106 @@
+<div class="card p-4 shadow-lg rounded-lg bg-gray-50 relative">
+  <p-toast></p-toast>
+  <p-confirmDialog [style]="{width: '450px'}"></p-confirmDialog>
+
+  <!-- Başlık ve Butonlar -->
+  <p-toolbar styleClass="mb-4 rounded-lg bg-gray-100 p-4">
+    <ng-template pTemplate="left">
+      <div class="my-2">
+        <button pButton pRipple label="Yeni Ürün" icon="pi pi-plus" class="p-button-success mr-2" (click)="openDialog()"></button>
+      </div>
+    </ng-template>
+    <ng-template pTemplate="right">
+        <button pButton pRipple type="button" icon="pi pi-arrow-left" (click)="goBack()"
+        class="p-button-rounded p-button-secondary p-button-text" pTooltip="Geri Dön"></button>
+    </ng-template>
+  </p-toolbar>
+
+  <!-- Ürün Listesi Tablosu -->
+  <p-table #dt [value]="state.filteredProducts()" [rows]="10" [paginator]="true" [globalFilterFields]="['name','description','categoryName']"
+    [tableStyle]="{'min-width': '75rem'}" [rowHover]="true"
+    currentPageReportTemplate="{first}-{last} / {totalRecords} arası gösteriliyor" [showCurrentPageReport]="true">
+    <ng-template pTemplate="caption">
+      <div class="flex items-center justify-between">
+        <h5 class="m-0 text-xl font-bold">Ürün Yönetimi</h5>
+        <div class="flex items-center gap-2">
+          <p-dropdown [options]="state.categories()" optionLabel="name" optionValue="id" placeholder="Kategoriye Göre Filtrele"
+            (onChange)="filterByCategory($event)" [showClear]="true" styleClass="w-full md:w-14rem"></p-dropdown>
+          <span class="p-input-icon-left ml-auto">
+            <i class="pi pi-search"></i>
+            <input pInputText type="text" (input)="filterProducts($event)" placeholder="Ürün ara..." class="w-full sm:w-auto" />
+          </span>
+        </div>
+      </div>
+    </ng-template>
+    <ng-template pTemplate="header">
+      <tr>
+        <th pSortableColumn="name" style="width:35%">İsim <p-sortIcon field="name"></p-sortIcon></th>
+        <th pSortableColumn="categoryName" style="width:25%">Kategori <p-sortIcon field="categoryName"></p-sortIcon></th>
+        <th pSortableColumn="stockLevel" style="width:20%">Stok Adedi <p-sortIcon field="stockLevel"></p-sortIcon></th>
+        <th style="width:20%">İşlemler</th>
+      </tr>
+    </ng-template>
+    <ng-template pTemplate="body" let-product>
+      <tr>
+        <td>{{ product.name }}</td>
+        <td>{{ getCategoryName(product.categoryId) }}</td>
+        <td>{{ product.stockLevel }}</td>
+        <td>
+          <button pButton pRipple icon="pi pi-pencil" class="p-button-rounded p-button-success mr-2" (click)="openDialog(product)"></button>
+          <button pButton pRipple icon="pi pi-trash" class="p-button-rounded p-button-warning" (click)="deleteProduct(product)"></button>
+        </td>
+      </tr>
+    </ng-template>
+    <ng-template pTemplate="summary">
+      <div class="flex items-center justify-between">
+        Toplam {{ state.filteredProducts() ? state.filteredProducts().length : 0 }} ürün bulunmaktadır.
+      </div>
+    </ng-template>
+  </p-table>
+</div>
+
+<!-- Ürün Ekleme/Düzenleme Dialog -->
+<p-dialog [(visible)]="state.productDialogVisible()" [style]="{width: '450px'}" [header]="state.isEditMode() ? 'Ürün Düzenle' : 'Yeni Ürün'"
+  [modal]="true" class="p-fluid" (onHide)="hideDialog()">
+  <ng-template pTemplate="content">
+    <form [formGroup]="productForm">
+      <div class="field">
+        <label for="name">İsim</label>
+        <input type="text" pInputText id="name" formControlName="name" required autofocus />
+        <small class="p-error" *ngIf="productForm.get('name')?.invalid && productForm.get('name')?.touched">İsim zorunludur.</small>
+      </div>
+      <div class="field">
+        <label for="description">Açıklama</label>
+        <textarea id="description" pInputTextarea formControlName="description" rows="3" cols="20"></textarea>
+      </div>
+      <div class="field">
+        <label for="category">Kategori</label>
+        <p-dropdown [options]="state.categories()" optionLabel="name" optionValue="id" formControlName="categoryId" placeholder="Kategori Seçin"></p-dropdown>
+        <small class="p-error" *ngIf="productForm.get('categoryId')?.invalid && productForm.get('categoryId')?.touched">Kategori seçimi zorunludur.</small>
+      </div>
+      <div class="field">
+        <label for="stockLevel">Stok Adedi</label>
+        <p-inputNumber id="stockLevel" formControlName="stockLevel" mode="decimal" [showButtons]="true" [min]="0"></p-inputNumber>
+        <small class="p-error" *ngIf="productForm.get('stockLevel')?.invalid && productForm.get('stockLevel')?.touched">Stok adedi zorunludur ve 0'dan küçük olamaz.</small>
+      </div>
+    </form>
+  </ng-template>
+  <ng-template pTemplate="footer">
+    <button pButton pRipple label="İptal" icon="pi pi-times" class="p-button-text" (click)="hideDialog()"></button>
+    <button pButton pRipple label="Kaydet" icon="pi pi-check" class="p-button-text" (click)="saveProduct()" [disabled]="productForm.invalid || state.loading()"></button>
+  </ng-template>
+</p-dialog>
+
+<!-- Silme Onay Dialogu -->
+<app-delete-confirmation-dialog
+  [visible]="deleteDialogVisible()"
+  (visibleChange)="deleteDialogVisible.set($event)"
+  [title]="'Ürün Silme'"
+  [message]="'Bu ürünü silmek istediğinizden emin misiniz?'"
+  [itemName]="productToDelete?.name"
+  (onCancel)="cancelDelete()"
+  (onConfirm)="confirmDelete()"
+></app-delete-confirmation-dialog>
+
+<!-- Bildirimler -->
+<p-toast></p-toast> 

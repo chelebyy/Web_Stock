@@ -1,0 +1,19 @@
+https://dribbble.com/
+https://readdy.ai/
+kullandığım Uİ'ler 
+
+
+https://uiverse.io/elements
+https://www.serenity-ui.com/components
+https://ui.lukacho.com/components
+https://animata.design/docs/accordion/faq
+https://ui.aceternity.com/components
+https://floatui.com/components
+https://www.heroui.com/docs/components
+https://21st.dev/?tab=components&sort=recommended best
+https://ui.shadcn.com/docs/components/
+
+
+https://prompts.chat/
+https://github.com/sanjeed5/awesome-cursor-rules-mdc/tree/main/awesome-cursor-rules-mdc
+https://github.com/bmadcode/cursor-auto-rules-agile-workflow?tab=readme-ov-file

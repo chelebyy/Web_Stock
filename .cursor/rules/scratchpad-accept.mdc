@@ -1,0 +1,23 @@
+---
+description: 
+globs: 
+alwaysApply: false
+---
+
+Kullanıcı "tamam süper" derse `scratchpad.md` ve `errors.md` dosyaları güncellenmeli,daha sonra Projeyi githuba yükle.
+
+Trigger:
+- Kullanıcı, üretilen bir kodu onaylayıp "tamam süper" dediğinde tetiklenecek.
+
+Action:
+1. `scratchpad.md` dosyasını aç.
+2. Dosya içerisinde "## Yapıldı" başlığını bul.
+3. En son onaylanan işlemin özetini bu bölümde ara.
+4. Eğer onaylanan işlem **"## Yapıldı" listesinde yoksa**, listenin en altına ekle.
+5. Eğer zaten varsa, herhangi bir ekleme yapma.
+6. Write all errors, solutions, and solution methods in the `errors.md`file.
+
+
+Context:
+- Bu kural, yalnızca kullanıcı "tamam süper" cümlesiyle başladığında çalışır.
+- Bu kural, projede geliştirilen yeni özelliklerin `scratchpad` dosyasında güncellenmesi içindir.

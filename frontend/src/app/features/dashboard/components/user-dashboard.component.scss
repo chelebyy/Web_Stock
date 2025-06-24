@@ -1,0 +1,472 @@
+.dashboard-container {
+  display: flex;
+  min-height: 100vh;
+  width: 100%;
+  position: relative;
+  z-index: 1;
+  background: linear-gradient(to bottom right, #f0f4f8, #d7e3fc);
+}
+
+.glass-card {
+  background: #ffffff;
+  padding: 2rem;
+  width: 100%;
+  min-height: 100vh;
+  box-shadow: none;
+  border: none;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2rem;
+  flex-wrap: wrap;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+  padding-bottom: 1rem;
+}
+
+.header-title h1 {
+  margin: 0;
+  font-size: 2rem;
+  color: #333;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+}
+
+.welcome-text {
+  margin: 0;
+  color: #666;
+  font-size: 1rem;
+}
+
+.username {
+  font-weight: 600;
+  color: #3B82F6;
+}
+
+/* Admin Dropdown Menüsü */
+.admin-dropdown {
+  position: relative;
+}
+
+.admin-button {
+  display: flex;
+  align-items: center;
+  background: white;
+  border-radius: 50px;
+  padding: 0.5rem 1rem;
+  cursor: pointer;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  transition: all 0.2s ease;
+  border: 1px solid #f0f0f0;
+}
+
+.admin-button:hover {
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+  transform: translateY(-2px);
+}
+
+.admin-button:active {
+  transform: translateY(0);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.admin-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid #f0f0f0;
+  margin-right: 0.75rem;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
+}
+
+.admin-button:hover .admin-avatar {
+  border-color: #3B82F6;
+  transform: scale(1.05);
+}
+
+.admin-name {
+  font-weight: 600;
+  color: #333;
+  margin-right: 0.75rem;
+}
+
+.admin-menu {
+  position: absolute;
+  top: calc(100% + 10px);
+  right: 0;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 5px 25px rgba(0, 0, 0, 0.15);
+  width: 220px;
+  z-index: 1000;
+  overflow: hidden;
+  animation: fadeInDown 0.3s ease;
+  border: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+.admin-menu::before {
+  content: '';
+  position: absolute;
+  top: -8px;
+  right: 20px;
+  width: 16px;
+  height: 16px;
+  background: white;
+  transform: rotate(45deg);
+  border-top: 1px solid rgba(0, 0, 0, 0.05);
+  border-left: 1px solid rgba(0, 0, 0, 0.05);
+  z-index: -1;
+}
+
+@keyframes fadeInDown {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.menu-header {
+  display: flex;
+  align-items: center;
+  padding: 1rem;
+  border-bottom: 1px solid #f0f0f0;
+  background-color: #f9fafc;
+}
+
+.menu-avatar {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 3px solid #fff;
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.1);
+  margin-right: 0.75rem;
+}
+
+.menu-user-info {
+  display: flex;
+  flex-direction: column;
+}
+
+.menu-username {
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 0.25rem;
+}
+
+.menu-role {
+  font-size: 0.8rem;
+  color: #6b7280;
+}
+
+.menu-item {
+  display: flex;
+  align-items: center;
+  padding: 0.75rem 1.5rem;
+  color: #555;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.menu-item:hover {
+  background-color: #f8f9fa;
+  color: #3B82F6;
+}
+
+.menu-item:hover i {
+  transform: translateX(3px);
+}
+
+.menu-item:active {
+  background-color: #EBF5FF;
+}
+
+.menu-item i {
+  font-size: 1.2rem;
+  margin-right: 0.75rem;
+  width: 24px;
+  text-align: center;
+  transition: transform 0.2s ease;
+}
+
+.menu-item span {
+  font-size: 0.95rem;
+}
+
+.logout {
+  border-top: 1px solid #f0f0f0;
+  color: #dc2626;
+}
+
+.logout:hover {
+  background-color: #FEF2F2;
+  color: #dc2626;
+}
+
+.password-change-form {
+  background: linear-gradient(135deg, #2a3f5f, #1e293b);
+  padding: 2rem;
+  border-radius: 16px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
+  animation: fadeIn 0.3s ease-in-out;
+  max-width: 400px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  position: absolute;
+  top: 80px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 1000;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  cursor: move;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.password-form-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.15);
+  padding-bottom: 1rem;
+  cursor: move;
+}
+
+.password-form-header h2 {
+  margin: 0;
+  font-size: 1.5rem;
+  color: #fff;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+}
+
+.close-button {
+  background: rgba(255, 255, 255, 0.1);
+  border: none;
+  cursor: pointer;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+}
+
+.close-button:hover {
+  background-color: rgba(255, 255, 255, 0.2);
+  transform: rotate(90deg);
+}
+
+.close-button i {
+  font-size: 1rem;
+  color: #fff;
+}
+
+.field {
+  margin-bottom: 1.5rem;
+  position: relative;
+}
+
+.modern-input {
+  background-color: rgba(255, 255, 255, 0.1) !important;
+  border: 1px solid rgba(255, 255, 255, 0.2) !important;
+  border-radius: 4px !important;
+  color: #fff !important;
+  transition: all 0.3s ease !important;
+}
+
+.modern-input:focus {
+  background-color: rgba(255, 255, 255, 0.15) !important;
+  border-color: rgba(255, 255, 255, 0.3) !important;
+  box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.1) !important;
+}
+
+.modern-input::placeholder {
+  color: rgba(255, 255, 255, 0.6) !important;
+}
+
+.p-inputgroup-addon {
+  background-color: rgba(255, 255, 255, 0.05) !important;
+  border: 1px solid rgba(255, 255, 255, 0.2) !important;
+  color: #fff !important;
+}
+
+.password-actions {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.75rem;
+  margin-top: 1.5rem;
+}
+
+.change-button {
+  background: linear-gradient(135deg, #6366f1, #8b5cf6) !important;
+  border: none !important;
+  box-shadow: 0 2px 8px rgba(99, 102, 241, 0.3) !important;
+  transition: all 0.3s ease !important;
+  font-size: 0.875rem !important;
+  flex: 1;
+}
+
+.change-button:hover {
+  background: linear-gradient(135deg, #4f46e5, #7c3aed) !important;
+  box-shadow: 0 4px 12px rgba(99, 102, 241, 0.4) !important;
+  transform: translateY(-1px) !important;
+}
+
+.cancel-button {
+  border-color: rgba(255, 255, 255, 0.3) !important;
+  color: rgba(255, 255, 255, 0.8) !important;
+  transition: all 0.3s ease !important;
+  font-size: 0.875rem !important;
+  flex: 1;
+}
+
+.cancel-button:hover {
+  background-color: rgba(255, 255, 255, 0.1) !important;
+  border-color: rgba(255, 255, 255, 0.5) !important;
+}
+
+/* Animasyonlu arka plan - Gizle */
+.animated-background {
+  display: none;
+}
+
+.cube {
+  display: none;
+}
+
+.lines {
+  display: none;
+}
+
+/* Ana İçerik Grid Yapısı */
+.main-content {
+  margin-top: 2rem;
+  width: 100%;
+}
+
+/* Admin Modülleri Kartları */
+.admin-modules {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2rem;
+  margin-top: 2rem;
+}
+
+.module-card {
+  flex: 1;
+  min-width: 250px;
+  background: white;
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
+  cursor: pointer;
+}
+
+.module-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+}
+
+.card-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+  text-align: center;
+}
+
+.card-content i {
+  font-size: 3rem;
+  color: #3B82F6;
+  margin-bottom: 1rem;
+}
+
+.card-content h3 {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: #333;
+  margin: 0;
+}
+
+/* PrimeNG Grid Uyumluluğu */
+.p-grid {
+  display: flex;
+  flex-wrap: wrap;
+  margin-right: -0.5rem;
+  margin-left: -0.5rem;
+  margin-top: -0.5rem;
+}
+
+.p-col-12 {
+  flex: 0 0 100%;
+  padding: 0.5rem;
+}
+
+.p-col-6 {
+  flex: 0 0 50%;
+  padding: 0.5rem;
+}
+
+@media screen and (min-width: 768px) {
+  .p-md-6 {
+    flex: 0 0 50%;
+  }
+  
+  .p-md-3 {
+    flex: 0 0 25%;
+  }
+}
+
+/* Responsive düzenlemeler */
+@media screen and (max-width: 768px) {
+  .admin-modules {
+    flex-direction: column;
+    align-items: center;
+  }
+  
+  .admin-card {
+    width: 100%;
+    max-width: 300px;
+  }
+  
+  .header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  
+  .header-title {
+    margin-bottom: 1rem;
+  }
+  
+  .admin-dropdown {
+    align-self: flex-end;
+  }
+  
+  .password-change-form {
+    width: calc(100% - 2rem);
+  }
+}

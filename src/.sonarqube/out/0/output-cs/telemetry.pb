@@ -1,0 +1,1 @@
+cRMC:\Users\muham\OneDrive\Masa√ºst√º\Stock\src\Stock.Domain\Stock.Domain.csproj¢net9.0ÚCSharp13

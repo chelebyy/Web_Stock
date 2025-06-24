@@ -1,0 +1,42 @@
+Test Sonuçları ve Coverage Rapor Lokasyonları
+===========================================
+
+Unit Test Coverage Raporu:
+-------------------------
+Lokasyon: C:\Users\muham\OneDrive\Masaüstü\Stock\tests\Stock.UnitTests\TestResults\348b5ad0-396f-4b73-baa9-e0855ae72c23\coverage.cobertura.xml
+
+Integration Test Coverage Raporu:
+--------------------------------
+Lokasyon: C:\Users\muham\OneDrive\Masaüstü\Stock\tests\Stock.IntegrationTests\TestResults\97c775b3-6479-4cad-bdc3-801e821d796c\coverage.cobertura.xml
+
+Test Sonuçları Özeti:
+--------------------
+Toplam Test Sayısı: 108
+Başarılı: 94
+Başarısız: 14
+Atlanan: 0
+Toplam Süre: 5.4 saniye
+
+Başarısız Test Detayları:
+------------------------
+1. Stock.UnitTests:
+   - CreateProduct_WithNullDescription_ShouldCreateAndReturnProductWithNullDescription
+
+2. Stock.IntegrationTests:
+   - GetProducts_ReturnsSuccessStatusCode
+   - CreateProduct_WithValidData_ReturnsCreatedProduct
+   - GetProductById_WithValidId_ReturnsProduct
+   - DeleteProduct_WithInvalidId_ReturnsNotFound
+   - DeleteProduct_WithValidId_ReturnsNoContent
+   - UpdateProduct_WithInvalidId_ReturnsNotFound
+   - UpdateProduct_WithValidData_ReturnsUpdatedProduct
+   - GetProductById_WithInvalidId_ReturnsNotFound
+
+Ana Hatalar:
+-----------
+1. Veritabanı sağlayıcı çakışması (PostgreSQL ve InMemory)
+2. LINQ sorgu çevirme hatası
+3. Domain nesnesi bulunamama hataları
+4. HTTP 500 Internal Server Error yanıtları
+
+Not: Bu sonuçlar dotnet test --collect:"XPlat Code Coverage" komutu çalıştırıldığında elde edilmiştir. 
