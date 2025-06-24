@@ -6,13 +6,13 @@ namespace Stock.Domain.Specifications
 {
     public class RolesSpecification : BaseSpecification<Role>
     {
-        public RolesSpecification(string name, string sortField, string sortOrder)
+        public RolesSpecification(string name) : base(r => string.IsNullOrEmpty(name) || r.Name.Contains(name))
         {
-            if (!string.IsNullOrEmpty(name))
-            {
-                SetCriteria(r => r.Name.Contains(name));
-            }
-
+        }
+        
+        public RolesSpecification(string name, string sortField, string sortOrder)
+            : base(r => string.IsNullOrEmpty(name) || r.Name.Contains(name))
+        {
             if (!string.IsNullOrEmpty(sortField))
             {
                 Expression<Func<Role, object>> keySelector = sortField.ToLower() switch
@@ -29,6 +29,10 @@ namespace Stock.Domain.Specifications
                 {
                     ApplyOrderBy(keySelector);
                 }
+            }
+            else
+            {
+                ApplyOrderBy(r => r.Name);
             }
         }
     }

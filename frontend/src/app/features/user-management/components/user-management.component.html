@@ -54,13 +54,20 @@
     <div class="overflow-x-auto bg-white rounded-lg shadow">
       <p-table
         #dt
-        [value]="state.paginatedUsers()"
+        [value]="state.users()"
         [(selection)]="selectedUsers"
         dataKey="id"
         styleClass="p-datatable-modern"
         [loading]="state.loading()"
         [rowHover]="true"
-        responsiveLayout="scroll">
+        responsiveLayout="scroll"
+        [lazy]="true"
+        (onLazyLoad)="onPageChange($event)"
+        [totalRecords]="totalRecords()"
+        [rows]="rows()"
+        [first]="first()"
+        [paginator]="true"
+        [rowsPerPageOptions]="[10, 25, 50]">
 
         <ng-template pTemplate="header">
           <tr>
@@ -83,7 +90,7 @@
         </ng-template>
         <tbody class="bg-white divide-y divide-gray-200">
           <ng-container *ngIf="!state.loading()">
-            <tr *ngFor="let user of state.paginatedUsers()" class="hover:bg-gray-50 transition-colors">
+            <tr *ngFor="let user of state.users()" class="hover:bg-gray-50 transition-colors">
               <td>
                 <p-tableCheckbox [value]="user"></p-tableCheckbox>
               </td>
@@ -107,14 +114,14 @@
                   pTooltip="Sayfa İzinlerini Yönet"></button>
               </td>
             </tr>
-            <tr *ngIf="state.filteredUsers().length === 0">
-              <td colspan="4" class="text-center py-6 text-gray-500">
+            <tr *ngIf="state.users().length === 0">
+              <td colspan="5" class="text-center py-6 text-gray-500">
                 Kayıt bulunamadı.
               </td>
             </tr>
           </ng-container>
           <tr *ngIf="state.loading()">
-            <td colspan="4" class="text-center py-6">
+            <td colspan="5" class="text-center py-6">
               <i class="pi pi-spin pi-spinner text-blue-500" style="font-size: 2rem"></i>
             </td>
           </tr>
@@ -122,30 +129,8 @@
       </p-table>
     </div>
 
-    <!-- Sayfalama -->
-    <div class="flex items-center justify-between mt-6" *ngIf="state.totalPages() > 1">
-      <div class="flex items-center">
-        <span class="text-sm text-gray-700 mr-4">
-          Sayfa {{ state.currentPage() }} / {{ state.totalPages() }}
-        </span>
-        <select (change)="onRowsPerPageChange($event)"
-          class="p-2 border border-gray-300 rounded-lg bg-white focus:ring-2 focus:ring-blue-500">
-          <option value="10">10</option>
-          <option value="25">25</option>
-          <option value="50">50</option>
-        </select>
-      </div>
-      <div class="inline-flex rounded-md shadow-sm">
-        <button (click)="goToPage(state.currentPage() - 1)" [disabled]="state.currentPage() === 1"
-          class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-l-lg hover:bg-gray-100 disabled:opacity-50">
-          Önceki
-        </button>
-        <button (click)="goToPage(state.currentPage() + 1)" [disabled]="state.currentPage() === state.totalPages()"
-          class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-r-lg hover:bg-gray-100 disabled:opacity-50">
-          Sonraki
-        </button>
-      </div>
-    </div>
+    <!-- Sayfalama bölümü kaldırıldı, p-table'ın kendi paginator'ı kullanılacak -->
+
   </div>
 </div>
 

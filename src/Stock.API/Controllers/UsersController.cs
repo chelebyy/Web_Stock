@@ -13,6 +13,7 @@ using Stock.Application.Models.DTOs;
 using System.Collections.Generic;
 using FluentValidation;
 using Stock.Domain.Exceptions;
+using Stock.Application.Models;
 
 namespace Stock.API.Controllers
 {
@@ -49,17 +50,16 @@ namespace Stock.API.Controllers
         /// <response code="500">Kullanıcılar listelenirken bir sunucu hatası oluştu.</response>
         [HttpGet]
         [Authorize(Roles = RoleNames.Admin)]
-        [ProducesResponseType(typeof(IEnumerable<UserListItemDto>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(PagedResponse<UserDto>), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(typeof(string), StatusCodes.Status500InternalServerError)]
-        public async Task<IActionResult> GetAll()
+        public async Task<IActionResult> GetAll([FromQuery] GetAllUsersQuery query)
         {
             try
             {
                 _logger.LogInformation(LogMessages.FetchingAllUsers);
-                var query = new GetAllUsersQuery();
                 var result = await _mediator.Send(query);
-                _logger.LogInformation(string.Format(LogMessages.UsersFetchedSuccessfully, result.Count()));
+                _logger.LogInformation(LogMessages.UsersFetchedSuccessfully, result.TotalCount);
                 return Ok(result);
             }
             catch (Exception ex)

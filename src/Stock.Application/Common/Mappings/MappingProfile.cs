@@ -23,20 +23,8 @@ namespace Stock.Application.Common.Mappings
 
             CreateMap<Role, RoleSlimDto>();
 
-            // Product mappings
-            CreateMap<Product, ProductDto>()
-                .ForMember(dest => dest.CategoryName, opt => opt.MapFrom(src => src.Category.Name))
-                .ForMember(dest => dest.StockLevel, opt => opt.MapFrom(src => src.StockLevel));
-
-            CreateMap<Product, ProductListItemDto>()
-                .ForMember(dest => dest.CategoryName, opt => opt.MapFrom(src => src.Category.Name));
-
             // Category mappings
             CreateMap<Category, CategoryDto>();
-
-            CreateMap<CreateProductDto, Product>();
-
-            CreateMap<UpdateProductDto, Product>();
         }
     }
 } 

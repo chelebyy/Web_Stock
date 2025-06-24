@@ -98,7 +98,7 @@ public class Program
                 .AddJsonOptions(options =>
                 {
                     // Döngüsel referansları koru
-                    options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.Preserve;
+                    // options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.Preserve; // Bu satır soruna neden oluyor
                     // Null değerleri dahil etme
                     options.JsonSerializerOptions.DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull;
                     // Enum değerlerini string olarak serialize et

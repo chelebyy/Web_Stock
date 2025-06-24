@@ -41,7 +41,7 @@ namespace Stock.Application.Features.Roles.Queries.GetAllRoles
                 request.PageNumber, request.PageSize, request.SortField, request.SortOrder, request.Name);
 
             var spec = new RolesSpecification(request.Name, request.SortField, request.SortOrder);
-            var countSpec = new RolesSpecification(request.Name, null, null); // Sayım için sıralama gerekmez
+            var countSpec = new RolesSpecification(request.Name); // Sayım için sıralama gerekmez
 
             spec.ApplyPaging((request.PageNumber - 1) * request.PageSize, request.PageSize);
 

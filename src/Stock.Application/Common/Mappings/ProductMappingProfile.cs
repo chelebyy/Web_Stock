@@ -12,7 +12,7 @@ public class ProductMappingProfile : Profile
         CreateMap<Product, ProductDto>()
             .ForMember(dest => dest.Name, opt => opt.MapFrom(src => src.Name.Value))
             .ForMember(dest => dest.Description, opt => opt.MapFrom(src => src.Description.Value))
-            .ForMember(dest => dest.StockLevel, opt => opt.MapFrom(src => src.StockLevel.Value))
+            .ForMember(dest => dest.Stock, opt => opt.MapFrom(src => src.StockLevel.Value))
             .ForMember(dest => dest.CategoryId, opt => opt.MapFrom(src => src.CategoryId))
             .ForMember(dest => dest.CategoryName, opt => opt.MapFrom(src => src.Category != null ? src.Category.Name : string.Empty));
 

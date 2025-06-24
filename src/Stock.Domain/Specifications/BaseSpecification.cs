@@ -151,6 +151,29 @@ namespace Stock.Domain.Specifications
         }
 
         /// <summary>
+        /// String tabanlı alan adı ve sıralama yönüne göre sıralama uygular.
+        /// </summary>
+        /// <param name="sortField">Sıralanacak alanın adı.</param>
+        /// <param name="sortOrder">Sıralama yönü ("asc" veya "desc").</param>
+        public virtual void AddOrderBy(string sortField, string sortOrder)
+        {
+            if (string.IsNullOrEmpty(sortField)) return;
+
+            var parameter = Expression.Parameter(typeof(T), "x");
+            var property = Expression.Property(parameter, sortField);
+            var lambda = Expression.Lambda<Func<T, object>>(Expression.Convert(property, typeof(object)), parameter);
+
+            if (string.Equals(sortOrder, "desc", StringComparison.OrdinalIgnoreCase))
+            {
+                ApplyOrderByDescending(lambda);
+            }
+            else
+            {
+                ApplyOrderBy(lambda);
+            }
+        }
+
+        /// <summary>
         /// Bu specification için EF Core değişiklik izlemesini devre dışı bırakır.
         /// Zincirleme (fluent) kullanım için kendini döndürür.
         /// </summary>

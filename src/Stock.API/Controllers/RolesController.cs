@@ -23,7 +23,7 @@ namespace Stock.API.Controllers
     /// Rolleri listeleme, detaylarını görme, oluşturma, güncelleme ve silme işlemlerini sağlar.
     /// </summary>
     [ApiController]
-    [Route("api/[controller]")]
+    [Route("api/roles")]
     [Authorize(Roles = "Admin")] // Rol bazlı yetkilendirme
     public class RolesController : ControllerBase
     {
@@ -106,12 +106,12 @@ namespace Stock.API.Controllers
             {
                 _logger.LogWarning(ex, $"Validation error while creating role: {command.Name}");
                 var errors = new Dictionary<string, string[]>(ex.Errors);
-                return BadRequest(new ErrorResponse { Message = ex.Message, Errors = errors });
+                return BadRequest(new ValidationErrorResponse(StatusCodes.Status400BadRequest, ex.Message, errors));
             }
             catch (System.Exception ex)
             {
                 _logger.LogError(ex, $"Error creating role: {command.Name}");
-                return StatusCode((int)HttpStatusCode.InternalServerError, new ErrorResponse { Message = "An unexpected error occurred." });
+                return StatusCode((int)HttpStatusCode.InternalServerError, new ErrorResponse(StatusCodes.Status500InternalServerError, "An unexpected error occurred."));
             }
         }
 
@@ -135,7 +135,7 @@ namespace Stock.API.Controllers
             if (id != command.Id)
             {
                 _logger.LogWarning($"Mismatched id in route ({id}) and body ({command.Id}) for role update.");
-                return BadRequest(new ErrorResponse { Message = "ID mismatch between route and body." });
+                return BadRequest(new ErrorResponse(StatusCodes.Status400BadRequest, "ID mismatch between route and body."));
             }
 
             try
@@ -148,17 +148,17 @@ namespace Stock.API.Controllers
             {
                 _logger.LogWarning(ex, $"Validation error while updating role: {id}");
                 var errors = new Dictionary<string, string[]>(ex.Errors);
-                return BadRequest(new ErrorResponse { Message = ex.Message, Errors = errors });
+                return BadRequest(new ValidationErrorResponse(StatusCodes.Status400BadRequest, ex.Message, errors));
             }
             catch (Stock.Domain.Exceptions.NotFoundException ex)
             {
                 _logger.LogWarning(ex, $"Role with id: {id} not found for update.");
-                return NotFound(new ErrorResponse { Message = ex.Message });
+                return NotFound(new ErrorResponse(StatusCodes.Status404NotFound, ex.Message));
             }
             catch (System.Exception ex)
             {
                 _logger.LogError(ex, $"Error updating role: {id}");
-                return StatusCode((int)HttpStatusCode.InternalServerError, new ErrorResponse { Message = "An unexpected error occurred." });
+                return StatusCode((int)HttpStatusCode.InternalServerError, new ErrorResponse(StatusCodes.Status500InternalServerError, "An unexpected error occurred."));
             }
         }
 
@@ -191,17 +191,17 @@ namespace Stock.API.Controllers
             {
                 _logger.LogWarning(ex, $"Validation error while updating permissions for role: {id}");
                 var errors = new Dictionary<string, string[]>(ex.Errors);
-                return BadRequest(new ErrorResponse { Message = ex.Message, Errors = errors });
+                return BadRequest(new ValidationErrorResponse(StatusCodes.Status400BadRequest, ex.Message, errors));
             }
             catch (Stock.Domain.Exceptions.NotFoundException ex)
             {
                 _logger.LogWarning(ex, $"Role with id: {id} not found for permission update.");
-                return NotFound(new ErrorResponse { Message = ex.Message });
+                return NotFound(new ErrorResponse(StatusCodes.Status404NotFound, ex.Message));
             }
             catch (System.Exception ex)
             {
                 _logger.LogError(ex, $"Error updating permissions for role: {id}");
-                return StatusCode((int)HttpStatusCode.InternalServerError, new ErrorResponse { Message = "An unexpected error occurred." });
+                return StatusCode((int)HttpStatusCode.InternalServerError, new ErrorResponse(StatusCodes.Status500InternalServerError, "An unexpected error occurred."));
             }
         }
 
@@ -229,17 +229,17 @@ namespace Stock.API.Controllers
             catch (Stock.Domain.Exceptions.NotFoundException ex)
             {
                 _logger.LogWarning(ex, $"Role with id: {id} not found for delete.");
-                return NotFound(new ErrorResponse { Message = ex.Message });
+                return NotFound(new ErrorResponse(StatusCodes.Status404NotFound, ex.Message));
             }
             catch (Stock.Domain.Exceptions.ConflictException ex)
             {
                 _logger.LogWarning(ex, $"Attempted to delete role with id: {id} but it is in use.");
-                return BadRequest(new ErrorResponse { Message = ex.Message });
+                return BadRequest(new ErrorResponse(StatusCodes.Status400BadRequest, ex.Message));
             }
             catch (System.Exception ex)
             {
                 _logger.LogError(ex, $"Error deleting role: {id}");
-                return StatusCode((int)HttpStatusCode.InternalServerError, new ErrorResponse { Message = "An unexpected error occurred." });
+                return StatusCode((int)HttpStatusCode.InternalServerError, new ErrorResponse(StatusCodes.Status500InternalServerError, "An unexpected error occurred."));
             }
         }
     }

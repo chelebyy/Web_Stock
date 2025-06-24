@@ -1,4 +1,4 @@
-import { Component, OnInit, ChangeDetectionStrategy, inject } from '@angular/core';
+import { Component, OnInit, ChangeDetectionStrategy, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ConfirmationService, MessageService } from 'primeng/api';
@@ -8,7 +8,7 @@ import { ConfirmDialogModule } from 'primeng/confirmdialog';
 import { DialogModule } from 'primeng/dialog';
 import { InputTextModule } from 'primeng/inputtext';
 import { PasswordModule } from 'primeng/password';
-import { TableModule } from 'primeng/table';
+import { TableLazyLoadEvent, TableModule } from 'primeng/table';
 import { ToastModule } from 'primeng/toast';
 import { ToolbarModule } from 'primeng/toolbar';
 import { DropdownModule } from 'primeng/dropdown';
@@ -23,6 +23,7 @@ import { DeleteConfirmationDialogComponent } from '../../../features/shared/comp
 import { UserManagementStateService } from '../services/UserManagementStateService';
 import { User } from '../../../shared/models/user.model';
 import { Role } from '../../../shared/models/role.model';
+import { PagedResponse } from '../../../shared/models/paged-response.model';
 
 @Component({
     selector: 'app-user-management',
@@ -354,6 +355,15 @@ export class UserManagementComponent implements OnInit {
   
   public state = inject(UserManagementStateService);
   
+  // Component-specific state for pagination
+  totalRecords = signal(0);
+  rows = signal(10);
+  first = signal(0);
+
+  // Search and filter state
+  private searchText = signal('');
+  private selectedRoleId = signal<number | null>(null);
+
   userDialog = false;
   submitted = false;
   editMode = false;
@@ -370,37 +380,41 @@ export class UserManagementComponent implements OnInit {
   private router = inject(Router);
 
   ngOnInit() {
-    this.loadInitialData();
     this.initForm();
+    this.loadInitialData();
   }
 
   loadInitialData() {
+    this.state.setLoading(true);
+    // Load users for the initial page
+    this.loadUsers(1, this.rows());
     this.loadRoles();
-    this.loadUsers();
   }
 
-  async loadUsers() {
+  async loadUsers(page: number, pageSize: number, name: string = '', roleId: number | null = null) {
     this.state.setLoading(true);
     this.state.setError(null);
     try {
-      const users = await firstValueFrom(this.userService.getUsers());
-      this.state.setUsers(users);
-    } catch (error) {
-      const errorMessage = (error as any)?.message || 'Kullanıcılar yüklenemedi.';
-      this.state.setError(errorMessage);
-      this.messageService.add({ severity: 'error', summary: 'Hata', detail: errorMessage });
+      const response = await firstValueFrom(this.userService.getUsers(page, pageSize, name, roleId));
+      this.state.setUsers(response.items);
+      this.totalRecords.set(response.totalRecords);
+    } catch (error: any) {
+      console.error('Kullanıcılar yüklenirken hata:', error);
+      this.state.setError('Kullanıcılar yüklenemedi.');
     } finally {
       this.state.setLoading(false);
     }
   }
 
   async loadRoles() {
+    // Roles are likely not paginated or we need all of them for a dropdown
     try {
-      const roles = await firstValueFrom(this.roleService.getRoles());
-      this.state.setRoles(roles);
+      // Assuming getRoles might also return a PagedResponse, we handle it.
+      const response = await firstValueFrom(this.roleService.getRoles(1, 1000)); // Fetch a large number of roles
+      this.state.setRoles(response.items);
     } catch (error) {
-       const errorMessage = (error as any)?.message || 'Roller yüklenemedi.';
-       this.messageService.add({ severity: 'error', summary: 'Hata', detail: errorMessage });
+      console.error('Roller yüklenirken hata:', error);
+      this.state.setError('Roller yüklenemedi.');
     }
   }
 
@@ -450,7 +464,7 @@ export class UserManagementComponent implements OnInit {
         try {
           await firstValueFrom(this.userService.deleteUser(user.id!));
           this.messageService.add({ severity: 'success', summary: 'Başarılı', detail: 'Kullanıcı silindi.' });
-          this.loadUsers(); // Refresh the list
+          this.loadUsers(1, this.rows());
         } catch (error) {
           this.messageService.add({ severity: 'error', summary: 'Hata', detail: 'Kullanıcı silinemedi.' });
         }
@@ -500,7 +514,7 @@ export class UserManagementComponent implements OnInit {
             await firstValueFrom(this.userService.createUser(createUserPayload));
             this.messageService.add({ severity: 'success', summary: 'Başarılı', detail: 'Kullanıcı oluşturuldu.' });
         }
-        this.loadUsers();
+        this.loadUsers(1, this.rows());
         this.userDialog = false;
     } catch(error) {
         const errorMessage = (error as any)?.message || 'İşlem başarısız.';
@@ -510,24 +524,14 @@ export class UserManagementComponent implements OnInit {
 
   onSearchTextChange(event: Event) {
     const searchText = (event.target as HTMLInputElement).value;
-    this.state.setSearchText(searchText);
+    this.searchText.set(searchText);
+    this.loadUsers(1, this.rows(), this.searchText(), this.selectedRoleId());
   }
   
   onRoleFilterChange(event: Event) {
     const roleId = (event.target as HTMLSelectElement).value;
-    const role = this.state.roles().find(r => r.id === +roleId) || null;
-    this.state.setSelectedRole(role);
-  }
-  
-  onRowsPerPageChange(event: Event) {
-    const rows = +(event.target as HTMLSelectElement).value;
-    this.state.setRowsPerPage(rows);
-  }
-
-  goToPage(page: number) {
-    if (page >= 1 && page <= this.state.totalPages()) {
-        this.state.setCurrentPage(page);
-    }
+    this.selectedRoleId.set(roleId ? parseInt(roleId, 10) : null);
+    this.loadUsers(1, this.rows(), this.searchText(), this.selectedRoleId());
   }
 
   goBack() {
@@ -563,7 +567,7 @@ export class UserManagementComponent implements OnInit {
       this.userService.deleteUser(this.userToDelete.id).subscribe({
         next: () => {
           this.messageService.add({ severity: 'success', summary: 'Başarılı', detail: 'Kullanıcı silindi' });
-          this.loadUsers();
+          this.loadUsers(1, this.rows());
         },
         error: (err: any) => {
           this.messageService.add({ severity: 'error', summary: 'Hata', detail: 'Kullanıcı silinirken bir hata oluştu' });
@@ -580,7 +584,7 @@ export class UserManagementComponent implements OnInit {
       forkJoin(deleteObservables).subscribe({
         next: () => {
           this.messageService.add({ severity: 'success', summary: 'Başarılı', detail: 'Seçilen kullanıcılar silindi' });
-          this.loadUsers(); // Refresh user list
+          this.loadUsers(1, this.rows());
           this.selectedUsers = [];
         },
         error: (err: any) => {
@@ -607,5 +611,14 @@ export class UserManagementComponent implements OnInit {
   private hideDeleteDialog(): void {
     this.deleteDialogVisible = false;
     this.userToDelete = null;
+  }
+
+  onPageChange(event: TableLazyLoadEvent) {
+    this.state.setLoading(true);
+    const page = (event.first || 0) / (event.rows || 10) + 1;
+    const pageSize = event.rows || 10;
+    this.rows.set(pageSize);
+    this.first.set(event.first || 0);
+    this.loadUsers(page, pageSize, this.searchText(), this.selectedRoleId());
   }
 }

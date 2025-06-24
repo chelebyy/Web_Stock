@@ -168,17 +168,17 @@ namespace Stock.API.Controllers
             {
                 _logger.LogWarning(ex, $"Validation error while updating permissions for user: {userId}");
                 var errors = new Dictionary<string, string[]>(ex.Errors);
-                return BadRequest(new ErrorResponse { Message = ex.Message, Errors = errors });
+                return BadRequest(new ValidationErrorResponse(StatusCodes.Status400BadRequest, ex.Message, errors));
             }
             catch (NotFoundException ex)
             {
                 _logger.LogWarning(ex, $"User with id: {userId} not found for permission update.");
-                return NotFound(new ErrorResponse { Message = ex.Message });
+                return NotFound(new ErrorResponse(StatusCodes.Status404NotFound, ex.Message));
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, $"Error updating permissions for user: {userId}");
-                return StatusCode(StatusCodes.Status500InternalServerError, new ErrorResponse { Message = "An unexpected error occurred." });
+                return StatusCode(StatusCodes.Status500InternalServerError, new ErrorResponse(StatusCodes.Status500InternalServerError, "An unexpected error occurred."));
             }
         }
 
@@ -243,7 +243,7 @@ namespace Stock.API.Controllers
             catch (Exception ex)
             {
                 _logger.LogError(ex, LogMessages.ErrorAddingMissingPermissions);
-                return StatusCode(StatusCodes.Status500InternalServerError, string.Format(ErrorMessages.MissingPermissionsError, ex.Message));
+                return StatusCode(StatusCodes.Status500InternalServerError, new ErrorResponse(StatusCodes.Status500InternalServerError, string.Format(ErrorMessages.MissingPermissionsError, ex.Message)));
             }
         }
 
@@ -311,10 +311,16 @@ namespace Stock.API.Controllers
                 // return CreatedAtAction(nameof(GetPermissionById), new { id = result.Value.Id }, result.Value);
                 return StatusCode(StatusCodes.Status201Created, result.Value);
             }
+            catch (ValidationException ex)
+            {
+                _logger.LogWarning(ex, $"Validation error while creating permission: {command.Name}");
+                var errors = new Dictionary<string, string[]>(ex.Errors);
+                return BadRequest(new ValidationErrorResponse(StatusCodes.Status400BadRequest, ex.Message, errors));
+            }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "İzin oluşturulurken beklenmedik bir hata oluştu: {Command}", command);
-                return StatusCode(StatusCodes.Status500InternalServerError, "An unexpected error occurred while creating the permission.");
+                _logger.LogError(ex, $"Error creating permission: {command.Name}");
+                return StatusCode(StatusCodes.Status500InternalServerError, new ErrorResponse(StatusCodes.Status500InternalServerError, "An unexpected error occurred."));
             }
         }
 
@@ -365,10 +371,21 @@ namespace Stock.API.Controllers
 
                 return NoContent(); // Başarılı güncellemede 204 No Content
             }
+            catch (ValidationException ex)
+            {
+                _logger.LogWarning(ex, $"Validation error while updating permission: {id}");
+                var errors = new Dictionary<string, string[]>(ex.Errors);
+                return BadRequest(new ValidationErrorResponse(StatusCodes.Status400BadRequest, ex.Message, errors));
+            }
+            catch (NotFoundException ex)
+            {
+                _logger.LogWarning(ex, $"Permission with id: {id} not found for update.");
+                return NotFound(new ErrorResponse(StatusCodes.Status404NotFound, ex.Message));
+            }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "İzin güncellenirken beklenmedik bir hata oluştu: ID {PermissionId}, Command: {Command}", id, command);
-                return StatusCode(StatusCodes.Status500InternalServerError, "An unexpected error occurred while updating the permission.");
+                _logger.LogError(ex, $"Error updating permission: {id}");
+                return StatusCode(StatusCodes.Status500InternalServerError, new ErrorResponse(StatusCodes.Status500InternalServerError, "An unexpected error occurred."));
             }
         }
 
@@ -412,10 +429,15 @@ namespace Stock.API.Controllers
 
                 return NoContent(); // Başarılı silmede 204 No Content
             }
+            catch (NotFoundException ex)
+            {
+                _logger.LogWarning(ex, $"Permission with id: {id} not found for delete.");
+                return NotFound(new ErrorResponse(StatusCodes.Status404NotFound, ex.Message));
+            }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "İzin silinirken beklenmedik bir hata oluştu: ID {PermissionId}", id);
-                return StatusCode(StatusCodes.Status500InternalServerError, "An unexpected error occurred while deleting the permission.");
+                _logger.LogError(ex, $"Error deleting permission: {id}");
+                return StatusCode(StatusCodes.Status500InternalServerError, new ErrorResponse(StatusCodes.Status500InternalServerError, "An unexpected error occurred."));
             }
         }
 

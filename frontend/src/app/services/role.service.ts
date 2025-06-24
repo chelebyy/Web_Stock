@@ -1,10 +1,11 @@
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { Role } from '../shared/models/role.model';
 import { environment } from '../../environments/environment';
 import { AuthService } from '../core/authentication/auth.service';
 import { BaseHttpService } from '../core/services/base-http.service';
+import { PagedResponse } from '../shared/models/paged-response.model';
 
 @Injectable({
   providedIn: 'root'
@@ -14,12 +15,15 @@ export class RoleService extends BaseHttpService<Role> {
     protected override http: HttpClient,
     protected override authService: AuthService
   ) {
-    super(http, authService, `${environment.apiUrl}/api/role`);
+    super(http, authService, `${environment.apiUrl}/api/roles`);
   }
 
   // Tüm rolleri getir
-  getRoles(): Observable<Role[]> {
-    return this.get<Role[]>('');
+  getRoles(pageNumber: number = 1, pageSize: number = 10): Observable<PagedResponse<Role>> {
+    let params = new HttpParams()
+      .set('PageNumber', pageNumber.toString())
+      .set('PageSize', pageSize.toString());
+    return this.get<PagedResponse<Role>>('', params);
   }
 
   // Belirli bir rolü getir

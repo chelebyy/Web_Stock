@@ -7,6 +7,7 @@ import { CreateUserRequest } from '../../../core/authentication/auth.model';
 import { environment } from '../../../../environments/environment';
 import { AuthService } from '../../../core/authentication/auth.service';
 import { BaseHttpService } from '../../../core/services/base-http.service';
+import { PagedResponse } from '../../../shared/models/paged-response.model';
 
 @Injectable({
   providedIn: 'root'
@@ -22,9 +23,20 @@ export class UserService extends BaseHttpService<User> {
     super(http, authService, environment.apiUrl);
   }
 
-  getUsers(): Observable<User[]> {
-    console.log(`UserService: getUsers çağrıldı`);
-    return super.get<User[]>(this.apiRoute);
+  getUsers(pageNumber: number = 1, pageSize: number = 10, name?: string, roleId?: number | null): Observable<PagedResponse<User>> {
+    let params = new HttpParams()
+      .set('PageNumber', pageNumber.toString())
+      .set('PageSize', pageSize.toString());
+    
+    if (name) {
+      params = params.set('Name', name);
+    }
+    
+    if (roleId) {
+      params = params.set('RoleId', roleId.toString());
+    }
+
+    return super.get<PagedResponse<User>>(this.apiRoute, params);
   }
 
   getById(id: number): Observable<User> {

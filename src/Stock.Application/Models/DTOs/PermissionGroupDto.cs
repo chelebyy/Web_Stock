@@ -4,7 +4,8 @@ namespace Stock.Application.Models.DTOs
 {
     public class PermissionGroupDto
     {
-        public string Group { get; set; }
-        public List<PermissionDto> Permissions { get; set; }
+        public int Id { get; set; }
+        public string Group { get; set; } = null!;
+        public List<PermissionDto> Permissions { get; set; } = new();
     }
 } 

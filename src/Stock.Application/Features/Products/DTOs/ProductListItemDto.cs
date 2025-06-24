@@ -6,8 +6,9 @@ namespace Stock.Application.Features.Products.DTOs;
 /// </summary>
 public class ProductListItemDto
 {
-    public int Id { get; set; }
-    public string Name { get; set; }
+    public Guid Id { get; set; }
+    public string Name { get; set; } = null!;
+    public decimal Price { get; set; }
+    public string CategoryName { get; set; } = null!;
     public int StockLevel { get; set; }
-    public string CategoryName { get; set; }
 } 
