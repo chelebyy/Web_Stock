@@ -1,13 +1,14 @@
 import { Routes } from '@angular/router';
-import { AuthGuard } from '../../core/guards/auth.guard';
+import { authGuard } from '../../core/guards/auth.guard';
+import { permissionGuard } from '../../core/guards/permission.guard';
 
 export const USER_MANAGEMENT_ROUTES: Routes = [
   {
     path: '',
     loadComponent: () => import('./components/user-management.component').then(m => m.UserManagementComponent),
-    canActivate: [AuthGuard],
+    canActivate: [authGuard, permissionGuard],
     data: { 
-      requiresAdmin: true
+      requiredPermission: 'Pages.UserManagement'
     }
   },
   {
@@ -18,17 +19,17 @@ export const USER_MANAGEMENT_ROUTES: Routes = [
   {
     path: 'users/:userId/permissions',
     loadComponent: () => import('./components/permission-management.component').then(m => m.PermissionManagementComponent),
-    canActivate: [AuthGuard],
+    canActivate: [authGuard, permissionGuard],
     data: { 
-      requiresAdmin: true
+      requiredPermission: 'Pages.UserManagement'
     }
   },
   {
     path: 'users/:userId/page-permissions',
     loadComponent: () => import('./components/user-page-permissions.component').then(m => m.UserPagePermissionsComponent),
-    canActivate: [AuthGuard],
+    canActivate: [authGuard, permissionGuard],
     data: { 
-      requiresAdmin: true
+      requiredPermission: 'Pages.UserManagement'
     }
   }
 ]; 

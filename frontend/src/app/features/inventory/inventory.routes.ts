@@ -1,15 +1,14 @@
 import { Routes } from '@angular/router';
-import { AuthGuard } from '../../core/guards/auth.guard';
-import { PermissionGuard } from '../../core/guards/permission.guard';
+import { authGuard } from '../../core/guards/auth.guard';
+import { permissionGuard } from '../../core/guards/permission.guard';
 
 export const INVENTORY_ROUTES: Routes = [
   {
     path: 'computers',
     loadComponent: () => import('./components/computers/computers.component').then(m => m.ComputersComponent),
-    canActivate: [AuthGuard, PermissionGuard],
+    canActivate: [authGuard, permissionGuard],
     data: { 
-      requiresAdmin: true,
-      permissions: ['Pages.Computers']
+      requiredPermission: 'Pages.Computers'
     }
   },
   {

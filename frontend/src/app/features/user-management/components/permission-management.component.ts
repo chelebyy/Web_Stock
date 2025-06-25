@@ -37,6 +37,7 @@ interface PermissionGroup {
 
 @Component({
     selector: 'app-permission-management',
+    standalone: true,
     imports: [
         CommonModule,
         FormsModule,

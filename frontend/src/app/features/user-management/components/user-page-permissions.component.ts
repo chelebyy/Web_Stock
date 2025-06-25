@@ -50,6 +50,7 @@ interface PagePermission {
 
 @Component({
     selector: 'app-user-page-permissions',
+    standalone: true,
     imports: [
         CommonModule,
         FormsModule,

@@ -1,11 +1,11 @@
 import { Routes } from '@angular/router';
-import { AuthGuard } from './core/guards/auth.guard';
-import { PermissionGuard } from './core/guards/permission.guard';
+import { authGuard } from './core/guards/auth.guard';
+import { permissionGuard } from './core/guards/permission.guard';
 
 export const routes: Routes = [
   { path: '', redirectTo: '/login', pathMatch: 'full' },
   
-  // Auth Module - Lazy Loading
+  // Auth Module (Login) - No guard needed
   {
     path: 'login',
     loadChildren: () => import('./features/auth/auth.routes').then(m => m.AUTH_ROUTES)
@@ -15,31 +15,32 @@ export const routes: Routes = [
   {
     path: 'dashboard',
     loadChildren: () => import('./features/dashboard/dashboard.routes').then(m => m.DASHBOARD_ROUTES),
-    canActivate: [AuthGuard]
+    canActivate: [authGuard]
   },
   
   // User Management Module - Lazy Loading
   {
     path: 'user-management',
     loadChildren: () => import('./features/user-management/user-management.routes').then(m => m.USER_MANAGEMENT_ROUTES),
-    canActivate: [AuthGuard]
+    canActivate: [authGuard, permissionGuard],
+    data: {
+      requiredPermission: 'Pages.UserManagement' // Örnek bir izin adı
+    }
   },
   
   // Role Management Module - Lazy Loading
+  // permissionGuard, admin kontrolünü zaten yapıyor.
   {
     path: 'role-management',
     loadChildren: () => import('./features/role-management/role-management.routes').then(m => m.ROLE_MANAGEMENT_ROUTES),
-    canActivate: [AuthGuard],
-    data: {
-      requiresAdmin: true
-    }
+    canActivate: [authGuard, permissionGuard]
   },
   
   // Dashboard Management Module - Lazy Loading
   {
     path: 'dashboard-management',
     loadChildren: () => import('./features/dashboard-management/dashboard-management.routes').then(m => m.DASHBOARD_MANAGEMENT_ROUTES),
-    canActivate: [AuthGuard, PermissionGuard],
+    canActivate: [authGuard, permissionGuard],
     data: {
       requiredPermission: 'Pages.DashboardManagement'
     }
@@ -49,26 +50,32 @@ export const routes: Routes = [
   {
     path: 'bilgi-islem',
     loadChildren: () => import('./features/bilgi-islem/bilgi-islem.routes').then(m => m.BILGI_ISLEM_ROUTES),
-    canActivate: [AuthGuard]
+    canActivate: [authGuard]
   },
   
   // Revir Module - Lazy Loading
   {
     path: 'revir',
     loadChildren: () => import('./features/revir/revir.routes').then(m => m.REVIR_ROUTES),
-    canActivate: [AuthGuard]
+    canActivate: [authGuard]
   },
   
   // Inventory Module - Lazy Loading
   {
     path: 'inventory',
     loadChildren: () => import('./features/inventory/inventory.routes').then(m => m.INVENTORY_ROUTES),
-    canActivate: [AuthGuard]
+    canActivate: [authGuard]
   },
   
-  // Catch-all route - Kullanıcı giriş yapmışsa dashboard'a, yapmamışsa login'e yönlendir
+  // Access Denied Page
+  {
+    path: 'access-denied',
+    loadComponent: () => import('./components/access-denied/access-denied.component').then(c => c.AccessDeniedComponent)
+  },
+
+  // Catch-all route
   { 
     path: '**', 
-    redirectTo: '/login'
+    redirectTo: '/login' // veya daha mantıklı bir '404 not found' sayfasına
   }
 ];
