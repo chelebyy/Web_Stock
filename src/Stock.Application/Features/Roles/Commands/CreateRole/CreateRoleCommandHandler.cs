@@ -1,73 +1,61 @@
-using AutoMapper;
 using MediatR;
-using Stock.Domain.Exceptions;
-using Stock.Domain.Interfaces;
-using Stock.Application.Models.DTOs;
+using AutoMapper;
+
+
 using Stock.Domain.Entities;
-using Stock.Domain.Specifications;
+using Stock.Domain.Common;
+using Stock.Domain.ValueObjects;
+using Microsoft.Extensions.Logging;
+using Stock.Application.Features.Roles.DTOs;
+using Stock.Domain.Interfaces;
 using System.Threading;
 using System.Threading.Tasks;
-using Microsoft.Extensions.Logging;
+using Stock.Application.Common.Interfaces;
 
-namespace Stock.Application.Features.Roles.Commands.CreateRole;
-
-/// <summary>
-/// Handles the <see cref="CreateRoleCommand"/>.
-/// </summary>
-public class CreateRoleCommandHandler : IRequestHandler<CreateRoleCommand, RoleDto>
+namespace Stock.Application.Features.Roles.Commands.CreateRole
 {
-    private readonly IRoleRepository _roleRepository;
-    private readonly IUnitOfWork _unitOfWork;
-    private readonly IMapper _mapper;
-    private readonly ILogger<CreateRoleCommandHandler> _logger;
-
-    public CreateRoleCommandHandler(
-        IRoleRepository roleRepository,
-        IUnitOfWork unitOfWork,
-        IMapper mapper,
-        ILogger<CreateRoleCommandHandler> logger)
+    public class CreateRoleCommandHandler : IRequestHandler<CreateRoleCommand, RoleDto>
     {
-        _roleRepository = roleRepository;
-        _unitOfWork = unitOfWork;
-        _mapper = mapper;
-        _logger = logger;
-    }
+        private readonly IUnitOfWork _unitOfWork;
+        private readonly IMapper _mapper;
+        private readonly ILogger<CreateRoleCommandHandler> _logger;
+        private readonly ICacheService _cacheService;
 
-    /// <summary>
-    /// Handles the command to create a new role.
-    /// </summary>
-    /// <param name="request">The command request.</param>
-    /// <param name="cancellationToken">The cancellation token.</param>
-    /// <returns>The created <see cref="RoleDto"/>.</returns>
-    /// <exception cref="ConflictException">Thrown if a role with the same name already exists.</exception>
-    /// <exception cref="ValidationException">Thrown if the role fails validation.</exception>
-    public async Task<RoleDto> Handle(CreateRoleCommand request, CancellationToken cancellationToken)
-    {
-        _logger.LogInformation("'{Name}' adında yeni rol oluşturuluyor.", request.Name);
-        var spec = new RoleByNameSpecification(request.Name);
-        var existingRole = await _roleRepository.FirstOrDefaultAsync(spec, cancellationToken);
-
-        if (existingRole != null)
+        public CreateRoleCommandHandler(IUnitOfWork unitOfWork, IMapper mapper, ILogger<CreateRoleCommandHandler> logger, ICacheService cacheService)
         {
-            _logger.LogWarning("'{Name}' adında bir rol zaten mevcut.", request.Name);
-            throw new ConflictException($"'{request.Name}' adında bir rol zaten mevcut.");
+            _unitOfWork = unitOfWork;
+            _mapper = mapper;
+            _logger = logger;
+            _cacheService = cacheService;
         }
 
-        var roleResult = Role.Create(request.Name, request.Description ?? string.Empty);
-
-        if (!roleResult.IsSuccess)
+        public async Task<RoleDto> Handle(CreateRoleCommand request, CancellationToken cancellationToken)
         {
-            _logger.LogError("Rol oluşturulurken validasyon hatası: {Error}", roleResult.Error);
-            throw new ValidationException(roleResult.Error);
+            var roleNameResult = RoleName.Create(request.Name);
+            if (!roleNameResult.IsSuccess)
+            {
+                throw new System.Exception(roleNameResult.Error);
+            }
+
+            var roleResult = Role.Create(roleNameResult.Value, request.Description);
+            if (!roleResult.IsSuccess)
+            {
+                throw new System.Exception(roleResult.Error);
+            }
+
+            var role = roleResult.Value;
+
+            await _unitOfWork.Roles.AddAsync(role);
+            await _unitOfWork.SaveChangesAsync(cancellationToken);
+
+            _logger.LogInformation("Yeni rol başarıyla oluşturuldu: {RoleName}", role.Name);
+
+            // Invalidate the cache for all role list pages
+            var prefix = "roles_page";
+            await _cacheService.RemoveByPrefixAsync(prefix);
+            _logger.LogInformation("Cache invalidated for prefix: {CachePrefix}", prefix);
+
+            return _mapper.Map<RoleDto>(role);
         }
-
-        var newRole = roleResult.Value;
-
-        await _roleRepository.AddAsync(newRole, cancellationToken);
-        await _unitOfWork.SaveChangesAsync(cancellationToken);
-        _logger.LogInformation("'{Name}' adlı rol başarıyla oluşturuldu. ID: {RoleId}", newRole.Name, newRole.Id);
-
-        var roleDto = _mapper.Map<RoleDto>(newRole);
-        return roleDto;
     }
-} 
+}

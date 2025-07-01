@@ -13,7 +13,7 @@ namespace Stock.Domain.Specifications
         /// </summary>
         /// <param name="name">Aranacak izin adı.</param>
         public PermissionByNameSpecification(string name)
-            : base(p => p.Name == name)
+            : base(p => p.Name.Value == name)
         {
         }
     }

@@ -1,0 +1,61 @@
+<p-dialog 
+  [(visible)]="display" 
+  [modal]="true" 
+  [style]="{width: '50vw'}" 
+  [header]="isEditMode ? 'Kullanıcıyı Düzenle' : 'Yeni Kullanıcı Oluştur'"
+  (onHide)="closeDialog()">
+  
+  <ng-template pTemplate="content">
+    <form [formGroup]="userForm" (ngSubmit)="onSave()" class="user-form p-fluid">
+      <div class="p-field">
+        <label for="adi">Adı</label>
+        <input id="adi" type="text" pInputText formControlName="adi" required>
+        <small class="p-error" *ngIf="userForm.get('adi')?.invalid && userForm.get('adi')?.dirty">Adı zorunludur.</small>
+      </div>
+      
+      <div class="p-field">
+        <label for="soyadi">Soyadı</label>
+        <input id="soyadi" type="text" pInputText formControlName="soyadi" required>
+        <small class="p-error" *ngIf="userForm.get('soyadi')?.invalid && userForm.get('soyadi')?.dirty">Soyadı zorunludur.</small>
+      </div>
+
+      <div class="p-field">
+        <label for="sicil">Sicil Numarası</label>
+        <input id="sicil" type="text" pInputText formControlName="sicil" required>
+        <small class="p-error" *ngIf="userForm.get('sicil')?.invalid && userForm.get('sicil')?.dirty">Sicil Numarası zorunludur.</small>
+      </div>
+
+      <div class="p-field">
+        <label for="password">Şifre</label>
+        <p-password id="password" formControlName="password" [toggleMask]="true" [feedback]="!isEditMode"></p-password>
+        <small class="p-error" *ngIf="userForm.get('password')?.invalid && userForm.get('password')?.dirty">
+          Şifre en az 6 karakter olmalıdır.
+        </small>
+        <small *ngIf="isEditMode">Boş bırakırsanız şifre değişmez.</small>
+      </div>
+
+      <div class="p-field">
+        <label for="roleId">Rol</label>
+        <p-dropdown 
+          id="roleId" 
+          [options]="roles" 
+          formControlName="roleId" 
+          optionLabel="name" 
+          optionValue="id"
+          placeholder="Rol Seçin"
+          [showClear]="true"></p-dropdown>
+        <small class="p-error" *ngIf="userForm.get('roleId')?.invalid && userForm.get('roleId')?.dirty">Rol seçimi zorunludur.</small>
+      </div>
+
+      <div class="p-field-checkbox">
+        <p-checkbox id="isAdmin" formControlName="isAdmin" [binary]="true"></p-checkbox>
+        <label for="isAdmin">Admin mi?</label>
+      </div>
+    </form>
+  </ng-template>
+
+  <ng-template pTemplate="footer">
+    <button pButton pRipple type="button" label="İptal" icon="pi pi-times" class="p-button-text" (click)="closeDialog()"></button>
+    <button pButton pRipple type="submit" [label]="isEditMode ? 'Güncelle' : 'Kaydet'" icon="pi pi-check" class="p-button-text" (click)="onSave()" [disabled]="userForm.invalid"></button>
+  </ng-template>
+</p-dialog> 

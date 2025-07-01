@@ -1,0 +1,44 @@
+<div class="page-permission-card" 
+     [attr.id]="'page-card-' + index"
+     [class.card-expanded]="page.expanded"
+     [style.display]="anyCardExpanded && !page.expanded ? 'none' : 'block'">
+  
+  <div class="page-card-header" (click)="onToggleCard()" [class.header-expanded]="page.expanded">
+    <div class="page-icon">
+      <i class="pi" [ngClass]="page.pageIcon"></i>
+    </div>
+    <div class="page-info">
+      <h3 class="page-name">{{ page.pageName }}</h3>
+      <p class="page-description">{{ page.pageDescription }}</p>
+    </div>
+    <div class="page-toggle">
+      <i class="pi" [ngClass]="page.expanded ? 'pi-chevron-up' : 'pi-chevron-down'"></i>
+    </div>
+  </div>
+
+  <div class="close-button" [class.active]="page.expanded" (click)="onCloseCard($event)">
+    <i class="pi pi-times"></i>
+  </div>
+
+  <div class="page-card-content" 
+       [@contentExpansion]="page.expanded ? 'expanded' : 'collapsed'"
+       [attr.id]="'page-content-' + index">
+    <div class="page-permissions-list">
+      <div class="permission-item" *ngFor="let permission of page.permissions">
+        <div class="permission-content">
+          <div class="checkbox-wrapper">
+            <input type="checkbox" 
+                   [id]="'perm_' + permission.id + '_' + index" 
+                   [(ngModel)]="permission.isGranted"
+                   (ngModelChange)="onCheckboxChange()">
+            <span class="checkmark"></span>
+          </div>
+          <label [for]="'perm_' + permission.id + '_' + index" class="permission-label">
+            {{ permission.description || permission.name }}
+            <small class="permission-name">{{ permission.name }}</small>
+          </label>
+        </div>
+      </div>
+    </div>
+  </div>
+</div> 

@@ -1,3 +1,4 @@
+using System;
 using System.Linq.Expressions;
 using Stock.Domain.Entities;
 
@@ -14,8 +15,10 @@ namespace Stock.Domain.Specifications
         /// </summary>
         /// <param name="userId">Aranacak kullanıcı ID'si.</param>
         public UserByIdSpecification(int userId)
-            : base(u => u.Id == userId)
         {
+            AddInclude(u => u.Role);
+            AddInclude(u => u.UserPermissions);
+            AddCriteria(u => u.Id == userId);
         }
     }
 } 

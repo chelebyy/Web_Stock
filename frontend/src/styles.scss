@@ -1,4 +1,3 @@
-@use "@angular/material/prebuilt-themes/indigo-pink.css";
 @use "primeicons/primeicons.css";
 @use "./app/features/dashboard/shared/styles/dashboard-icons.scss";
 @use "./app/features/bilgi-islem/shared/styles/bilgi-islem-icons.scss";
@@ -2561,3 +2560,131 @@ body .p-dropdown-panel {
 }
 
 /* Tabs komponenti için özel stillemeler kaldırıldı - sadece TabView kullanılacak */
+
+/* ==========================================================================
+   Modern Toast, Dialog, ve Confirm Dialog Stilleri
+   (role-management.component.scss dosyasından taşındı)
+   ========================================================================== */
+
+/* Modern Toast Stilleri */
+.modern-toast .p-toast-message {
+  border-radius: 8px;
+  box-shadow: var(--shadow-md);
+  color: var(--text-color);
+}
+
+.modern-toast .p-toast-message.p-toast-message-success {
+  background-color: #f0fdf4;
+  border-left: 6px solid var(--success-color);
+  color: #065f46;
+}
+
+.modern-toast .p-toast-message.p-toast-message-error {
+  background-color: #fef2f2;
+  border-left: 6px solid var(--danger-color);
+  color: #991b1b;
+}
+
+.modern-toast .p-toast-message.p-toast-message-info {
+  background-color: #eff6ff;
+  border-left: 6px solid var(--info-color);
+  color: #1e40af;
+}
+
+.modern-toast .p-toast-message.p-toast-message-warn {
+  background-color: #fffbeb;
+  border-left: 6px solid var(--warning-color);
+  color: #92400e;
+}
+
+.modern-toast .p-toast-message-content {
+  padding: 1rem;
+}
+
+.modern-toast .p-toast-summary {
+  font-weight: 600;
+  font-size: 1rem;
+}
+
+.modern-toast .p-toast-detail {
+  font-size: 0.875rem;
+  margin-top: 0.25rem;
+}
+
+/* Modern Dialog Stilleri */
+.modern-dialog {
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: var(--shadow-lg);
+}
+
+.modern-dialog .p-dialog-header {
+  padding: 1.5rem;
+  border-bottom: 1px solid var(--surface-border);
+  background-color: var(--surface-card);
+  color: var(--text-color);
+  font-weight: 600;
+}
+
+.modern-dialog .p-dialog-content {
+  padding: 1.5rem;
+  background-color: var(--surface-card);
+}
+
+.modern-dialog .p-dialog-footer {
+  padding: 1.25rem 1.5rem;
+  background-color: var(--surface-card);
+  border-top: 1px solid var(--surface-border);
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.75rem;
+}
+
+.modern-dialog .p-dialog-header-close {
+  width: 2rem;
+  height: 2rem;
+  border-radius: 50%;
+  background-color: #f1f5f9;
+  color: #64748b;
+  transition: all 0.2s ease;
+}
+
+.modern-dialog .p-dialog-header-close:hover {
+  background-color: #e2e8f0;
+  color: #334155;
+}
+
+.modern-dialog .p-dialog-header-close-icon {
+  font-size: 1rem;
+}
+
+/* Custom Confirm Dialog Stilleri */
+.p-confirm-dialog.custom-confirm-dialog .p-dialog-content {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.p-confirm-dialog.custom-confirm-dialog .p-confirm-dialog-icon {
+  font-size: 1.5rem;
+  color: var(--warning-color);
+}
+
+.p-confirm-dialog.custom-confirm-dialog .p-confirm-dialog-message {
+  font-weight: 500;
+  font-size: 1.1rem;
+}
+
+.p-confirm-dialog.custom-confirm-dialog .p-dialog-footer .p-button {
+  font-weight: 600;
+}
+
+.p-confirm-dialog.custom-confirm-dialog .p-dialog-footer .p-button.p-button-danger {
+  background-color: var(--danger-color);
+  border-color: var(--danger-color);
+}
+
+.p-confirm-dialog.custom-confirm-dialog .p-dialog-footer .p-button.p-button-danger:hover {
+  background-color: #dc2626;
+  border-color: #dc2626;
+}

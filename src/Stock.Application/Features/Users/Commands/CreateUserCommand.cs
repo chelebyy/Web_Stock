@@ -1,10 +1,10 @@
 using MediatR;
 using Stock.Application.Models.DTOs;
-// using Stock.Domain.Common.Result; // Kaldırıldı
+using Stock.Domain.Common;
 
 namespace Stock.Application.Features.Users.Commands
 {
-    public class CreateUserCommand : IRequest<UserDto>
+    public class CreateUserCommand : IRequest<Result<UserDto>>
     {
         public string Adi { get; set; } = string.Empty;
         public string Soyadi { get; set; } = string.Empty;

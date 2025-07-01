@@ -1,0 +1,199 @@
+// Bu dosya, `user-page-permissions.component.ts` dosyasından taşınan stilleri içerir.
+// Kart bileşeninin kendine ait, kapsüllenmiş stilleridir.
+
+.page-permission-card {
+  position: relative;
+  background-color: #ffffff;
+  border-radius: 12px;
+  border: 1px solid #e2e8f0;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+  transition: all 0.3s ease-in-out;
+  cursor: pointer;
+
+  &.card-expanded {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 90vw;
+    max-width: 600px;
+    z-index: 1002;
+    cursor: default;
+    border: 2px solid #3B82F6;
+    max-height: 80vh;
+    display: flex;
+    flex-direction: column;
+  }
+
+  &:hover:not(.card-expanded) {
+    transform: translateY(-4px);
+    box-shadow: 0 10px 15px rgba(0, 0, 0, 0.08);
+    border-color: #93c5fd;
+  }
+}
+
+.page-card-header {
+  display: flex;
+  align-items: center;
+  padding: 1.25rem;
+  gap: 1rem;
+  
+  &.header-expanded {
+    background-color: #f8fafc;
+    border-bottom: 1px solid #e2e8f0;
+  }
+}
+
+.page-icon {
+  font-size: 1.75rem;
+  color: #3B82F6;
+  flex-shrink: 0;
+  width: 40px;
+  text-align: center;
+}
+
+.page-info {
+  flex-grow: 1;
+}
+
+.page-name {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #1e293b;
+  margin: 0;
+}
+
+.page-description {
+  font-size: 0.875rem;
+  color: #64748b;
+  margin: 0.25rem 0 0;
+}
+
+.page-toggle {
+  font-size: 1.25rem;
+  color: #94a3b8;
+  transition: transform 0.2s ease;
+}
+
+.page-card-header:hover .page-toggle {
+  transform: scale(1.1);
+}
+
+.close-button {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  background-color: rgba(0, 0, 0, 0.05);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  z-index: 1003;
+  opacity: 0;
+  transform: scale(0.8);
+  transition: all 0.2s ease;
+
+  &.active {
+    opacity: 1;
+    transform: scale(1);
+  }
+
+  &:hover {
+    background-color: rgba(0, 0, 0, 0.1);
+  }
+
+  i {
+    font-size: 1rem;
+    color: #475569;
+  }
+}
+
+.page-card-content {
+  padding: 0 1.5rem 1.5rem;
+  overflow-y: auto;
+}
+
+.page-permissions-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 1rem;
+  padding-top: 1.5rem;
+}
+
+.permission-item {
+  display: flex;
+  align-items: center;
+}
+
+.permission-content {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.permission-label {
+  font-size: 0.95rem;
+  color: #334155;
+  cursor: pointer;
+
+  .permission-name {
+    display: block;
+    font-size: 0.8rem;
+    color: #94a3b8;
+    margin-top: 2px;
+  }
+}
+
+// Custom Checkbox
+.checkbox-wrapper {
+  position: relative;
+  width: 22px;
+  height: 22px;
+
+  input[type="checkbox"] {
+    opacity: 0;
+    width: 100%;
+    height: 100%;
+    cursor: pointer;
+    z-index: 1;
+
+    &:checked + .checkmark {
+      background-color: #3B82F6;
+      border-color: #3B82F6;
+    }
+
+    &:checked + .checkmark:after {
+      opacity: 1;
+      transform: rotate(45deg) scale(1);
+    }
+  }
+
+  .checkmark {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 22px;
+    height: 22px;
+    background-color: #fff;
+    border: 2px solid #cbd5e1;
+    border-radius: 6px;
+    transition: all 0.2s ease;
+
+    &:after {
+      content: '';
+      position: absolute;
+      left: 7px;
+      top: 3px;
+      width: 6px;
+      height: 12px;
+      border: solid white;
+      border-width: 0 2px 2px 0;
+      transform: rotate(45deg) scale(0.8);
+      opacity: 0;
+      transition: all 0.2s ease;
+    }
+  }
+} 

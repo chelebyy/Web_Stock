@@ -12,15 +12,35 @@ namespace Stock.Infrastructure.Data.Configurations
 
             builder.HasKey(u => u.Id);
 
+            // Value Object'lerin konfigürasyonu
+            builder.OwnsOne(u => u.FullName, fullNameBuilder =>
+            {
+                fullNameBuilder.Property(fn => fn.Adi)
+                    .HasColumnName("Adi")
+                    .IsRequired()
+                    .HasMaxLength(100);
+
+                fullNameBuilder.Property(fn => fn.Soyadi)
+                    .HasColumnName("Soyadi")
+                    .IsRequired()
+                    .HasMaxLength(100);
+            });
+
+            builder.OwnsOne(u => u.Sicil, sicilBuilder =>
+            {
+                sicilBuilder.Property(s => s.Value)
+                    .HasColumnName("Sicil")
+                    .IsRequired()
+                    .HasMaxLength(50);
+                
+                // Index'i OwnsOne yapılandırması içinde tanımlama
+                sicilBuilder.HasIndex(s => s.Value)
+                    .IsUnique()
+                    .HasDatabaseName("IX_Users_Sicil");
+            });
+
             builder.Property(u => u.PasswordHash)
                 .IsRequired();
-
-            builder.Property(u => u.Sicil)
-                .IsRequired()
-                .HasMaxLength(50);
-
-            // Sicil alanı için unique index eklendi
-            builder.HasIndex(u => u.Sicil).IsUnique();
 
             builder.Property(u => u.IsAdmin)
                 .HasDefaultValue(false);

@@ -1,10 +1,11 @@
 using MediatR;
 using Stock.Application.Features.Products.DTOs;
 using System.ComponentModel.DataAnnotations;
+using Stock.Domain.Common;
 
 namespace Stock.Application.Features.Products.Commands.CreateProduct
 {
-    public class CreateProductCommand : IRequest<ProductDto>
+    public class CreateProductCommand : IRequest<Result<ProductDto>>
     {
         [Required(ErrorMessage = "Ürün adı gereklidir.")]
         [StringLength(100, ErrorMessage = "Ürün adı en fazla 100 karakter olabilir.")]

@@ -6,6 +6,7 @@ import { environment } from '../../environments/environment';
 import { AuthService } from '../core/authentication/auth.service';
 import { BaseHttpService } from '../core/services/base-http.service';
 import { PagedResponse } from '../shared/models/paged-response.model';
+import { map } from 'rxjs/operators';
 
 @Injectable({
   providedIn: 'root'
@@ -24,6 +25,18 @@ export class RoleService extends BaseHttpService<Role> {
       .set('PageNumber', pageNumber.toString())
       .set('PageSize', pageSize.toString());
     return this.get<PagedResponse<Role>>('', params);
+  }
+
+  // Sayfalama olmadan tüm rolleri getir
+  getAllRoles(): Observable<Role[]> {
+    // Genellikle backend'de sayfalama olmadan tüm veriyi döndüren ayrı bir endpoint olur.
+    // Örnek olarak, çok büyük bir pageSize ile tüm veriyi çekmeyi deneyebiliriz.
+    // İdeal olan, backend'e /api/roles/all gibi bir endpoint eklemektir.
+    // Geçici çözüm olarak, pageSize'ı yüksek bir değere ayarlıyoruz.
+    let params = new HttpParams().set('PageSize', '1000'); // 1000 rol varsayımı
+    return this.get<PagedResponse<Role>>('', params).pipe(
+      map(pagedResponse => pagedResponse.items)
+    );
   }
 
   // Belirli bir rolü getir

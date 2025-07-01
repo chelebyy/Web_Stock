@@ -8,7 +8,8 @@ namespace Stock.Application.Common.Mappings
     {
         public CategoryProfile()
         {
-            CreateMap<Category, CategoryDto>();
+            CreateMap<Category, CategoryDto>()
+                .ForMember(dest => dest.Name, opt => opt.MapFrom(src => src.Name.Value));
             // Başka eşlemeler gerekirse buraya eklenebilir
         }
     }

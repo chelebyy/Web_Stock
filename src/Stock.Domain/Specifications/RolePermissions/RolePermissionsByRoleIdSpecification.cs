@@ -1,6 +1,6 @@
+using System;
 using Stock.Domain.Entities.Permissions;
 using System.Linq.Expressions;
-using System;
 
 namespace Stock.Domain.Specifications.RolePermissions
 {
@@ -9,6 +9,7 @@ namespace Stock.Domain.Specifications.RolePermissions
         public RolePermissionsByRoleIdSpecification(int roleId)
             : base(rp => rp.RoleId == roleId)
         {
+            AddInclude(rp => rp.Permission);
         }
     }
 } 

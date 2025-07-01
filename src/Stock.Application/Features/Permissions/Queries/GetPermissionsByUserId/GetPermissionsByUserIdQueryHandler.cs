@@ -1,6 +1,7 @@
 using AutoMapper;
 using MediatR;
 using Microsoft.Extensions.Logging;
+using Stock.Application.Common.Interfaces;
 using Stock.Application.Constants;
 using Stock.Application.Models.DTOs;
 using Stock.Domain.Entities;
@@ -20,77 +21,85 @@ namespace Stock.Application.Features.Permissions.Queries.GetPermissionsByUserId
         private readonly IUnitOfWork _unitOfWork;
         private readonly IMapper _mapper;
         private readonly ILogger<GetPermissionsByUserIdQueryHandler> _logger;
+        private readonly ICacheService _cacheService;
 
-        public GetPermissionsByUserIdQueryHandler(IUnitOfWork unitOfWork, IMapper mapper, ILogger<GetPermissionsByUserIdQueryHandler> logger)
+        public GetPermissionsByUserIdQueryHandler(
+            IUnitOfWork unitOfWork, 
+            IMapper mapper, 
+            ILogger<GetPermissionsByUserIdQueryHandler> logger,
+            ICacheService cacheService)
         {
             _unitOfWork = unitOfWork;
             _mapper = mapper;
             _logger = logger;
+            _cacheService = cacheService;
         }
 
         public async Task<IEnumerable<PermissionDto>> Handle(GetPermissionsByUserIdQuery request, CancellationToken cancellationToken)
         {
-            _logger.LogInformation("Getting all permissions for user with ID: {UserId}", request.UserId);
+            var cacheKey = $"user-permissions:{request.UserId}";
 
-            var userRepo = _unitOfWork.GetRepository<User>();
-            var userPermissionRepo = _unitOfWork.GetRepository<UserPermission>();
-
-            var userSpec = new UserWithRoleAndPermissionsSpecification(request.UserId);
-            var user = await userRepo.FirstOrDefaultAsync(userSpec, cancellationToken);
-
-            if (user == null)
+            return await _cacheService.GetOrCreateAsync(cacheKey, async () =>
             {
-                _logger.LogWarning("User with ID: {UserId} not found.", request.UserId);
-                return Enumerable.Empty<PermissionDto>();
-            }
+                _logger.LogInformation("Getting all permissions from database for user with ID: {UserId}", request.UserId);
 
-            var allPermissions = new Dictionary<int, PermissionDto>();
+                var userRepo = _unitOfWork.GetRepository<User>();
+                var userPermissionRepo = _unitOfWork.GetRepository<UserPermission>();
 
-            // Rol izinlerini ekle
-            if (user.Role?.RolePermissions != null)
-            {
-                foreach (var rp in user.Role.RolePermissions)
+                var userSpec = new UserWithRoleAndPermissionsSpecification(request.UserId);
+                var user = await userRepo.FirstOrDefaultAsync(userSpec, cancellationToken);
+
+                if (user == null)
                 {
-                    if (rp.Permission != null && !allPermissions.ContainsKey(rp.Permission.Id))
-                    {
-                        allPermissions.Add(rp.Permission.Id, MapToDto(rp.Permission, true, user.Role.Name));
-                    }
+                    _logger.LogWarning("User with ID: {UserId} not found.", request.UserId);
+                    return Enumerable.Empty<PermissionDto>();
                 }
-            }
 
-            // Kullanıcının özel izinlerini işle
-            var userPermissionsSpec = new UserPermissionsWithDetailsSpecification(request.UserId);
-            var userPermissions = await userPermissionRepo.ListAsync(userPermissionsSpec, cancellationToken);
+                var allPermissions = new Dictionary<int, PermissionDto>();
 
-            foreach (var up in userPermissions)
-            {
-                if (up.Permission != null)
+                // Rol izinlerini ekle
+                if (user.Role?.RolePermissions != null)
                 {
-                    if (allPermissions.TryGetValue(up.Permission.Id, out var existingDto))
+                    foreach (var rp in user.Role.RolePermissions)
                     {
-                        // Eğer rolünden gelen izin, kullanıcı tarafından özel olarak kaldırıldıysa
-                        if (!up.IsGranted)
+                        if (rp.Permission != null && !allPermissions.ContainsKey(rp.Permission.Id))
                         {
-                            existingDto.IsGranted = false;
-                            existingDto.IsCustom = true;
-                        }
-                        // Eğer rolünden gelen izin, kullanıcı tarafından özel olarak da eklendiyse (gereksiz ama olabilir)
-                        else if (existingDto.IsFromRole)
-                        {
-                            existingDto.IsCustom = true;
+                            allPermissions.Add(rp.Permission.Id, MapToDto(rp.Permission, true, user.Role.Name));
                         }
                     }
-                    // Eğer rolünden gelmeyen ve kullanıcıya özel olarak eklenmiş bir izinse
-                    else if (up.IsGranted)
+                }
+
+                // Kullanıcının özel izinlerini işle
+                var userPermissionsSpec = new UserPermissionsWithDetailsSpecification(request.UserId);
+                var userPermissions = await userPermissionRepo.ListAsync(userPermissionsSpec, cancellationToken);
+
+                foreach (var up in userPermissions)
+                {
+                    if (up.Permission != null)
                     {
-                        var newDto = MapToDto(up.Permission, false);
-                        newDto.IsCustom = true;
-                        allPermissions.Add(up.Permission.Id, newDto);
+                        if (allPermissions.TryGetValue(up.Permission.Id, out var existingDto))
+                        {
+                            if (!up.IsGranted)
+                            {
+                                existingDto.IsGranted = false;
+                                existingDto.IsCustom = true;
+                            }
+                            else if (existingDto.IsFromRole)
+                            {
+                                existingDto.IsCustom = true;
+                            }
+                        }
+                        else if (up.IsGranted)
+                        {
+                            var newDto = MapToDto(up.Permission, false);
+                            newDto.IsCustom = true;
+                            allPermissions.Add(up.Permission.Id, newDto);
+                        }
                     }
                 }
-            }
 
-            return allPermissions.Values.OrderBy(p => p.Group).ThenBy(p => p.Name);
+                return allPermissions.Values.OrderBy(p => p.Group).ThenBy(p => p.Name);
+            }, TimeSpan.FromMinutes(30), cancellationToken: cancellationToken);
         }
 
         private PermissionDto MapToDto(Permission permission, bool isFromRole = false, string? roleName = null)

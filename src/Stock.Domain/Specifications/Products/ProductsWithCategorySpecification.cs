@@ -108,9 +108,9 @@ namespace Stock.Domain.Specifications.Products
                     break;
                 case "categoryname":
                     if (sortDirection.ToLower() == "desc")
-                        ApplyOrderByDescending(p => p.Category.Name);
+                        ApplyOrderByDescending(p => p.Category.Name.Value);
                     else
-                        ApplyOrderBy(p => p.Category.Name);
+                        ApplyOrderBy(p => p.Category.Name.Value);
                     break;
                 default:
                     // Varsayılan olarak ürün adına göre sırala

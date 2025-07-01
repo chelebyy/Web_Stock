@@ -11,6 +11,7 @@ namespace Stock.Domain.Specifications.Users
             AddInclude(u => u.Role);
             AddInclude($"{nameof(User.Role)}.{nameof(Role.RolePermissions)}"); // String-based include (EF Core önerir)
             AddInclude($"{nameof(User.Role)}.{nameof(Role.RolePermissions)}.{nameof(RolePermission.Permission)}");
+            AddInclude(u => u.UserPermissions);
         }
     }
 } 

@@ -9,19 +9,22 @@ using System.Linq;
 using System.Security.Claims;
 using System.Text;
 using System.Threading.Tasks;
+using MediatR;
 using Stock.Application.Constants;
+using Stock.Application.Features.Permissions.Queries.GetPermissionsByUserId;
+using Stock.Application.Models.DTOs;
 
 namespace Stock.Infrastructure.Services
 {
     public class JwtTokenGenerator : IJwtTokenGenerator
     {
         private readonly IConfiguration _configuration;
-        private readonly IPermissionService _permissionService;
+        private readonly IMediator _mediator;
 
-        public JwtTokenGenerator(IConfiguration configuration, IPermissionService permissionService)
+        public JwtTokenGenerator(IConfiguration configuration, IMediator mediator)
         {
             _configuration = configuration;
-            _permissionService = permissionService;
+            _mediator = mediator;
         }
 
         public async Task<string> GenerateTokenAsync(User user)
@@ -37,7 +40,7 @@ namespace Stock.Infrastructure.Services
             var claims = new List<Claim>
             {
                 new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
-                new Claim(ClaimTypes.Name, $"{user.Adi} {user.Soyadi}"),
+                new Claim(ClaimTypes.Name, $"{user.FullName.Adi} {user.FullName.Soyadi}"),
                 new Claim(ClaimTypes.Role, user.IsAdmin ? RoleNames.Admin : (user.Role?.Name ?? RoleNames.User)),
                 new Claim(JwtClaimTypes.Sicil, user.Sicil ?? string.Empty)
             };
@@ -48,8 +51,10 @@ namespace Stock.Infrastructure.Services
                 claims.Add(new Claim(JwtClaimTypes.RoleId, user.Role.Id.ToString()));
             }
             
-            var permissions = await _permissionService.GetPermissionsByUserIdAsync(user.Id);
-            foreach (var permission in permissions.Where(p => p.IsGranted))
+            var permissionsQuery = new GetPermissionsByUserIdQuery(user.Id);
+            var permissions = await _mediator.Send(permissionsQuery);
+
+            foreach (var permission in permissions)
             {
                 claims.Add(new Claim(JwtClaimTypes.Permission, permission.Name));
             }
@@ -57,7 +62,7 @@ namespace Stock.Infrastructure.Services
             var tokenDescriptor = new SecurityTokenDescriptor
             {
                 Subject = new ClaimsIdentity(claims),
-                Expires = DateTime.UtcNow.AddHours(Convert.ToDouble(_configuration["Jwt:ExpirationHours"] ?? "1")),
+                Expires = DateTime.UtcNow.AddMinutes(Convert.ToDouble(_configuration["Jwt:ExpiryMinutes"] ?? "60")),
                 SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature),
                 Issuer = _configuration["Jwt:Issuer"],
                 Audience = _configuration["Jwt:Audience"]

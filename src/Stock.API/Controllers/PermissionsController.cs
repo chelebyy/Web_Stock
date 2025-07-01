@@ -23,48 +23,46 @@ using Stock.Application.Features.Permissions.Queries.GetPermissionsByRoleId;
 using Stock.Application.Features.Permissions.Queries.GetPermissionsByUserId;
 using Stock.Application.Features.Users.Commands.UpdateUserPermissions;
 using Stock.Domain.Exceptions;
+using Stock.Application.Features.Permissions.Queries.GetUserHasPermission;
+using Stock.Application.Features.Permissions.Commands.AddMissingPermissions;
+using Stock.Application.Features.Permissions.Commands.RemoveUserPermission;
+using Stock.Application.Features.Permissions.Commands.ResetUserPermissions;
+using Stock.Application.Features.Permissions.Queries.GetUserCustomPermissions;
+
 
 namespace Stock.API.Controllers
 {
     /// <summary>
-    /// İzin yönetimi ile ilgili API endpoint'lerini içerir (CQRS ile).
-    /// İzinleri listeleme, gruplama, role veya kullanıcıya atama, kaldırma ve kontrol etme işlemlerini sağlar.
+    /// Provides API endpoints for managing permissions using the CQRS pattern.
+    /// Allows for listing, grouping, assigning to roles/users, revoking, and checking permissions.
     /// </summary>
     [ApiController]
-    [Route(ApiConstants.ApiBaseRoute + "/[controller]")]
+    [Route("api/[controller]")]
     [Authorize]
     public class PermissionsController : ControllerBase
     {
-        private readonly IPermissionService _permissionService;
-        private readonly ApplicationDbContext _context;
         private readonly ILogger<PermissionsController> _logger;
         private readonly IMediator _mediator;
 
         /// <summary>
         /// PermissionsController sınıfının yapıcı metodu.
-        /// Bağımlılıkları (IPermissionService, ApplicationDbContext, ILogger, IMediator) enjekte eder.
+        /// Bağımlılıkları (ILogger, IMediator) enjekte eder.
         /// </summary>
-        /// <param name="permissionService">İzin işlemleri servisi.</param>
-        /// <param name="context">Veritabanı context nesnesi (Geçici olarak kullanılıyor).</param>
         /// <param name="logger">Loglama servisi.</param>
         /// <param name="mediator">MediatR nesnesi.</param>
         public PermissionsController(
-            IPermissionService permissionService,
-            ApplicationDbContext context,
             ILogger<PermissionsController> logger,
             IMediator mediator)
         {
-            _permissionService = permissionService;
-            _context = context;
             _logger = logger;
             _mediator = mediator;
         }
 
         /// <summary>
-        /// Sistemdeki tüm tanımlı izinleri listeler.
+        /// Retrieves a list of all defined permissions in the system.
         /// </summary>
-        /// <returns>İzinlerin listesi.</returns>
-        /// <response code="200">İzinler başarıyla listelendi.</response>
+        /// <returns>A list of permissions.</returns>
+        /// <response code="200">Returns the list of all permissions.</response>
         [HttpGet]
         [ProducesResponseType(typeof(IEnumerable<PermissionDto>), StatusCodes.Status200OK)]
         public async Task<ActionResult<IEnumerable<PermissionDto>>> GetAllPermissions()
@@ -75,10 +73,13 @@ namespace Stock.API.Controllers
         }
 
         /// <summary>
-        /// Gets a specific permission by its ID.
+        /// Retrieves a specific permission by its unique ID.
         /// </summary>
-        /// <param name="id">The ID of the permission.</param>
-        /// <returns>The permission DTO.</returns>
+        /// <param name="id">The ID of the permission to retrieve.</param>
+        /// <returns>The details of the specified permission.</returns>
+        /// <response code="200">Returns the permission details.</response>
+        /// <response code="403">If the user does not have the required 'Permissions.View' permission.</response>
+        /// <response code="404">If a permission with the specified ID is not found.</response>
         [HttpGet("{id}")]
         [RequirePermission(PermissionNames.PermissionsView)]
         [ProducesResponseType(typeof(PermissionDto), StatusCodes.Status200OK)]
@@ -91,9 +92,12 @@ namespace Stock.API.Controllers
         }
 
         /// <summary>
-        /// Sistemdeki tüm izinleri gruplarına göre listeler (Sadece Admin yetkisine sahip kullanıcılar).
+        /// Retrieves all permissions, grouped by their functional area (e.g., "Users", "Roles"). (Admin only)
         /// </summary>
-        /// <returns>A list of permission groups with their permissions.</returns>
+        /// <returns>A list of permission groups, each containing a list of permissions.</returns>
+        /// <response code="200">Returns the list of grouped permissions.</response>
+        /// <response code="403">If the user does not have the required 'Permissions.View' permission.</response>
+        /// <response code="500">If an internal server error occurs.</response>
         [HttpGet("groups")]
         [RequirePermission(PermissionNames.PermissionsView)]
         [ProducesResponseType(typeof(List<PermissionGroupDto>), StatusCodes.Status200OK)]
@@ -107,10 +111,12 @@ namespace Stock.API.Controllers
         }
 
         /// <summary>
-        /// Belirtilen role atanmış izinleri listeler (Sadece Admin yetkisine sahip kullanıcılar).
+        /// Retrieves all permissions assigned to a specific role. (Admin only)
         /// </summary>
         /// <param name="roleId">The ID of the role.</param>
-        /// <returns>A list of permissions assigned to the role.</returns>
+        /// <returns>A list of permissions assigned to the specified role.</returns>
+        /// <response code="200">Returns the list of permissions for the role.</response>
+        /// <response code="403">If the user does not have the required 'Permissions.View' permission.</response>
         [HttpGet("role/{roleId}")]
         [RequirePermission(PermissionNames.PermissionsView)]
         [ProducesResponseType(typeof(List<PermissionDto>), StatusCodes.Status200OK)]
@@ -123,11 +129,12 @@ namespace Stock.API.Controllers
         }
 
         /// <summary>
-        /// Belirtilen kullanıcıya atanmış (doğrudan veya rolünden gelen) izinleri listeler.
-        /// Bu endpoint'e erişim için 'Permissions.View' izni gereklidir.
+        /// Retrieves all permissions assigned to a specific user, including those inherited from their role.
         /// </summary>
         /// <param name="userId">The ID of the user.</param>
-        /// <returns>A list of permissions assigned to the user.</returns>
+        /// <returns>A comprehensive list of permissions for the user.</returns>
+        /// <response code="200">Returns the list of all permissions for the user.</response>
+        /// <response code="403">If the user does not have the required 'Permissions.View' permission.</response>
         [HttpGet("user/{userId}")]
         [RequirePermission(PermissionNames.PermissionsView)]
         [ProducesResponseType(typeof(List<PermissionDto>), StatusCodes.Status200OK)]
@@ -140,14 +147,33 @@ namespace Stock.API.Controllers
         }
 
         /// <summary>
-        /// Bir kullanıcıya ait özel izinleri günceller.
+        /// Retrieves only the custom permissions (grant/revoke) specifically assigned to a user, excluding inherited role permissions.
         /// </summary>
-        /// <param name="userId">İzinleri güncellenecek kullanıcının ID'si.</param>
-        /// <param name="command">Yeni izinleri ve durumlarını (granted/revoked) içeren komut.</param>
-        /// <returns>Başarılı olursa NoContent (204) yanıtı döner.</returns>
-        /// <response code="204">Kullanıcı izinleri başarıyla güncellendi.</response>
-        /// <response code="400">Geçersiz kullanıcı ID'si veya izin bilgileri.</response>
-        /// <response code="404">Belirtilen ID'ye sahip kullanıcı bulunamadı.</response>
+        /// <param name="userId">The ID of the user.</param>
+        /// <returns>A list of custom-assigned permissions for the user.</returns>
+        /// <response code="200">Returns the list of custom permissions.</response>
+        /// <response code="403">If the user does not have the required 'Permissions.View' permission.</response>
+        [HttpGet("users/{userId}/custom-permissions")]
+        [RequirePermission(PermissionNames.PermissionsView)]
+        [ProducesResponseType(typeof(List<PermissionDto>), StatusCodes.Status200OK)]
+        public async Task<ActionResult<List<PermissionDto>>> GetCustomPermissionsByUserId(int userId)
+        {
+            _logger.LogInformation("Getting custom permissions for user with ID: {UserId}", userId);
+            var query = new GetUserCustomPermissionsQuery(userId);
+            var result = await _mediator.Send(query);
+            return Ok(result);
+        }
+
+        /// <summary>
+        /// Updates the custom permissions for a specific user.
+        /// </summary>
+        /// <param name="userId">The ID of the user whose permissions are to be updated.</param>
+        /// <param name="command">The command containing the permissions to grant or revoke.</param>
+        /// <returns>A success response if the update is successful.</returns>
+        /// <response code="204">If the user permissions were successfully updated.</response>
+        /// <response code="400">If the request is invalid (e.g., validation errors).</response>
+        /// <response code="404">If the specified user is not found.</response>
+        /// <response code="500">If an internal server error occurs.</response>
         [HttpPut("users/{userId}/permissions")]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
@@ -183,17 +209,15 @@ namespace Stock.API.Controllers
         }
 
         /// <summary>
-        /// Belirtilen kullanıcının belirtilen izne sahip olup olmadığını kontrol eder.
-        /// Bu endpoint'e erişim için 'Permissions.Check' izni gereklidir.
+        /// Checks if a specific user has a given permission.
         /// </summary>
-        /// <param name="userId">Kontrol edilecek kullanıcının ID'si.</param>
-        /// <param name="permissionName">Kontrol edilecek iznin adı (örn. "Users.View").</param>
-        /// <returns>Kullanıcı izne sahipse true, değilse false döner.</returns>
-        /// <response code="200">İzin kontrol sonucu başarıyla döndürüldü.</response>
-        /// <response code="401">Kimlik doğrulanmamış veya token geçersiz.</response>
-        /// <response code="403">Gerekli 'Permissions.Check' izni bulunmuyor.</response>
-        /// <response code="404">Kullanıcı ID veya izin adı bulunamadı.</response>
-        /// <response code="500">İzin kontrolü sırasında bir sunucu hatası oluştu.</response>
+        /// <param name="userId">The ID of the user to check.</param>
+        /// <param name="permissionName">The name of the permission to check (e.g., "Users.View").</param>
+        /// <returns>True if the user has the permission; otherwise, false.</returns>
+        /// <response code="200">Returns the result of the permission check.</response>
+        /// <response code="403">If the user does not have the required 'Permissions.Check' permission to perform the check.</response>
+        /// <response code="404">If the specified user or permission name is not found.</response>
+        /// <response code="500">If an internal server error occurs.</response>
         [HttpGet("user/{userId}/check/{permissionName}")]
         [RequirePermission(PermissionNames.PermissionsCheck)]
         [ProducesResponseType(typeof(bool), StatusCodes.Status200OK)]
@@ -203,24 +227,23 @@ namespace Stock.API.Controllers
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public async Task<ActionResult<bool>> UserHasPermission(int userId, string permissionName)
         {
-            var result = await _permissionService.UserHasPermissionAsync(userId, permissionName);
+            var query = new GetUserHasPermissionQuery(userId, permissionName);
+            var result = await _mediator.Send(query);
             return Ok(result);
         }
 
         /// <summary>
-        /// Veritabanına eksik olan temel sayfa erişim izinlerini manuel olarak ekler (Sadece Admin).
-        /// Bu endpoint genellikle ilk kurulum veya güncelleme sonrası kullanılır.
+        /// Manually adds missing page access permissions to the database. (Admin only)
         /// </summary>
         /// <remarks>
-        /// Bu metod, `PermissionNames` sınıfında tanımlı olan ancak veritabanında bulunmayan
-        /// `Pages.Revir.View` ve `Pages.BilgiIslem.View` izinlerini ekler.
-        /// Bu endpoint'in production ortamında dikkatli kullanılması gerekir.
-        /// TODO: Bu işlem startup'ta veya migration içinde yapılmalı.
+        /// This endpoint is typically used after initial setup or an update to ensure that core permissions
+        /// defined in `PermissionNames` (e.g., `Pages.Revir.View`, `Pages.BilgiIslem.View`) exist in the database.
+        /// Use with caution in a production environment.
         /// </remarks>
-        /// <returns>Başarılı olursa Ok mesajı döner.</returns>
-        /// <response code="200">Eksik izinler başarıyla kontrol edildi ve/veya eklendi.</response>
-        /// <response code="401">Yetkisiz erişim (Admin rolü gerekli).</response>
-        /// <response code="500">İzin ekleme sırasında bir sunucu hatası oluştu.</response>
+        /// <returns>A success message if the operation is successful.</returns>
+        /// <response code="200">If the missing permissions were successfully checked and/or added.</response>
+        /// <response code="401">If the user is not authenticated or is not an Admin.</response>
+        /// <response code="500">If an internal server error occurs.</response>
         [HttpGet("add-missing-permissions")]
         [Authorize(Roles = RoleNames.Admin)]
         [ProducesResponseType(typeof(object), StatusCodes.Status200OK)]
@@ -230,15 +253,8 @@ namespace Stock.API.Controllers
         {
             try
             {
-                _logger.LogInformation(LogMessages.AddingMissingPermissions);
-                
-                await AddPermissionIfNotExistsAsync(PermissionNames.PagesRevirView, "Revir sayfasını görüntüleme", "Sayfa Erişimi", "Page", "Revir", "View");
-                
-                await AddPermissionIfNotExistsAsync(PermissionNames.PagesBilgiIslemView, "Bilgi İşlem sayfasını görüntüleme", "Sayfa Erişimi", "Page", "BilgiIslem", "View");
-                
-                await _context.SaveChangesAsync();
-                
-                return Ok(new { message = ApiConstants.SuccessMessage });
+                await _mediator.Send(new AddMissingPermissionsCommand());
+                return Ok(new { message = "Eksik izinler başarıyla kontrol edildi ve/veya eklendi." });
             }
             catch (Exception ex)
             {
@@ -247,46 +263,15 @@ namespace Stock.API.Controllers
             }
         }
 
-        private async Task AddPermissionIfNotExistsAsync(string name, string description, string group, string resourceType, string resourceName, string action)
-        {
-            var permissionExists = await _context.Permissions.AnyAsync(p => p.Name == name);
-            if (!permissionExists)
-            {
-                var permissionResult = Permission.Create(
-                    name: name,
-                    description: description,
-                    resourceType: resourceType,
-                    resourceName: resourceName,
-                    action: action,
-                    group: group);
-
-                if (permissionResult.IsSuccess)
-                {
-                    _context.Permissions.Add(permissionResult.Value);
-                    _logger.LogInformation(string.Format(LogMessages.PermissionAdded, name));
-                }
-                else
-                {
-                    _logger.LogWarning(string.Format("İzin eklenemedi: {0}. Hata: {1}", name, permissionResult.Error));
-                }
-            }
-            else
-            {
-                _logger.LogInformation(string.Format(LogMessages.PermissionAlreadyExists, name));
-            }
-        }
-
         /// <summary>
-        /// Yeni bir izin oluşturur.
-        /// Bu endpoint'e erişim için 'Permissions.Create' izni gereklidir.
+        /// Creates a new permission.
         /// </summary>
-        /// <param name="command">Oluşturulacak iznin bilgilerini içeren komut.</param>
-        /// <returns>Oluşturulan iznin bilgileri.</returns>
-        /// <response code="201">İzin başarıyla oluşturuldu ve oluşturulan izin bilgileri döndürüldü.</response>
-        /// <response code="400">Geçersiz istek verisi veya domain doğrulama hatası.</response>
-        /// <response code="401">Kimlik doğrulanmamış veya token geçersiz.</response>
-        /// <response code="403">Gerekli 'Permissions.Create' izni bulunmuyor.</response>
-        /// <response code="500">İzin oluşturma sırasında bir sunucu hatası oluştu.</response>
+        /// <param name="command">The command for creating a permission.</param>
+        /// <returns>The created permission.</returns>
+        /// <response code="201">Returns the newly created permission.</response>
+        /// <response code="400">If the request is invalid.</response>
+        /// <response code="403">If the user does not have the required 'Permissions.Create' permission.</response>
+        /// <response code="500">If an internal server error occurs.</response>
         [HttpPost]
         [RequirePermission(PermissionNames.PermissionsCreate)]
         [ProducesResponseType(typeof(PermissionDto), StatusCodes.Status201Created)]
@@ -325,18 +310,16 @@ namespace Stock.API.Controllers
         }
 
         /// <summary>
-        /// Mevcut bir izni günceller.
-        /// Bu endpoint'e erişim için 'Permissions.Update' izni gereklidir.
+        /// Updates an existing permission.
         /// </summary>
-        /// <param name="id">Güncellenecek iznin ID'si.</param>
-        /// <param name="command">Güncellenecek iznin bilgilerini içeren komut.</param>
-        /// <returns>İşlem başarılı olursa 204 No Content döner.</returns>
-        /// <response code="204">İzin başarıyla güncellendi.</response>
-        /// <response code="400">Geçersiz istek verisi, ID uyuşmazlığı veya domain doğrulama hatası.</response>
-        /// <response code="401">Kimlik doğrulanmamış veya token geçersiz.</response>
-        /// <response code="403">Gerekli 'Permissions.Update' izni bulunmuyor.</response>
-        /// <response code="404">Güncellenecek izin bulunamadı.</response>
-        /// <response code="500">İzin güncelleme sırasında bir sunucu hatası oluştu.</response>
+        /// <param name="id">The ID of the permission to update.</param>
+        /// <param name="command">The command for updating the permission.</param>
+        /// <returns>An success response if the update is successful.</returns>
+        /// <response code="204">If the permission was successfully updated.</response>
+        /// <response code="400">If the request is invalid (e.g., ID mismatch).</response>
+        /// <response code="403">If the user does not have the required 'Permissions.Update' permission.</response>
+        /// <response code="404">If the permission is not found.</response>
+        /// <response code="500">If an internal server error occurs.</response>
         [HttpPut("{id}")]
         [RequirePermission(PermissionNames.PermissionsUpdate)]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
@@ -390,16 +373,14 @@ namespace Stock.API.Controllers
         }
 
         /// <summary>
-        /// Belirtilen ID'ye sahip izni siler.
-        /// Bu endpoint'e erişim için 'Permissions.Delete' izni gereklidir.
+        /// Deletes a permission.
         /// </summary>
-        /// <param name="id">Silinecek iznin ID'si.</param>
-        /// <returns>İşlem başarılı olursa 204 No Content döner.</returns>
-        /// <response code="204">İzin başarıyla silindi.</response>
-        /// <response code="401">Kimlik doğrulanmamış veya token geçersiz.</response>
-        /// <response code="403">Gerekli 'Permissions.Delete' izni bulunmuyor.</response>
-        /// <response code="404">Silinecek izin bulunamadı.</response>
-        /// <response code="500">İzin silme sırasında bir sunucu hatası oluştu.</response>
+        /// <param name="id">The ID of the permission to delete.</param>
+        /// <returns>A success response if the deletion is successful.</returns>
+        /// <response code="204">If the permission was successfully deleted.</response>
+        /// <response code="403">If the user does not have the required 'Permissions.Delete' permission.</response>
+        /// <response code="404">If the permission is not found.</response>
+        /// <response code="500">If an internal server error occurs.</response>
         [HttpDelete("{id}")]
         [RequirePermission(PermissionNames.PermissionsDelete)]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
@@ -441,28 +422,43 @@ namespace Stock.API.Controllers
             }
         }
 
+        /// <summary>
+        /// Removes a specific custom permission from a user.
+        /// </summary>
+        /// <param name="userId">The ID of the user.</param>
+        /// <param name="permissionId">The ID of the permission to remove.</param>
+        /// <returns>A success response if the operation is successful.</returns>
+        /// <response code="204">If the permission was successfully removed from the user.</response>
+        /// <response code="403">If the user does not have the required 'Permissions.Update' permission.</response>
         [HttpDelete("users/{userId}/permissions/{permissionId}")]
+        [RequirePermission(PermissionNames.PermissionsUpdate)]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(StatusCodes.Status403Forbidden)]
         public async Task<IActionResult> RemoveUserPermission(int userId, int permissionId)
         {
-            // This can be refactored to a command later if needed
-            var result = await _permissionService.RemoveUserPermissionAsync(userId, permissionId);
-            if (result)
-            {
-                return Ok(new { message = "Kullanıcı izni başarıyla kaldırıldı." });
-            }
-            return BadRequest(new { error = "Kullanıcı izni kaldırılamadı." });
+            var command = new RemoveUserPermissionCommand { UserId = userId, PermissionId = permissionId };
+            await _mediator.Send(command);
+            return NoContent();
         }
 
+        /// <summary>
+        /// Resets all custom permissions for a user, so they only inherit permissions from their role.
+        /// </summary>
+        /// <param name="userId">The ID of the user whose permissions are to be reset.</param>
+        /// <returns>A success response if the operation is successful.</returns>
+        /// <response code="204">If the user's custom permissions were successfully reset.</response>
+        /// <response code="403">If the user does not have the required 'Permissions.Update' permission.</response>
         [HttpPost("users/{userId}/reset-permissions")]
+        [RequirePermission(PermissionNames.PermissionsUpdate)]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(StatusCodes.Status403Forbidden)]
         public async Task<IActionResult> ResetUserPermissions(int userId)
         {
-            // This can be refactored to a command later if needed
-             var result = await _permissionService.ResetUserToRolePermissionsAsync(userId);
-            if (result)
-            {
-                return Ok(new { message = "Kullanıcı izinleri başarıyla rol varsayılanlarına sıfırlandı." });
-            }
-            return BadRequest(new { error = "Kullanıcı izinleri sıfırlanamadı." });
+            var command = new ResetUserPermissionsCommand(userId);
+            await _mediator.Send(command);
+            return NoContent();
         }
     }
 

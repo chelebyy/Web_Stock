@@ -6,9 +6,12 @@ namespace Stock.Domain.Entities
     public class ActivityLog : BaseEntity
     {
         public int? UserId { get; set; }
-
-        [Required]
-        [StringLength(50)]
+        public string Action { get; set; } = string.Empty;
+        public string TableName { get; set; } = string.Empty;
+        public string EntityId { get; set; } = string.Empty;
+        public string? OldValues { get; set; }
+        public string? NewValues { get; set; }
+        public DateTime Timestamp { get; set; }
         public string Username { get; set; } = string.Empty;
 
         [Required]
@@ -18,8 +21,6 @@ namespace Stock.Domain.Entities
         [Required]
         [StringLength(500)]
         public string Description { get; set; } = string.Empty;
-
-        public DateTime Timestamp { get; set; }
 
         public string? AdditionalInfo { get; set; }
 

@@ -7,6 +7,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging; // Loglama için
 using Stock.Domain.Exceptions; // DomainErrors için
+using Stock.Application.Common.Interfaces; // ICacheService için
 
 namespace Stock.Application.Features.Categories.Commands
 {
@@ -15,12 +16,18 @@ namespace Stock.Application.Features.Categories.Commands
         private readonly ICategoryRepository _categoryRepository;
         private readonly IUnitOfWork _unitOfWork;
         private readonly ILogger<DeleteCategoryCommandHandler> _logger;
+        private readonly ICacheService _cacheService;
 
-        public DeleteCategoryCommandHandler(ICategoryRepository categoryRepository, IUnitOfWork unitOfWork, ILogger<DeleteCategoryCommandHandler> logger)
+        public DeleteCategoryCommandHandler(
+            ICategoryRepository categoryRepository, 
+            IUnitOfWork unitOfWork, 
+            ILogger<DeleteCategoryCommandHandler> logger,
+            ICacheService cacheService)
         {
             _categoryRepository = categoryRepository;
             _unitOfWork = unitOfWork;
             _logger = logger;
+            _cacheService = cacheService;
         }
 
         public async Task<Result> Handle(DeleteCategoryCommand request, CancellationToken cancellationToken)
@@ -46,6 +53,15 @@ namespace Stock.Application.Features.Categories.Commands
                     _logger.LogError("Kategori silinirken veritabanına kaydetme başarısız: ID {CategoryId}", request.Id);
                     return Result.Failure("Failed to delete the category from the database.");
                 }
+
+                // Invalidate both the list cache and the specific item cache
+                var listCachePrefix = "categories_page";
+                await _cacheService.RemoveByPrefixAsync(listCachePrefix).ConfigureAwait(false);
+                _logger.LogInformation("Cache invalidated for prefix: {CachePrefix}", listCachePrefix);
+
+                var specificCacheKey = $"categories:{request.Id}";
+                await _cacheService.RemoveAsync(specificCacheKey).ConfigureAwait(false);
+                _logger.LogInformation("Cache invalidated for key: '{SpecificCacheKey}'", specificCacheKey);
 
                 _logger.LogInformation("ID: {CategoryId} olan kategori başarıyla silindi.", request.Id);
                 return Result.Success();

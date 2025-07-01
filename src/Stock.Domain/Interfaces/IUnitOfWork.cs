@@ -12,6 +12,7 @@ namespace Stock.Domain.Interfaces
         IPermissionRepository Permissions { get; }
         IProductRepository Products { get; }
         ICategoryRepository Categories { get; }
+        IActivityLogRepository ActivityLogs { get; }
         
         /// <summary>
         /// Belirtilen entity türü için Generic Repository örneği döndürür.

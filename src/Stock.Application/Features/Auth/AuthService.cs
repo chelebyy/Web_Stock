@@ -52,7 +52,7 @@ public class AuthService
         {
             var roleSpec = new RoleByIdSpecification(roleId.Value);
             var role = await _unitOfWork.GetRepository<Role>().FirstOrDefaultAsync(roleSpec);
-            if (role != null && role.Name == "Admin")
+            if (role != null && role.Name.Value == "Admin")
             {
                 isAdmin = true;
             }
@@ -63,10 +63,23 @@ public class AuthService
             }
         }
 
+        var fullNameResult = FullName.Create(registerDto.Adi, registerDto.Soyadi);
+        if (!fullNameResult.IsSuccess)
+        {
+            _logger.LogWarning("FullName creation failed: {Error}", fullNameResult.Error);
+            return Result<AuthResponseDto>.Failure(fullNameResult.Error);
+        }
+
+        var sicilResult = Sicil.Create(registerDto.Sicil);
+        if (!sicilResult.IsSuccess)
+        {
+            _logger.LogWarning("Sicil creation failed: {Error}", sicilResult.Error);
+            return Result<AuthResponseDto>.Failure(sicilResult.Error);
+        }
+
         var userResult = User.Create(
-            registerDto.Adi,
-            registerDto.Soyadi,
-            registerDto.Sicil,
+            fullNameResult.Value,
+            sicilResult.Value,
             passwordHash,
             roleId,
             isAdmin);
@@ -99,12 +112,12 @@ public class AuthService
             Token = token,
             UserId = registeredUserWithRole.Id.ToString(),
             Sicil = registeredUserWithRole.Sicil,
-            Adi = registeredUserWithRole.Adi,
-            Soyadi = registeredUserWithRole.Soyadi,
+            Adi = registeredUserWithRole.FullName.Adi,
+            Soyadi = registeredUserWithRole.FullName.Soyadi,
             IsAdmin = registeredUserWithRole.IsAdmin,
             Success = true,
             RoleId = registeredUserWithRole.RoleId,
-            RoleName = registeredUserWithRole.Role?.Name
+            RoleName = registeredUserWithRole.Role?.Name.Value
         });
     }
 } 

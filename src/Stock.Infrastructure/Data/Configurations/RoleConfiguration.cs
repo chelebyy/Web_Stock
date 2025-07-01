@@ -12,14 +12,20 @@ namespace Stock.Infrastructure.Data.Configurations
 
             builder.HasKey(r => r.Id);
 
-            builder.Property(r => r.Name)
-                .IsRequired()
-                .HasMaxLength(50)
-                .UsePropertyAccessMode(PropertyAccessMode.Property);
+            builder.OwnsOne(r => r.Name, nameBuilder =>
+            {
+                nameBuilder.Property(n => n.Value)
+                    .HasColumnName("Name")
+                    .IsRequired()
+                    .HasMaxLength(50);
+                
+                nameBuilder.HasIndex(n => n.Value)
+                    .IsUnique()
+                    .HasDatabaseName("IX_Roles_Name");
+            });
 
             builder.Property(r => r.Description)
-                .HasMaxLength(200)
-                .UsePropertyAccessMode(PropertyAccessMode.Property);
+                .HasMaxLength(200);
 
             builder.Property(r => r.CreatedAt)
                 .IsRequired();
@@ -28,4 +34,4 @@ namespace Stock.Infrastructure.Data.Configurations
                 .HasDefaultValue(false);
         }
     }
-} 
+}

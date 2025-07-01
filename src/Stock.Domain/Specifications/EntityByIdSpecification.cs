@@ -16,15 +16,13 @@ namespace Stock.Domain.Specifications
         /// </summary>
         /// <param name="id">Aranacak entity ID'si.</param>
         /// <param name="includes">İlişkili verileri dahil etmek için ifadeler.</param>
-        public EntityByIdSpecification(int id, params Expression<Func<T, object>>[] includes) 
-            : base(e => e.Id == id)
+        public EntityByIdSpecification(int id, params Expression<Func<T, object>>[] includes)
         {
-            if (includes != null)
+            AddCriteria(entity => entity.Id == id);
+
+            foreach (var include in includes)
             {
-                foreach (var include in includes)
-                {
-                    AddInclude(include);
-                }
+                AddInclude(include);
             }
         }
     }

@@ -201,5 +201,65 @@ namespace Stock.Domain.Specifications
         {
             Criteria = criteria;
         }
+
+        /// <summary>
+        /// Mevcut kriterlere yeni bir kriter ekler (AND ile birleştirir).
+        /// </summary>
+        /// <param name="criteria">Eklenecek kriter ifadesi</param>
+        protected void AddCriteria(Expression<Func<T, bool>> criteria)
+        {
+            if (Criteria == null)
+            {
+                Criteria = criteria;
+            }
+            else
+            {
+                var param = Expression.Parameter(typeof(T), "x");
+                var left = Expression.Invoke(Criteria, param);
+                var right = Expression.Invoke(criteria, param);
+                var combined = Expression.AndAlso(left, right);
+                Criteria = Expression.Lambda<Func<T, bool>>(combined, param);
+            }
+        }
+
+        /// <summary>
+        /// Artan sıralama kriterini ayarlar (yeni API).
+        /// </summary>
+        /// <param name="orderByExpression">Sıralama ifadesi.</param>
+        protected virtual void AddOrderBy(Expression<Func<T, object>> orderByExpression)
+        {
+            OrderBy = orderByExpression;
+            OrderByDescending = null;
+        }
+
+        /// <summary>
+        /// Azalan sıralama kriterini ayarlar (yeni API).
+        /// </summary>
+        /// <param name="orderByDescendingExpression">Sıralama ifadesi.</param>
+        protected virtual void AddOrderByDescending(Expression<Func<T, object>> orderByDescendingExpression)
+        {
+            OrderByDescending = orderByDescendingExpression;
+            OrderBy = null;
+        }
+
+        /// <summary>
+        /// Sayfalama parametrelerini ayarlar (sayfa number bazlı).
+        /// </summary>
+        /// <param name="pageNumber">Sayfa numarası (1'den başlar)</param>
+        /// <param name="pageSize">Sayfa boyutu</param>
+        public virtual void ApplyPaging(int pageNumber, int pageSize, bool isPageBased = true)
+        {
+            if (isPageBased)
+            {
+                Skip = (pageNumber - 1) * pageSize;
+                Take = pageSize;
+            }
+            else
+            {
+                Skip = pageNumber;
+                Take = pageSize;
+            }
+            IsPagingEnabled = true;
+        }
     }
 } 

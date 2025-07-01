@@ -6,7 +6,7 @@ namespace Stock.Application.Features.Roles.Commands.UpdateRole
     /// <summary>
     /// Represents the command to update an existing role.
     /// </summary>
-    public class UpdateRoleCommand : IRequest<bool>
+    public class UpdateRoleCommand : IRequest<Unit>
     {
         /// <summary>
         /// Gets or sets the ID of the role to update.

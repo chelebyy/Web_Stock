@@ -19,10 +19,8 @@ namespace Stock.API.Attributes
 
         public async Task OnActionExecutionAsync(ActionExecutingContext context, ActionExecutionDelegate next)
         {
-            var permissionService = context.HttpContext.RequestServices
-                .GetRequiredService<IPermissionService>();
-            var currentUserService = context.HttpContext.RequestServices
-                .GetRequiredService<ICurrentUserService>();
+            var authorizationService = context.HttpContext.RequestServices.GetRequiredService<IAuthorizationService>();
+            var currentUserService = context.HttpContext.RequestServices.GetRequiredService<ICurrentUserService>();
 
             if (currentUserService.UserId == null)
             {
@@ -30,8 +28,7 @@ namespace Stock.API.Attributes
                 return;
             }
 
-            bool hasPermission = await permissionService.UserHasPermissionAsync(
-                currentUserService.UserId.Value, _permission);
+            bool hasPermission = await authorizationService.HasPermissionAsync(currentUserService.UserId.Value, _permission);
 
             if (!hasPermission)
             {

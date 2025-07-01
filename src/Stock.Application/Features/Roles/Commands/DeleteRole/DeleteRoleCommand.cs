@@ -5,7 +5,7 @@ namespace Stock.Application.Features.Roles.Commands.DeleteRole;
 /// <summary>
 /// Represents the command to delete a role.
 /// </summary>
-public class DeleteRoleCommand : IRequest<bool>
+public class DeleteRoleCommand : IRequest<Unit>
 {
     /// <summary>
     /// Gets or sets the ID of the role to delete.

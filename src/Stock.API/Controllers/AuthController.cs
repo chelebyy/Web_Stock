@@ -9,55 +9,66 @@ using System.Security.Claims;
 using Microsoft.Extensions.Logging;
 using Stock.Application.Features.Users.Commands;
 using System;
+using System.Linq;
+using Stock.Application.Features.Auth.Commands.Login;
+using Stock.Application.Features.Auth.Commands.Register;
+using Stock.Application.Features.Auth.Commands.ChangePassword;
+
 
 namespace Stock.API.Controllers
 {
     /// <summary>
-    /// Kullanıcı kimlik doğrulama ve yetkilendirme işlemlerini yöneten API Controller.
-    /// Login, register, kullanıcı oluşturma ve şifre değiştirme gibi endpoint'leri içerir.
+    /// Handles user authentication.
     /// </summary>
+    [Route("api/[controller]")]
     [ApiController]
-    [Route(ApiConstants.ApiBaseRoute + "/[controller]")]
     public class AuthController : ControllerBase
     {
-        private readonly IAuthService _authService;
-        private readonly ILogger<AuthController> _logger;
         private readonly IMediator _mediator;
+        private readonly ILogger<AuthController> _logger;
 
         /// <summary>
         /// AuthController sınıfının yapıcı metodu.
-        /// Bağımlılıkları (IAuthService, ILogger, IMediator) enjekte eder.
+        /// Bağımlılıkları (IMediator, ILogger) enjekte eder.
         /// </summary>
-        /// <param name="authService">Kimlik doğrulama işlemleri servisi.</param>
-        /// <param name="logger">Loglama servisi.</param>
         /// <param name="mediator">CQRS Mediator arayüzü.</param>
-        public AuthController(IAuthService authService, ILogger<AuthController> logger, IMediator mediator)
+        /// <param name="logger">Loglama servisi.</param>
+        public AuthController(IMediator mediator, ILogger<AuthController> logger)
         {
-            _authService = authService;
-            _logger = logger;
             _mediator = mediator;
+            _logger = logger;
         }
 
         /// <summary>
-        /// Kullanıcı girişi yapar.
+        /// Authenticates a user and returns a JWT token.
         /// </summary>
-        /// <param name="loginDto">Giriş bilgileri (kullanıcı adı/sicil ve şifre).</param>
-        /// <returns>
-        /// Başarılı girişte JWT token ve kullanıcı bilgileri içeren bir AuthResponseDto.
-        /// Başarısız girişte Unauthorized (401) yanıtı döner.
-        /// </returns>
+        /// <param name="loginDto">The login request containing user credentials.</param>
+        /// <returns>A JWT token if authentication is successful.</returns>
         /// <response code="200">Giriş başarılı. JWT token ve kullanıcı bilgileri döner.</response>
         /// <response code="401">Giriş başarısız. Geçersiz kullanıcı adı/sicil veya şifre.</response>
         [HttpPost("login")]
+        [AllowAnonymous]
         [ProducesResponseType(typeof(AuthResponseDto), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(AuthResponseDto), StatusCodes.Status401Unauthorized)]
         public async Task<IActionResult> Login([FromBody] LoginDto loginDto)
         {
-            var result = await _authService.LoginAsync(loginDto);
-            
-            if (!result.Success)
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            var command = new LoginCommand 
+            { 
+                Sicil = loginDto.Sicil, 
+                Password = loginDto.Password 
+            };
+            var result = await _mediator.Send(command);
+
+            if (result == null || !result.Success)
+            {
                 return Unauthorized(result);
-                
+            }
+
             return Ok(result);
         }
 
@@ -72,15 +83,32 @@ namespace Stock.API.Controllers
         /// <response code="200">Kayıt başarılı. Kullanıcı bilgileri döner.</response>
         /// <response code="400">Kayıt başarısız. Geçersiz veya eksik bilgi.</response>
         [HttpPost("register")]
+        [Authorize(Roles = "Admin")]
         [ProducesResponseType(typeof(AuthResponseDto), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(AuthResponseDto), StatusCodes.Status400BadRequest)]
         public async Task<IActionResult> Register([FromBody] RegisterDto registerDto)
         {
-            var result = await _authService.RegisterAsync(registerDto);
-            
-            if (!result.Success)
+            if (registerDto.Password != registerDto.ConfirmPassword)
+            {
+                return BadRequest(new AuthResponseDto { Success = false, ErrorMessage = "Şifreler uyuşmuyor." });
+            }
+
+            var command = new RegisterCommand
+            {
+                Adi = registerDto.Adi,
+                Soyadi = registerDto.Soyadi,
+                Password = registerDto.Password,
+                Sicil = registerDto.Sicil,
+                RoleId = registerDto.RoleId
+            };
+
+            var result = await _mediator.Send(command);
+
+            if (result == null || !result.Success)
+            {
                 return BadRequest(result);
-                
+            }
+
             return Ok(result);
         }
 
@@ -141,8 +169,18 @@ namespace Stock.API.Controllers
                 }
 
                 var result = await _mediator.Send(command);
-                _logger.LogInformation(LogMessages.UserCreatedSuccessfully, $"{result.Adi} {result.Soyadi}", result.Id);
-                return CreatedAtAction(nameof(CreateUser), new { id = result.Id }, result);
+
+                if (result.IsSuccess)
+                {
+                    _logger.LogInformation(LogMessages.UserCreatedSuccessfully, $"{result.Value.Adi} {result.Value.Soyadi}", result.Value.Id);
+                    return CreatedAtAction(nameof(CreateUser), new { id = result.Value.Id }, result.Value);
+                }
+                else
+                {
+                    // Handle MediatR result failure
+                     _logger.LogWarning(LogMessages.ValidationErrorDuringUserCreation, result.Error);
+                    return BadRequest(new { error = result.Error });
+                }
             }
             catch (InvalidOperationException ex)
             {
@@ -197,29 +235,33 @@ namespace Stock.API.Controllers
         [HttpPost("change-password")]
         [ProducesResponseType(typeof(AuthResponseDto), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(AuthResponseDto), StatusCodes.Status400BadRequest)]
-        [ProducesResponseType(typeof(object), StatusCodes.Status401Unauthorized)]
         public async Task<IActionResult> ChangePassword([FromBody] ChangePasswordDto changePasswordDto)
         {
-            _logger.LogInformation(LogMessages.PasswordChangeRequestStarted);
-            
-            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier);
-            if (userIdClaim == null || !int.TryParse(userIdClaim.Value, out int userId))
+            if (!ModelState.IsValid)
             {
-                _logger.LogWarning(LogMessages.UserIdNotFoundInToken);
-                return Unauthorized(new { message = ErrorMessages.InvalidUserId });
+                return BadRequest(ModelState);
             }
 
-            _logger.LogInformation(string.Format(LogMessages.PasswordChangeRequestForUser, userId));
-            
-            var result = await _authService.ChangePasswordAsync(changePasswordDto, userId);
-            
-            if (!result.Success)
+            var userIdClaim = User.Claims.FirstOrDefault(c => c.Type == "uid");
+            if (userIdClaim == null || !int.TryParse(userIdClaim.Value, out var userId))
             {
-                _logger.LogWarning(string.Format(LogMessages.PasswordChangeFailed, userId, result.ErrorMessage));
+                return Unauthorized(new AuthResponseDto { Success = false, ErrorMessage = "Geçersiz token." });
+            }
+
+            var command = new ChangePasswordCommand
+            {
+                UserId = userId,
+                CurrentPassword = changePasswordDto.CurrentPassword,
+                NewPassword = changePasswordDto.NewPassword
+            };
+
+            var result = await _mediator.Send(command);
+
+            if (result == null || !result.Success)
+            {
                 return BadRequest(result);
             }
-            
-            _logger.LogInformation(string.Format(LogMessages.PasswordChangeSuccessful, userId));
+
             return Ok(result);
         }
     }

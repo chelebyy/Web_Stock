@@ -2,14 +2,13 @@ using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using Stock.Domain.Common;
 using Stock.Domain.Entities.Permissions;
+using Stock.Domain.ValueObjects;
 
 namespace Stock.Domain.Entities
 {
     public class Role : BaseEntity
     {
-        [Required]
-        [StringLength(50)]
-        public string Name { get; private set; } = string.Empty;
+        public RoleName Name { get; private set; }
 
         [StringLength(200)]
         public string Description { get; private set; } = string.Empty;
@@ -21,12 +20,13 @@ namespace Stock.Domain.Entities
         // Entity Framework için protected constructor
         protected Role()
         {
+            Name = null!;
             Users = new HashSet<User>();
             RolePermissions = new HashSet<RolePermission>();
         }
 
         // Private constructor ile nesne oluşturma kontrolü
-        private Role(string name, string description)
+        private Role(RoleName name, string description)
         {
             Name = name;
             Description = description;
@@ -35,17 +35,11 @@ namespace Stock.Domain.Entities
         }
 
         // Factory metodu - Entity oluşturmayı kontrol ediyor
-        public static Result<Role> Create(string name, string description)
+        public static Result<Role> Create(RoleName name, string description)
         {
-            // Validasyon kuralları
-            if (string.IsNullOrWhiteSpace(name))
+            if (name is null)
             {
-                return Result<Role>.Failure(DomainErrors.Role.NameEmpty);
-            }
-
-            if (name.Length > 50)
-            {
-                return Result<Role>.Failure(DomainErrors.Role.NameTooLong);
+                return Result<Role>.Failure(DomainErrors.Role.RoleNameNull);
             }
 
             if (description != null && description.Length > 200)
@@ -58,16 +52,11 @@ namespace Stock.Domain.Entities
         }
 
         // Domain davranışları - Entity'nin iş kurallarını zorunlu kılıyor
-        public Result UpdateName(string newName)
+        public Result UpdateName(RoleName newName)
         {
-            if (string.IsNullOrWhiteSpace(newName))
+            if (newName is null)
             {
-                return Result.Failure(DomainErrors.Role.NameEmpty);
-            }
-
-            if (newName.Length > 50)
-            {
-                return Result.Failure(DomainErrors.Role.NameTooLong);
+                return Result.Failure(DomainErrors.Role.RoleNameNull);
             }
 
             Name = newName;

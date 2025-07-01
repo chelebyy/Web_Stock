@@ -14,51 +14,66 @@ namespace Stock.Domain.Entities
         public int CategoryId { get; private set; }
         public Category Category { get; private set; }
 
-        private Product() { }
-
-        public static Product Create(ProductName name, ProductDescription description, StockLevel stockLevel, int categoryId)
+        private Product() 
         {
-            if (name == null) throw new DomainException("Product name cannot be null.");
-            if (stockLevel == null) throw new DomainException("Stock level cannot be null.");
-            if (categoryId <= 0) throw new DomainException("Invalid CategoryId.");
+            Name = null!;
+            Description = null!;
+            StockLevel = null!;
+            Category = null!;
+        }
 
-            return new Product
+        public static Result<Product> Create(ProductName name, ProductDescription description, StockLevel stockLevel, int categoryId)
+        {
+            if (name == null) return Result<Product>.Failure("Product name cannot be null.");
+            if (stockLevel == null) return Result<Product>.Failure("Stock level cannot be null.");
+            if (categoryId <= 0) return Result<Product>.Failure("Invalid CategoryId.");
+
+            return Result<Product>.Success(new Product
             {
                 Name = name,
                 Description = description,
                 StockLevel = stockLevel,
                 CategoryId = categoryId
-            };
+            });
         }
 
-        public void UpdateName(ProductName newName)
+        public Result UpdateName(ProductName newName)
         {
-            if (newName == null) throw new DomainException("Product name cannot be null.");
+            if (newName == null) return Result.Failure("Product name cannot be null.");
             Name = newName;
+            return Result.Success();
         }
 
-        public void UpdateDescription(ProductDescription newDescription)
+        public Result UpdateDescription(ProductDescription newDescription)
         {
             Description = newDescription;
+            return Result.Success();
         }
 
-        public void IncreaseStock(int amount)
+        public Result IncreaseStock(int amount)
         {
-            StockLevel = StockLevel.Increase(amount);
+            var result = StockLevel.Increase(amount);
+            if (!result.IsSuccess) return Result.Failure(result.Error);
+            StockLevel = result.Value;
+            return Result.Success();
         }
 
-        public void DecreaseStock(int amount)
+        public Result DecreaseStock(int amount)
         {
-            StockLevel = StockLevel.Decrease(amount);
+            var result = StockLevel.Decrease(amount);
+            if (!result.IsSuccess) return Result.Failure(result.Error);
+            StockLevel = result.Value;
+            return Result.Success();
         }
 
-        public void ChangeCategory(int newCategoryId)
+        public Result ChangeCategory(int newCategoryId)
         {
-            if (newCategoryId <= 0) throw new DomainException("Invalid CategoryId.");
-            if (newCategoryId == CategoryId) return;
+            if (newCategoryId <= 0) return Result.Failure("Invalid CategoryId.");
+            if (newCategoryId == CategoryId) return Result.Success();
 
             CategoryId = newCategoryId;
             Category = null;
+            return Result.Success();
         }
     }
 } 

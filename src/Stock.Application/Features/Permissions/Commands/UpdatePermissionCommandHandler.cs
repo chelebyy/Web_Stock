@@ -4,6 +4,7 @@ using Stock.Domain.Common;
 using Stock.Domain.Entities.Permissions;
 using Stock.Domain.Interfaces;
 using Stock.Domain.Specifications;
+using Stock.Application.Common.Interfaces;
 using System;
 using System.Threading;
 using System.Threading.Tasks;
@@ -14,13 +15,16 @@ namespace Stock.Application.Features.Permissions.Commands
     {
         private readonly IUnitOfWork _unitOfWork;
         private readonly ILogger<UpdatePermissionCommandHandler> _logger;
+        private readonly ICacheService _cacheService;
 
         public UpdatePermissionCommandHandler(
             IUnitOfWork unitOfWork,
-            ILogger<UpdatePermissionCommandHandler> logger)
+            ILogger<UpdatePermissionCommandHandler> logger,
+            ICacheService cacheService)
         {
             _unitOfWork = unitOfWork;
             _logger = logger;
+            _cacheService = cacheService;
         }
 
         public async Task<Result> Handle(UpdatePermissionCommand request, CancellationToken cancellationToken)
@@ -37,8 +41,15 @@ namespace Stock.Application.Features.Permissions.Commands
                 return Result.Failure($"Permission with ID {request.Id} not found.");
             }
 
-            // Name is not updated as it's a key identifier.
-            // If name changes are needed, a different pattern (like retiring old and creating new) should be used.
+            if (!string.IsNullOrWhiteSpace(request.Name))
+            {
+                var nameUpdateResult = permission.UpdateName(request.Name);
+                if (!nameUpdateResult.IsSuccess)
+                {
+                    _logger.LogWarning("İzin adı güncelleme başarısız (Domain Validation): {Error}", nameUpdateResult.Error);
+                    return Result.Failure(nameUpdateResult.Error);
+                }
+            }
 
             var descriptionUpdateResult = permission.UpdateDescription(request.Description);
             if (!descriptionUpdateResult.IsSuccess)
@@ -74,6 +85,10 @@ namespace Stock.Application.Features.Permissions.Commands
                 _logger.LogError("İzin güncellenirken veritabanına kaydetme başarısız: ID {PermissionId}", request.Id);
                 return Result.Failure("Failed to update the permission in the database.");
             }
+
+            // İzin önbelleğini temizle
+            await _cacheService.RemoveAsync(Application.Common.Constants.CacheKeys.PermissionsAll);
+            _logger.LogInformation("İzin listesi önbelleği temizlendi.");
 
             _logger.LogInformation("ID: {PermissionId} olan izin başarıyla güncellendi.", request.Id);
             return Result.Success();

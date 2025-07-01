@@ -2,6 +2,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using Stock.Domain.Entities;
 using Stock.Domain.Entities.Permissions;
+using Stock.Domain.ValueObjects;
 
 namespace Stock.Infrastructure.Data.Configurations
 {
@@ -13,9 +14,15 @@ namespace Stock.Infrastructure.Data.Configurations
 
             builder.HasKey(p => p.Id);
 
-            builder.Property(p => p.Name)
-                .IsRequired()
-                .HasMaxLength(50);
+            builder.OwnsOne(p => p.Name, nameBuilder =>
+            {
+                nameBuilder.Property(n => n.Value)
+                    .HasColumnName("Name")
+                    .IsRequired()
+                    .HasMaxLength(PermissionName.MaxLength);
+
+                nameBuilder.HasIndex(n => n.Value).IsUnique();
+            });
 
             builder.Property(p => p.Description)
                 .HasMaxLength(200);
@@ -38,9 +45,8 @@ namespace Stock.Infrastructure.Data.Configurations
             builder.Property(p => p.IsDeleted)
                 .HasDefaultValue(false);
 
-            // İsim benzersiz olmalı
-            builder.HasIndex(p => p.Name)
-                .IsUnique();
+            // Gruba göre sorgulamaları hızlandırmak için index
+            builder.HasIndex(p => p.Group);
         }
     }
 } 

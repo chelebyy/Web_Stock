@@ -2,7 +2,7 @@ using MediatR;
 
 namespace Stock.Application.Features.Users.Commands.DeleteUser
 {
-    public class DeleteUserCommand : IRequest<bool>
+    public class DeleteUserCommand : IRequest<Unit>
     {
         public int Id { get; set; }
 

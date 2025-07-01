@@ -1,4 +1,4 @@
-import { Component, inject } from '@angular/core';
+import { Component, inject, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { LoadingService } from '../../../core/services/loading.service';
 import { ProgressSpinnerModule } from 'primeng/progressspinner';
@@ -8,7 +8,8 @@ import { ProgressSpinnerModule } from 'primeng/progressspinner';
   standalone: true,
   imports: [CommonModule, ProgressSpinnerModule],
   templateUrl: './loading-indicator.component.html',
-  styleUrls: ['./loading-indicator.component.scss']
+  styleUrls: ['./loading-indicator.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class LoadingIndicatorComponent {
   loadingService = inject(LoadingService);

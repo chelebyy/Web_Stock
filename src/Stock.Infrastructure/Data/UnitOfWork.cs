@@ -20,6 +20,7 @@ namespace Stock.Infrastructure.Data
         private IPermissionRepository? _permissions;
         private IProductRepository? _products;
         private ICategoryRepository? _categories;
+        private IActivityLogRepository? _activityLogs;
         private bool _disposed;
 
         public UnitOfWork(ApplicationDbContext context)
@@ -35,6 +36,7 @@ namespace Stock.Infrastructure.Data
         public IPermissionRepository Permissions => _permissions ??= new PermissionRepository(_context);
         public IProductRepository Products => _products ??= new ProductRepository(_context);
         public ICategoryRepository Categories => _categories ??= new CategoryRepository(_context);
+        public IActivityLogRepository ActivityLogs => _activityLogs ??= new ActivityLogRepository(_context);
         
         /// <inheritdoc/>
         public IRepository<T> GetRepository<T>() where T : BaseEntity

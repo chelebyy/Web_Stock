@@ -3,111 +3,131 @@ using System.Collections.Generic;
 using Stock.Domain.Common;
 using Stock.Domain.Entities.Permissions;
 using Stock.Domain.Exceptions;
+using Stock.Domain.ValueObjects;
 
 namespace Stock.Domain.Entities
 {
     public class User : BaseEntity
     {
         // Entity'nin iç durumu private setter'lar ile korunuyor
-        public string Adi { get; private set; } = string.Empty;
-        public string Soyadi { get; private set; } = string.Empty;
-        public string Sicil { get; private set; } = string.Empty;
-        public string PasswordHash { get; private set; } = string.Empty;
+        public FullName FullName { get; private set; }
+        public Sicil Sicil { get; private set; }
+        public string Username { get; private set; }
+        public string PasswordHash { get; private set; }
+        public bool IsActive { get; private set; }
         public bool IsAdmin { get; private set; }
         public DateTime? LastLoginAt { get; private set; }
 
+        // Foreign key to Role
         public int? RoleId { get; private set; }
         public Role? Role { get; private set; }
 
-        public ICollection<UserPermission> UserPermissions { get; private set; } = new List<UserPermission>();
+        // Navigation property
+        public List<UserPermission> UserPermissions { get; private set; } = new List<UserPermission>();
 
         // Boş constructor Entity Framework için gerekli
         protected User()
         {
+            FullName = null!;
+            Sicil = null!;
+            Username = null!;
+            PasswordHash = null!;
             UserPermissions = new List<UserPermission>();
         }
 
         // Private constructor ile nesne oluşturma kontrolü
-        private User(string adi, string soyadi, string sicil, string passwordHash, int? roleId, bool isAdmin)
+        private User(FullName fullName, Sicil sicil, string passwordHash, int? roleId, bool isAdmin)
         {
-            Adi = adi;
-            Soyadi = soyadi;
+            FullName = fullName;
             Sicil = sicil;
+            Username = sicil.Value;
             PasswordHash = passwordHash;
             RoleId = roleId;
             IsAdmin = isAdmin;
+            IsActive = true;
             UserPermissions = new List<UserPermission>();
         }
 
         // Factory metodu - Entity oluşturmayı kontrol ediyor
         public static Result<User> Create(
-            string adi, 
-            string soyadi, 
-            string sicil, 
-            string passwordHash,
-            int? roleId = null, 
+            FullName fullName, 
+            Sicil sicil, 
+            string passwordHash, 
+            int? roleId = null,
             bool isAdmin = false)
         {
-            if (string.IsNullOrWhiteSpace(adi))
-            {
-                return Result<User>.Failure(DomainErrors.User.AdiEmpty);
-            }
+            if (fullName == null) return Result<User>.Failure("Full name cannot be null.");
+            if (sicil == null) return Result<User>.Failure("Sicil cannot be null.");
+            if (string.IsNullOrWhiteSpace(passwordHash)) 
+                return Result<User>.Failure("Password hash cannot be empty.");
 
-            if (string.IsNullOrWhiteSpace(soyadi))
-            {
-                return Result<User>.Failure(DomainErrors.User.SoyadiEmpty);
-            }
-
-            if (string.IsNullOrWhiteSpace(sicil))
-            {
-                return Result<User>.Failure(DomainErrors.User.SicilEmpty);
-            }
-
-            if (string.IsNullOrWhiteSpace(passwordHash))
-            {
-                return Result<User>.Failure(DomainErrors.User.PasswordHashEmpty);
-            }
-
-            var user = new User(adi, soyadi, sicil, passwordHash, roleId, isAdmin);
-            return Result<User>.Success(user);
+            return Result<User>.Success(new User(fullName, sicil, passwordHash, roleId, isAdmin));
         }
 
         // Domain davranışları - Entity'nin iş kurallarını zorunlu kılıyor
-        public Result UpdateName(string newAdi, string newSoyadi)
+        public Result UpdateFullName(FullName newFullName)
         {
-            if (string.IsNullOrWhiteSpace(newAdi))
-            {
-                return Result.Failure(DomainErrors.User.AdiEmpty);
-            }
-
-            if (string.IsNullOrWhiteSpace(newSoyadi))
-            {
-                return Result.Failure(DomainErrors.User.SoyadiEmpty);
-            }
-
-            Adi = newAdi;
-            Soyadi = newSoyadi;
+            if (newFullName == null) return Result.Failure("Full name cannot be null.");
+            FullName = newFullName;
             return Result.Success();
         }
 
-        public Result UpdateSicil(string newSicil)
+        public Result UpdatePassword(string newPasswordHash)
         {
-            if (string.IsNullOrWhiteSpace(newSicil))
-            {
-                return Result.Failure(DomainErrors.User.SicilEmpty);
-            }
-            Sicil = newSicil;
+            if (string.IsNullOrWhiteSpace(newPasswordHash))
+                return Result.Failure("Password hash cannot be empty.");
+            
+            PasswordHash = newPasswordHash;
             return Result.Success();
         }
 
         public Result ChangePassword(string newPasswordHash)
         {
             if (string.IsNullOrWhiteSpace(newPasswordHash))
-            {
-                return Result.Failure(DomainErrors.User.PasswordHashEmpty);
-            }
+                return Result.Failure("Password hash cannot be empty.");
+            
             PasswordHash = newPasswordHash;
             return Result.Success();
+        }
+
+        public Result UpdateSicil(Sicil newSicil)
+        {
+            if (newSicil == null) return Result.Failure("Sicil cannot be null.");
+            Sicil = newSicil;
+            Username = newSicil.Value; // Username'i de güncelle
+            return Result.Success();
+        }
+
+        public Result UpdateName(FullName newFullName)
+        {
+            if (newFullName == null) return Result.Failure("Full name cannot be null.");
+            FullName = newFullName;
+            return Result.Success();
+        }
+
+        public void Activate()
+        {
+            IsActive = true;
+        }
+
+        public void Deactivate()
+        {
+            IsActive = false;
+        }
+
+        public void MakeAdmin()
+        {
+            IsAdmin = true;
+        }
+
+        public void RemoveAdmin()
+        {
+            IsAdmin = false;
+        }
+
+        public void SetAdminStatus(bool isAdmin)
+        {
+            IsAdmin = isAdmin;
         }
 
         public void AssignRole(int roleId, Role? role)
@@ -122,11 +142,6 @@ namespace Stock.Domain.Entities
             Role = null;
         }
 
-        public void SetAdminStatus(bool isAdmin)
-        {
-            IsAdmin = isAdmin;
-        }
-
         public void RecordLoginTime(DateTime loginTime)
         {
             LastLoginAt = loginTime;
@@ -135,24 +150,38 @@ namespace Stock.Domain.Entities
         // UserPermissions koleksiyonunu yönetmek için metotlar
         public void AddPermission(UserPermission permission)
         {
-            // Belki burada duplicate kontrolü eklenebilir?
-            UserPermissions.Add(permission);
+            if (!UserPermissions.Any(up => up.PermissionId == permission.PermissionId))
+            {
+                UserPermissions.Add(permission);
+            }
         }
 
-        public void RemovePermission(UserPermission permission)
+        public void RemovePermission(int permissionId)
         {
-            UserPermissions.Remove(permission);
+            var permission = UserPermissions.FirstOrDefault(up => up.PermissionId == permissionId);
+            if (permission != null)
+            {
+                UserPermissions.Remove(permission);
+            }
         }
 
-        public void ClearPermissions()
+        public bool HasPermission(int permissionId)
         {
-            UserPermissions.Clear();
+            // Check direct permissions
+            if (UserPermissions.Any(up => up.PermissionId == permissionId))
+                return true;
+
+            // Check role-based permissions
+            if (Role?.RolePermissions.Any(rp => rp.PermissionId == permissionId) == true)
+                return true;
+
+            return false;
         }
 
         // İlave kullanışlı metot
         public string GetFullName()
         {
-            return $"{Adi} {Soyadi}";
+            return FullName.ToString();
         }
     }
 } 

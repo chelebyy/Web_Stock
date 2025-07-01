@@ -1,624 +1,171 @@
-import { Component, OnInit, ChangeDetectionStrategy, inject, signal } from '@angular/core';
+import { Component, OnInit, ChangeDetectionStrategy, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ConfirmationService, MessageService } from 'primeng/api';
+import { TableModule } from 'primeng/table';
 import { ButtonModule } from 'primeng/button';
-import { CheckboxModule } from 'primeng/checkbox';
-import { ConfirmDialogModule } from 'primeng/confirmdialog';
-import { DialogModule } from 'primeng/dialog';
-import { InputTextModule } from 'primeng/inputtext';
-import { PasswordModule } from 'primeng/password';
-import { TableLazyLoadEvent, TableModule } from 'primeng/table';
-import { ToastModule } from 'primeng/toast';
 import { ToolbarModule } from 'primeng/toolbar';
-import { DropdownModule } from 'primeng/dropdown';
-import { TooltipModule } from 'primeng/tooltip';
-import { firstValueFrom, forkJoin } from 'rxjs';
-import { Router } from '@angular/router';
+import { ToastModule } from 'primeng/toast';
+import { ConfirmDialogModule } from 'primeng/confirmdialog';
+import { RippleModule } from 'primeng/ripple';
 
-import { UserService } from '../services/user.service';
-import { RoleService } from '../../../services/role.service';
-import { AuthService } from '../../../core/authentication/auth.service';
-import { DeleteConfirmationDialogComponent } from '../../../features/shared/components/delete-confirmation-dialog/delete-confirmation-dialog.component';
-import { UserManagementStateService } from '../services/UserManagementStateService';
 import { User } from '../../../shared/models/user.model';
-import { Role } from '../../../shared/models/role.model';
-import { PagedResponse } from '../../../shared/models/paged-response.model';
+import { UserService } from '../../../services/user.service';
+import { UserFormComponent } from './user-form/user-form.component';
 
 @Component({
-    selector: 'app-user-management',
-    templateUrl: './user-management.component.html',
-    styleUrls: ['./user-management.component.scss'],
-    standalone: true,
-    changeDetection: ChangeDetectionStrategy.OnPush,
-    imports: [
-        CommonModule,
-        FormsModule,
-        ReactiveFormsModule,
-        ButtonModule,
-        InputTextModule,
-        DialogModule,
-        DropdownModule,
-        ToastModule,
-        ToolbarModule,
-        TableModule,
-        ConfirmDialogModule,
-        CheckboxModule,
-        PasswordModule,
-        TooltipModule,
-        DeleteConfirmationDialogComponent
-    ],
-    providers: [MessageService, ConfirmationService, UserManagementStateService],
-    styles: [`
-    .modern-dialog {
-      border-radius: 12px;
-      box-shadow: 0 6px 16px rgba(0, 0, 0, 0.1);
-      overflow: hidden;
-    }
-    
-    .modern-dialog .p-dialog-header {
-      background-color: #ffffff;
-      padding: 1.5rem 2rem 0.5rem;
-      border-bottom: none;
-    }
-    
-    .modern-dialog .p-dialog-title {
-      font-size: 1.25rem;
-      font-weight: 600;
-      color: #333;
-    }
-    
-    .modern-dialog .p-dialog-content {
-      background-color: #ffffff;
-      padding: 2rem;
-    }
-    
-    .dialog-content {
-      display: flex;
-      flex-direction: column;
-      gap: 1.5rem;
-    }
-    
-    .field {
-      margin-bottom: 1.5rem;
-    }
-    
-    .input-with-icon {
-      position: relative;
-      width: 100%;
-      display: block;
-    }
-    
-    .input-icon {
-      position: absolute;
-      left: 14px;
-      top: 50%;
-      transform: translateY(-50%);
-      color: #6c757d;
-      font-size: 1.1rem;
-      z-index: 5;
-    }
-    
-    .input-with-icon .modern-input,
-    .input-with-icon .modern-select {
-      padding-left: 42px;
-      width: 100%;
-      height: 48px;
-      border-radius: 8px;
-      border: 1px solid #ced4da;
-      transition: all 0.3s;
-      font-size: 1rem;
-      color: #333;
-      background-color: #ffffff;
-    }
-    
-    .modern-input:focus,
-    .modern-select:focus {
-      border-color: #2196F3;
-      box-shadow: 0 0 0 2px rgba(33, 150, 243, 0.2);
-    }
-    
-    .modern-input:hover:not(:focus):not(:disabled),
-    .modern-select:hover:not(:focus):not(:disabled) {
-      border-color: #bbdefb;
-    }
-    
-    .modern-select {
-      appearance: none;
-      background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="%236c757d" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>');
-      background-repeat: no-repeat;
-      background-position: right 14px center;
-      padding-right: 40px;
-    }
-    
-    .p-error {
-      color: #f44336;
-      font-size: 0.875rem;
-      margin-top: 0.25rem;
-      display: block;
-    }
-    
-    .p-help {
-      color: #6c757d;
-      font-size: 0.875rem;
-      margin-top: 0.25rem;
-      display: flex;
-      align-items: center;
-    }
-    
-    .dialog-footer {
-      display: flex;
-      justify-content: flex-end;
-      gap: 0.75rem;
-      padding: 1rem 2rem 1.5rem;
-      background-color: #ffffff;
-    }
-    
-    .cancel-button, .save-button {
-      min-width: 120px;
-      height: 40px;
-      border-radius: 8px;
-      font-weight: 500;
-      transition: all 0.3s;
-    }
-    
-    .cancel-button:hover {
-      background-color: rgba(0, 0, 0, 0.04);
-    }
-    
-    .save-button:disabled {
-      opacity: 0.6;
-      cursor: not-allowed;
-    }
-    
-    /* Dropdown özel stilleri */
-    .modern-dropdown {
-      width: 100% !important;
-      height: 48px !important;
-      position: relative !important;
-    }
-    
-    .modern-dropdown .p-dropdown {
-      width: 100% !important;
-      height: 48px !important;
-      border-radius: 8px !important;
-      background-color: #ffffff !important;
-      border: 1px solid #ced4da !important;
-      display: flex !important;
-      align-items: center !important;
-    }
-    
-    .modern-dropdown .p-dropdown-label {
-      padding-left: 42px !important;
-      display: flex !important;
-      align-items: center !important;
-      color: #333333 !important;
-      font-size: 1rem !important;
-      font-weight: normal !important;
-      height: 100% !important;
-      background-color: transparent !important;
-      z-index: 1 !important;
-      position: relative !important;
-      visibility: visible !important;
-      opacity: 1 !important;
-    }
-    
-    .modern-dropdown .p-dropdown-label.p-placeholder {
-      color: #6c757d !important;
-      visibility: visible !important;
-      opacity: 1 !important;
-      display: flex !important;
-      align-items: center !important;
-    }
-    
-    .modern-dropdown .p-dropdown-trigger {
-      color: #6c757d !important;
-      width: 3rem !important;
-      z-index: 2 !important;
-    }
-    
-    .input-with-icon .p-dropdown {
-      background-color: #ffffff !important;
-      position: relative !important;
-    }
-    
-    .input-with-icon .p-dropdown .p-dropdown-label {
-      padding-left: 42px !important;
-      color: #333333 !important;
-      font-size: 1rem !important;
-      background-color: #ffffff !important;
-      visibility: visible !important;
-      opacity: 1 !important;
-    }
-    
-    .input-with-icon .p-dropdown .p-dropdown-label.p-placeholder {
-      color: #6c757d !important;
-      visibility: visible !important;
-      opacity: 1 !important;
-    }
-    
-    /* Dropdown panel stilleri */
-    .p-dropdown-panel {
-      background-color: #ffffff !important;
-      border: 1px solid #ced4da !important;
-      border-radius: 8px !important;
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15) !important;
-      z-index: 1000 !important;
-    }
-    
-    .p-dropdown-panel .p-dropdown-items {
-      padding: 0.5rem 0 !important;
-      background-color: #ffffff !important;
-    }
-    
-    .p-dropdown-panel .p-dropdown-items .p-dropdown-item {
-      padding: 0.75rem 1rem !important;
-      color: #333333 !important;
-      font-size: 1rem !important;
-      border-bottom: 1px solid rgba(0, 0, 0, 0.05) !important;
-      background-color: #ffffff !important;
-    }
-    
-    .p-dropdown-panel .p-dropdown-items .p-dropdown-item:hover {
-      background-color: #f8f9fa !important;
-      color: #000000 !important;
-    }
-    
-    .p-dropdown-panel .p-dropdown-items .p-dropdown-item.p-highlight {
-      background-color: rgba(59, 130, 246, 0.1) !important;
-      color: #2563eb !important;
-      font-weight: 600 !important;
-    }
-    
-    /* Yüksek öncelikli dropdown panel seçicileri */
-    html body .p-dropdown-panel,
-    body .p-dropdown-panel,
-    .p-dropdown-panel,
-    html body .p-dropdown-items-wrapper,
-    body .p-dropdown-items-wrapper,
-    .p-dropdown-items-wrapper {
-      background-color: #ffffff !important;
-      border: 1px solid #ced4da !important;
-      border-radius: 8px !important;
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15) !important;
-    }
-    
-    html body .p-dropdown-panel .p-dropdown-items,
-    body .p-dropdown-panel .p-dropdown-items,
-    .p-dropdown-panel .p-dropdown-items,
-    html body .p-dropdown-items-wrapper .p-dropdown-items,
-    body .p-dropdown-items-wrapper .p-dropdown-items,
-    .p-dropdown-items-wrapper .p-dropdown-items {
-      background-color: #ffffff !important;
-      padding: 0.5rem 0 !important;
-    }
-    
-    html body .p-dropdown-panel .p-dropdown-items .p-dropdown-item,
-    body .p-dropdown-panel .p-dropdown-items .p-dropdown-item,
-    .p-dropdown-panel .p-dropdown-items .p-dropdown-item,
-    html body .p-dropdown-items-wrapper .p-dropdown-items .p-dropdown-item,
-    body .p-dropdown-items-wrapper .p-dropdown-items .p-dropdown-item,
-    .p-dropdown-items-wrapper .p-dropdown-items .p-dropdown-item {
-      padding: 0.75rem 1rem !important;
-      color: #333333 !important;
-      font-size: 1rem !important;
-      border-bottom: 1px solid rgba(0, 0, 0, 0.05) !important;
-      background-color: #ffffff !important;
-    }
-    
-    html body .p-dropdown-panel .p-dropdown-items .p-dropdown-item:hover,
-    body .p-dropdown-panel .p-dropdown-items .p-dropdown-item:hover,
-    .p-dropdown-panel .p-dropdown-items .p-dropdown-item:hover,
-    html body .p-dropdown-items-wrapper .p-dropdown-items .p-dropdown-item:hover,
-    body .p-dropdown-items-wrapper .p-dropdown-items .p-dropdown-item:hover,
-    .p-dropdown-items-wrapper .p-dropdown-items .p-dropdown-item:hover {
-      background-color: #f8f9fa !important;
-      color: #000000 !important;
-    }
-    
-    html body .p-dropdown-panel .p-dropdown-items .p-dropdown-item.p-highlight,
-    body .p-dropdown-panel .p-dropdown-items .p-dropdown-item.p-highlight,
-    .p-dropdown-panel .p-dropdown-items .p-dropdown-item.p-highlight,
-    html body .p-dropdown-items-wrapper .p-dropdown-items .p-dropdown-item.p-highlight,
-    body .p-dropdown-items-wrapper .p-dropdown-items .p-dropdown-item.p-highlight,
-    .p-dropdown-items-wrapper .p-dropdown-items .p-dropdown-item.p-highlight {
-      background-color: rgba(59, 130, 246, 0.1) !important;
-      color: #2563eb !important;
-      font-weight: 600 !important;
-    }
-    
-    /* Yüksek öncelikli input seçicileri */
-    html body .input-with-icon .p-dropdown .p-dropdown-label,
-    body .input-with-icon .p-dropdown .p-dropdown-label,
-    .input-with-icon .p-dropdown .p-dropdown-label {
-      padding-left: 42px !important;
-      color: #333333 !important;
-      font-size: 1rem !important;
-      visibility: visible !important;
-      opacity: 1 !important;
-      display: flex !important;
-      align-items: center !important;
-    }
-    
-    html body .input-with-icon .p-dropdown .p-dropdown-label.p-placeholder,
-    body .input-with-icon .p-dropdown .p-dropdown-label.p-placeholder,
-    .input-with-icon .p-dropdown .p-dropdown-label.p-placeholder {
-      color: #6c757d !important;
-      visibility: visible !important;
-      opacity: 1 !important;
-      display: flex !important;
-      align-items: center !important;
-    }
-  `]
+  selector: 'app-user-management',
+  standalone: true,
+  imports: [
+    CommonModule,
+    TableModule,
+    ButtonModule,
+    ToolbarModule,
+    ToastModule,
+    ConfirmDialogModule,
+    RippleModule,
+    UserFormComponent
+  ],
+  templateUrl: './user-management.component.html',
+  styleUrls: ['./user-management.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  providers: [MessageService, ConfirmationService]
 })
 export class UserManagementComponent implements OnInit {
-  
-  public state = inject(UserManagementStateService);
-  
-  // Component-specific state for pagination
-  totalRecords = signal(0);
-  rows = signal(10);
-  first = signal(0);
+  private readonly userService = inject(UserService);
+  private readonly messageService = inject(MessageService);
+  private readonly confirmationService = inject(ConfirmationService);
 
-  // Search and filter state
-  private searchText = signal('');
-  private selectedRoleId = signal<number | null>(null);
+  users: User[] = [];
+  selectedUser: User | null = null;
+  displayUserDialog = false;
 
-  userDialog = false;
-  submitted = false;
-  editMode = false;
-  userForm!: FormGroup;
-  deleteDialogVisible = false;
-  userToDelete: User | null = null;
-  selectedUsers: User[] = [];
-  
-  private userService = inject(UserService);
-  private roleService = inject(RoleService);
-  private messageService = inject(MessageService);
-  private confirmationService = inject(ConfirmationService);
-  private formBuilder = inject(FormBuilder);
-  private router = inject(Router);
+  // Web Worker
+  private worker: Worker | undefined;
 
-  ngOnInit() {
-    this.initForm();
-    this.loadInitialData();
+  ngOnInit(): void {
+    this.loadUsers();
+    this.initializeWorker();
   }
 
-  loadInitialData() {
-    this.state.setLoading(true);
-    // Load users for the initial page
-    this.loadUsers(1, this.rows());
-    this.loadRoles();
-  }
-
-  async loadUsers(page: number, pageSize: number, name: string = '', roleId: number | null = null) {
-    this.state.setLoading(true);
-    this.state.setError(null);
-    try {
-      const response = await firstValueFrom(this.userService.getUsers(page, pageSize, name, roleId));
-      this.state.setUsers(response.items);
-      this.totalRecords.set(response.totalRecords);
-    } catch (error: any) {
-      console.error('Kullanıcılar yüklenirken hata:', error);
-      this.state.setError('Kullanıcılar yüklenemedi.');
-    } finally {
-      this.state.setLoading(false);
-    }
-  }
-
-  async loadRoles() {
-    // Roles are likely not paginated or we need all of them for a dropdown
-    try {
-      // Assuming getRoles might also return a PagedResponse, we handle it.
-      const response = await firstValueFrom(this.roleService.getRoles(1, 1000)); // Fetch a large number of roles
-      this.state.setRoles(response.items);
-    } catch (error) {
-      console.error('Roller yüklenirken hata:', error);
-      this.state.setError('Roller yüklenemedi.');
-    }
-  }
-
-  initForm() {
-    this.userForm = this.formBuilder.group({
-      id: [null],
-      fullName: ['', Validators.required],
-      sicil: ['', Validators.required],
-      password: [''],
-      roleId: [null, Validators.required]
-    });
-  }
-
-  openNewUserDialog() {
-    this.editMode = false;
-    this.submitted = false;
-    this.userForm.reset();
-    this.userForm.get('password')?.setValidators([Validators.required, Validators.minLength(6)]);
-    this.userForm.updateValueAndValidity();
-    this.userDialog = true;
-  }
-
-  editUser(user: User) {
-    this.editMode = true;
-    this.submitted = false;
-    this.userForm.reset({
-        id: user.id,
-        fullName: user.fullName,
-        sicil: user.sicil,
-        roleId: user.roleId
-    });
-    this.userForm.get('password')?.clearValidators();
-    this.userForm.get('password')?.updateValueAndValidity();
-    this.userDialog = true;
-  }
-  
-  deleteUser(user: User) {
-    if (user.id === undefined) {
-      this.messageService.add({ severity: 'error', summary: 'Hata', detail: 'Kullanıcı ID\'si bulunamadı.' });
-      return;
-    }
-    this.confirmationService.confirm({
-      message: `${user.fullName} adlı kullanıcıyı silmek istediğinizden emin misiniz?`,
-      header: 'Kullanıcı Silme Onayı',
-      icon: 'pi pi-exclamation-triangle',
-      accept: async () => {
-        try {
-          await firstValueFrom(this.userService.deleteUser(user.id!));
-          this.messageService.add({ severity: 'success', summary: 'Başarılı', detail: 'Kullanıcı silindi.' });
-          this.loadUsers(1, this.rows());
-        } catch (error) {
-          this.messageService.add({ severity: 'error', summary: 'Hata', detail: 'Kullanıcı silinemedi.' });
-        }
-      }
-    });
-  }
-
-  hideDialog() {
-    this.userDialog = false;
-    this.submitted = false;
-  }
-
-  async saveUser() {
-    this.submitted = true;
-    if (this.userForm.invalid) {
-      return;
-    }
-
-    const formValue = this.userForm.value;
-    
-    try {
-        if (this.editMode) {
-            const updateUserPayload: Partial<User> = {
-                id: formValue.id,
-                fullName: formValue.fullName,
-                sicil: formValue.sicil,
-                roleId: formValue.roleId,
-                ...(formValue.password && { password: formValue.password })
-            };
-            await firstValueFrom(this.userService.updateUser(updateUserPayload.id!, updateUserPayload));
-            this.messageService.add({ severity: 'success', summary: 'Başarılı', detail: 'Kullanıcı güncellendi.' });
+  initializeWorker(): void {
+    if (typeof Worker !== 'undefined') {
+      this.worker = new Worker(new URL('../workers/csv-export.worker', import.meta.url));
+        
+      this.worker.onmessage = ({ data: csvData }) => {
+        if (csvData) {
+          this.downloadCSV(csvData);
+          this.messageService.add({ 
+            severity: 'success', 
+            summary: 'Başarılı', 
+            detail: 'Kullanıcı listesi CSV olarak başarıyla indirildi.',
+            life: 5000 
+          });
         } else {
-            const createUserPayload: User = {
-                id: 0, // Backend will assign ID
-                fullName: formValue.fullName,
-                sicil: formValue.sicil,
-                roleId: formValue.roleId,
-                password: formValue.password,
-                roleName: '', 
-                username: '',
-                firstName: '',
-                lastName: '',
-                isAdmin: false,
-                createdAt: new Date(),
-                isActive: true
-            };
-            await firstValueFrom(this.userService.createUser(createUserPayload));
-            this.messageService.add({ severity: 'success', summary: 'Başarılı', detail: 'Kullanıcı oluşturuldu.' });
+           this.messageService.add({ severity: 'warn', summary: 'Uyarı', detail: 'Dışa aktarılacak kullanıcı bulunamadı.' });
         }
-        this.loadUsers(1, this.rows());
-        this.userDialog = false;
-    } catch(error) {
-        const errorMessage = (error as any)?.message || 'İşlem başarısız.';
-        this.messageService.add({ severity: 'error', summary: 'Hata', detail: errorMessage });
+        console.log(`CSV data received from web worker.`);
+        };
+
+        this.worker.onerror = (error) => {
+        this.messageService.add({ severity: 'error', summary: 'Hata', detail: 'CSV dışa aktarılırken bir hata oluştu.' });
+        console.error('Web worker error:', error);
+        };
+    } else {
+      console.error('Web Workers are not supported in this environment.');
     }
   }
-
-  onSearchTextChange(event: Event) {
-    const searchText = (event.target as HTMLInputElement).value;
-    this.searchText.set(searchText);
-    this.loadUsers(1, this.rows(), this.searchText(), this.selectedRoleId());
-  }
   
-  onRoleFilterChange(event: Event) {
-    const roleId = (event.target as HTMLSelectElement).value;
-    this.selectedRoleId.set(roleId ? parseInt(roleId, 10) : null);
-    this.loadUsers(1, this.rows(), this.searchText(), this.selectedRoleId());
-  }
-
-  goBack() {
-    this.router.navigate(['/dashboard']);
-  }
-
-  manageUserPermissions(user: User): void {
-    this.router.navigate(['/user-permissions', user.id]);
-  }
-  
-  getRoleName(roleId: number | null): string {
-    if (roleId === null) return 'N/A';
-    return this.state.roles().find(r => r.id === roleId)?.name || 'Bilinmeyen Rol';
-  }
-
-  getRoleColorClass(roleName?: string): string {
-    if (!roleName) return 'p-badge-secondary';
-    switch (roleName.toLowerCase()) {
-      case 'admin':
-        return 'p-badge-danger';
-      case 'kullanıcı':
-        return 'p-badge-info';
-      default:
-        return 'p-badge-secondary';
-    }
-  }
-
-  // --- Methods for delete confirmation and bulk actions ---
-
-  confirmDelete(): void {
-    if (this.userToDelete && this.userToDelete.id !== undefined) {
-      // Logic for deleting a single user
-      this.userService.deleteUser(this.userToDelete.id).subscribe({
-        next: () => {
-          this.messageService.add({ severity: 'success', summary: 'Başarılı', detail: 'Kullanıcı silindi' });
-          this.loadUsers(1, this.rows());
-        },
-        error: (err: any) => {
-          this.messageService.add({ severity: 'error', summary: 'Hata', detail: 'Kullanıcı silinirken bir hata oluştu' });
-        }
-      });
-    } else if (this.selectedUsers.length > 0) {
-      // Logic for bulk deleting selected users
-      const usersToDelete = this.selectedUsers.filter(user => user.id !== undefined);
-      if (usersToDelete.length === 0) {
-        this.hideDeleteDialog();
-        return;
+  exportUsersToCsv(): void {
+    if (this.worker) {
+      if (this.users && this.users.length > 0) {
+        this.messageService.add({ severity: 'info', summary: 'İşlem Başlatıldı', detail: 'Kullanıcı listesi CSV olarak hazırlanıyor...' });
+        this.worker.postMessage(this.users);
+      } else {
+        this.messageService.add({ severity: 'warn', summary: 'Uyarı', detail: 'Dışa aktarılacak kullanıcı bulunamadı.' });
       }
-      const deleteObservables = usersToDelete.map(user => this.userService.deleteUser(user.id!));
-      forkJoin(deleteObservables).subscribe({
+    } else {
+      this.messageService.add({ severity: 'error', summary: 'Hata', detail: 'CSV dışa aktarma servisi başlatılamadı. Tarayıcınız desteklemiyor olabilir.' });
+    }
+  }
+
+  private downloadCSV(csvData: string): void {
+    const blob = new Blob([`\uFEFF${csvData}`], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement('a');
+    const url = URL.createObjectURL(blob);
+    link.setAttribute('href', url);
+    link.setAttribute('download', 'kullanicilar.csv');
+    link.style.visibility = 'hidden';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  }
+
+  loadUsers(): void {
+    this.userService.getUsers().subscribe(
+      (users) => {
+        this.users = users;
+      },
+      () => {
+        this.messageService.add({ severity: 'error', summary: 'Hata', detail: 'Kullanıcılar yüklenirken bir hata oluştu.' });
+      }
+    );
+  }
+
+  openNewUserDialog(): void {
+    this.selectedUser = null;
+    this.displayUserDialog = true;
+  }
+
+  openEditUserDialog(user: User): void {
+    this.selectedUser = { ...user };
+    this.displayUserDialog = true;
+  }
+
+  onUserSave(user: User): void {
+    if (user.id) {
+      // Güncelleme
+      this.userService.updateUser(user.id, user).subscribe({
         next: () => {
-          this.messageService.add({ severity: 'success', summary: 'Başarılı', detail: 'Seçilen kullanıcılar silindi' });
-          this.loadUsers(1, this.rows());
-          this.selectedUsers = [];
+          this.messageService.add({ severity: 'success', summary: 'Başarılı', detail: 'Kullanıcı başarıyla güncellendi.' });
+          this.loadUsers();
         },
-        error: (err: any) => {
-          this.messageService.add({ severity: 'error', summary: 'Hata', detail: 'Kullanıcılar silinirken bir hata oluştu' });
+        error: () => {
+          this.messageService.add({ severity: 'error', summary: 'Hata', detail: 'Kullanıcı güncellenirken bir hata oluştu.' });
+        }
+      });
+    } else {
+      // Oluşturma
+      this.userService.createUser(user).subscribe({
+        next: () => {
+          this.messageService.add({ severity: 'success', summary: 'Başarılı', detail: 'Kullanıcı başarıyla oluşturuldu.' });
+          this.loadUsers();
+        },
+        error: () => {
+          this.messageService.add({ severity: 'error', summary: 'Hata', detail: 'Kullanıcı oluşturulurken bir hata oluştu.' });
         }
       });
     }
-    this.hideDeleteDialog();
+    this.displayUserDialog = false;
   }
 
-  cancelDelete(): void {
-    this.hideDeleteDialog();
-  }
-
-  deleteSelectedUsers(): void {
-    this.userToDelete = null; // Ensure we are in bulk delete mode
-    this.deleteDialogVisible = true;
-  }
-
-  getSelectedUserCount(): number {
-    return this.selectedUsers.length;
-  }
-
-  private hideDeleteDialog(): void {
-    this.deleteDialogVisible = false;
-    this.userToDelete = null;
-  }
-
-  onPageChange(event: TableLazyLoadEvent) {
-    this.state.setLoading(true);
-    const page = (event.first || 0) / (event.rows || 10) + 1;
-    const pageSize = event.rows || 10;
-    this.rows.set(pageSize);
-    this.first.set(event.first || 0);
-    this.loadUsers(page, pageSize, this.searchText(), this.selectedRoleId());
+  deleteUser(user: User): void {
+    this.confirmationService.confirm({
+      message: `${user.adi} ${user.soyadi} adlı kullanıcıyı silmek istediğinizden emin misiniz?`,
+      header: 'Kullanıcıyı Sil',
+      icon: 'pi pi-exclamation-triangle',
+      accept: () => {
+        if (user.id) {
+          this.userService.deleteUser(user.id).subscribe({
+            next: () => {
+              this.messageService.add({ severity: 'success', summary: 'Başarılı', detail: 'Kullanıcı başarıyla silindi.' });
+              this.loadUsers();
+            },
+            error: () => {
+              this.messageService.add({ severity: 'error', summary: 'Hata', detail: 'Kullanıcı silinirken bir hata oluştu.' });
+            }
+          });
+        }
+      }
+    });
   }
 }

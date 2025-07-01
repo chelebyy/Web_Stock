@@ -15,7 +15,7 @@ namespace Stock.Domain.Specifications
         /// <param name="name">Aranacak rol adı.</param>
         /// <param name="includeUsers">Kullanıcıları dahil et (varsayılan: false).</param>
         public RoleByNameSpecification(string name, bool includeUsers = false)
-            : base(r => r.Name.ToLower() == name.ToLower())
+            : base(r => r.Name.Value.ToLower() == name.ToLower())
         {
             if (includeUsers)
             {

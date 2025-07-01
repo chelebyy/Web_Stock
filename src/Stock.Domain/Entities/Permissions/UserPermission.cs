@@ -15,7 +15,11 @@ namespace Stock.Domain.Entities.Permissions
         public Permission Permission { get; private set; }
 
         // EF Core için protected constructor
-        protected UserPermission() { }
+        protected UserPermission() 
+        {
+            User = null!;
+            Permission = null!;
+        }
 
         // Primary constructor
         private UserPermission(int userId, int permissionId, bool isGranted)

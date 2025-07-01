@@ -40,6 +40,11 @@ namespace Stock.Infrastructure.Data.Configurations
             builder.Property(a => a.IsDeleted)
                 .HasDefaultValue(false);
 
+            // Sorgu performansını artırmak için index'ler
+            builder.HasIndex(a => a.UserId);
+            builder.HasIndex(a => a.ActivityType);
+            builder.HasIndex(a => a.Timestamp);
+
             builder.HasOne(a => a.User)
                 .WithMany()
                 .HasForeignKey(a => a.UserId)

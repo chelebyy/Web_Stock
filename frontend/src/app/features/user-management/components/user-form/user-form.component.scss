@@ -1,0 +1,51 @@
+:host ::ng-deep {
+    .user-form {
+      display: flex;
+      flex-direction: column;
+      gap: 1.5rem;
+      padding-top: 1rem;
+    }
+  
+    .p-field {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+  
+      label {
+        font-weight: 600;
+        color: #4b5563; // gray-600
+      }
+  
+      .p-inputtext,
+      .p-password,
+      .p-dropdown {
+        width: 100%;
+      }
+    }
+  
+    .p-field-checkbox {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      margin-top: 1rem;
+  
+      label {
+        margin-bottom: 0;
+        cursor: pointer;
+      }
+    }
+  
+    .p-dialog-footer {
+        border-top: 1px solid #e5e7eb; // gray-200
+        padding: 1rem 1.5rem;
+    }
+  
+    .p-error {
+      color: #ef4444; // red-500
+      font-size: 0.875rem;
+    }
+  
+    small {
+      color: #6b7280; // gray-500
+    }
+  } 

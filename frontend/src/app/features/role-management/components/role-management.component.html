@@ -93,14 +93,13 @@
 
 <!-- Rol Dialog -->
 <p-dialog [visible]="roleDialog()" (visibleChange)="roleDialog.set($event)" [style]="{width: '500px'}" [header]="editMode() ? 'Rolü Düzenle' : 'Yeni Rol Ekle'" 
-          [modal]="true" [draggable]="false" [resizable]="false" styleClass="role-dialog modern-dialog custom-light-dialog" 
+          [modal]="true" [draggable]="false" [resizable]="false" styleClass="modern-dialog" 
           [closeOnEscape]="true" [dismissableMask]="true">
   <div class="dialog-content">
     <form [formGroup]="roleForm" class="role-form">
       <div class="field">
         <label for="name" class="form-label">Rol Adı</label>
-        <input type="text" pInputText id="name" formControlName="name" autocomplete="off" 
-               class="w-full custom-input" style="background-color: #ffffff !important; color: #1e293b !important; padding-left: 0.75rem !important;" />
+        <input type="text" pInputText id="name" formControlName="name" autocomplete="off" class="w-full" />
         @if (roleForm.get('name')?.errors?.['required'] && roleForm.get('name')?.touched) {
           <small class="p-error">Rol adı gereklidir.</small>
         }
@@ -108,8 +107,7 @@
       
       <div class="field">
         <label for="description" class="form-label">Açıklama</label>
-        <textarea pTextarea id="description" formControlName="description" rows="3" 
-                  class="w-full custom-textarea" style="background-color: #ffffff !important; color: #1e293b !important; padding-left: 0.75rem !important;"></textarea>
+        <textarea pTextarea id="description" formControlName="description" rows="3" class="w-full"></textarea>
         @if (roleForm.get('description')?.errors?.['required'] && roleForm.get('description')?.touched) {
           <small class="p-error">Açıklama gereklidir.</small>
         }

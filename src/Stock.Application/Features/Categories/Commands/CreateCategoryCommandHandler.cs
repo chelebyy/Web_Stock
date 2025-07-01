@@ -8,6 +8,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging; // Loglama için
 using System;
+using Stock.Application.Common.Interfaces;
 
 namespace Stock.Application.Features.Categories.Commands
 {
@@ -18,17 +19,20 @@ namespace Stock.Application.Features.Categories.Commands
         private readonly IUnitOfWork _unitOfWork;
         private readonly IMapper _mapper;
         private readonly ILogger<CreateCategoryCommandHandler> _logger;
+        private readonly ICacheService _cacheService;
 
         public CreateCategoryCommandHandler(
             ICategoryRepository categoryRepository, 
             IUnitOfWork unitOfWork, 
             IMapper mapper, 
-            ILogger<CreateCategoryCommandHandler> logger)
+            ILogger<CreateCategoryCommandHandler> logger,
+            ICacheService cacheService)
         {
             _categoryRepository = categoryRepository;
             _unitOfWork = unitOfWork; // UnitOfWork'ü inject et
             _mapper = mapper;
             _logger = logger;
+            _cacheService = cacheService;
         }
 
         public async Task<Result<CategoryDto>> Handle(CreateCategoryCommand request, CancellationToken cancellationToken)
@@ -60,7 +64,12 @@ namespace Stock.Application.Features.Categories.Commands
                     return Result<CategoryDto>.Failure("Failed to save the new category.");
                 }
 
-                _logger.LogInformation("Kategori başarıyla oluşturuldu: ID {CategoryId}, Name: {CategoryName}", newCategory.Id, newCategory.Name);
+                // Invalidate cache
+                var prefix = "categories_page";
+                await _cacheService.RemoveByPrefixAsync(prefix);
+                _logger.LogInformation("Cache invalidated for prefix: {CachePrefix}", prefix);
+
+                _logger.LogInformation("Kategori başarıyla oluşturuldu: ID {CategoryId}, Name: {CategoryName}", newCategory.Id, newCategory.Name.Value);
 
                 var categoryDto = _mapper.Map<CategoryDto>(newCategory);
                 return Result<CategoryDto>.Success(categoryDto);

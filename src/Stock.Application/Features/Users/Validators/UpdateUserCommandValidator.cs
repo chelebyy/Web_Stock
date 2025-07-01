@@ -16,13 +16,9 @@ namespace Stock.Application.Features.Users.Validators
                 .MaximumLength(20).WithMessage("Sicil 20 karakterden uzun olamaz.");
                 // Sicil formatı kontrolü eklenebilir
 
-            RuleFor(v => v.Adi)
-                .NotEmpty().WithMessage("Ad boş olamaz.")
-                .MaximumLength(50).WithMessage("Ad 50 karakterden uzun olamaz.");
-
-            RuleFor(v => v.Soyadi)
-                .NotEmpty().WithMessage("Soyad boş olamaz.")
-                .MaximumLength(50).WithMessage("Soyad 50 karakterden uzun olamaz.");
+            RuleFor(v => v.FullName)
+                .NotEmpty().WithMessage("Ad Soyad boş olamaz.")
+                .MaximumLength(100).WithMessage("Ad Soyad 100 karakterden uzun olamaz.");
 
             RuleFor(v => v.RoleId)
                 .NotEmpty().WithMessage("Rol ID boş olamaz.")

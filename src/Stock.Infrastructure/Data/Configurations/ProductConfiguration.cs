@@ -18,6 +18,10 @@ namespace Stock.Infrastructure.Data.Configurations
                     .HasColumnName("Name") // Sütun adını belirtiyoruz
                     .IsRequired()
                     .HasMaxLength(100);
+                
+                // Index'i OwnsOne yapılandırması içinde tanımlama
+                nameBuilder.HasIndex(pn => pn.Value)
+                    .HasDatabaseName("IX_Products_Name");
             });
 
             builder.OwnsOne(p => p.Description, descBuilder =>
@@ -35,11 +39,8 @@ namespace Stock.Infrastructure.Data.Configurations
                     .IsRequired();
             });
 
-            // Category ile ilişki
-            builder.HasOne(p => p.Category)
-                .WithMany() // Category'nin Product listesi yoksa WithMany() yeterli
-                .HasForeignKey(p => p.CategoryId)
-                .IsRequired();
+            // Category ile ilişki CategoryConfiguration.cs'te tanımlandığı için
+            // burada tekrar tanımlamaya gerek yok - çifte tanım sorunu yaratıyor
 
             // BaseEntity'den gelen CreatedAt ve UpdatedAt
             builder.Property(p => p.CreatedAt).IsRequired();

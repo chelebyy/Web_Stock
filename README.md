@@ -96,6 +96,7 @@ Proje ile ilgili tüm belgeler `knowledge-base` klasöründe bulunmaktadır:
 
 - [Belge Yönetim Kuralları](knowledge-base/document-management-rules.mdc)
 - [Kullanıcı Sayfa İzinleri Modülü](knowledge-base/feature_modules/user_page_permissions_module.md)
+- [Rol Yönetimi Optimizasyonu](knowledge-base/feature_modules/role_management_optimization.md)
 - [Kullanıcı Sayfa İzinleri Bilgi Tabanı](knowledge-base/user_page_permissions_knowledge_base.md)
 - [Hata Kayıtları ve Çözümleri](errors.md)
 - [Scratchpad - Çalışma Notları](scratchpad.md)

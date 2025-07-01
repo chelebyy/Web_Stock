@@ -1,4 +1,5 @@
 using MediatR;
+using Microsoft.Extensions.Logging;
 using Stock.Application.Interfaces; // IUnitOfWork
 using Stock.Application.Models.DTOs; // UserDto
 using Stock.Domain.Entities;
@@ -7,6 +8,7 @@ using Stock.Domain.Specifications.Users; // UserWithRoleAndPermissionsSpecificat
 using System.Threading;
 using System.Threading.Tasks;
 using AutoMapper; // AutoMapper için
+using Stock.Application.Common.Interfaces;
 
 namespace Stock.Application.Features.Users.Queries.GetUserById
 {
@@ -14,28 +16,38 @@ namespace Stock.Application.Features.Users.Queries.GetUserById
     {
         private readonly IUnitOfWork _unitOfWork;
         private readonly IMapper _mapper;
+        private readonly ICacheService _cacheService;
+        private readonly ILogger<GetUserByIdQueryHandler> _logger;
 
-        public GetUserByIdQueryHandler(IUnitOfWork unitOfWork, IMapper mapper)
+        public GetUserByIdQueryHandler(IUnitOfWork unitOfWork, IMapper mapper, ICacheService cacheService, ILogger<GetUserByIdQueryHandler> logger)
         {
             _unitOfWork = unitOfWork;
             _mapper = mapper;
+            _cacheService = cacheService;
+            _logger = logger;
         }
 
         public async Task<UserDto?> Handle(GetUserByIdQuery request, CancellationToken cancellationToken)
         {
-            // Rol ve izin bilgilerini de dahil etmek için uygun specification'ı kullan
-            var spec = new UserWithRoleAndPermissionsSpecification(request.Id);
+            var cacheKey = $"users:{request.Id}";
 
-            // IRepository<User> üzerinden veriyi çek
-            var user = await _unitOfWork.GetRepository<User>().FirstOrDefaultAsync(spec, cancellationToken);
-
-            if (user == null)
+            return await _cacheService.GetOrCreateAsync(cacheKey, async () =>
             {
-                return null; // Veya NotFoundException fırlatılabilir, duruma göre karar verilir.
-            }
+                _logger.LogInformation("Fetching user with ID: {UserId} from database.", request.Id);
+                var spec = new UserWithRoleAndPermissionsSpecification(request.Id);
 
-            // AutoMapper ile User entity'sini UserDto'ya map et
-            return _mapper.Map<UserDto>(user);
+                var user = await _unitOfWork.GetRepository<User>().FirstOrDefaultAsync(spec, cancellationToken);
+
+                if (user == null)
+                {
+                    _logger.LogWarning("User with ID: {UserId} not found in database.", request.Id);
+                    return null;
+                }
+
+                _logger.LogInformation("User with ID: {UserId} fetched successfully from database.", request.Id);
+                return _mapper.Map<UserDto>(user);
+
+            }, TimeSpan.FromMinutes(30), cancellationToken: cancellationToken);
         }
     }
 } 

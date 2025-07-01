@@ -10,33 +10,32 @@ namespace Stock.Domain.ValueObjects
 
         private StockLevel(int value)
         {
-            if (value < 0)
-            {
-                throw new DomainException("Stock level cannot be negative.");
-            }
             Value = value;
         }
 
-        public static StockLevel From(int value)
+        public static Result<StockLevel> From(int value)
         {
-            return new StockLevel(value);
+            if (value < 0)
+            {
+                return Result<StockLevel>.Failure("Stock level cannot be negative.");
+            }
+            return Result<StockLevel>.Success(new StockLevel(value));
         }
 
-        // Stok seviyesini artırma/azaltma metotları eklenebilir
-        public StockLevel Increase(int amount)
+        public Result<StockLevel> Increase(int amount)
         {
             if (amount < 0)
-                throw new DomainException("Amount to increase must be non-negative.");
-            return new StockLevel(Value + amount);
+                return Result<StockLevel>.Failure("Amount to increase must be non-negative.");
+            return From(Value + amount);
         }
 
-        public StockLevel Decrease(int amount)
+        public Result<StockLevel> Decrease(int amount)
         {
             if (amount < 0)
-                throw new DomainException("Amount to decrease must be non-negative.");
+                return Result<StockLevel>.Failure("Amount to decrease must be non-negative.");
             if (Value - amount < 0)
-                throw new DomainException("Cannot decrease stock level below zero.");
-            return new StockLevel(Value - amount);
+                return Result<StockLevel>.Failure("Cannot decrease stock level below zero.");
+            return From(Value - amount);
         }
 
         protected override IEnumerable<object> GetEqualityComponents()

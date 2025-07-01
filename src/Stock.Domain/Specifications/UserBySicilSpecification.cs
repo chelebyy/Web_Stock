@@ -15,7 +15,7 @@ namespace Stock.Domain.Specifications
         /// <param name="sicil">Aranacak sicil numarası.</param>
         /// <param name="includeRole">Rol bilgisini dahil et (varsayılan: true).</param>
         public UserBySicilSpecification(string sicil, bool includeRole = true)
-            : base(u => u.Sicil == sicil)
+            : base(u => u.Sicil.Value == sicil)
         {
             if (includeRole)
             {

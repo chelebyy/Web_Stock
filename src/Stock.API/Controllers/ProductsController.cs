@@ -14,51 +14,56 @@ using Microsoft.AspNetCore.Http; // StatusCodes için eklendi
 using System;
 using Stock.Application.Constants; // ApiConstants için eklendi
 using Stock.Application.Models; // PagedResponse için eklendi
+using Stock.Application.Features.Products.Queries.GetProductsSummary;
+
+using Stock.Domain.Common; // Result türü için eklendi
 
 namespace Stock.API.Controllers
 {
     /// <summary>
-    /// Ürün yönetimi için API controller sınıfı.
-    /// Ürünleri listeleme, detaylarını görme, oluşturma, güncelleme ve silme işlemlerini sağlar.
-    /// Tüm işlemler CQRS pattern kullanılarak MediatR üzerinden gerçekleştirilir.
+    /// Manages product-related operations such as listing, retrieving, creating, updating, and deleting products.
+    /// All operations are handled via the CQRS pattern using MediatR.
     /// </summary>
     [ApiController]
     [Route("api/[controller]")]
-    // [Authorize] // Bu controller'a erişim için yetkilendirme gerekliyse açılabilir
+    // [Authorize] // Uncomment to enforce authorization for the entire controller
     public class ProductsController : ControllerBase
     {
         private readonly IMediator _mediator;
 
         /// <summary>
-        /// ProductsController yapıcı metodu.
-        /// MediatR bağımlılığını enjekte eder.
+        /// Initializes a new instance of the <see cref="ProductsController"/> class.
         /// </summary>
-        /// <param name="mediator">CQRS komutlarını ve sorgularını işleyecek olan MediatR nesnesi.</param>
+        /// <param name="mediator">The MediatR instance for handling CQRS commands and queries.</param>
         public ProductsController(IMediator mediator)
         {
             _mediator = mediator;
         }
 
         /// <summary>
-        /// Tüm ürünleri listeler.
-        /// Filtre, sıralama ve sayfalama parametreleri destekler.
+        /// Retrieves a paginated list of all products.
         /// </summary>
-        /// <param name="pageNumber">Sayfa numarası (varsayılan: 1)</param>
-        /// <param name="pageSize">Sayfa başına kayıt sayısı (varsayılan: 10, max: 100)</param>
-        /// <param name="sortBy">Sıralama alanı (Name, StockLevel, CategoryName vb.)</param>
-        /// <param name="sortDirection">Sıralama yönü (asc/desc)</param>
-        /// <param name="nameFilter">Ürün adına göre filtreleme</param>
-        /// <param name="categoryId">Kategori ID'sine göre filtreleme</param>
-        /// <returns>Sayfalanmış ürünlerin listesini içeren bir ActionResult.</returns>
-        /// <response code="200">Ürünler başarıyla getirildi.</response>
+        /// <remarks>
+        /// Supports filtering by name and category, as well as sorting and pagination.
+        /// Example: GET /api/v1/products?pageNumber=1&amp;pageSize=20&amp;sortBy=Name&amp;sortDirection=asc&amp;nameFilter=laptop&amp;categoryId=1
+        /// </remarks>
+        /// <param name="pageNumber">The page number to retrieve (default: 1).</param>
+        /// <param name="pageSize">The number of items per page (default: 10, max: 100).</param>
+        /// <param name="sortBy">The field to sort by (e.g., Name, CategoryName).</param>
+        /// <param name="sortDirection">The sort direction ('asc' or 'desc').</param>
+        /// <param name="nameFilter">A filter to apply to the product name.</param>
+        /// <param name="categoryId">A filter to retrieve products by a specific category ID.</param>
+        /// <response code="200">Returns the paginated list of products.</response>
+        /// <response code="400">If the query parameters are invalid.</response>
         [HttpGet]
         [ProducesResponseType(typeof(PagedResponse<ProductListItemDto>), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
         public async Task<ActionResult<PagedResponse<ProductListItemDto>>> GetAllProducts(
             [FromQuery] int? pageNumber = null,
             [FromQuery] int? pageSize = null,
-            [FromQuery] string sortBy = null,
-            [FromQuery] string sortDirection = null,
-            [FromQuery] string nameFilter = null,
+            [FromQuery] string? sortBy = null,
+            [FromQuery] string? sortDirection = null,
+            [FromQuery] string? nameFilter = null,
             [FromQuery] int? categoryId = null)
         {
             var query = new GetAllProductsQuery
@@ -76,79 +81,140 @@ namespace Stock.API.Controllers
         }
 
         /// <summary>
-        /// Belirtilen ID'ye sahip ürünü getirir.
+        /// Gets a product by its ID.
         /// </summary>
-        /// <param name="id">Getirilecek ürünün ID'si.</param>
-        /// <returns>Bulunan ürünü içeren bir ActionResult.</returns>
-        /// <response code="200">Ürün başarıyla getirildi.</response>
-        /// <response code="404">Belirtilen ID'ye sahip ürün bulunamadı.</response>
+        /// <param name="id">The ID of the product to retrieve.</param>
+        /// <remarks>
+        /// Sample request:
+        ///
+        ///     GET /api/products/1
+        ///
+        /// </remarks>
+        /// <response code="200">Returns the product with the specified ID.</response>
+        /// <response code="404">If the product with the specified ID was not found.</response>
         [HttpGet("{id:int}")]
         [ProducesResponseType(typeof(ProductDto), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public async Task<ActionResult<ProductDto>> GetProductById(int id)
+        public async Task<ActionResult<ProductDto>> GetById(int id)
         {
             var query = new GetProductByIdQuery(id);
-            var product = await _mediator.Send(query);
-            // Handler'dan gelen null durumu kontrol edilmeli veya handler içinde NotFoundException fırlatılmalı.
-            // Şimdilik doğrudan Ok dönüyoruz, global exception handler 404'ü yakalayacaktır.
-            return Ok(product);
+            var result = await _mediator.Send(query);
+            return result != null ? Ok(result) : NotFound();
         }
 
         /// <summary>
-        /// Yeni bir ürün oluşturur.
+        /// Creates a new product.
         /// </summary>
-        /// <param name="command">Oluşturulacak ürünün bilgilerini içeren komut.</param>
-        /// <returns>Oluşturulan ürünü içeren bir ActionResult.</returns>
-        /// <response code="201">Ürün başarıyla oluşturuldu.</response>
-        /// <response code="400">Geçersiz ürün bilgileri.</response>
+        /// <param name="command">The command to create a new product.</param>
+        /// <remarks>
+        /// Sample request:
+        ///
+        ///     POST /api/products
+        ///     {
+        ///        "name": "New Product",
+        ///        "price": 10.0,
+        ///        "categoryId": 1
+        ///     }
+        ///
+        /// </remarks>
+        /// <response code="201">Returns the newly created product.</response>
+        /// <response code="400">If the command is invalid.</response>
         [HttpPost]
+        //[Authorize(Policy = "RequireAdminRole")]
         [ProducesResponseType(typeof(ProductDto), StatusCodes.Status201Created)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        public async Task<ActionResult<ProductDto>> CreateProduct([FromBody] CreateProductCommand command)
+        public async Task<ActionResult<ProductDto>> Create(CreateProductCommand command)
         {
-            var product = await _mediator.Send(command);
-            return CreatedAtAction(nameof(GetProductById), new { id = product.Id }, product);
+            Result<ProductDto> result = await _mediator.Send(command);
+
+            if (!result.IsSuccess)
+            {
+                return BadRequest(result.Error);
+            }
+
+            var productDto = result.Value;
+            return CreatedAtAction(nameof(GetById), new { id = productDto.Id }, productDto);
         }
 
         /// <summary>
-        /// Mevcut bir ürünü günceller.
+        /// Updates an existing product.
         /// </summary>
-        /// <param name="id">Güncellenecek ürünün ID'si.</param>
-        /// <param name="command">Güncellenmiş ürün bilgilerini içeren komut.</param>
-        /// <returns>İşlem sonucunu belirten bir IActionResult.</returns>
-        /// <response code="204">Ürün başarıyla güncellendi.</response>
-        /// <response code="400">Geçersiz ürün bilgileri veya ID uyuşmazlığı.</response>
-        /// <response code="404">Belirtilen ID'ye sahip ürün bulunamadı.</response>
+        /// <param name="id">The ID of the product to update.</param>
+        /// <param name="command">The command to update the product.</param>
+        /// <remarks>
+        /// Sample request:
+        ///
+        ///     PUT /api/products/1
+        ///     {
+        ///        "name": "Updated Product",
+        ///        "price": 15.0,
+        ///        "categoryId": 1
+        ///     }
+        ///
+        /// </remarks>
+        /// <response code="204">If the product was successfully updated.</response>
+        /// <response code="400">If the command is invalid or the ID does not match.</response>
+        /// <response code="404">If the product with the specified ID was not found.</response>
         [HttpPut("{id:int}")]
+        //[Authorize(Policy = "RequireAdminRole")]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public async Task<IActionResult> UpdateProduct(int id, [FromBody] UpdateProductCommand command)
+        public async Task<IActionResult> Update(int id, UpdateProductCommand command)
         {
-            // Route ID ile komut içindeki ID'nin eşleştiğini kontrol etmek iyi bir pratiktir.
             if (id != command.Id)
             {
-                return BadRequest("ID mismatch between route parameter and command body.");
+                return BadRequest();
             }
-            await _mediator.Send(command);
-            return NoContent(); // Başarılı güncelleme sonrası 204
+
+            var result = await _mediator.Send(command);
+
+            if (!result.IsSuccess)
+            {
+                return NotFound();
+            }
+
+            return NoContent();
         }
 
         /// <summary>
-        /// Belirtilen ID'ye sahip ürünü siler (Soft delete).
+        /// Deletes a product by its ID.
         /// </summary>
-        /// <param name="id">Silinecek ürünün ID'si.</param>
-        /// <returns>İşlem sonucunu belirten bir IActionResult.</returns>
-        /// <response code="204">Ürün başarıyla silindi.</response>
-        /// <response code="404">Belirtilen ID'ye sahip ürün bulunamadı.</response>
+        /// <param name="id">The ID of the product to delete.</param>
+        /// <remarks>
+        /// Sample request:
+        ///
+        ///     DELETE /api/products/1
+        ///
+        /// </remarks>
+        /// <response code="204">If the product was successfully deleted.</response>
+        /// <response code="404">If the product with the specified ID was not found.</response>
         [HttpDelete("{id:int}")]
+        //[Authorize(Policy = "RequireAdminRole")]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public async Task<IActionResult> DeleteProduct(int id)
+        public async Task<IActionResult> Delete(int id)
         {
-            var command = new DeleteProductCommand(id);
-            await _mediator.Send(command);
-            return NoContent(); // Başarılı silme sonrası 204
+            await _mediator.Send(new DeleteProductCommand(id));
+            return NoContent();
+        }
+
+        /// <summary>
+        /// Retrieves a paginated summary list of products.
+        /// </summary>
+        /// <remarks>
+        /// This endpoint returns a lightweight version of product data, suitable for quick overviews or lists.
+        /// </remarks>
+        /// <param name="query">The query parameters for pagination and filtering.</param>
+        /// <response code="200">Returns the paginated list of product summaries.</response>
+        /// <response code="400">If the query parameters are invalid.</response>
+        [HttpGet("summary")]
+        [ProducesResponseType(typeof(PagedResponse<ProductSummaryDto>), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        public async Task<IActionResult> GetSummary([FromQuery] GetProductsSummaryQuery query)
+        {
+            var result = await _mediator.Send(query);
+            return Ok(result);
         }
     }
 } 

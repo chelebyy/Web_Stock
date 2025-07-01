@@ -1,3 +1,4 @@
+using System;
 using System.Linq.Expressions;
 using Stock.Domain.Entities;
 
@@ -15,9 +16,8 @@ namespace Stock.Domain.Specifications
         /// <param name="sicil">Aranacak sicil numarası.</param>
         /// <param name="userIdToExclude">Kontrol dışında tutulacak kullanıcı ID'si.</param>
         public UserBySicilExcludingIdSpecification(string sicil, int userIdToExclude)
-            : base(u => u.Sicil == sicil && u.Id != userIdToExclude)
         {
-            // Bu kontrol için rol bilgisine gerek yok.
+            AddCriteria(u => u.Sicil.Value == sicil && u.Id != userIdToExclude);
         }
     }
 } 

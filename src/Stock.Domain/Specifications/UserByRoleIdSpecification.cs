@@ -1,3 +1,4 @@
+using System;
 using System.Linq.Expressions;
 using Stock.Domain.Entities;
 
@@ -13,8 +14,9 @@ namespace Stock.Domain.Specifications
         /// </summary>
         /// <param name="roleId">Filtrelenecek rol ID'si.</param>
         public UserByRoleIdSpecification(int? roleId)
-            : base(u => u.RoleId == roleId)
         {
+            AddInclude(u => u.Role);
+            AddCriteria(u => u.RoleId == roleId);
         }
     }
 } 

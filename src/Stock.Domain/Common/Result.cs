@@ -7,6 +7,7 @@ namespace Stock.Domain.Common;
 public class Result<T>
 {
     public bool IsSuccess { get; }
+    public bool IsFailure => !IsSuccess;
     public T Value { get; }
     public string Error { get; }
 
@@ -29,6 +30,7 @@ public class Result<T>
 public class Result
 {
     public bool IsSuccess { get; }
+    public bool IsFailure => !IsSuccess;
     public string Error { get; }
 
     protected Result(bool isSuccess, string error)
@@ -40,4 +42,35 @@ public class Result
     public static Result Success() => new Result(true, string.Empty);
 
     public static Result Failure(string error) => new Result(false, error);
+
+    // Combine multiple results into one
+    public static Result Combine(params Result[] results)
+    {
+        var failedResults = results.Where(r => r.IsFailure).ToList();
+        
+        if (failedResults.Any())
+        {
+            var combinedError = string.Join("; ", failedResults.Select(r => r.Error));
+            return Failure(combinedError);
+        }
+        
+        return Success();
+    }
+
+    // Combine multiple results with values into one
+    public static Result<T> Combine<T>(Result<T> result, params Result<T>[] otherResults)
+    {
+        var allResults = new List<Result<T>> { result };
+        allResults.AddRange(otherResults);
+        
+        var failedResults = allResults.Where(r => r.IsFailure).ToList();
+        
+        if (failedResults.Any())
+        {
+            var combinedError = string.Join("; ", failedResults.Select(r => r.Error));
+            return Result<T>.Failure(combinedError);
+        }
+        
+        return result;
+    }
 }

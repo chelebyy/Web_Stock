@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using Stock.Domain.Entities;
+using Stock.Domain.ValueObjects;
 
 namespace Stock.Infrastructure.Data.Configurations
 {
@@ -10,10 +11,15 @@ namespace Stock.Infrastructure.Data.Configurations
         {
             builder.HasKey(c => c.Id);
 
-            builder.Property(c => c.Name)
-                .UsePropertyAccessMode(PropertyAccessMode.Field)
-                .IsRequired()
-                .HasMaxLength(100);
+            builder.OwnsOne(c => c.Name, nameBuilder =>
+            {
+                nameBuilder.Property(n => n.Value)
+                    .HasColumnName("Name")
+                    .IsRequired()
+                    .HasMaxLength(CategoryName.MaxLength);
+
+                nameBuilder.HasIndex(n => n.Value).IsUnique();
+            });
 
             builder.Property(c => c.Description)
                 .UsePropertyAccessMode(PropertyAccessMode.Field)

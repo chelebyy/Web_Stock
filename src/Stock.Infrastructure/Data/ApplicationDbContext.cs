@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using Stock.Domain.Entities;
 using Stock.Domain.Entities.Permissions;
+using Stock.Domain.ValueObjects;
 using Stock.Infrastructure.Data.Configurations;
 using BCrypt.Net;
 using Stock.Application.Constants;
@@ -40,8 +41,8 @@ namespace Stock.Infrastructure.Data
             // Apply entity configurations
             modelBuilder.ApplyConfigurationsFromAssembly(typeof(ApplicationDbContext).Assembly);
 
-            // Seed data
-            SeedData(modelBuilder);
+            // Seed data - Value Object'ler nedeniyle Program.cs'de yapılacak
+            // SeedData(modelBuilder);
         }
 
         private void SeedData(ModelBuilder modelBuilder)
@@ -50,43 +51,36 @@ namespace Stock.Infrastructure.Data
             var seedDate = new DateTime(2025, 3, 1, 0, 0, 0, DateTimeKind.Utc);
 
             // Seed admin role
-            // DDD için factory metot kullanarak Role oluştur
-            var adminRoleResult = Role.Create("Admin", "Administrator role with full access");
-            if (adminRoleResult.IsSuccess)
-            {
-                var adminRole = adminRoleResult.Value;
-                // Seed data için gerekli özellikler anonim nesne ile eklenir
-                modelBuilder.Entity<Role>().HasData(
-                    new 
-                    {
-                        Id = 1,
-                        Name = adminRole.Name,
-                        Description = adminRole.Description,
-                        CreatedAt = seedDate,
-                        IsDeleted = false,
-                        UpdatedAt = (DateTime?)null,
-                        CreatedBy = (string)null,
-                        UpdatedBy = (string)null
-                    }
-                );
-            }
+            modelBuilder.Entity<Role>().HasData(
+                new 
+                {
+                    Id = 1,
+                    Name_Value = "Admin", // Value Object için doğru property adı
+                    Description = "Administrator role with full access",
+                    CreatedAt = seedDate,
+                    IsDeleted = false,
+                    UpdatedAt = (DateTime?)null,
+                    CreatedBy = (string)null,
+                    UpdatedBy = (string)null
+                }
+            );
 
-            // Seed admin user - Using User factory method would be ideal but EF Core seeding requires 
-            // explicit property assignments, so we'll use the Entity direct initialization here
-            // and then ensure our model is correctly configured in UserConfiguration
-            var passwordHash = "$2a$11$w1QwQn1QwQn1QwQn1QwQnOQn1QwQn1QwQn1QwQn1QwQn1QwQn1Q";
+            // Seed admin user
+            var passwordHash = "$2a$11$3J5..wF0T4iP.gR2Y5tA5.L/E.CHd2/x3O5aZl4Y3k58S.s/3x8ge"; // Admin123!
             modelBuilder.Entity<User>().HasData(
                 new 
                 {
                     Id = 1,
-                    Adi = "Admin",
-                    Soyadi = "Kullanıcısı",
-                    Sicil = "00000",
+                    FullName_Adi = "Admin", // Value Object için doğru property adı
+                    FullName_Soyadi = "Kullanıcısı", // Value Object için doğru property adı
+                    Sicil_Value = "00000", // Value Object için doğru property adı
                     PasswordHash = passwordHash,
                     IsAdmin = true,
                     RoleId = 1,
                     CreatedAt = seedDate,
                     IsDeleted = false,
+                    IsActive = true,
+                    Username = "admin",
                     LastLoginAt = (DateTime?)null,
                     UpdatedAt = (DateTime?)null,
                     CreatedBy = (string)null,
@@ -109,12 +103,11 @@ namespace Stock.Infrastructure.Data
                 string permissionName = (string)field.GetValue(null);
                 string groupName = field.DeclaringType.Name;
                 
-                // Factory metodu yerine doğrudan HasData için anonim nesne kullanıyoruz
                 modelBuilder.Entity<Permission>().HasData(
                     new 
                     {
                         Id = permissionIdCounter,
-                        Name = permissionName,
+                        Name_Value = permissionName, // Value Object için doğru property adı
                         Group = groupName, 
                         Description = $"{groupName} - {permissionName}",
                         ResourceType = "",

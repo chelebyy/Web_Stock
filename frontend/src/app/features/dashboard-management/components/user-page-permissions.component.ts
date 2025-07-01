@@ -1,16 +1,15 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, inject, signal, computed, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { ActivatedRoute, Router } from '@angular/router';
+import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { ButtonModule } from 'primeng/button';
 import { ToastModule } from 'primeng/toast';
 import { InputTextModule } from 'primeng/inputtext';
 import { TooltipModule } from 'primeng/tooltip';
 import { RippleModule } from 'primeng/ripple';
 import { MessageService } from 'primeng/api';
-import { DashboardPermissionService, DashboardUser, PagePermission } from '../services/dashboard-permission.service';
-import { finalize, catchError } from 'rxjs/operators';
-import { of } from 'rxjs';
+import { DashboardPermissionStateService } from '../services/dashboard-permission-state.service';
+import { DashboardUser, PagePermission } from '../services/dashboard-permission.service';
 
 @Component({
   selector: 'app-user-page-permissions',
@@ -22,43 +21,46 @@ import { of } from 'rxjs';
     ToastModule,
     InputTextModule,
     TooltipModule,
-    RippleModule
+    RippleModule,
+    RouterModule
   ],
-  providers: [MessageService],
+  providers: [MessageService, DashboardPermissionStateService],
   templateUrl: './user-page-permissions.component.html',
-  styleUrls: ['./user-page-permissions.component.scss']
+  styleUrls: ['./user-page-permissions.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class UserPagePermissionsComponent implements OnInit {
+  public state = inject(DashboardPermissionStateService);
+  private route = inject(ActivatedRoute);
+  private router = inject(Router);
+
   pageId = 0;
   pageName = '';
-  loading = true;
-  processing = false;
   
-  // Aktif sayfa (users veya permissions)
-  activePage = 'users';
-  
-  // Kullanıcılar sayfası için
-  users: DashboardUser[] = [];
-  filteredUsers: DashboardUser[] = [];
-  usersSearchText = '';
-  currentUserPage = 1;
-  totalUserPages = 1;
-  usersPerPage = 12;
-  
-  // İzinler sayfası için
-  pagePermissions: PagePermission[] = [];
-  filteredPagePermissions: PagePermission[] = [];
-  permissionsSearchText = '';
-  currentPermissionPage = 1;
-  totalPermissionPages = 1;
-  permissionsPerPage = 12;
+  activePage = signal('users');
+  usersSearchText = signal('');
+  permissionsSearchText = signal('');
 
-  constructor(
-    private route: ActivatedRoute,
-    private router: Router,
-    private permissionService: DashboardPermissionService,
-    private messageService: MessageService
-  ) {}
+  // Computed signals for filtering
+  filteredUsers = computed(() => {
+    const searchTerm = this.usersSearchText().toLowerCase();
+    if (!searchTerm) return this.state.users();
+    return this.state.users().filter(user =>
+      user.fullName.toLowerCase().includes(searchTerm) ||
+      user.sicil.toLowerCase().includes(searchTerm)
+    );
+  });
+
+  filteredPermissions = computed(() => {
+    const searchTerm = this.permissionsSearchText().toLowerCase();
+    if (!searchTerm) return this.state.permissions();
+    return this.state.permissions().filter(p =>
+      p.fullName.toLowerCase().includes(searchTerm) ||
+      p.sicil.toLowerCase().includes(searchTerm)
+    );
+  });
+
+  constructor() {}
 
   ngOnInit(): void {
     this.route.params.subscribe(params => {
@@ -66,243 +68,35 @@ export class UserPagePermissionsComponent implements OnInit {
       this.pageName = params['pageName'] || 'Bilinmeyen Sayfa';
       
       if (isNaN(this.pageId) || this.pageId <= 0) {
-        this.messageService.add({
-          severity: 'error',
-          summary: 'Hata',
-          detail: 'Geçersiz sayfa ID\'si.'
-        });
-        this.navigateBack();
+        // Error handling can be enhanced via state service if needed
+        this.router.navigate(['/dashboard']);
         return;
       }
       
-      this.loadData();
+      this.state.loadInitialData(this.pageId);
     });
-  }
-
-  loadData(): void {
-    this.loading = true;
-    
-    // Kullanıcıları yükle
-    this.permissionService.getUsers(this.pageId)
-      .pipe(
-        catchError(error => {
-          console.error('Kullanıcı verileri yüklenirken hata:', error);
-          this.messageService.add({
-            severity: 'error',
-            summary: 'Hata',
-            detail: 'Kullanıcı verileri yüklenirken bir hata oluştu.'
-          });
-          return of([]);
-        }),
-        finalize(() => {
-          this.loading = false;
-        })
-      )
-      .subscribe(users => {
-        console.log('Yüklenen kullanıcılar:', users);
-        this.users = users;
-        this.filteredUsers = [...users];
-        this.calculateUserPages();
-      });
-
-    // İzinleri yükle
-    this.permissionService.getPagePermissions(this.pageId)
-      .pipe(
-        catchError(error => {
-          console.error('Sayfa izinleri yüklenirken hata:', error);
-          this.messageService.add({
-            severity: 'error',
-            summary: 'Hata',
-            detail: 'Sayfa izinleri yüklenirken bir hata oluştu.'
-          });
-          return of([]);
-        })
-      )
-      .subscribe(permissions => {
-        console.log('Yüklenen izinler:', permissions);
-        this.pagePermissions = permissions;
-        this.filteredPagePermissions = [...permissions];
-        this.calculatePermissionPages();
-      });
-  }
-
-  // Sayfa geçişi
-  switchPage(page: string): void {
-    if (this.activePage !== page) {
-      this.activePage = page;
-      
-      // Sayfa değiştiğinde sayfalama bilgilerini sıfırla
-      if (page === 'users') {
-        this.currentUserPage = 1;
-        this.calculateUserPages();
-      } else {
-        this.currentPermissionPage = 1;
-        this.calculatePermissionPages();
-      }
-    }
-  }
-
-  // Kullanıcı sayfalaması
-  calculateUserPages(): void {
-    this.totalUserPages = Math.ceil(this.filteredUsers.length / this.usersPerPage);
-    if (this.totalUserPages === 0) this.totalUserPages = 1;
-  }
-
-  goToUserPage(page: number): void {
-    if (page >= 1 && page <= this.totalUserPages) {
-      this.currentUserPage = page;
-    }
-  }
-
-  // İzin sayfalaması
-  calculatePermissionPages(): void {
-    this.totalPermissionPages = Math.ceil(this.filteredPagePermissions.length / this.permissionsPerPage);
-    if (this.totalPermissionPages === 0) this.totalPermissionPages = 1;
-  }
-
-  goToPermissionPage(page: number): void {
-    if (page >= 1 && page <= this.totalPermissionPages) {
-      this.currentPermissionPage = page;
-    }
-  }
-
-  // Kullanıcı arama
-  searchUsers(event: any): void {
-    const searchText = this.usersSearchText.toLowerCase();
-    this.filteredUsers = this.users.filter(user =>
-      (user.username && user.username.toLowerCase().includes(searchText)) ||
-      user.fullName.toLowerCase().includes(searchText) ||
-      user.sicil.toLowerCase().includes(searchText)
-    );
-    
-    // Arama sonuçlarına göre sayfalama bilgilerini güncelle
-    this.currentUserPage = 1;
-    this.calculateUserPages();
-  }
-
-  // İzin arama
-  searchPermissions(event: any): void {
-    const searchText = this.permissionsSearchText.toLowerCase();
-    this.filteredPagePermissions = this.pagePermissions.filter(permission =>
-      (permission.username && permission.username.toLowerCase().includes(searchText)) ||
-      permission.fullName.toLowerCase().includes(searchText) ||
-      permission.sicil.toLowerCase().includes(searchText)
-    );
-    
-    // Arama sonuçlarına göre sayfalama bilgilerini güncelle
-    this.currentPermissionPage = 1;
-    this.calculatePermissionPages();
-  }
-
-  clearUsersSearch(): void {
-    this.usersSearchText = '';
-    this.filteredUsers = [...this.users];
-    this.currentUserPage = 1;
-    this.calculateUserPages();
-  }
-
-  clearPermissionsSearch(): void {
-    this.permissionsSearchText = '';
-    this.filteredPagePermissions = [...this.pagePermissions];
-    this.currentPermissionPage = 1;
-    this.calculatePermissionPages();
   }
 
   grantPermission(user: DashboardUser): void {
     if (!user.id || user.hasPagePermission || !user.isActive) return;
-
-    this.processing = true;
-    this.permissionService.grantPermission(this.pageId, user.id)
-      .pipe(
-        catchError(error => {
-          console.error('İzin verilirken hata:', error);
-          this.messageService.add({
-            severity: 'error',
-            summary: 'Hata',
-            detail: 'İzin verilirken bir hata oluştu.'
-          });
-          return of(null);
-        }),
-        finalize(() => {
-          this.processing = false;
-        })
-      )
-      .subscribe(result => {
-        if (result) {
-          // Kullanıcının izin durumunu güncelle
-          user.hasPagePermission = true;
-          
-          this.messageService.add({
-            severity: 'success',
-            summary: 'Başarılı',
-            detail: `${user.fullName} kullanıcısına sayfa izni verildi.`
-          });
-          
-          // İzinler listesini güncelle
-          const newPermission: PagePermission = {
-            id: 0, // Backend tarafından atanacak
-            userId: user.id,
-            pageId: this.pageId,
-            username: user.username || '',
-            fullName: user.fullName,
-            sicil: user.sicil,
-            grantedAt: new Date()
-          };
-          
-          this.pagePermissions = [...this.pagePermissions, newPermission];
-          this.filteredPagePermissions = [...this.pagePermissions];
-          this.calculatePermissionPages();
-        }
-      });
+    this.state.grantPermission(this.pageId, user);
   }
 
   revokePermission(permission: PagePermission): void {
-    this.processing = true;
-    this.permissionService.revokePermission(this.pageId, permission.userId)
-      .pipe(
-        catchError(error => {
-          console.error('İzin kaldırılırken hata:', error);
-          this.messageService.add({
-            severity: 'error',
-            summary: 'Hata',
-            detail: 'İzin kaldırılırken bir hata oluştu.'
-          });
-          return of(null);
-        }),
-        finalize(() => {
-          this.processing = false;
-        })
-      )
-      .subscribe(result => {
-        if (result) {
-          // Kullanıcının izin durumunu güncelle
-          const user = this.users.find(u => u.id === permission.userId);
-          if (user) {
-            user.hasPagePermission = false;
-          }
-          
-          // İzinler listesinden kaldır
-          this.pagePermissions = this.pagePermissions.filter(p => p.userId !== permission.userId);
-          this.filteredPagePermissions = this.filteredPagePermissions.filter(p => p.userId !== permission.userId);
-          
-          this.messageService.add({
-            severity: 'success',
-            summary: 'Başarılı',
-            detail: `${permission.fullName} kullanıcısının sayfa izni kaldırıldı.`
-          });
-          
-          // Sayfalama bilgilerini güncelle
-          this.calculatePermissionPages();
-          
-          // Eğer mevcut sayfa boşsa, bir önceki sayfaya git
-          if (this.currentPermissionPage > this.totalPermissionPages) {
-            this.currentPermissionPage = this.totalPermissionPages;
-          }
-        }
-      });
+    this.state.revokePermission(this.pageId, permission);
+  }
+
+  onUsersSearch(event: Event): void {
+    const value = (event.target as HTMLInputElement).value;
+    this.usersSearchText.set(value);
+  }
+
+  onPermissionsSearch(event: Event): void {
+    const value = (event.target as HTMLInputElement).value;
+    this.permissionsSearchText.set(value);
   }
 
   navigateBack(): void {
-    this.router.navigate(['/dashboard-management']);
+    this.router.navigate(['/dashboard/admin-dashboard']);
   }
 } 

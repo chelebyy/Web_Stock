@@ -1,3 +1,6 @@
+using System;
+using System.Linq;
+using System.Linq.Expressions;
 using Stock.Domain.Entities;
 
 namespace Stock.Domain.Specifications
@@ -11,55 +14,57 @@ namespace Stock.Domain.Specifications
         /// <summary>
         /// Tüm kullanıcıları rolleriyle birlikte getiren bir specification oluşturur.
         /// </summary>
-        public UsersWithRolesSpecification() : base()
+        public UsersWithRolesSpecification()
         {
             AddInclude(u => u.Role);
+            AddInclude(u => u.UserPermissions);
         }
 
         /// <summary>
-        /// Filtreleme kriterlerine göre kullanıcıları rolleriyle birlikte getiren bir specification oluşturur.
+        /// Filtreleme ve sıralama kriterlerine göre kullanıcıları rolleriyle birlikte getiren bir specification oluşturur.
         /// </summary>
-        /// <param name="name">Aranacak kullanıcı adı veya soyadı parçası.</param>
-        /// <param name="roleId">Filtrelenecek rol ID'si.</param>
-        /// <param name="sortField">Sıralama için kullanılacak alan.</param>
-        /// <param name="sortOrder">Sıralama için kullanılacak sıralama türü.</param>
         public UsersWithRolesSpecification(string name, int? roleId, string sortField, string sortOrder)
-            : base(u =>
-                (string.IsNullOrEmpty(name) || (u.Adi + " " + u.Soyadi).Contains(name) || u.Sicil.Contains(name)) &&
-                (!roleId.HasValue || u.RoleId == roleId.Value)
-            )
         {
             AddInclude(u => u.Role);
+            AddInclude(u => u.UserPermissions);
 
-            if (string.IsNullOrEmpty(sortField))
+            // Name filter
+            if (!string.IsNullOrEmpty(name))
             {
-                ApplyOrderBy(u => u.Adi);
-                return;
+                AddCriteria(u => u.FullName.ToString().ToLower().Contains(name.ToLower()));
             }
 
-            var keySelector = GetSortExpression(sortField);
-
-            if (keySelector != null)
+            // Role filter
+            if (roleId.HasValue)
             {
-                if (sortOrder?.ToLower() == "desc")
-                {
-                    ApplyOrderByDescending(keySelector);
-                }
-                else
-                {
-                    ApplyOrderBy(keySelector);
-                }
+                AddCriteria(u => u.RoleId == roleId);
             }
+
+            ApplySorting(sortField, sortOrder);
         }
 
         /// <summary>
-        /// Filtreleme kriterlerine göre kullanıcıları rolleriyle birlikte getiren bir specification oluşturur.
+        /// Filtreleme, sıralama ve sayfalama kriterlerine göre kullanıcıları rolleriyle birlikte getiren bir specification oluşturur.
         /// </summary>
-        /// <param name="name">Aranacak kullanıcı adı veya soyadı parçası.</param>
-        /// <param name="roleId">Filtrelenecek rol ID'si.</param>
-        public UsersWithRolesSpecification(string name, int? roleId)
-            : this(name, roleId, null, null)
+        public UsersWithRolesSpecification(string name, int? roleId, string sortField, string sortOrder, int pageNumber, int pageSize)
         {
+            AddInclude(u => u.Role);
+            AddInclude(u => u.UserPermissions);
+
+            // Name filter
+            if (!string.IsNullOrEmpty(name))
+            {
+                AddCriteria(u => u.FullName.ToString().ToLower().Contains(name.ToLower()));
+            }
+
+            // Role filter
+            if (roleId.HasValue)
+            {
+                AddCriteria(u => u.RoleId == roleId);
+            }
+
+            ApplySorting(sortField, sortOrder);
+            ApplyPaging(pageNumber, pageSize);
         }
 
         /// <summary>
@@ -67,20 +72,32 @@ namespace Stock.Domain.Specifications
         /// </summary>
         /// <param name="userId">Getirilecek kullanıcının ID'si.</param>
         public UsersWithRolesSpecification(int userId)
-            : base(u => u.Id == userId)
         {
             AddInclude(u => u.Role);
+            AddInclude(u => u.UserPermissions);
+            AddCriteria(u => u.Id == userId);
         }
 
-        private System.Linq.Expressions.Expression<System.Func<User, object>> GetSortExpression(string sortField)
+        private void ApplySorting(string sortField, string sortOrder)
         {
-            return sortField.ToLower() switch
+            Expression<Func<User, object>> keySelector = sortField?.ToLower() switch
             {
-                "fullname" => u => u.Adi + " " + u.Soyadi,
-                "sicil" => u => u.Sicil,
-                "rolename" => u => u.Role.Name,
+                "name" or "fullname" => u => u.FullName.ToString(),
+                "sicil" => u => u.Sicil.Value,
+                "role" => u => u.Role != null ? u.Role.Name.Value : "",
+                "isadmin" => u => u.IsAdmin,
+                "createdat" => u => u.CreatedAt,
                 _ => u => u.Id
             };
+
+            if (sortOrder?.ToLower() == "desc")
+            {
+                AddOrderByDescending(keySelector);
+            }
+            else
+            {
+                AddOrderBy(keySelector);
+            }
         }
     }
 } 

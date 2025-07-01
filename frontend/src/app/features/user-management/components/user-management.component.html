@@ -5,15 +5,9 @@
       <h1 class="page-title">Kullanıcı Yönetimi</h1>
       <p class="page-subtitle">Sistem kullanıcılarını yönetin ve gerekli izinleri atayın</p>
     </div>
-    <button pButton pRipple icon="pi pi-arrow-left" label="Geri Dön" class="p-button-outlined back-button" (click)="goBack()"></button>
   </div>
 
   <div class="card p-4 shadow-lg rounded-lg bg-gray-50 relative">
-
-    <!-- Geri Dön Butonu -->
-    <button pButton pRipple type="button" icon="pi pi-arrow-left" (click)="goBack()"
-      class="p-button-rounded p-button-secondary p-button-text absolute top-4 right-4" pTooltip="Geri Dön"></button>
-
     <p-toast></p-toast>
     <p-confirmDialog [style]="{width: '450px'}"></p-confirmDialog>
 
@@ -22,173 +16,91 @@
       <h2 class="text-3xl font-bold text-gray-800">Kullanıcı Yönetimi</h2>
     </div>
 
-    <!-- Araç Çubuğu -->
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6 items-center">
-      <!-- Arama Çubuğu -->
-      <div class="relative col-span-1 md:col-span-1">
-        <span class="p-input-icon-left w-full">
-          <i class="pi pi-search text-gray-400"></i>
-          <input type="text" pInputText placeholder="Kullanıcı veya sicil ara..." (input)="onSearchTextChange($event)"
-            class="w-full p-3 pl-10 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition">
-        </span>
-      </div>
-
-      <!-- Filtreler -->
-      <div class="col-span-1 md:col-span-1">
-        <select (change)="onRoleFilterChange($event)"
-          class="w-full p-3 border border-gray-300 rounded-lg bg-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition">
-          <option [ngValue]="null">Tüm Roller</option>
-          <option *ngFor="let role of state.roles()" [value]="role.id">{{ role.name }}</option>
-        </select>
-      </div>
-
-      <!-- Eylemler -->
-      <div class="col-span-1 md:col-span-1 flex justify-end">
-        <button pButton pRipple label="Yeni Kullanıcı Ekle" icon="pi pi-plus" class="p-button-success"
-          (click)="openNewUserDialog()"></button>
-      </div>
-    </div>
-
+    <p-toolbar styleClass="mb-4">
+      <ng-template pTemplate="left">
+        <button pButton pRipple label="Yeni Kullanıcı" icon="pi pi-plus" class="p-button-success mr-2" (click)="openNewUserDialog()"></button>
+        <button pButton pRipple label="CSV Olarak Dışa Aktar" icon="pi pi-file-export" class="p-button-info" (click)="exportUsersToCsv()"></button>
+      </ng-template>
+    </p-toolbar>
 
     <!-- Kullanıcı Tablosu -->
     <div class="overflow-x-auto bg-white rounded-lg shadow">
       <p-table
         #dt
-        [value]="state.users()"
-        [(selection)]="selectedUsers"
+        [value]="users"
+        [(selection)]="selectedUser"
         dataKey="id"
         styleClass="p-datatable-modern"
-        [loading]="state.loading()"
         [rowHover]="true"
         responsiveLayout="scroll"
-        [lazy]="true"
-        (onLazyLoad)="onPageChange($event)"
-        [totalRecords]="totalRecords()"
-        [rows]="rows()"
-        [first]="first()"
         [paginator]="true"
-        [rowsPerPageOptions]="[10, 25, 50]">
+        [rows]="10"
+        [rowsPerPageOptions]="[10, 25, 50]"
+        [globalFilterFields]="['fullName', 'sicil', 'roleName']"
+        currentPageReportTemplate="{first} ile {last} arası gösteriliyor, toplam {totalRecords} kayıt"
+        [showCurrentPageReport]="true">
+
+        <ng-template pTemplate="caption">
+          <div class="flex align-items-center justify-content-between">
+            <h5 class="m-0">Kullanıcıları Yönet</h5>
+          </div>
+        </ng-template>
 
         <ng-template pTemplate="header">
           <tr>
-            <th style="width: 4rem">
-              <p-tableHeaderCheckbox></p-tableHeaderCheckbox>
-            </th>
-            <th scope="col" class="px-6 py-3 text-left text-xs font-bold text-gray-600 uppercase tracking-wider">
-              Kullanıcı Adı
-            </th>
-            <th scope="col" class="px-6 py-3 text-left text-xs font-bold text-gray-600 uppercase tracking-wider">
-              Sicil
-            </th>
-            <th scope="col" class="px-6 py-3 text-left text-xs font-bold text-gray-600 uppercase tracking-wider">
-              Rol
-            </th>
+            <th pSortableColumn="fullName">Kullanıcı Adı <p-sortIcon field="fullName"></p-sortIcon></th>
+            <th pSortableColumn="sicil">Sicil <p-sortIcon field="sicil"></p-sortIcon></th>
+            <th pSortableColumn="roleName">Rol <p-sortIcon field="roleName"></p-sortIcon></th>
             <th scope="col" class="px-6 py-3 text-center text-xs font-bold text-gray-600 uppercase tracking-wider">
               İşlemler
             </th>
           </tr>
         </ng-template>
-        <tbody class="bg-white divide-y divide-gray-200">
-          <ng-container *ngIf="!state.loading()">
-            <tr *ngFor="let user of state.users()" class="hover:bg-gray-50 transition-colors">
-              <td>
-                <p-tableCheckbox [value]="user"></p-tableCheckbox>
-              </td>
-              <td class="px-6 py-4 whitespace-nowrap">
-                <div class="text-sm font-medium text-gray-900">{{ user.fullName }}</div>
-              </td>
-              <td class="px-6 py-4 whitespace-nowrap">
-                <div class="text-sm text-gray-500">{{ user.sicil }}</div>
-              </td>
-              <td class="px-6 py-4 whitespace-nowrap">
-                <span class="p-badge" [ngClass]="getRoleColorClass(user.roleName)">{{ user.roleName }}</span>
-              </td>
-              <td class="px-6 py-4 whitespace-nowrap text-center">
-                <button pButton pRipple icon="pi pi-pencil"
-                  class="p-button-rounded p-button-warning p-button-text mr-2" (click)="editUser(user)"
-                  pTooltip="Düzenle"></button>
-                <button pButton pRipple icon="pi pi-trash" class="p-button-rounded p-button-danger p-button-text mr-2"
-                  (click)="deleteUser(user)" pTooltip="Sil"></button>
-                <button pButton pRipple icon="pi pi-key"
-                  class="p-button-rounded p-button-info p-button-text" (click)="manageUserPermissions(user)"
-                  pTooltip="Sayfa İzinlerini Yönet"></button>
-              </td>
-            </tr>
-            <tr *ngIf="state.users().length === 0">
-              <td colspan="5" class="text-center py-6 text-gray-500">
-                Kayıt bulunamadı.
-              </td>
-            </tr>
-          </ng-container>
-          <tr *ngIf="state.loading()">
-            <td colspan="5" class="text-center py-6">
-              <i class="pi pi-spin pi-spinner text-blue-500" style="font-size: 2rem"></i>
+        
+        <ng-template pTemplate="body" let-user>
+          <tr class="hover:bg-gray-50 transition-colors">
+            <td class="px-6 py-4 whitespace-nowrap">
+              <div class="text-sm font-medium text-gray-900">{{ user.adi }} {{ user.soyadi }}</div>
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap">
+              <div class="text-sm text-gray-500">{{ user.sicil }}</div>
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap">
+              <span class="p-badge">{{ user.roleName || 'Belirsiz' }}</span>
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap text-center">
+              <button pButton pRipple icon="pi pi-pencil"
+                class="p-button-rounded p-button-warning p-button-text mr-2" (click)="openEditUserDialog(user)"
+                pTooltip="Düzenle"></button>
+              <button pButton pRipple icon="pi pi-trash" class="p-button-rounded p-button-danger p-button-text mr-2"
+                (click)="deleteUser(user)" pTooltip="Sil"></button>
             </td>
           </tr>
-        </tbody>
+        </ng-template>
+        
+        <ng-template pTemplate="emptymessage">
+          <tr>
+            <td colspan="4" class="text-center py-6 text-gray-500">
+              Kayıt bulunamadı.
+            </td>
+          </tr>
+        </ng-template>
+        
+        <ng-template pTemplate="summary">
+          <div class="flex align-items-center justify-content-between">
+            Toplam {{ users.length || 0 }} kullanıcı.
+          </div>
+        </ng-template>
       </p-table>
     </div>
-
-    <!-- Sayfalama bölümü kaldırıldı, p-table'ın kendi paginator'ı kullanılacak -->
-
   </div>
 </div>
 
 <!-- Kullanıcı Ekleme/Düzenle Dialog -->
-<p-dialog [(visible)]="userDialog" [style]="{width: '450px'}" header="{{editMode ? 'Kullanıcı Düzenle' : 'Yeni Kullanıcı'}}"
-  [modal]="true" class="p-fluid">
-  <ng-template pTemplate="content">
-    <form [formGroup]="userForm">
-      <div class="field">
-        <label for="fullName">Ad Soyad</label>
-        <input type="text" pInputText id="fullName" formControlName="fullName" required autofocus
-          [ngClass]="{'ng-invalid ng-dirty' : submitted && userForm.controls['fullName'].errors}" />
-        <small class="p-error" *ngIf="submitted && userForm.controls['fullName'].errors">Ad soyad zorunludur.</small>
-      </div>
-      <div class="field">
-        <label for="sicil">Sicil</label>
-        <input type="text" pInputText id="sicil" formControlName="sicil" required
-          [ngClass]="{'ng-invalid ng-dirty' : submitted && userForm.controls['sicil'].errors}" />
-        <small class="p-error" *ngIf="submitted && userForm.controls['sicil'].errors">Sicil zorunludur.</small>
-      </div>
-      <div class="field">
-        <label for="password">{{editMode ? 'Yeni Şifre (isteğe bağlı)' : 'Şifre'}}</label>
-        <p-password id="password" formControlName="password" [toggleMask]="true"
-          [ngClass]="{'ng-invalid ng-dirty' : submitted && userForm.controls['password'].errors}"></p-password>
-        <small class="p-error" *ngIf="submitted && userForm.controls['password'].errors?.['required']">Şifre
-          zorunludur.</small>
-        <small class="p-error" *ngIf="submitted && userForm.controls['password'].errors?.['minlength']">Şifre en az 6
-          karakter olmalıdır.</small>
-      </div>
-      <div class="field">
-        <label for="roleId">Rol</label>
-        <p-dropdown inputId="roleId" [options]="state.roles()" optionLabel="name" optionValue="id"
-          placeholder="Rol Seçin" formControlName="roleId"
-          [ngClass]="{'ng-invalid ng-dirty' : submitted && userForm.controls['roleId'].errors}"></p-dropdown>
-        <small class="p-error" *ngIf="submitted && userForm.controls['roleId'].errors">Rol seçimi zorunludur.</small>
-      </div>
-    </form>
-  </ng-template>
-  <ng-template pTemplate="footer">
-    <button pButton pRipple label="İptal" icon="pi pi-times" class="p-button-text" (click)="hideDialog()"></button>
-    <button pButton pRipple label="Kaydet" icon="pi pi-check" class="p-button-text" (click)="saveUser()"></button>
-  </ng-template>
-</p-dialog>
-
-<!-- Özel Silme Onay Dialogu -->
-<app-delete-confirmation-dialog
-  [visible]="deleteDialogVisible"
-  [itemName]="userToDelete ? (userToDelete.fullName || '') : (getSelectedUserCount() + ' kullanıcı')"
-  [title]="userToDelete ? 'Kullanıcıyı Sil' : 'Seçilen Kullanıcıları Sil'"
-  [message]="userToDelete ? (userToDelete.fullName + ' adlı kullanıcıyı silmek istediğinizden emin misiniz?') : (getSelectedUserCount() + ' kullanıcıyı silmek istediğinizden emin misiniz?')"
-  (confirm)="confirmDelete()"
-  (cancel)="cancelDelete()">
-</app-delete-confirmation-dialog>
-
-<!-- Toplu işlem butonları tablonun paginator kısmına eklenebilir veya ayrı bir bölümde kalabilir -->
-<div class="bulk-actions mt-4" *ngIf="getSelectedUserCount() > 0">
-    <span class="selected-count font-semibold mr-4">{{ getSelectedUserCount() }} kullanıcı seçildi</span>
-    <button pButton type="button" icon="pi pi-trash" class="p-button-danger" (click)="deleteSelectedUsers()" label="Seçilenleri Sil"></button>
-</div>
+<app-user-form 
+    [user]="selectedUser" 
+    [(display)]="displayUserDialog"
+    (save)="onUserSave($event)">
+</app-user-form>
 
 <p-toast position="top-right" styleClass="modern-toast"></p-toast>

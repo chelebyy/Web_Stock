@@ -1,8 +1,9 @@
 using MediatR;
+using Stock.Domain.Common;
 
 namespace Stock.Application.Features.Products.Commands.UpdateProduct
 {
-    public class UpdateProductCommand : IRequest // Güncelleme işlemi genellikle bir sonuç döndürmez (ya da sadece başarı durumu)
+    public class UpdateProductCommand : IRequest<Result> // Result döndürüyor
     {
         public int Id { get; set; }
         public string Name { get; set; } = string.Empty;
@@ -11,3 +12,4 @@ namespace Stock.Application.Features.Products.Commands.UpdateProduct
         public int CategoryId { get; set; }
     }
 } 
+

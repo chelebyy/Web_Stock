@@ -5,6 +5,7 @@ using Stock.Application.Models.DTOs;
 using Stock.Domain.Common;
 using Stock.Domain.Entities.Permissions;
 using Stock.Domain.Interfaces;
+using Stock.Application.Common.Interfaces;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -15,15 +16,18 @@ namespace Stock.Application.Features.Permissions.Commands
         private readonly IUnitOfWork _unitOfWork;
         private readonly IMapper _mapper;
         private readonly ILogger<CreatePermissionCommandHandler> _logger;
+        private readonly ICacheService _cacheService;
 
         public CreatePermissionCommandHandler(
             IUnitOfWork unitOfWork,
             IMapper mapper,
-            ILogger<CreatePermissionCommandHandler> logger)
+            ILogger<CreatePermissionCommandHandler> logger,
+            ICacheService cacheService)
         {
             _unitOfWork = unitOfWork;
             _mapper = mapper;
             _logger = logger;
+            _cacheService = cacheService;
         }
 
         public async Task<Result<PermissionDto>> Handle(CreatePermissionCommand request, CancellationToken cancellationToken)
@@ -61,7 +65,11 @@ namespace Stock.Application.Features.Permissions.Commands
                     return Result<PermissionDto>.Failure("Failed to save the new permission to the database.");
                 }
 
-                _logger.LogInformation("İzin başarıyla oluşturuldu: ID {PermissionId}, Name: {PermissionName}", newPermission.Id, newPermission.Name);
+                _logger.LogInformation("İzin başarıyla oluşturuldu: ID {PermissionId}, Name: {PermissionName}", newPermission.Id, newPermission.Name.Value);
+
+                // İzin önbelleğini temizle
+                await _cacheService.RemoveAsync(Application.Common.Constants.CacheKeys.PermissionsAll);
+                _logger.LogInformation("İzin listesi önbelleği temizlendi.");
 
                 var permissionDto = _mapper.Map<PermissionDto>(newPermission);
                 return Result<PermissionDto>.Success(permissionDto);

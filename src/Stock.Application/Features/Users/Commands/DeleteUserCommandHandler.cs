@@ -1,44 +1,63 @@
 using MediatR;
-using Stock.Domain.Exceptions; // Correct namespace for Exceptions
+using Microsoft.Extensions.Logging;
+using Stock.Application.Common.Exceptions;
+using Stock.Application.Common.Interfaces;
 using Stock.Domain.Entities;
 using Stock.Domain.Interfaces;
+using Stock.Domain.Specifications;
+using Stock.Application.Features.Users.Commands.DeleteUser;
 using System.Threading;
 using System.Threading.Tasks;
-// using Stock.Application.Exceptions; // Removed incorrect namespace
-using Stock.Domain.Specifications; // Correct namespace for Specifications
 
-namespace Stock.Application.Features.Users.Commands.DeleteUser;
-
-/// <summary>
-/// Handles the <see cref="DeleteUserCommand"/>.
-/// </summary>
-public class DeleteUserCommandHandler : IRequestHandler<DeleteUserCommand, bool> // Correct return type
+namespace Stock.Application.Features.Users.Commands
 {
-    private readonly IUnitOfWork _unitOfWork;
-
-    public DeleteUserCommandHandler(IUnitOfWork unitOfWork)
+    /// <summary>
+    /// Handles the <see cref="DeleteUserCommand"/>.
+    /// </summary>
+    public class DeleteUserCommandHandler : IRequestHandler<DeleteUserCommand, Unit>
     {
-        _unitOfWork = unitOfWork;
-    }
+        private readonly IUnitOfWork _unitOfWork;
+        private readonly ICacheService _cacheService;
+        private readonly ILogger<DeleteUserCommandHandler> _logger;
+        private const string CacheKey = "users_all";
 
-    public async Task<bool> Handle(DeleteUserCommand request, CancellationToken cancellationToken)
-    {
-        // 1. Silinecek kullanıcıyı bul
-        var userSpec = new UserByIdSpecification(request.Id);
-        var userToDelete = await _unitOfWork.GetRepository<User>().FirstOrDefaultAsync(userSpec, cancellationToken);
-
-        if (userToDelete == null)
+        public DeleteUserCommandHandler(
+            IUnitOfWork unitOfWork,
+            ICacheService cacheService,
+            ILogger<DeleteUserCommandHandler> logger)
         {
-            // Kullanıcı bulunamadıysa NotFoundException fırlatmak iyi bir pratik.
-            // throw new NotFoundException($"Silinecek kullanıcı bulunamadı (ID: {request.Id})."); // Using correct NotFoundException
-            throw new NotFoundException(nameof(User), request.Id); // Use constructor
+            _unitOfWork = unitOfWork;
+            _cacheService = cacheService;
+            _logger = logger;
         }
 
-        // 2. Kullanıcıyı sil
-        _unitOfWork.GetRepository<User>().Delete(userToDelete); // Using synchronous Delete method
-        await _unitOfWork.SaveChangesAsync(cancellationToken);
+        public async Task<Unit> Handle(DeleteUserCommand request, CancellationToken cancellationToken)
+        {
+            // 1. Silinecek kullanıcıyı bul
+            var userSpec = new UserByIdSpecification(request.Id);
+            var user = await _unitOfWork.Users.FirstOrDefaultAsync(userSpec, cancellationToken);
 
-        // 3. Başarılı yanıt döndür (true)
-        return true;
+            if (user == null)
+            {
+                // Kullanıcı bulunamadıysa NotFoundException fırlatmak iyi bir pratik.
+                throw new NotFoundException(nameof(User), request.Id);
+            }
+
+            // 2. Kullanıcıyı sil
+            await _unitOfWork.Users.DeleteAsync(user);
+            await _unitOfWork.SaveChangesAsync(cancellationToken);
+            _logger.LogInformation("User {UserId} deleted successfully.", request.Id);
+
+            // Invalidate all paged user list caches
+            await _cacheService.RemoveByPrefixAsync("users_page").ConfigureAwait(false);
+            _logger.LogInformation("Cache invalidated for prefix: users_page");
+
+            // Invalidate the specific user cache
+            var specificCacheKey = $"users:{request.Id}";
+            await _cacheService.RemoveAsync(specificCacheKey).ConfigureAwait(false);
+            _logger.LogInformation("Cache invalidated for key: {SpecificCacheKey}", specificCacheKey);
+
+            return Unit.Value;
+        }
     }
 } 

@@ -30,6 +30,10 @@ namespace Stock.Infrastructure.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
+                    b.Property<string>("Action")
+                        .IsRequired()
+                        .HasColumnType("text");
+
                     b.Property<string>("ActivityType")
                         .IsRequired()
                         .HasMaxLength(50)
@@ -49,6 +53,10 @@ namespace Stock.Infrastructure.Migrations
                         .HasMaxLength(500)
                         .HasColumnType("character varying(500)");
 
+                    b.Property<string>("EntityId")
+                        .IsRequired()
+                        .HasColumnType("text");
+
                     b.Property<bool>("IsDeleted")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("boolean")
@@ -58,6 +66,16 @@ namespace Stock.Infrastructure.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("boolean")
                         .HasDefaultValue(false);
+
+                    b.Property<string>("NewValues")
+                        .HasColumnType("text");
+
+                    b.Property<string>("OldValues")
+                        .HasColumnType("text");
+
+                    b.Property<string>("TableName")
+                        .IsRequired()
+                        .HasColumnType("text");
 
                     b.Property<DateTime>("Timestamp")
                         .HasColumnType("timestamp with time zone");
@@ -77,6 +95,10 @@ namespace Stock.Infrastructure.Migrations
                         .HasColumnType("character varying(50)");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("ActivityType");
+
+                    b.HasIndex("Timestamp");
 
                     b.HasIndex("UserId");
 
@@ -135,7 +157,11 @@ namespace Stock.Infrastructure.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("CreatedAt");
+
                     b.HasIndex("UserId");
+
+                    b.HasIndex("EntityType", "EntityId");
 
                     b.ToTable("AuditLogs", (string)null);
                 });
@@ -162,11 +188,6 @@ namespace Stock.Infrastructure.Migrations
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("boolean");
 
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("character varying(100)");
-
                     b.Property<DateTime?>("UpdatedAt")
                         .HasColumnType("timestamp with time zone");
 
@@ -174,9 +195,6 @@ namespace Stock.Infrastructure.Migrations
                         .HasColumnType("text");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("Name")
-                        .IsUnique();
 
                     b.ToTable("Categories", (string)null);
                 });
@@ -215,11 +233,6 @@ namespace Stock.Infrastructure.Migrations
                         .HasColumnType("boolean")
                         .HasDefaultValue(false);
 
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("character varying(50)");
-
                     b.Property<string>("ResourceName")
                         .IsRequired()
                         .HasMaxLength(50)
@@ -238,9 +251,7 @@ namespace Stock.Infrastructure.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("Name")
-                        .IsUnique()
-                        .HasFilter("\"IsDeleted\" = false");
+                    b.HasIndex("Group");
 
                     b.ToTable("Permissions", (string)null);
                 });
@@ -278,10 +289,9 @@ namespace Stock.Infrastructure.Migrations
 
                     b.HasIndex("PermissionId");
 
-                    b.HasIndex("RoleId", "PermissionId")
-                        .IsUnique();
+                    b.HasIndex("RoleId");
 
-                    b.ToTable("RolePermissions");
+                    b.ToTable("RolePermissions", (string)null);
                 });
 
             modelBuilder.Entity("Stock.Domain.Entities.Permissions.UserPermission", b =>
@@ -302,9 +312,7 @@ namespace Stock.Infrastructure.Migrations
                         .HasColumnType("boolean");
 
                     b.Property<bool>("IsGranted")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("boolean")
-                        .HasDefaultValue(true);
+                        .HasColumnType("boolean");
 
                     b.Property<int>("PermissionId")
                         .HasColumnType("integer");
@@ -322,10 +330,9 @@ namespace Stock.Infrastructure.Migrations
 
                     b.HasIndex("PermissionId");
 
-                    b.HasIndex("UserId", "PermissionId")
-                        .IsUnique();
+                    b.HasIndex("UserId");
 
-                    b.ToTable("UserPermissions");
+                    b.ToTable("UserPermissions", (string)null);
                 });
 
             modelBuilder.Entity("Stock.Domain.Entities.Product", b =>
@@ -337,9 +344,6 @@ namespace Stock.Infrastructure.Migrations
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
                     b.Property<int>("CategoryId")
-                        .HasColumnType("integer");
-
-                    b.Property<int?>("CategoryId1")
                         .HasColumnType("integer");
 
                     b.Property<DateTime>("CreatedAt")
@@ -361,9 +365,7 @@ namespace Stock.Infrastructure.Migrations
 
                     b.HasIndex("CategoryId");
 
-                    b.HasIndex("CategoryId1");
-
-                    b.ToTable("Products");
+                    b.ToTable("Products", (string)null);
                 });
 
             modelBuilder.Entity("Stock.Domain.Entities.Role", b =>
@@ -378,8 +380,7 @@ namespace Stock.Infrastructure.Migrations
                         .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("CreatedBy")
-                        .HasMaxLength(50)
-                        .HasColumnType("character varying(50)");
+                        .HasColumnType("text");
 
                     b.Property<string>("Description")
                         .IsRequired()
@@ -391,35 +392,15 @@ namespace Stock.Infrastructure.Migrations
                         .HasColumnType("boolean")
                         .HasDefaultValue(false);
 
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("character varying(50)");
-
                     b.Property<DateTime?>("UpdatedAt")
                         .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("UpdatedBy")
-                        .HasMaxLength(50)
-                        .HasColumnType("character varying(50)");
+                        .HasColumnType("text");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("Name")
-                        .IsUnique()
-                        .HasFilter("\"IsDeleted\" = false");
-
                     b.ToTable("Roles", (string)null);
-
-                    b.HasData(
-                        new
-                        {
-                            Id = 1,
-                            CreatedAt = new DateTime(2025, 3, 1, 0, 0, 0, 0, DateTimeKind.Utc),
-                            Description = "Administrator role with full access",
-                            IsDeleted = false,
-                            Name = "Admin"
-                        });
                 });
 
             modelBuilder.Entity("Stock.Domain.Entities.User", b =>
@@ -430,16 +411,14 @@ namespace Stock.Infrastructure.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
-                    b.Property<string>("Adi")
-                        .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("character varying(50)");
-
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("CreatedBy")
                         .HasColumnType("text");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("boolean");
 
                     b.Property<bool>("IsAdmin")
                         .ValueGeneratedOnAdd()
@@ -461,44 +440,21 @@ namespace Stock.Infrastructure.Migrations
                     b.Property<int?>("RoleId")
                         .HasColumnType("integer");
 
-                    b.Property<string>("Sicil")
-                        .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("character varying(50)");
-
-                    b.Property<string>("Soyadi")
-                        .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("character varying(50)");
-
                     b.Property<DateTime?>("UpdatedAt")
                         .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("UpdatedBy")
                         .HasColumnType("text");
 
+                    b.Property<string>("Username")
+                        .IsRequired()
+                        .HasColumnType("text");
+
                     b.HasKey("Id");
 
                     b.HasIndex("RoleId");
 
-                    b.HasIndex("Sicil")
-                        .IsUnique();
-
                     b.ToTable("Users", (string)null);
-
-                    b.HasData(
-                        new
-                        {
-                            Id = 1,
-                            Adi = "Admin",
-                            CreatedAt = new DateTime(2025, 3, 1, 0, 0, 0, 0, DateTimeKind.Utc),
-                            IsAdmin = true,
-                            IsDeleted = false,
-                            PasswordHash = "$2a$11$w1QwQn1QwQn1QwQn1QwQnOQn1QwQn1QwQn1QwQn1QwQn1QwQn1Q",
-                            RoleId = 1,
-                            Sicil = "00000",
-                            Soyadi = "Kullanıcısı"
-                        });
                 });
 
             modelBuilder.Entity("Stock.Domain.Entities.ActivityLog", b =>
@@ -519,6 +475,62 @@ namespace Stock.Infrastructure.Migrations
                         .OnDelete(DeleteBehavior.SetNull);
 
                     b.Navigation("User");
+                });
+
+            modelBuilder.Entity("Stock.Domain.Entities.Category", b =>
+                {
+                    b.OwnsOne("Stock.Domain.ValueObjects.CategoryName", "Name", b1 =>
+                        {
+                            b1.Property<int>("CategoryId")
+                                .HasColumnType("integer");
+
+                            b1.Property<string>("Value")
+                                .IsRequired()
+                                .HasMaxLength(100)
+                                .HasColumnType("character varying(100)")
+                                .HasColumnName("Name");
+
+                            b1.HasKey("CategoryId");
+
+                            b1.HasIndex("Value")
+                                .IsUnique();
+
+                            b1.ToTable("Categories", (string)null);
+
+                            b1.WithOwner()
+                                .HasForeignKey("CategoryId");
+                        });
+
+                    b.Navigation("Name")
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("Stock.Domain.Entities.Permissions.Permission", b =>
+                {
+                    b.OwnsOne("Stock.Domain.ValueObjects.PermissionName", "Name", b1 =>
+                        {
+                            b1.Property<int>("PermissionId")
+                                .HasColumnType("integer");
+
+                            b1.Property<string>("Value")
+                                .IsRequired()
+                                .HasMaxLength(100)
+                                .HasColumnType("character varying(100)")
+                                .HasColumnName("Name");
+
+                            b1.HasKey("PermissionId");
+
+                            b1.HasIndex("Value")
+                                .IsUnique();
+
+                            b1.ToTable("Permissions", (string)null);
+
+                            b1.WithOwner()
+                                .HasForeignKey("PermissionId");
+                        });
+
+                    b.Navigation("Name")
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("Stock.Domain.Entities.Permissions.RolePermission", b =>
@@ -562,14 +574,10 @@ namespace Stock.Infrastructure.Migrations
             modelBuilder.Entity("Stock.Domain.Entities.Product", b =>
                 {
                     b.HasOne("Stock.Domain.Entities.Category", "Category")
-                        .WithMany()
+                        .WithMany("Products")
                         .HasForeignKey("CategoryId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
-
-                    b.HasOne("Stock.Domain.Entities.Category", null)
-                        .WithMany("Products")
-                        .HasForeignKey("CategoryId1");
 
                     b.OwnsOne("Stock.Domain.ValueObjects.ProductDescription", "Description", b1 =>
                         {
@@ -583,7 +591,7 @@ namespace Stock.Infrastructure.Migrations
 
                             b1.HasKey("ProductId");
 
-                            b1.ToTable("Products");
+                            b1.ToTable("Products", (string)null);
 
                             b1.WithOwner()
                                 .HasForeignKey("ProductId");
@@ -602,7 +610,10 @@ namespace Stock.Infrastructure.Migrations
 
                             b1.HasKey("ProductId");
 
-                            b1.ToTable("Products");
+                            b1.HasIndex("Value")
+                                .HasDatabaseName("IX_Products_Name");
+
+                            b1.ToTable("Products", (string)null);
 
                             b1.WithOwner()
                                 .HasForeignKey("ProductId");
@@ -619,7 +630,7 @@ namespace Stock.Infrastructure.Migrations
 
                             b1.HasKey("ProductId");
 
-                            b1.ToTable("Products");
+                            b1.ToTable("Products", (string)null);
 
                             b1.WithOwner()
                                 .HasForeignKey("ProductId");
@@ -637,6 +648,35 @@ namespace Stock.Infrastructure.Migrations
                         .IsRequired();
                 });
 
+            modelBuilder.Entity("Stock.Domain.Entities.Role", b =>
+                {
+                    b.OwnsOne("Stock.Domain.ValueObjects.RoleName", "Name", b1 =>
+                        {
+                            b1.Property<int>("RoleId")
+                                .HasColumnType("integer");
+
+                            b1.Property<string>("Value")
+                                .IsRequired()
+                                .HasMaxLength(50)
+                                .HasColumnType("character varying(50)")
+                                .HasColumnName("Name");
+
+                            b1.HasKey("RoleId");
+
+                            b1.HasIndex("Value")
+                                .IsUnique()
+                                .HasDatabaseName("IX_Roles_Name");
+
+                            b1.ToTable("Roles", (string)null);
+
+                            b1.WithOwner()
+                                .HasForeignKey("RoleId");
+                        });
+
+                    b.Navigation("Name")
+                        .IsRequired();
+                });
+
             modelBuilder.Entity("Stock.Domain.Entities.User", b =>
                 {
                     b.HasOne("Stock.Domain.Entities.Role", "Role")
@@ -644,7 +684,61 @@ namespace Stock.Infrastructure.Migrations
                         .HasForeignKey("RoleId")
                         .OnDelete(DeleteBehavior.SetNull);
 
+                    b.OwnsOne("Stock.Domain.ValueObjects.FullName", "FullName", b1 =>
+                        {
+                            b1.Property<int>("UserId")
+                                .HasColumnType("integer");
+
+                            b1.Property<string>("Adi")
+                                .IsRequired()
+                                .HasMaxLength(100)
+                                .HasColumnType("character varying(100)")
+                                .HasColumnName("Adi");
+
+                            b1.Property<string>("Soyadi")
+                                .IsRequired()
+                                .HasMaxLength(100)
+                                .HasColumnType("character varying(100)")
+                                .HasColumnName("Soyadi");
+
+                            b1.HasKey("UserId");
+
+                            b1.ToTable("Users", (string)null);
+
+                            b1.WithOwner()
+                                .HasForeignKey("UserId");
+                        });
+
+                    b.OwnsOne("Stock.Domain.ValueObjects.Sicil", "Sicil", b1 =>
+                        {
+                            b1.Property<int>("UserId")
+                                .HasColumnType("integer");
+
+                            b1.Property<string>("Value")
+                                .IsRequired()
+                                .HasMaxLength(50)
+                                .HasColumnType("character varying(50)")
+                                .HasColumnName("Sicil");
+
+                            b1.HasKey("UserId");
+
+                            b1.HasIndex("Value")
+                                .IsUnique()
+                                .HasDatabaseName("IX_Users_Sicil");
+
+                            b1.ToTable("Users", (string)null);
+
+                            b1.WithOwner()
+                                .HasForeignKey("UserId");
+                        });
+
+                    b.Navigation("FullName")
+                        .IsRequired();
+
                     b.Navigation("Role");
+
+                    b.Navigation("Sicil")
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("Stock.Domain.Entities.Category", b =>

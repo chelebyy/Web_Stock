@@ -1,3 +1,4 @@
+
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using Stock.Application.Features.Categories.Commands;
@@ -11,32 +12,30 @@ using Microsoft.AspNetCore.Authorization; // Yetkilendirme için
 namespace Stock.API.Controllers
 {
     /// <summary>
-    /// Kategori yönetimi için API controller sınıfı.
-    /// Kategorileri listeleme, detaylarını görme, oluşturma, güncelleme ve silme işlemlerini sağlar.
-    /// Tüm işlemler CQRS pattern kullanılarak MediatR üzerinden gerçekleştirilir.
+    /// Manages category-related operations. Allows for listing, retrieving, creating, updating, and deleting categories.
+    /// All operations are handled via the CQRS pattern using MediatR.
     /// </summary>
     [ApiController]
     [Route("api/[controller]")]
-    // [Authorize] // Gerekirse yetkilendirme ekle
+    // [Authorize] // Uncomment to enforce authorization for the entire controller
     public class CategoriesController : ControllerBase
     {
         private readonly IMediator _mediator;
 
         /// <summary>
-        /// CategoriesController yapıcı metodu.
-        /// MediatR bağımlılığını enjekte eder.
+        /// Initializes a new instance of the <see cref="CategoriesController"/> class.
         /// </summary>
-        /// <param name="mediator">CQRS komutlarını ve sorgularını işleyecek olan MediatR nesnesi.</param>
+        /// <param name="mediator">The MediatR instance for handling CQRS commands and queries.</param>
         public CategoriesController(IMediator mediator)
         {
             _mediator = mediator;
         }
 
         /// <summary>
-        /// Tüm kategorileri listeler.
+        /// Retrieves a list of all categories.
         /// </summary>
-        /// <returns>Kategorilerin listesini içeren bir ActionResult.</returns>
-        /// <response code="200">Kategoriler başarıyla getirildi.</response>
+        /// <returns>A list of all categories.</returns>
+        /// <response code="200">Returns the list of categories.</response>
         [HttpGet]
         [ProducesResponseType(typeof(IEnumerable<CategoryDto>), StatusCodes.Status200OK)]
         public async Task<ActionResult<IEnumerable<CategoryDto>>> GetAllCategories()
@@ -47,12 +46,12 @@ namespace Stock.API.Controllers
         }
 
         /// <summary>
-        /// Belirtilen ID'ye sahip kategoriyi getirir.
+        /// Retrieves a specific category by its unique ID.
         /// </summary>
-        /// <param name="id">Getirilecek kategorinin ID'si.</param>
-        /// <returns>Bulunan kategoriyi içeren bir ActionResult.</returns>
-        /// <response code="200">Kategori başarıyla getirildi.</response>
-        /// <response code="404">Belirtilen ID'ye sahip kategori bulunamadı.</response>
+        /// <param name="id">The ID of the category to retrieve.</param>
+        /// <returns>The details of the specified category.</returns>
+        /// <response code="200">Returns the category details.</response>
+        /// <response code="404">If a category with the specified ID is not found.</response>
         [HttpGet("{id}")]
         [ProducesResponseType(typeof(CategoryDto), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
@@ -64,12 +63,12 @@ namespace Stock.API.Controllers
         }
 
         /// <summary>
-        /// Yeni bir kategori oluşturur.
+        /// Creates a new category.
         /// </summary>
-        /// <param name="command">Oluşturulacak kategorinin bilgilerini içeren komut.</param>
-        /// <returns>Oluşturulan kategoriyi içeren bir ActionResult.</returns>
-        /// <response code="201">Kategori başarıyla oluşturuldu.</response>
-        /// <response code="400">Geçersiz kategori bilgileri.</response>
+        /// <param name="command">The command containing the details for the new category.</param>
+        /// <returns>The newly created category.</returns>
+        /// <response code="201">Returns the newly created category.</response>
+        /// <response code="400">If the command contains invalid data (e.g., duplicate name).</response>
         [HttpPost]
         [ProducesResponseType(typeof(CategoryDto), StatusCodes.Status201Created)]
         [ProducesResponseType(typeof(string), StatusCodes.Status400BadRequest)]
@@ -91,14 +90,14 @@ namespace Stock.API.Controllers
         }
 
         /// <summary>
-        /// Mevcut bir kategoriyi günceller.
+        /// Updates an existing category.
         /// </summary>
-        /// <param name="id">Güncellenecek kategorinin ID'si.</param>
-        /// <param name="command">Güncellenmiş kategori bilgilerini içeren komut.</param>
-        /// <returns>İşlem sonucunu belirten bir IActionResult.</returns>
-        /// <response code="204">Kategori başarıyla güncellendi.</response>
-        /// <response code="400">Geçersiz kategori bilgileri veya ID uyuşmazlığı.</response>
-        /// <response code="404">Belirtilen ID'ye sahip kategori bulunamadı.</response>
+        /// <param name="id">The ID of the category to update.</param>
+        /// <param name="command">The command containing the updated category data.</param>
+        /// <returns>A success response if the update is successful.</returns>
+        /// <response code="204">If the category was successfully updated.</response>
+        /// <response code="400">If the command contains invalid data or the ID in the route does not match the ID in the body.</response>
+        /// <response code="404">If a category with the specified ID is not found.</response>
         [HttpPut("{id}")]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(typeof(string), StatusCodes.Status400BadRequest)]
@@ -129,13 +128,13 @@ namespace Stock.API.Controllers
         }
 
         /// <summary>
-        /// Belirtilen ID'ye sahip kategoriyi siler (Soft delete).
+        /// Deletes a category by its unique ID (soft delete).
         /// </summary>
-        /// <param name="id">Silinecek kategorinin ID'si.</param>
-        /// <returns>İşlem sonucunu belirten bir IActionResult.</returns>
-        /// <response code="204">Kategori başarıyla silindi.</response>
-        /// <response code="400">Geçersiz istek veya kategori silinemedi.</response>
-        /// <response code="404">Belirtilen ID'ye sahip kategori bulunamadı.</response>
+        /// <param name="id">The ID of the category to delete.</param>
+        /// <returns>A success response if the deletion is successful.</returns>
+        /// <response code="204">If the category was successfully deleted.</response>
+        /// <response code="400">If the request is invalid or the category cannot be deleted.</response>
+        /// <response code="404">If a category with the specified ID is not found.</response>
         [HttpDelete("{id}")]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(typeof(string), StatusCodes.Status400BadRequest)] 

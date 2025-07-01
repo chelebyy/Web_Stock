@@ -114,8 +114,7 @@ namespace Stock.Infrastructure.Services
 
                 // DDD approach: Use factory method to create the entity
                 var userResult = User.Create(
-                    user.Adi,
-                    user.Soyadi,
+                    user.FullName,
                     user.Sicil,
                     user.PasswordHash,
                     user.RoleId,
@@ -182,7 +181,7 @@ namespace Stock.Infrastructure.Services
                     throw new InvalidOperationException(sicilResult.Error);
                 }
 
-                var nameResult = existingUser.UpdateName(user.Adi, user.Soyadi);
+                var nameResult = existingUser.UpdateName(user.FullName);
                 if (!nameResult.IsSuccess)
                 {
                     throw new InvalidOperationException(nameResult.Error);

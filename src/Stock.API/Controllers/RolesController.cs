@@ -16,6 +16,7 @@ using System.Net;
 using System.Threading.Tasks;
 using System.Linq;
 
+
 namespace Stock.API.Controllers
 {
     /// <summary>
@@ -35,7 +36,7 @@ namespace Stock.API.Controllers
         /// IMediator ve ILogger bağımlılıklarını enjekte eder.
         /// </summary>
         /// <param name="mediator">MediatR nesnesi.</param>
-        /// <param name="logger">ILogger<RolesController> nesnesi.</param>
+        /// <param name="logger">ILogger nesnesi.</param>
         public RolesController(IMediator mediator, ILogger<RolesController> logger)
         {
             _mediator = mediator;
@@ -43,11 +44,12 @@ namespace Stock.API.Controllers
         }
 
         /// <summary>
-        /// Sistemdeki tüm rolleri listeler.
+        /// Retrieves a paginated list of all roles.
         /// </summary>
-        /// <returns>Rollerin listesi (Id, Name, Description, UserCount vb.).</returns>
-        /// <response code="200">Roller başarıyla listelendi.</response>
-        /// <response code="500">Roller listelenirken bir sunucu hatası oluştu.</response>
+        /// <param name="query">The query parameters for pagination, sorting, and filtering.</param>
+        /// <returns>A paginated list of roles, including details like name, description, and user count.</returns>
+        /// <response code="200">Returns the paginated list of roles.</response>
+        /// <response code="500">If an internal server error occurs while retrieving the roles.</response>
         [HttpGet]
         [ProducesResponseType(typeof(PagedResponse<RoleSlimDto>), (int)HttpStatusCode.OK)]
         public async Task<ActionResult<PagedResponse<RoleSlimDto>>> GetAllRoles([FromQuery] GetAllRolesQuery query)
@@ -58,13 +60,13 @@ namespace Stock.API.Controllers
         }
 
         /// <summary>
-        /// Belirtilen ID'ye sahip rolün detaylarını getirir.
+        /// Retrieves the details of a specific role by its unique ID.
         /// </summary>
-        /// <param name="id">Detayları getirilecek rolün ID'si.</param>
-        /// <returns>Rol detayları (Id, Name, Description, UserCount, Users listesi vb.).</returns>
-        /// <response code="200">Rol detayları başarıyla getirildi.</response>
-        /// <response code="404">Belirtilen ID'ye sahip rol bulunamadı.</response>
-        /// <response code="500">Rol detayları getirilirken bir sunucu hatası oluştu.</response>
+        /// <param name="id">The ID of the role to retrieve.</param>
+        /// <returns>The detailed information for the role, including the list of users in it.</returns>
+        /// <response code="200">Returns the role details.</response>
+        /// <response code="404">If a role with the specified ID is not found.</response>
+        /// <response code="500">If an internal server error occurs.</response>
         [HttpGet("{id}")]
         [ProducesResponseType(typeof(RoleDto), (int)HttpStatusCode.OK)]
         [ProducesResponseType((int)HttpStatusCode.NotFound)]
@@ -83,13 +85,14 @@ namespace Stock.API.Controllers
         }
 
         /// <summary>
-        /// Yeni bir rol oluşturur.
+        /// Creates a new role.
         /// </summary>
-        /// <param name="command">Oluşturulacak rol bilgilerini içeren komut.</param>
-        /// <returns>Oluşturulan rolün bilgileri.</returns>
-        /// <response code="201">Rol başarıyla oluşturuldu. Oluşturulan rolün detaylarını döner.</response>
-        /// <response code="400">Geçersiz rol bilgileri gönderildi (Validation Error).</response>
-        /// <response code="409">Aynı isimde başka bir rol zaten mevcut (Conflict Error).</response>
+        /// <param name="command">The command containing the details for the new role.</param>
+        /// <returns>The newly created role's details.</returns>
+        /// <response code="201">Returns the newly created role.</response>
+        /// <response code="400">If the request is invalid (e.g., validation errors).</response>
+        /// <response code="409">If a role with the same name already exists.</response>
+        /// <response code="500">If an internal server error occurs.</response>
         [HttpPost]
         [ProducesResponseType(typeof(RoleDto), (int)HttpStatusCode.Created)]
         [ProducesResponseType(typeof(ErrorResponse), (int)HttpStatusCode.BadRequest)]
@@ -116,15 +119,16 @@ namespace Stock.API.Controllers
         }
 
         /// <summary>
-        /// Mevcut bir rolü günceller.
+        /// Updates an existing role.
         /// </summary>
-        /// <param name="id">Güncellenecek rolün ID'si.</param>
-        /// <param name="command">Güncellenmiş rol bilgilerini içeren komut.</param>
-        /// <returns>Başarılı olursa NoContent (204) yanıtı döner.</returns>
-        /// <response code="204">Rol başarıyla güncellendi.</response>
-        /// <response code="400">Geçersiz rol bilgileri veya ID uyuşmazlığı.</response>
-        /// <response code="404">Belirtilen ID'ye sahip rol bulunamadı.</response>
-        /// <response code="409">Aynı isimde başka bir rol zaten mevcut.</response>
+        /// <param name="id">The ID of the role to update.</param>
+        /// <param name="command">The command containing the updated role details.</param>
+        /// <returns>A success response if the update is successful.</returns>
+        /// <response code="204">If the role was successfully updated.</response>
+        /// <response code="400">If the request is invalid (e.g., ID mismatch or validation errors).</response>
+        /// <response code="404">If a role with the specified ID is not found.</response>
+        /// <response code="409">If a role with the same name already exists.</response>
+        /// <response code="500">If an internal server error occurs.</response>
         [HttpPut("{id}")]
         [ProducesResponseType((int)HttpStatusCode.NoContent)]
         [ProducesResponseType((int)HttpStatusCode.NotFound)]
@@ -163,14 +167,14 @@ namespace Stock.API.Controllers
         }
 
         /// <summary>
-        /// Bir role ait izinleri günceller. Mevcut tüm izinleri siler ve yenilerini ekler.
+        /// Updates the permissions for a specific role. This replaces all existing permissions with the new set provided.
         /// </summary>
-        /// <param name="id">İzinleri güncellenecek rolün ID'si.</param>
-        /// <param name="command">Yeni izin ID'lerini içeren komut.</param>
-        /// <returns>Başarılı olursa NoContent (204) yanıtı döner.</returns>
-        /// <response code="204">Rol izinleri başarıyla güncellendi.</response>
-        /// <response code="400">Geçersiz rol ID'si veya izin bilgileri.</response>
-        /// <response code="404">Belirtilen ID'ye sahip rol bulunamadı.</response>
+        /// <param name="id">The ID of the role whose permissions are to be updated.</param>
+        /// <param name="command">The command containing the new list of permission IDs.</param>
+        /// <returns>A success response if the update is successful.</returns>
+        /// <response code="204">If the role permissions were successfully updated.</response>
+        /// <response code="400">If the request is invalid (e.g., mismatched IDs, validation errors).</response>
+        /// <response code="404">If a role with the specified ID is not found.</response>
         [HttpPut("{id}/permissions")]
         [ProducesResponseType((int)HttpStatusCode.NoContent)]
         [ProducesResponseType((int)HttpStatusCode.NotFound)]
@@ -206,13 +210,14 @@ namespace Stock.API.Controllers
         }
 
         /// <summary>
-        /// Belirtilen ID'ye sahip rolü siler.
+        /// Deletes a specific role by its unique ID.
         /// </summary>
-        /// <param name="id">Silinecek rolün ID'si.</param>
-        /// <returns>Başarılı olursa NoContent (204) yanıtı döner.</returns>
-        /// <response code="204">Rol başarıyla silindi.</response>
-        /// <response code="404">Belirtilen ID'ye sahip rol bulunamadı.</response>
-        /// <response code="400">Rol silinemedi (örn. kullanılıyor).</response>
+        /// <param name="id">The ID of the role to delete.</param>
+        /// <returns>A success response if the deletion is successful.</returns>
+        /// <response code="204">If the role was successfully deleted.</response>
+        /// <response code="400">If the role cannot be deleted (e.g., it is currently in use by users).</response>
+        /// <response code="404">If a role with the specified ID is not found.</response>
+        /// <response code="500">If an internal server error occurs.</response>
         [HttpDelete("{id}")]
         [ProducesResponseType((int)HttpStatusCode.NoContent)]
         [ProducesResponseType((int)HttpStatusCode.NotFound)]

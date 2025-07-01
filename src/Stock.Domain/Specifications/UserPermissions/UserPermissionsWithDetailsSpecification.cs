@@ -7,8 +7,8 @@ namespace Stock.Domain.Specifications.UserPermissions
     {
         public UserPermissionsWithDetailsSpecification(int userId) : base(up => up.UserId == userId)
         {
+            AddInclude(up => up.User);
             AddInclude(up => up.Permission);
         }
     }
-
 } 

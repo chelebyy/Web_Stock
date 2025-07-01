@@ -15,254 +15,153 @@ using FluentValidation;
 using Stock.Domain.Exceptions;
 using Stock.Application.Models;
 
+
 namespace Stock.API.Controllers
 {
     /// <summary>
-    /// Kullanıcı yönetimi ile ilgili API endpoint'lerini içerir.
-    /// Kullanıcıları listeleme, detaylarını görme, oluşturma, güncelleme ve silme işlemlerini sağlar.
-    /// Bu işlemler MediatR aracılığıyla ilgili Handler'lara yönlendirilir.
+    /// Manages user-related operations such as retrieving, creating, updating, and deleting users.
     /// </summary>
     [ApiController]
-    [Route(ApiConstants.ApiBaseRoute + "/[controller]")]
+    [Route("api/[controller]")]
     public class UsersController : ControllerBase
     {
         private readonly IMediator _mediator;
-        private readonly ILogger<UsersController> _logger;
 
         /// <summary>
-        /// UsersController sınıfının yapıcı metodu.
-        /// Bağımlılıkları (IMediator, ILogger) enjekte eder.
+        /// Initializes a new instance of the <see cref="UsersController"/> class.
         /// </summary>
-        /// <param name="mediator">CQRS Mediator arayüzü.</param>
-        /// <param name="logger">Loglama servisi.</param>
-        public UsersController(IMediator mediator, ILogger<UsersController> logger)
+        /// <param name="mediator">The mediator for sending commands and queries.</param>
+        public UsersController(IMediator mediator)
         {
             _mediator = mediator;
-            _logger = logger;
         }
 
         /// <summary>
-        /// Sistemdeki tüm kullanıcıları listeler (Sadece Admin yetkisine sahip kullanıcılar).
+        /// Retrieves a paginated list of all users. (Admin only)
         /// </summary>
-        /// <returns>Tüm kullanıcıların listesi (UserListItemDto).</returns>
-        /// <response code="200">Kullanıcılar başarıyla listelendi.</response>
-        /// <response code="401">Yetkisiz erişim (Admin rolü gerekli).</response>
-        /// <response code="500">Kullanıcılar listelenirken bir sunucu hatası oluştu.</response>
+        /// <param name="query">The query parameters for pagination and filtering.</param>
+        /// <returns>A paginated list of users.</returns>
+        /// <response code="200">Returns the paginated list of users.</response>
+        /// <response code="401">Unauthorized if the user is not authenticated.</response>
+        /// <response code="403">Forbidden if the user is not an Admin.</response>
         [HttpGet]
         [Authorize(Roles = RoleNames.Admin)]
         [ProducesResponseType(typeof(PagedResponse<UserDto>), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-        [ProducesResponseType(typeof(string), StatusCodes.Status500InternalServerError)]
+        [ProducesResponseType(StatusCodes.Status403Forbidden)]
         public async Task<IActionResult> GetAll([FromQuery] GetAllUsersQuery query)
         {
-            try
-            {
-                _logger.LogInformation(LogMessages.FetchingAllUsers);
-                var result = await _mediator.Send(query);
-                _logger.LogInformation(LogMessages.UsersFetchedSuccessfully, result.TotalCount);
-                return Ok(result);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, LogMessages.ErrorFetchingUsers);
-                return StatusCode(StatusCodes.Status500InternalServerError, new { error = string.Format(ErrorMessages.GeneralServerError, ex.Message) });
-            }
+            var result = await _mediator.Send(query);
+            return Ok(result);
         }
 
         /// <summary>
-        /// Belirtilen ID'ye sahip kullanıcının detaylarını getirir.
-        /// Giriş yapmış herhangi bir kullanıcı kendi bilgilerini veya Admin rolüne sahip kullanıcılar diğer kullanıcıların bilgilerini getirebilir.
+        /// Retrieves a specific user by their unique ID.
         /// </summary>
-        /// <param name="id">Detayları getirilecek kullanıcının ID'si.</param>
-        /// <returns>Kullanıcı detayları (UserDto).</returns>
-        /// <response code="200">Kullanıcı detayları başarıyla getirildi.</response>
-        /// <response code="401">Kimlik doğrulanmamış veya token geçersiz.</response>
-        /// <response code="403">Kullanıcının bu bilgilere erişim yetkisi yok (Admin değil ve kendi ID'si değilse - bu kontrol servis katmanında yapılmalı).</response>
-        /// <response code="404">Belirtilen ID'ye sahip kullanıcı bulunamadı.</response>
-        /// <response code="500">Kullanıcı detayları getirilirken bir sunucu hatası oluştu.</response>
+        /// <remarks>
+        /// An authenticated user can retrieve their own details. An Admin can retrieve any user's details.
+        /// </remarks>
+        /// <param name="id">The ID of the user to retrieve.</param>
+        /// <returns>The user's details.</returns>
+        /// <response code="200">Returns the user's details.</response>
+        /// <response code="401">Unauthorized if the user is not authenticated.</response>
+        /// <response code="403">Forbidden if the user is trying to access another user's details without Admin privileges.</response>
+        /// <response code="404">If a user with the specified ID is not found.</response>
         [HttpGet("{id}")]
         [Authorize]
         [ProducesResponseType(typeof(UserDto), StatusCodes.Status200OK)]
-        [ProducesResponseType(typeof(string), StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
-        [ProducesResponseType(typeof(string), StatusCodes.Status500InternalServerError)]
         public async Task<IActionResult> GetById(int id)
         {
-            try
+            var result = await _mediator.Send(new GetUserByIdQuery { Id = id });
+            if (result != null)
             {
-                _logger.LogInformation(string.Format(LogMessages.FetchingUserById, id));
-                var query = new GetUserByIdQuery { Id = id };
-                var result = await _mediator.Send(query);
-
-                if (result == null)
-                {
-                    _logger.LogWarning(string.Format(LogMessages.UserNotFound, id));
-                    return NotFound(string.Format(ErrorMessages.UserNotFoundSpecific, id));
-                }
-
-                _logger.LogInformation(string.Format(LogMessages.UserFetchedSuccessfully, id));
                 return Ok(result);
             }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, string.Format(LogMessages.ErrorFetchingUser, id));
-                return StatusCode(StatusCodes.Status500InternalServerError, new { error = string.Format(ErrorMessages.GeneralServerError, ex.Message) });
-            }
+            return NotFound();
         }
 
         /// <summary>
-        /// Yeni bir kullanıcı oluşturur (Sadece Admin yetkisine sahip kullanıcılar).
-        /// Bu endpoint AuthController'daki CreateUser ile benzer işlevi görür ancak direkt UserDto döner.
+        /// Creates a new user. (Admin only)
         /// </summary>
-        /// <param name="command">Kullanıcı oluşturma komutu (kullanıcı adı, şifre, sicil, rol ID vb.).</param>
-        /// <returns>Oluşturulan kullanıcı bilgileri (UserDto).</returns>
-        /// <response code="201">Kullanıcı başarıyla oluşturuldu. Oluşturulan kullanıcının detaylarını döner.</response>
-        /// <response code="400">İstek geçersiz veya eksik parametre içeriyor (örn. boş kullanıcı adı, geçersiz rol ID, zaten kullanılan sicil).</response>
-        /// <response code="401">Yetkisiz erişim (Admin rolü gerekli).</response>
-        /// <response code="500">Kullanıcı oluşturma sırasında beklenmeyen bir sunucu hatası oluştu.</response>
+        /// <param name="command">The command containing the details for the new user.</param>
+        /// <returns>The newly created user's details.</returns>
+        /// <response code="201">Returns the newly created user.</response>
+        /// <response code="400">If the request is invalid (e.g., validation errors).</response>
+        /// <response code="401">Unauthorized if the user is not authenticated.</response>
+        /// <response code="403">Forbidden if the user is not an Admin.</response>
+        /// <response code="409">If a user with the same registration number (sicil) already exists.</response>
         [HttpPost]
         [Authorize(Roles = RoleNames.Admin)]
         [ProducesResponseType(typeof(UserDto), StatusCodes.Status201Created)]
-        [ProducesResponseType(typeof(object), StatusCodes.Status400BadRequest)]
-        [ProducesResponseType(typeof(object), StatusCodes.Status409Conflict)]
+        [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status409Conflict)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-        [ProducesResponseType(typeof(object), StatusCodes.Status500InternalServerError)]
+        [ProducesResponseType(StatusCodes.Status403Forbidden)]
         public async Task<IActionResult> Create([FromBody] CreateUserCommand command)
         {
-            try
+            var result = await _mediator.Send(command);
+            if (result.IsSuccess)
             {
-                _logger.LogInformation(string.Format(LogMessages.UserCreating, command.Sicil));
-                var result = await _mediator.Send(command);
-                _logger.LogInformation(string.Format(LogMessages.UserCreated, result.Sicil, result.Id));
-                return CreatedAtAction(nameof(GetById), new { id = result.Id }, result);
+                return CreatedAtAction(nameof(GetById), new { id = result.Value.Id }, result.Value);
             }
-            catch (Stock.Domain.Exceptions.ValidationException ex)
-            {
-                _logger.LogWarning(LogMessages.ValidationErrorDuringUserCreation, ex.Message);
-                var problemDetails = new ValidationProblemDetails(ex.Errors
-                    .GroupBy(kvp => kvp.Key)
-                    .ToDictionary(g => g.Key, g => g.SelectMany(kvp => kvp.Value).ToArray()));
-                return BadRequest(problemDetails);
-            }
-            catch (ConflictException ex)
-            {
-                _logger.LogWarning(LogMessages.ConflictDuringUserCreation, command.Sicil, ex.Message);
-                return Conflict(new { error = ex.Message });
-            }
-            catch (NotFoundException ex)
-            {
-                _logger.LogWarning(LogMessages.NotFoundDuringUserCreation, ex.Message);
-                return NotFound(new { error = ex.Message });
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, LogMessages.ErrorDuringUserCreation);
-                return StatusCode(StatusCodes.Status500InternalServerError, new { error = ErrorMessages.UserCreationError });
-            }
+            // Handle error cases, e.g., conflict or bad request
+            return BadRequest(result.Error);
         }
 
         /// <summary>
-        /// Mevcut bir kullanıcıyı günceller (Sadece Admin yetkisine sahip kullanıcılar).
+        /// Updates an existing user. (Admin only)
         /// </summary>
-        /// <param name="id">Güncellenecek kullanıcının ID'si.</param>
-        /// <param name="command">Güncellenmiş kullanıcı bilgilerini içeren komut.</param>
-        /// <returns>Güncellenmiş kullanıcı bilgileri (UserDto).</returns>
-        /// <response code="200">Kullanıcı başarıyla güncellendi.</response>
-        /// <response code="400">İstek geçersiz (örn. ID uyuşmazlığı, validasyon hatası, zaten kullanılan sicil).</response>
-        /// <response code="401">Yetkisiz erişim (Admin rolü gerekli).</response>
-        /// <response code="404">Belirtilen ID'ye sahip kullanıcı bulunamadı.</response>
-        /// <response code="500">Kullanıcı güncelleme sırasında beklenmeyen bir sunucu hatası oluştu.</response>
+        /// <param name="id">The ID of the user to update.</param>
+        /// <param name="command">The command containing the updated details for the user.</param>
+        /// <returns>The updated user's details.</returns>
+        /// <response code="200">Returns the updated user.</response>
+        /// <response code="400">If the request is invalid (e.g., ID mismatch, validation errors).</response>
+        /// <response code="401">Unauthorized if the user is not authenticated.</response>
+        /// <response code="403">Forbidden if the user is not an Admin.</response>
+        /// <response code="404">If a user with the specified ID is not found.</response>
+        /// <response code="409">If a conflict occurs (e.g., unique constraint violation).</response>
         [HttpPut("{id}")]
         [Authorize(Roles = RoleNames.Admin)]
         [ProducesResponseType(typeof(UserDto), StatusCodes.Status200OK)]
-        [ProducesResponseType(typeof(object), StatusCodes.Status400BadRequest)]
-        [ProducesResponseType(typeof(object), StatusCodes.Status409Conflict)]
+        [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status409Conflict)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-        [ProducesResponseType(typeof(object), StatusCodes.Status404NotFound)]
-        [ProducesResponseType(typeof(object), StatusCodes.Status500InternalServerError)]
+        [ProducesResponseType(StatusCodes.Status403Forbidden)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<IActionResult> Update(int id, [FromBody] UpdateUserCommand command)
         {
-            try
+            if (id != command.Id)
             {
-                if (id != command.Id)
-                {
-                    _logger.LogWarning(string.Format(LogMessages.RouteBodyIdMismatch, id, command.Id));
-                    return BadRequest(new { error = ErrorMessages.RouteBodyIdMismatch });
-                }
-                
-                _logger.LogInformation(string.Format(LogMessages.UserUpdating, id));
-                var result = await _mediator.Send(command);
-                
-                if (result == null)
-                {
-                    _logger.LogWarning(string.Format(LogMessages.UserNotFoundForUpdate, id));
-                    return NotFound(new { error = string.Format(ErrorMessages.UserNotFoundSpecific, id) });
-                }
-                
-                _logger.LogInformation(string.Format(LogMessages.UserUpdated, result.Id));
-                return Ok(result);
+                throw new BadRequestException(ErrorMessages.RouteBodyIdMismatch);
             }
-            catch (Stock.Domain.Exceptions.ValidationException ex)
-            {
-                _logger.LogWarning(LogMessages.ValidationErrorDuringUserUpdate, ex.Message);
-                var problemDetails = new ValidationProblemDetails(ex.Errors
-                    .GroupBy(kvp => kvp.Key)
-                    .ToDictionary(g => g.Key, g => g.SelectMany(kvp => kvp.Value).ToArray()));
-                return BadRequest(problemDetails);
-            }
-            catch (ConflictException ex)
-            {
-                _logger.LogWarning(LogMessages.ConflictDuringUserUpdate, id, ex.Message);
-                return Conflict(new { error = ex.Message });
-            }
-            catch (NotFoundException ex)
-            {
-                _logger.LogWarning(LogMessages.NotFoundDuringUserUpdate, id, ex.Message);
-                return NotFound(new { error = ex.Message });
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, string.Format(LogMessages.ErrorUpdatingUser, id));
-                return StatusCode(StatusCodes.Status500InternalServerError, new { error = ErrorMessages.UserUpdateError });
-            }
+            
+            await _mediator.Send(command);
+            
+            return NoContent(); // Return 204 No Content on successful update
         }
 
         /// <summary>
-        /// Belirtilen ID'ye sahip kullanıcıyı siler (Sadece Admin yetkisine sahip kullanıcılar).
+        /// Deletes a user by their unique ID. (Admin only)
         /// </summary>
-        /// <param name="id">Silinecek kullanıcının ID'si.</param>
-        /// <returns>Başarılı olursa NoContent (204) yanıtı döner.</returns>
-        /// <response code="204">Kullanıcı başarıyla silindi.</response>
-        /// <response code="401">Yetkisiz erişim (Admin rolü gerekli).</response>
-        /// <response code="404">Belirtilen ID'ye sahip kullanıcı bulunamadı.</response>
-        /// <response code="500">Kullanıcı silme sırasında beklenmeyen bir sunucu hatası oluştu.</response>
+        /// <param name="id">The ID of the user to delete.</param>
+        /// <returns>A success response if the user is deleted.</returns>
+        /// <response code="204">If the user was successfully deleted.</response>
+        /// <response code="401">Unauthorized if the user is not authenticated.</response>
+        /// <response code="403">Forbidden if the user is not an Admin.</response>
+        /// <response code="404">If a user with the specified ID is not found.</response>
         [HttpDelete("{id}")]
         [Authorize(Roles = RoleNames.Admin)]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-        [ProducesResponseType(typeof(object), StatusCodes.Status404NotFound)]
-        [ProducesResponseType(typeof(object), StatusCodes.Status500InternalServerError)]
+        [ProducesResponseType(StatusCodes.Status403Forbidden)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<IActionResult> Delete(int id)
         {
-            try
-            {
-                _logger.LogInformation(string.Format(LogMessages.UserDeleting, id));
-                var command = new DeleteUserCommand { Id = id };
-                await _mediator.Send(command);
-                _logger.LogInformation(string.Format(LogMessages.UserDeleted, id));
-                return NoContent();
-            }
-            catch (NotFoundException ex)
-            {
-                _logger.LogWarning(LogMessages.NotFoundDuringUserDelete, id, ex.Message);
-                return NotFound(new { error = ex.Message });
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, string.Format(LogMessages.ErrorDuringUserDelete, id));
-                return StatusCode(StatusCodes.Status500InternalServerError, new { error = ErrorMessages.UserDeleteError });
-            }
+            await _mediator.Send(new DeleteUserCommand { Id = id });
+            return NoContent();
         }
     }
 } 

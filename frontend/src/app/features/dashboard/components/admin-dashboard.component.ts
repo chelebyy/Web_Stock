@@ -9,7 +9,6 @@ import { InputTextModule } from 'primeng/inputtext';
 import { PasswordModule } from 'primeng/password';
 import { ToastModule } from 'primeng/toast';
 import { MessageService } from 'primeng/api';
-import { ChartModule } from 'primeng/chart';
 import { TableModule } from 'primeng/table';
 import { ProgressBarModule } from 'primeng/progressbar';
 import { TagModule } from 'primeng/tag';
@@ -21,6 +20,7 @@ import { HostListener } from '@angular/core';
 import { DragDropModule } from '@angular/cdk/drag-drop';
 import { HasPermissionDirective } from '../../../shared/directives/has-permission.directive';
 import { DatePickerModule } from 'primeng/datepicker';
+import { DashboardChartComponent } from './dashboard-chart.component';
 
 // PrimeNG Tag bileşeni için geçerli severity tipleri
 type TagSeverity = 'success' | 'info' | 'warning' | 'danger' | 'secondary' | 'contrast' | undefined;
@@ -38,7 +38,6 @@ type TagSeverity = 'success' | 'info' | 'warning' | 'danger' | 'secondary' | 'co
         InputTextModule,
         PasswordModule,
         ToastModule,
-        ChartModule,
         TableModule,
         ProgressBarModule,
         TagModule,
@@ -47,7 +46,8 @@ type TagSeverity = 'success' | 'info' | 'warning' | 'danger' | 'secondary' | 'co
         DialogModule,
         DragDropModule,
         HasPermissionDirective,
-        DatePickerModule
+        DatePickerModule,
+        DashboardChartComponent
     ],
     providers: [MessageService]
 })
@@ -94,12 +94,6 @@ export class AdminDashboardComponent implements OnInit {
   pageSize = 10;
   totalRecords = 0;
   totalFilteredRecords = 0;
-  
-  // Grafik verileri (eski)
-  userActivityData: any;
-  
-  // Grafik seçenekleri (eski)
-  chartOptions: any;
   
   // Aktivite verileri
   recentActivities: { user: string; action: string; date: Date }[] = [
@@ -157,7 +151,7 @@ export class AdminDashboardComponent implements OnInit {
     private logService: LogService
   ) {
     // Grafik verilerini hazırla (eski)
-    this.initChartData();
+    // this.initChartData();
   }
 
   ngOnInit(): void {
@@ -183,7 +177,7 @@ export class AdminDashboardComponent implements OnInit {
     this.loadSystemData();
     
     // Grafik seçeneklerini ayarla (eski)
-    this.setupChartOptions();
+    // this.setupChartOptions();
     
     // Bekleyen logları senkronize et
     this.logService.syncPendingLogs();
@@ -418,88 +412,18 @@ export class AdminDashboardComponent implements OnInit {
   onPageChange(event: any): void {
     this.currentPage = event.page + 1;
     this.pageSize = event.rows;
-    this.loadUserActivityLogs();
-  }
-  
-  private setupChartOptions(): void {
-    this.chartOptions = {
-      responsive: true,
-      maintainAspectRatio: false,
-      plugins: {
-        legend: {
-          position: 'top',
-          labels: {
-            usePointStyle: true,
-            padding: 20
-          }
-        },
-        tooltip: {
-          mode: 'index',
-          intersect: false
-        }
-      },
-      scales: {
-        x: {
-          grid: {
-            display: false
-          }
-        },
-        y: {
-          beginAtZero: true,
-          grid: {
-            color: 'rgba(0, 0, 0, 0.05)'
-          }
-        }
-      }
-    };
-  }
-  
-  private initChartData(): void {
-    // Kullanıcı aktivite grafiği
-    this.userActivityData = {
-      labels: ['Ocak', 'Şubat', 'Mart', 'Nisan', 'Mayıs', 'Haziran', 'Temmuz'],
-      datasets: [
-        {
-          label: 'Aktif Kullanıcılar',
-          data: [65, 59, 80, 81, 56, 55, 40],
-          fill: false,
-          borderColor: '#42A5F5',
-          tension: 0.4,
-          backgroundColor: 'rgba(66, 165, 245, 0.2)',
-          borderWidth: 2,
-          pointBackgroundColor: '#42A5F5',
-          pointBorderColor: '#fff',
-          pointHoverBackgroundColor: '#fff',
-          pointHoverBorderColor: '#42A5F5'
-        },
-        {
-          label: 'Yeni Kullanıcılar',
-          data: [28, 48, 40, 19, 86, 27, 90],
-          fill: false,
-          borderColor: '#FFA726',
-          tension: 0.4,
-          backgroundColor: 'rgba(255, 167, 38, 0.2)',
-          borderWidth: 2,
-          pointBackgroundColor: '#FFA726',
-          pointBorderColor: '#fff',
-          pointHoverBackgroundColor: '#fff',
-          pointHoverBorderColor: '#FFA726'
-        }
-      ]
-    };
+    this.applyFilters();
   }
   
   private loadSystemData(): void {
-    // Gerçek API bağlantısı olmadığında örnek veriler
-    setTimeout(() => {
-      this.systemSummary = {
-        totalUsers: 1254,
-        totalRoles: 8,
-        activeUsers: 876
-      };
-      
-      this.loading = false;
-    }, 1000);
+    // Gerçek API çağrıları burada yapılacak
+    this.systemSummary = {
+      totalUsers: 1254,
+      totalRoles: 8,
+      activeUsers: 876
+    };
+    
+    this.loading = false;
   }
 
   navigateToUserManagement(): void {

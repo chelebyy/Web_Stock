@@ -10,6 +10,8 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using System;
+using Stock.Application.Common.Interfaces;
+using Microsoft.Extensions.Logging;
 
 namespace Stock.Application.Features.Products.Queries.GetAllProducts
 {
@@ -21,35 +23,47 @@ namespace Stock.Application.Features.Products.Queries.GetAllProducts
     {
         private readonly IUnitOfWork _unitOfWork;
         private readonly IMapper _mapper;
+        private readonly ICacheService _cacheService;
+        private readonly ILogger<GetAllProductsQueryHandler> _logger;
 
-        public GetAllProductsQueryHandler(IUnitOfWork unitOfWork, IMapper mapper)
+        public GetAllProductsQueryHandler(IUnitOfWork unitOfWork, IMapper mapper, ICacheService cacheService, ILogger<GetAllProductsQueryHandler> logger)
         {
             _unitOfWork = unitOfWork;
             _mapper = mapper;
+            _cacheService = cacheService;
+            _logger = logger;
         }
 
         public async Task<PagedResponse<ProductListItemDto>> Handle(GetAllProductsQuery request, CancellationToken cancellationToken)
         {
-            var spec = new ProductsWithCategorySpecification(
-                request.NameFilter,
-                request.CategoryId,
-                request.SortBy,
-                request.SortDirection
-            );
+            var cacheKey = $"products_page_{request.PageNumber}_size_{request.PageSize}_sort_{request.SortBy}_{request.SortDirection}_name_{request.NameFilter}_cat_{request.CategoryId}";
 
-            var countSpec = new ProductsWithCategorySpecification(
-                request.NameFilter,
-                request.CategoryId
-            );
+            return await _cacheService.GetOrCreateAsync(cacheKey, async () =>
+            {
+                _logger.LogInformation("Cache miss for products with key: {CacheKey}. Fetching from database.", cacheKey);
 
-            spec.ApplyPaging((request.PageNumber - 1) * request.PageSize, request.PageSize);
+                var spec = new ProductsWithCategorySpecification(
+                    request.NameFilter,
+                    request.CategoryId,
+                    request.SortBy,
+                    request.SortDirection
+                );
 
-            var products = await _unitOfWork.GetRepository<Product>().ListAsync(spec, cancellationToken);
-            var totalRecords = await _unitOfWork.GetRepository<Product>().CountAsync(countSpec, cancellationToken);
+                var countSpec = new ProductsWithCategorySpecification(
+                    request.NameFilter,
+                    request.CategoryId
+                );
 
-            var productsDto = _mapper.Map<IReadOnlyList<ProductListItemDto>>(products);
+                spec.ApplyPaging((request.PageNumber - 1) * request.PageSize, request.PageSize);
 
-            return new PagedResponse<ProductListItemDto>(productsDto, request.PageNumber, request.PageSize, totalRecords);
+                var products = await _unitOfWork.GetRepository<Product>().ListAsync(spec, cancellationToken);
+                var totalRecords = await _unitOfWork.GetRepository<Product>().CountAsync(countSpec, cancellationToken);
+
+                var productsDto = _mapper.Map<IReadOnlyList<ProductListItemDto>>(products);
+
+                return new PagedResponse<ProductListItemDto>(productsDto, request.PageNumber, request.PageSize, totalRecords);
+
+            }, slidingExpiration: TimeSpan.FromMinutes(5));
         }
     }
 } 

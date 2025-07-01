@@ -18,9 +18,8 @@
     .page-title {
       font-size: 2.25rem;
       font-weight: 700;
-      color: #1e3a8a; // Koyu mavi başlık (beyaz tema için)
-      margin: 0;
-      margin-bottom: 0.5rem;
+      color: #1e3a8a; // TODO: Temadan bir değişken kullan
+      margin: 0 0 0.5rem 0;
       position: relative;
       letter-spacing: -0.5px;
       
@@ -31,15 +30,15 @@
         left: 0;
         width: 60px;
         height: 4px;
-        background: linear-gradient(90deg, #3B82F6, #60a5fa);
+        background: linear-gradient(90deg, var(--primary-color), var(--primary-color-hover));
         border-radius: 4px;
       }
     }
     
     .page-subtitle {
-      color: #64748b; // Slate 500
+      color: var(--text-color-secondary);
       font-size: 1.1rem;
-      margin: 1.25rem 0 0 0;
+      margin-top: 1.25rem;
       font-weight: 400;
     }
   }
@@ -52,6 +51,92 @@
     &:hover {
       transform: translateX(-5px);
     }
+  }
+}
+
+// Tablo Başlığı ve Eylemleri
+.table-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+
+  .table-title {
+    font-size: 1.5rem;
+    font-weight: 600;
+    margin: 0;
+  }
+
+  .table-actions {
+    display: flex;
+    gap: 0.5rem;
+
+    .p-input-icon-left {
+      input {
+        min-width: 250px;
+      }
+    }
+  }
+}
+
+// Tablo Stilleri (Bileşene Özgü)
+:host ::ng-deep {
+  .p-datatable-modern {
+    .p-datatable-thead > tr > th {
+      background-color: var(--surface-section);
+      font-weight: 600;
+    }
+
+    .p-datatable-tbody > tr {
+      &:hover {
+        background-color: var(--surface-hover);
+      }
+    }
+
+    .role-name {
+      font-weight: 600;
+    }
+
+    .action-buttons {
+      display: flex;
+      justify-content: center;
+      gap: 0.5rem;
+    }
+  }
+
+  // Hata ve boş mesaj stilleri
+  .error-message, .empty-message {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem;
+    text-align: center;
+    color: var(--text-color-secondary);
+
+    i {
+      font-size: 2rem;
+      margin-bottom: 1rem;
+    }
+    
+    .p-button {
+      margin-top: 1rem;
+    }
+  }
+}
+
+// Form Stilleri (Dialog içinde)
+.role-form {
+  .field {
+    margin-bottom: 1.5rem;
+    
+    .form-label {
+      display: block;
+      margin-bottom: 0.5rem;
+      font-weight: 500;
+    }
+    
+    // Input stilleri globalde yönetiliyor, 
+    // eğer özel bir stil gerekirse buraya eklenebilir.
   }
 }
 
@@ -102,135 +187,6 @@
         }
       }
     }
-  }
-}
-
-// Tablo stilleri
-:host ::ng-deep {
-  .p-datatable {
-    .p-datatable-header {
-      background-color: transparent;
-      border: none;
-      padding: 1rem 1.5rem;
-    }
-    
-    .p-datatable-thead > tr > th {
-      background-color: var(--surface-section);
-      color: var(--text-color);
-      padding: 1rem 1.5rem;
-      font-weight: 600;
-      border-color: var(--surface-border);
-    }
-    
-    .p-datatable-tbody > tr {
-      background-color: var(--surface-card);
-      transition: all 0.2s ease;
-      
-      &:hover {
-        background-color: var(--surface-hover);
-      }
-      
-      > td {
-        padding: 1rem 1.5rem;
-        border-color: var(--surface-border);
-        color: var(--text-color);
-        
-        .id-badge {
-          background-color: #4f46e5;
-          color: #ffffff;
-          padding: 0.25rem 0.5rem;
-          border-radius: 4px;
-          font-weight: 600;
-          font-size: 0.875rem;
-          display: inline-block;
-        }
-        
-        .role-name {
-          font-weight: 600;
-          color: #1e293b;
-          font-size: 1rem;
-        }
-        
-        .role-description {
-          color: #475569;
-          font-size: 0.875rem;
-          max-width: 400px;
-          white-space: nowrap;
-          overflow: hidden;
-          text-overflow: ellipsis;
-        }
-      }
-    }
-    
-    .p-paginator {
-      padding: 1rem 1.5rem;
-      background-color: transparent;
-      border-color: var(--surface-border);
-      
-      .p-paginator-current {
-        color: var(--text-color-secondary);
-      }
-    }
-  }
-  
-  .action-column {
-    width: 150px;
-    text-align: center;
-  }
-  
-  .action-buttons {
-    display: flex;
-    justify-content: center;
-    gap: 0.5rem;
-    
-    .p-button {
-      width: 2.5rem;
-      height: 2.5rem;
-      
-      &.p-button-info {
-        color: #0ea5e9;
-      }
-      
-      &.p-button-danger {
-        color: #ef4444;
-      }
-      
-      &.p-button-success {
-        color: #10b981;
-      }
-      
-      &:hover {
-        background-color: var(--surface-hover);
-      }
-    }
-  }
-  
-  // Boş durum mesajı
-  .empty-message {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    padding: 3rem 1rem;
-    text-align: center;
-    
-    .empty-icon {
-      font-size: 3rem;
-      color: #cbd5e1;
-      margin-bottom: 1rem;
-    }
-    
-    p {
-      color: #64748b;
-      font-size: 1.1rem;
-      margin-bottom: 1.5rem;
-    }
-  }
-  
-  // Tablo özeti
-  .table-summary {
-    color: var(--text-color-secondary);
-    font-size: 0.875rem;
   }
 }
 

@@ -1,3 +1,4 @@
+using System;
 using Stock.Domain.Entities.Permissions;
 using Stock.Domain.Specifications;
 

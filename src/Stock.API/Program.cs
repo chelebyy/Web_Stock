@@ -18,11 +18,16 @@ using FluentValidation; // Eklendi
 using Stock.Application.Common.Behaviors; // 'u' olmadan düzeltildi
 using Microsoft.AspNetCore.RateLimiting; // Eklendi
 using System.Threading.RateLimiting; // Eklendi
+using Stock.Application.Models.DTOs;
+using Stock.Domain.Entities;
+using Stock.Domain.ValueObjects;
+using System.Reflection;
+using Microsoft.OpenApi.Models;
 
 // Program sınıfını public yaparak erişilebilirlik sorununu çözüyoruz
 public class Program
 {
-    public static async Task Main(string[] args) // Main metodunu async yap
+    public static async Task Main(string[] args)
     {
         // NLog yapılandırmasını yükle
         var logger = NLog.LogManager.Setup()
@@ -73,6 +78,12 @@ public class Program
             // MediatR doğrulama pipeline behavior'ı
             builder.Services.AddTransient(typeof(IPipelineBehavior<,>), typeof(ValidationBehavior<,>)); // Yorum kaldırıldı
 
+            var jwtKey = builder.Configuration["Jwt:Key"];
+            if (string.IsNullOrEmpty(jwtKey))
+            {
+                throw new InvalidOperationException("JWT Key not found in configuration.");
+            }
+
             // JWT yapılandırması
             builder.Services.AddAuthentication(options =>
             {
@@ -89,7 +100,7 @@ public class Program
                     ValidateIssuerSigningKey = true,
                     ValidIssuer = builder.Configuration["Jwt:Issuer"],
                     ValidAudience = builder.Configuration["Jwt:Audience"],
-                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"]))
+                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtKey))
                 };
             });
 
@@ -105,9 +116,8 @@ public class Program
                     options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
                 });
 
-            // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
+            // Swagger configuration is handled in Infrastructure layer
             builder.Services.AddEndpointsApiExplorer();
-            builder.Services.AddSwaggerGen();
             builder.Services.AddCors(options =>
             {
                 options.AddPolicy("AllowLocalhost4200", policy =>
@@ -134,6 +144,8 @@ public class Program
                         }));
             });
 
+            // API versioning removed for simplicity
+
             var app = builder.Build();
 
             // Veritabanı başlangıç verilerini (seed) ekle
@@ -150,12 +162,9 @@ public class Program
 
                     // Mevcut Seed Data logları devam edebilir
                     appLogger.LogInformation("Başlangıç verileri ekleniyor...");
-                    // await SeedRoles.SeedAsync(services); // Bu satırı kaldır
-                    // await SeedUsers.SeedDefaultUsersAsync(services); // Bu satırı kaldır
-                    // Seeding işlemi artık ApplicationDbContext içinde yapılıyor.
-                    // Bu bloğu tamamen kaldırmak veya sadece bir log mesajı bırakmak daha iyi olabilir.
-                    appLogger.LogInformation("Başlangıç verileri ApplicationDbContext içinde işleniyor."); 
-                    // appLogger.LogInformation("Başlangıç verileri başarıyla eklendi."); // Bu satırı kaldır veya güncelle
+                    // Value Object'ler ile seeding yapıyoruz
+                    await SeedInitialDataAsync(context, appLogger);
+                    appLogger.LogInformation("Başlangıç verileri başarıyla eklendi.");
                 }
                 catch (Exception ex)
                 {
@@ -174,8 +183,8 @@ public class Program
             // Configure the HTTP request pipeline.
             if (app.Environment.IsDevelopment())
             {
-                app.UseSwagger();
-                app.UseSwaggerUI();
+                // Swagger configuration is handled in Infrastructure layer
+                app.UseInfrastructure();
                 // app.UseDeveloperExceptionPage(); // Global middleware varken buna gerek kalmayabilir
             }
             else
@@ -210,6 +219,89 @@ public class Program
         finally
         {
             LogManager.Shutdown();
+        }
+    }
+
+    private static async Task SeedInitialDataAsync(ApplicationDbContext context, ILogger<Program> logger)
+    {
+        try
+        {
+            // Admin rolünü kontrol et ve oluştur
+            if (!await context.Roles.AnyAsync())
+            {
+                logger.LogInformation("Admin rolü oluşturuluyor...");
+                
+                var roleNameResult = RoleName.Create("Admin");
+                if (roleNameResult.IsFailure)
+                {
+                    logger.LogError($"Admin rol adı oluşturulamadı: {roleNameResult.Error}");
+                    return;
+                }
+
+                var adminRoleResult = Role.Create(roleNameResult.Value, "Administrator role with full access");
+                if (adminRoleResult.IsFailure)
+                {
+                    logger.LogError($"Admin rolü oluşturulamadı: {adminRoleResult.Error}");
+                    return;
+                }
+                
+                context.Roles.Add(adminRoleResult.Value);
+                await context.SaveChangesAsync();
+                
+                logger.LogInformation("Admin rolü başarıyla oluşturuldu.");
+            }
+
+            // Admin kullanıcısını kontrol et ve oluştur
+            if (!await context.Users.AnyAsync())
+            {
+                logger.LogInformation("Admin kullanıcısı oluşturuluyor...");
+                
+                // Admin rolünü getir
+                var adminRole = await context.Roles.FirstOrDefaultAsync();
+                if (adminRole == null)
+                {
+                    logger.LogError("Admin rolü bulunamadı.");
+                    return;
+                }
+
+                // Value Object'leri oluştur
+                var sicilResult = Sicil.Create("00000");
+                var fullNameResult = FullName.Create("Admin", "User");
+                
+                if (sicilResult.IsFailure || fullNameResult.IsFailure)
+                {
+                    logger.LogError("Admin kullanıcısı için Value Object'ler oluşturulamadı.");
+                    return;
+                }
+
+                // Admin kullanıcısını oluştur
+                var adminUserResult = User.Create(
+                    fullNameResult.Value,  // FullName (1. parametre)
+                    sicilResult.Value,     // Sicil (2. parametre)
+                    "$2a$11$3J5..wF0T4iP.gR2Y5tA5.L/E.CHd2/x3O5aZl4Y3k58S.s/3x8ge", // PasswordHash (3. parametre)
+                    adminRole.Id,          // RoleId (4. parametre)
+                    true                   // IsAdmin (5. parametre)
+                );
+                
+                if (adminUserResult.IsFailure)
+                {
+                    logger.LogError($"Admin kullanıcısı oluşturulamadı: {adminUserResult.Error}");
+                    return;
+                }
+                
+                context.Users.Add(adminUserResult.Value);
+                await context.SaveChangesAsync();
+                
+                logger.LogInformation("Admin kullanıcısı başarıyla oluşturuldu.");
+            }
+            else
+            {
+                logger.LogInformation("Seeding atlandı: Veriler zaten mevcut.");
+            }
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, "Seeding işlemi sırasında hata oluştu.");
         }
     }
 }

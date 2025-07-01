@@ -1,3 +1,4 @@
+using System;
 using System.Linq.Expressions;
 using Stock.Domain.Entities.Permissions;
 
@@ -13,8 +14,8 @@ namespace Stock.Domain.Specifications
         /// </summary>
         /// <param name="permissionId">Aranacak izin ID'si.</param>
         public PermissionByIdSpecification(int permissionId)
-            : base(p => p.Id == permissionId)
         {
+            AddCriteria(p => p.Id == permissionId);
         }
     }
 } 

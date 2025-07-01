@@ -4,6 +4,8 @@ export interface Permission {
     description: string;
     displayName?: string;
     resourceType?: string;
+    resourceName?: string;
+    action?: string;
     group: string;
     isFromRole?: boolean;
     isCustom?: boolean;

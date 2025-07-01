@@ -4,6 +4,7 @@ using Stock.Domain.Entities;
 using Stock.Domain.Interfaces;
 using Stock.Domain.Specifications.Products;
 using Stock.Domain.ValueObjects;
+using Stock.Domain.Common;
 using System.Threading;
 using Stock.Domain.Specifications;
 
@@ -42,12 +43,27 @@ public class ProductService : IProductService
 
     public async Task<ProductDto> CreateProductAsync(CreateProductDto dto)
     {
-        var product = Product.Create(
-            ProductName.From(dto.Name),
-            ProductDescription.From(dto.Description),
-            StockLevel.From(dto.StockLevel),
+        var productName = ProductName.From(dto.Name);
+        var productDescription = ProductDescription.From(dto.Description);
+
+        var stockLevelResult = StockLevel.From(dto.StockLevel);
+        if (!stockLevelResult.IsSuccess)
+        {
+            throw new ArgumentException(stockLevelResult.Error);
+        }
+
+        var productResult = Product.Create(
+            productName,
+            productDescription,
+            stockLevelResult.Value,
             dto.CategoryId);
 
+        if (!productResult.IsSuccess)
+        {
+            throw new ArgumentException(productResult.Error);
+        }
+
+        var product = productResult.Value;
         await _unitOfWork.Products.AddAsync(product);
         await _unitOfWork.SaveChangesAsync();
 
@@ -62,9 +78,20 @@ public class ProductService : IProductService
             throw new KeyNotFoundException($"Product with id {dto.Id} not found");
         }
 
-        product.UpdateName(ProductName.From(dto.Name));
-        // Allow null description by passing dto.Description directly
-        product.UpdateDescription(ProductDescription.From(dto.Description));
+        var productName = ProductName.From(dto.Name);
+        var productDescription = ProductDescription.From(dto.Description);
+
+        var updateNameResult = product.UpdateName(productName);
+        if (!updateNameResult.IsSuccess)
+        {
+            throw new ArgumentException(updateNameResult.Error);
+        }
+
+        var updateDescResult = product.UpdateDescription(productDescription);
+        if (!updateDescResult.IsSuccess)
+        {
+            throw new ArgumentException(updateDescResult.Error);
+        }
         int currentStock = product.StockLevel.Value;
         int difference = dto.StockLevel - currentStock;
         if (difference > 0) product.IncreaseStock(difference);

@@ -4,6 +4,7 @@ using Stock.Domain.Common;
 using Stock.Domain.Entities.Permissions;
 using Stock.Domain.Interfaces;
 using Stock.Domain.Specifications;
+using Stock.Application.Common.Interfaces;
 using System;
 using System.Threading;
 using System.Threading.Tasks;
@@ -14,13 +15,16 @@ namespace Stock.Application.Features.Permissions.Commands
     {
         private readonly IUnitOfWork _unitOfWork;
         private readonly ILogger<DeletePermissionCommandHandler> _logger;
+        private readonly ICacheService _cacheService;
 
         public DeletePermissionCommandHandler(
             IUnitOfWork unitOfWork,
-            ILogger<DeletePermissionCommandHandler> logger)
+            ILogger<DeletePermissionCommandHandler> logger,
+            ICacheService cacheService)
         {
             _unitOfWork = unitOfWork;
             _logger = logger;
+            _cacheService = cacheService;
         }
 
         public async Task<Result> Handle(DeletePermissionCommand request, CancellationToken cancellationToken)
@@ -47,6 +51,10 @@ namespace Stock.Application.Features.Permissions.Commands
                     _logger.LogError("İzin silinirken veritabanına kaydetme başarısız: ID {PermissionId}", request.Id);
                     return Result.Failure("Failed to delete the permission from the database.");
                 }
+
+                // İzin önbelleğini temizle
+                await _cacheService.RemoveAsync(Application.Common.Constants.CacheKeys.PermissionsAll);
+                _logger.LogInformation("İzin listesi önbelleği temizlendi.");
 
                 _logger.LogInformation("ID: {PermissionId} olan izin başarıyla silindi.", request.Id);
                 return Result.Success();

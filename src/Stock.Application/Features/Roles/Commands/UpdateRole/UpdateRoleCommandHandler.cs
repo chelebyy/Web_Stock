@@ -1,11 +1,15 @@
-using AutoMapper;
 using MediatR;
-using Stock.Domain.Exceptions;
+
 using Stock.Domain.Entities;
-using Stock.Domain.Interfaces;
-using Stock.Domain.Specifications;
+using Stock.Domain.Common;
+using Stock.Domain.ValueObjects;
+using System;
 using System.Threading;
 using System.Threading.Tasks;
+using Stock.Domain.Exceptions;
+using Stock.Domain.Interfaces;
+using Stock.Domain.Specifications;
+using Stock.Application.Common.Interfaces;
 using Microsoft.Extensions.Logging;
 
 namespace Stock.Application.Features.Roles.Commands.UpdateRole;
@@ -13,23 +17,17 @@ namespace Stock.Application.Features.Roles.Commands.UpdateRole;
 /// <summary>
 /// Handles the <see cref="UpdateRoleCommand"/>.
 /// </summary>
-public class UpdateRoleCommandHandler : IRequestHandler<UpdateRoleCommand, bool>
+public class UpdateRoleCommandHandler : IRequestHandler<UpdateRoleCommand, Unit>
 {
-    private readonly IRoleRepository _roleRepository;
     private readonly IUnitOfWork _unitOfWork;
-    private readonly IMapper _mapper;
     private readonly ILogger<UpdateRoleCommandHandler> _logger;
+    private readonly ICacheService _cacheService;
 
-    public UpdateRoleCommandHandler(
-        IRoleRepository roleRepository,
-        IUnitOfWork unitOfWork,
-        IMapper mapper,
-        ILogger<UpdateRoleCommandHandler> logger)
+    public UpdateRoleCommandHandler(IUnitOfWork unitOfWork, ILogger<UpdateRoleCommandHandler> logger, ICacheService cacheService)
     {
-        _roleRepository = roleRepository;
         _unitOfWork = unitOfWork;
-        _mapper = mapper;
         _logger = logger;
+        _cacheService = cacheService;
     }
 
     /// <summary>
@@ -38,50 +36,48 @@ public class UpdateRoleCommandHandler : IRequestHandler<UpdateRoleCommand, bool>
     /// <param name="request">The command request.</param>
     /// <param name="cancellationToken">The cancellation token.</param>
     /// <returns>True if update was successful.</returns>
-    /// <exception cref="NotFoundException">Thrown if the role to update is not found.</exception>
-    /// <exception cref="ConflictException">Thrown if another role with the same name already exists.</exception>
-    /// <exception cref="ValidationException">Thrown if the role fails validation.</exception>
-    public async Task<bool> Handle(UpdateRoleCommand request, CancellationToken cancellationToken)
+    /// <exception cref="Exception">Thrown if the role to update is not found, validation fails, or an error occurs.</exception>
+    public async Task<Unit> Handle(UpdateRoleCommand request, CancellationToken cancellationToken)
     {
-        _logger.LogInformation("{RoleId} ID'li rol güncelleniyor.", request.Id);
-        var spec = new RoleByIdSpecification(request.Id);
-        var roleToUpdate = await _roleRepository.FirstOrDefaultAsync(spec, cancellationToken);
+        var role = await _unitOfWork.Roles.GetByIdAsync(request.Id);
 
-        if (roleToUpdate == null)
+        if (role == null)
         {
-            _logger.LogWarning("{RoleId} ID'li rol bulunamadı.", request.Id);
-            throw new NotFoundException(nameof(Role), request.Id);
+            throw new Exception($"Role with ID {request.Id} not found.");
         }
 
-        if (!string.IsNullOrWhiteSpace(request.Name) && roleToUpdate.Name != request.Name)
+        var roleNameResult = RoleName.Create(request.Name);
+        if (!roleNameResult.IsSuccess)
         {
-            var nameCheckSpec = new RoleByNameSpecification(request.Name);
-            var existingRoleWithSameName = await _roleRepository.FirstOrDefaultAsync(nameCheckSpec, cancellationToken);
-            if (existingRoleWithSameName != null && existingRoleWithSameName.Id != request.Id)
-            {
-                _logger.LogWarning("'{Name}' adında başka bir rol zaten mevcut (ID: {ExistingRoleId}). Güncellenmek istenen rol ID: {RequestedRoleId}", request.Name, existingRoleWithSameName.Id, request.Id);
-                throw new ConflictException($"'{request.Name}' adında başka bir rol zaten mevcut.");
-            }
-        }
-        
-        var nameUpdateResult = roleToUpdate.UpdateName(request.Name);
-        if (!nameUpdateResult.IsSuccess)
-        {
-            _logger.LogError("{RoleId} ID'li rolün adı güncellenirken validasyon hatası: {Error}", request.Id, nameUpdateResult.Error);
-            throw new ValidationException(nameUpdateResult.Error);
+            throw new Exception(roleNameResult.Error);
         }
 
-        var descriptionUpdateResult = roleToUpdate.UpdateDescription(request.Description /*?? roleToUpdate.Description*/);
-        if (!descriptionUpdateResult.IsSuccess)
+        var updateNameResult = role.UpdateName(roleNameResult.Value);
+        if (!updateNameResult.IsSuccess)
         {
-            _logger.LogError("{RoleId} ID'li rolün açıklaması güncellenirken validasyon hatası: {Error}", request.Id, descriptionUpdateResult.Error);
-            throw new ValidationException(descriptionUpdateResult.Error);
+            throw new Exception(updateNameResult.Error);
         }
 
-        _roleRepository.Update(roleToUpdate);
+        var updateDescriptionResult = role.UpdateDescription(request.Description);
+        if (!updateDescriptionResult.IsSuccess)
+        {
+            throw new Exception(updateDescriptionResult.Error);
+        }
+
+        _unitOfWork.Roles.Update(role);
         await _unitOfWork.SaveChangesAsync(cancellationToken);
-        _logger.LogInformation("{RoleId} ID'li rol başarıyla güncellendi.", request.Id);
 
-        return true;
+        _logger.LogInformation("Rol başarıyla güncellendi: {RoleId}", request.Id);
+
+        // Invalidate both the list cache and the specific item cache
+        var listCachePrefix = "roles_page";
+        await _cacheService.RemoveByPrefixAsync(listCachePrefix).ConfigureAwait(false);
+        _logger.LogInformation("Cache invalidated for prefix: {CachePrefix}", listCachePrefix);
+
+        var specificCacheKey = $"roles:{request.Id}";
+        await _cacheService.RemoveAsync(specificCacheKey).ConfigureAwait(false);
+        _logger.LogInformation("Cache invalidated for key: {SpecificCacheKey}", specificCacheKey);
+
+        return Unit.Value;
     }
 } 

@@ -34,6 +34,11 @@ namespace Stock.Infrastructure.Data.Configurations
 
             builder.Property(a => a.IsDeleted)
                 .HasDefaultValue(false);
+
+            // Sorgu performansını artırmak için index'ler
+            builder.HasIndex(a => new { a.EntityType, a.EntityId }); // Varlık geçmişini sorgulamak için
+            builder.HasIndex(a => a.UserId); // Kullanıcıya göre sorgulamak için
+            builder.HasIndex(a => a.CreatedAt); // Tarihe göre sorgulamak için
                 
             // User tablosuyla ilişki tanımlıyoruz
             builder.HasOne(a => a.User)

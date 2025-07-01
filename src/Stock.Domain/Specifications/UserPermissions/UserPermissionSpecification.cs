@@ -1,6 +1,6 @@
+using System;
 using Stock.Domain.Entities.Permissions;
 using System.Linq.Expressions;
-using System;
 
 namespace Stock.Domain.Specifications.UserPermissions
 {

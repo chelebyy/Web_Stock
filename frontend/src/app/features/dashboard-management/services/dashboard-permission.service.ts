@@ -6,15 +6,19 @@ import { environment } from '../../../../environments/environment';
 import { User as BaseUser } from '../../../shared/models/user.model';
 import { AuthService } from '../../../core/authentication/auth.service';
 import { BaseHttpService } from '../../../core/services/base-http.service';
+import { UserService } from '../../user-management/services/user.service';
+import { PagedResponse } from '../../../shared/models/paged-response.model';
 
 export interface DashboardUser extends Omit<BaseUser, 'id'> {
   id: number;
+  username: string;
   hasPagePermission: boolean;
   fullName: string;
   sicil: string;
   isActive: boolean;
   isAdmin: boolean;
   createdAt: Date;
+  avatar?: string;
 }
 
 export interface PagePermission {
@@ -43,6 +47,8 @@ export class DashboardPermissionService extends BaseHttpService<any> {
   private dashboardPermissionsPath = 'api/dashboard-permissions';
   private usersPath = 'api/users';
 
+  private userService = inject(UserService);
+
   constructor(http: HttpClient, authService: AuthService) {
     super(http, authService, environment.apiUrl);
     console.log('[DashboardPermissionService] Initialized.');
@@ -63,16 +69,15 @@ export class DashboardPermissionService extends BaseHttpService<any> {
   getUsers(pageId: number): Observable<DashboardUser[]> {
     console.log('[DashboardPermissionService] Fetching users for pageId:', pageId);
     
-    // Önce kullanıcıları al, başarılı olursa izinleri al
-    return this.get<any[]>(this.usersPath).pipe(
-      tap(response => console.log('[DashboardPermissionService] Fetched users raw response:', response)),
+    return this.userService.getUsers(1, 1000).pipe(
+      tap(response => console.log('[DashboardPermissionService] Fetched users via UserService:', response)),
+      map(pagedResponse => pagedResponse.items),
       switchMap(users => {
         if (!Array.isArray(users)) {
           console.warn('[DashboardPermissionService] Users is not an array:', users);
           return of([]);
         }
         
-        // Kullanıcılar başarıyla alındıysa, izinleri almaya devam et
         return this.getPagePermissions(pageId).pipe(
           map(permissions => {
             console.log('[DashboardPermissionService] Processing users and permissions');
@@ -84,10 +89,11 @@ export class DashboardPermissionService extends BaseHttpService<any> {
                 return null;
               }
               
-              const fullName = `${user.firstName || ''} ${user.lastName || ''}`.trim() || user.username;
+              const fullName = (`${user.adi || ''} ${user.soyadi || ''}`.trim() || user.username) || '';
               const dashboardUser: DashboardUser = {
                 ...user,
                 id: user.id,
+                username: user.username || '',
                 hasPagePermission: permissionUserIds.includes(user.id),
                 fullName: fullName,
                 sicil: user.sicil || '',
@@ -99,16 +105,16 @@ export class DashboardPermissionService extends BaseHttpService<any> {
             }).filter((user): user is DashboardUser => user !== null);
           }),
           catchError(error => {
-            // İzinleri alırken hata oluşursa, kullanıcıları hala döndürüyoruz, ancak izinler olmadan
             console.error('[DashboardPermissionService] Error fetching permissions:', error.message || error);
             return of(users.map(user => {
               if (!user || !user.id) return null;
               
-              const fullName = `${user.firstName || ''} ${user.lastName || ''}`.trim() || user.username;
+              const fullName = (`${user.adi || ''} ${user.soyadi || ''}`.trim() || user.username) || '';
               const dashboardUser: DashboardUser = {
                 ...user,
                 id: user.id,
-                hasPagePermission: false, // İzinler alınamadı, varsayılan olarak false
+                username: user.username || '',
+                hasPagePermission: false,
                 fullName: fullName,
                 sicil: user.sicil || '',
                 isActive: user.isActive !== undefined ? user.isActive : true,
@@ -121,7 +127,7 @@ export class DashboardPermissionService extends BaseHttpService<any> {
         );
       }),
       catchError(error => {
-        console.error('[DashboardPermissionService] Error fetching users:', error.message || error);
+        console.error('[DashboardPermissionService] Error fetching users via UserService:', error.message || error);
         return of([]);
       })
     );

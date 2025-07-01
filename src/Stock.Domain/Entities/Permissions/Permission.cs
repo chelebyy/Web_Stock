@@ -2,13 +2,14 @@ using System;
 using System.Collections.Generic;
 using Stock.Domain.Common;
 using Stock.Domain.Entities;
+using Stock.Domain.ValueObjects;
 
 namespace Stock.Domain.Entities.Permissions
 {
     public class Permission : BaseEntity
     {
         // Private setter'lar ile encapsulation sağlanır
-        public string Name { get; private set; }
+        public PermissionName Name { get; private set; }
         public string Description { get; private set; }
         public string ResourceType { get; private set; }
         public string ResourceName { get; private set; }
@@ -20,10 +21,20 @@ namespace Stock.Domain.Entities.Permissions
         public ICollection<UserPermission> UserPermissions { get; private set; }
 
         // EF Core için protected constructor
-        protected Permission() { }
+        protected Permission() 
+        {
+            Name = null!;
+            Description = null!;
+            ResourceType = null!;
+            ResourceName = null!;
+            Action = null!;
+            Group = null!;
+            RolePermissions = null!;
+            UserPermissions = null!;
+        }
 
         // Primary constructor - private, sadece factory metodu üzerinden erişim
-        private Permission(string name, string description, string resourceType, string resourceName, string action, string group)
+        private Permission(PermissionName name, string description, string resourceType, string resourceName, string action, string group)
         {
             Name = name;
             Description = description;
@@ -44,15 +55,10 @@ namespace Stock.Domain.Entities.Permissions
             string action = "",
             string group = "")
         {
-            // İş kuralları ve doğrulama kontrolleri
-            if (string.IsNullOrWhiteSpace(name))
+            var permissionNameResult = PermissionName.Create(name);
+            if (permissionNameResult.IsFailure)
             {
-                return Result<Permission>.Failure(DomainErrors.Permission.NameEmpty);
-            }
-
-            if (name.Length > 100)
-            {
-                return Result<Permission>.Failure(DomainErrors.Permission.NameTooLong);
+                return Result<Permission>.Failure(permissionNameResult.Error);
             }
 
             if (description?.Length > 200)
@@ -71,7 +77,7 @@ namespace Stock.Domain.Entities.Permissions
             }
 
             var permission = new Permission(
-                name,
+                permissionNameResult.Value,
                 description ?? string.Empty,
                 resourceType ?? string.Empty,
                 resourceName ?? string.Empty,
@@ -82,6 +88,17 @@ namespace Stock.Domain.Entities.Permissions
         }
 
         // Davranış metotları
+        public Result UpdateName(string newName)
+        {
+            var permissionNameResult = PermissionName.Create(newName);
+            if (permissionNameResult.IsFailure)
+            {
+                return Result.Failure(permissionNameResult.Error);
+            }
+            Name = permissionNameResult.Value;
+            return Result.Success();
+        }
+
         public Result UpdateDescription(string newDescription)
         {
             if (newDescription?.Length > 200)

@@ -1,6 +1,8 @@
 using FluentValidation;
 using MediatR;
 using Microsoft.Extensions.DependencyInjection;
+using Stock.Application.Features.Auth;
+using Stock.Application.Features.Products.Services;
 using System.Reflection;
 
 namespace Stock.Application
@@ -28,6 +30,10 @@ namespace Stock.Application
                     .First(i => i.IsGenericType && i.GetGenericTypeDefinition() == validatorType);
                 services.AddTransient(validatorInterface, validator);
             }
+
+            // Register Application Services
+            services.AddScoped<IProductService, ProductService>();
+            services.AddScoped<AuthService>();
 
             return services;
         }

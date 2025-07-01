@@ -1,5 +1,5 @@
 using MediatR;
-using Stock.Application.Models.DTOs;
+using Stock.Application.Features.Roles.DTOs;
 using System.ComponentModel.DataAnnotations;
 
 namespace Stock.Application.Features.Roles.Commands.CreateRole

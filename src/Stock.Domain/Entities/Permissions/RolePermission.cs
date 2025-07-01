@@ -14,7 +14,11 @@ namespace Stock.Domain.Entities.Permissions
         public Permission Permission { get; private set; }
 
         // EF Core için protected constructor
-        protected RolePermission() { }
+        protected RolePermission() 
+        {
+            Role = null!;
+            Permission = null!;
+        }
 
         // Primary constructor
         private RolePermission(int roleId, int permissionId)
