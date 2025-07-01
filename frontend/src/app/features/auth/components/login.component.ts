@@ -259,7 +259,7 @@ export class LoginComponent implements OnInit, AfterViewInit, OnDestroy {
         
         // Kullanıcı rolüne göre yönlendirme
         const user = this.authService.getCurrentUser();
-        const targetRoute = user?.isAdmin ? '/dashboard/admin-dashboard' : '/dashboard/user-dashboard';
+        const targetRoute = user?.isAdmin ? '/app/dashboard/admin-dashboard' : '/app/dashboard/user-dashboard';
         
         setTimeout(() => {
           this.router.navigate([targetRoute])
@@ -288,7 +288,7 @@ export class LoginComponent implements OnInit, AfterViewInit, OnDestroy {
     // Daha önce giriş yapmış kullanıcıyı kontrol et
     if (this.authService.isLoggedIn()) {
       const user = this.authService.getCurrentUser();
-      const targetRoute = user?.isAdmin ? '/dashboard/admin-dashboard' : '/dashboard/user-dashboard';
+      const targetRoute = user?.isAdmin ? '/app/dashboard/admin-dashboard' : '/app/dashboard/user-dashboard';
       this.router.navigate([targetRoute]);
     }
   }

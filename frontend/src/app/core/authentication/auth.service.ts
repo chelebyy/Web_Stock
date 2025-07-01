@@ -245,7 +245,7 @@ export class AuthService {
             }
             console.log('Kullanıcı izinleri (login sonrası admin kontrolü):', this.permissions);
 
-            const targetRoute = user.isAdmin ? '/dashboard/admin-dashboard' : '/dashboard/user-dashboard';
+            const targetRoute = user.isAdmin ? '/app/dashboard/admin-dashboard' : '/app/dashboard/user-dashboard';
             console.log('Yönlendiriliyor:', targetRoute);
             this.router.navigate([targetRoute]);
           } else {

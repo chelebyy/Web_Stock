@@ -11,6 +11,10 @@ import { ConfirmDialogModule } from 'primeng/confirmdialog';
 import { ConfirmationService, MessageService } from 'primeng/api';
 import { JwtModule } from '@auth0/angular-jwt';
 
+// PrimeNG 19 tema import'ları
+import { providePrimeNG } from 'primeng/config';
+import Lara from '@primeng/themes/lara';
+
 // Token getirme fonksiyonu (localStorage'dan token alır)
 export function tokenGetter() {
   return localStorage.getItem('access_token');
@@ -21,6 +25,13 @@ export const appConfig: ApplicationConfig = {
     provideRouter(routes),
     provideAnimations(),
     provideHttpClient(withInterceptorsFromDi()), // Eski interceptor'ları DI'dan alacak şekilde ayarlandı
+    
+    // PrimeNG 19 tema konfigürasyonu
+    providePrimeNG({
+      theme: {
+        preset: Lara
+      }
+    }),
     
     MessageService,
     ConfirmationService,

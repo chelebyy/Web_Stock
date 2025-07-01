@@ -1,451 +1,384 @@
-:host {
-  display: block;
-  height: 100%;
-  
-  ::ng-deep {
-    .user-management-container {
-      background-color: var(--surface-ground);
-      min-height: 100vh;
-      padding: 2rem;
-      color: var(--text-color);
-      display: flex;
-      flex-direction: column;
-      gap: 1.5rem;
-    }
-
-    // Kullanıcı yönetimi sayfasına özel stiller
-    .user-avatar {
-      width: 40px;
-      height: 40px;
-      border-radius: 50%;
-      object-fit: cover;
-      border: 2px solid #e2e8f0;
-    }
-
-    .user-status {
-      display: inline-flex;
-      align-items: center;
-      padding: 0.25rem 0.75rem;
-      border-radius: 50px;
-      font-size: 0.875rem;
-      font-weight: 500;
-      
-      &.active {
-        background-color: rgba(16, 185, 129, 0.1);
-        color: #10b981;
-      }
-      
-      &.inactive {
-        background-color: rgba(239, 68, 68, 0.1);
-        color: #ef4444;
-      }
-      
-      &.pending {
-        background-color: rgba(245, 158, 11, 0.1);
-        color: #f59e0b;
-      }
-      
-      i {
-        margin-right: 0.5rem;
-        font-size: 0.75rem;
-      }
-    }
-
-    .user-role {
-      display: inline-flex;
-      align-items: center;
-      padding: 0.25rem 0.75rem;
-      border-radius: 50px;
-      font-size: 0.875rem;
-      font-weight: 500;
-      background-color: rgba(79, 70, 229, 0.1);
-      color: #4f46e5;
-      
-      i {
-        margin-right: 0.5rem;
-        font-size: 0.75rem;
-      }
-    }
-
-    .user-details {
-      display: flex;
-      align-items: center;
-      gap: 0.75rem;
-      
-      .user-info {
-        display: flex;
-        flex-direction: column;
-        
-        .user-name {
-          font-weight: 600;
-          color: #1e293b;
-          font-size: 1rem;
-        }
-        
-        .user-email {
-          color: #64748b;
-          font-size: 0.875rem;
-        }
-      }
-    }
-
-    // Kullanıcı formuna özel stiller
-    .user-form {
-      display: grid;
-      grid-template-columns: repeat(2, 1fr);
-      gap: 1.5rem;
-      
-      @media (max-width: 768px) {
-        grid-template-columns: 1fr;
-      }
-      
-      .form-field {
-        margin-bottom: 1.5rem;
-        
-        label {
-          display: block;
-          margin-bottom: 0.5rem;
-          font-weight: 500;
-          color: #334155;
-        }
-        
-        small {
-          display: block;
-          color: #ef4444;
-          margin-top: 0.25rem;
-          font-size: 0.75rem;
-        }
-      }
-      
-      .form-actions {
-        grid-column: 1 / -1;
-        display: flex;
-        justify-content: flex-end;
-        gap: 1rem;
-        margin-top: 1rem;
-      }
-    }
-
-    // Kullanıcı detay sayfasına özel stiller
-    .user-detail-header {
-      display: flex;
-      align-items: center;
-      gap: 1.5rem;
-      margin-bottom: 2rem;
-      
-      .user-avatar-large {
-        width: 80px;
-        height: 80px;
-        border-radius: 50%;
-        object-fit: cover;
-        border: 3px solid #e2e8f0;
-      }
-      
-      .user-header-info {
-        display: flex;
-        flex-direction: column;
-        gap: 0.5rem;
-        
-        .user-name-large {
-          font-size: 1.5rem;
-          font-weight: 700;
-          color: #1e293b;
-        }
-        
-        .user-meta {
-          display: flex;
-          gap: 1rem;
-          flex-wrap: wrap;
-          
-          .meta-item {
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            color: #64748b;
-            font-size: 0.875rem;
-            
-            i {
-              color: var(--primary-color);
-              opacity: 0.7;
-            }
-          }
-        }
-      }
-    }
-
-    // Kullanıcı tablosu stilleri
-    .user-table {
-      width: 100%;
-      border-collapse: collapse;
-      
-      .table-header {
-        display: flex;
-        background-color: #f8fafc;
-        border-bottom: 1px solid #e2e8f0;
+:host ::ng-deep {
+    /* Table genel stilleri - temiz beyaz-gri tema */
+    .p-datatable .p-datatable-header {
+        background: #ffffff !important;
+        color: #374151 !important;
+        border-bottom: 1px solid #e5e7eb !important;
         font-weight: 600;
-        color: #475569;
-        
-        .header-cell {
-          padding: 1rem;
-          flex: 1;
-          
-          &.checkbox-cell {
-            flex: 0 0 50px;
-          }
-          
-          &.name-cell {
-            flex: 2;
-          }
-          
-          &.sicil-cell {
-            flex: 1;
-          }
-          
-          &.permissions-cell {
-            flex: 1;
-          }
-          
-          &.actions-cell {
-            flex: 0 0 120px;
-          }
-        }
-      }
-      
-      .table-row {
-        display: flex;
-        border-bottom: 1px solid #e2e8f0;
+        padding: 1rem;
+    }
+
+    .p-datatable .p-datatable-tbody > tr {
+        border-bottom: 1px solid #f3f4f6 !important;
         transition: background-color 0.2s;
-        
-        &:hover {
-          background-color: rgba(59, 130, 246, 0.05);
-        }
-        
-        .row-cell {
-          padding: 1rem;
-          flex: 1;
-          display: flex;
-          align-items: center;
-          
-          &.checkbox-cell {
-            flex: 0 0 50px;
-          }
-          
-          &.name-cell {
-            flex: 2;
-          }
-          
-          &.sicil-cell {
-            flex: 1;
-          }
-          
-          &.permissions-cell {
-            flex: 1;
-          }
-          
-          &.actions-cell {
-            flex: 0 0 120px;
-            justify-content: flex-end;
-          }
-        }
-      }
+        background-color: #ffffff !important;
     }
 
-    // Kullanıcı bilgileri
-    .user-info {
-      display: flex;
-      align-items: center;
-      gap: 0.75rem;
-      
-      .avatar-container {
-        width: 40px;
-        height: 40px;
-        border-radius: 50%;
-        overflow: hidden;
-        border: 2px solid #e2e8f0;
-        
-        .avatar-image {
-          width: 100%;
-          height: 100%;
-          object-fit: cover;
-        }
-      }
-      
-      .user-name {
+    .p-datatable .p-datatable-tbody > tr:hover {
+        background: #f9fafb !important;
+        transform: none;
+        box-shadow: none;
+    }
+
+    .p-datatable .p-datatable-tbody > tr > td {
+        background: transparent !important;
+        color: #374151 !important;
+        padding: 1rem;
+        vertical-align: middle;
+        border-color: #f3f4f6 !important;
+    }
+
+    .p-datatable .p-datatable-thead > tr > th {
+        background: #f8fafc !important;
+        color: #374151 !important;
         font-weight: 600;
-        color: #1e293b;
-      }
+        padding: 1rem;
+        border-color: #e5e7eb !important;
     }
 
-    // İzin rozeti
-    .permission-badge {
-      display: inline-flex;
-      align-items: center;
-      padding: 0.25rem 0.75rem;
-      border-radius: 50px;
-      font-size: 0.875rem;
-      font-weight: 500;
-      
-      &.admin-badge {
-        background-color: rgba(244, 67, 54, 0.1);
-        color: #f44336; // Kırmızı
-      }
-      
-      &.contributor-badge {
-        background-color: rgba(33, 150, 243, 0.1);
-        color: #2196f3; // Mavi
-      }
-      
-      &.admin {
-        background-color: rgba(79, 70, 229, 0.1);
-        color: #4f46e5;
-      }
-      
-      &.contributor {
-        background-color: rgba(16, 185, 129, 0.1);
-        color: #10b981;
-      }
-      
-      &.viewer {
-        background-color: rgba(14, 165, 233, 0.1);
-        color: #0ea5e9;
-      }
-      
-      // Otomatik renk sınıfları
-      &.blue-badge {
-        background-color: rgba(33, 150, 243, 0.1);
-        color: #2196f3; // Mavi
-      }
-      
-      &.green-badge {
-        background-color: rgba(76, 175, 80, 0.1);
-        color: #4caf50; // Yeşil
-      }
-      
-      &.purple-badge {
-        background-color: rgba(156, 39, 176, 0.1);
-        color: #9c27b0; // Mor
-      }
-      
-      &.orange-badge {
-        background-color: rgba(255, 152, 0, 0.1);
-        color: #ff9800; // Turuncu
-      }
-      
-      &.teal-badge {
-        background-color: rgba(0, 150, 136, 0.1);
-        color: #009688; // Turkuaz
-      }
-      
-      &.pink-badge {
-        background-color: rgba(233, 30, 99, 0.1);
-        color: #e91e63; // Pembe
-      }
-      
-      &.indigo-badge {
-        background-color: rgba(63, 81, 181, 0.1);
-        color: #3f51b5; // İndigo
-      }
-      
-      &.amber-badge {
-        background-color: rgba(255, 193, 7, 0.1);
-        color: #ffc107; // Amber
-      }
-      
-      &.cyan-badge {
-        background-color: rgba(0, 188, 212, 0.1);
-        color: #00bcd4; // Camgöbeği
-      }
-      
-      &.lime-badge {
-        background-color: rgba(205, 220, 57, 0.1);
-        color: #cddc39; // Limon
-      }
+    .p-datatable .p-datatable-thead > tr > th .p-column-title {
+        color: #374151 !important;
     }
 
-    // İşlem butonları
-    .action-buttons {
-      display: flex;
-      gap: 0.5rem;
-      justify-content: flex-end;
+    .p-datatable .p-paginator {
+        background: #ffffff !important;
+        border: 1px solid #e5e7eb !important;
+        border-top: none !important;
+        color: #374151 !important;
     }
 
-    // Sayfalama
-    .pagination-container {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 1rem;
-      background-color: #f8fafc;
-      border-top: 1px solid #e2e8f0;
-      
-      .table-summary {
-        color: #64748b;
-        font-size: 0.875rem;
-      }
-      
-      .pagination-controls {
-        display: flex;
+    .p-datatable .p-datatable-footer {
+        background: #ffffff !important;
+        color: #374151 !important;
+        border-top: 1px solid #e5e7eb !important;
+    }
+
+    /* Caption bölümü - arama kutusu */
+    .p-datatable .p-datatable-header {
+        background: #ffffff !important;
+        border-bottom: 1px solid #e5e7eb !important;
+        padding: 1rem;
+    }
+
+    /* Arama kutusu düzeltmeleri */
+    .p-input-icon-left {
+        position: relative;
+        display: inline-flex;
         align-items: center;
-        gap: 0.25rem;
-      }
-      
-      .rows-selector {
-        display: flex;
-        align-items: center;
-        gap: 0.5rem;
-        color: #64748b;
-        font-size: 0.875rem;
-      }
     }
 
-    // Özel checkbox
-    .custom-checkbox-container {
-      position: relative;
-      width: 20px;
-      height: 20px;
-      
-      .custom-checkbox-input {
+    .p-input-icon-left > input {
+        background: #ffffff !important;
+        border: 1px solid #d1d5db !important;
+        border-radius: 8px !important;
+        padding: 0.75rem 1rem 0.75rem 2.5rem !important;
+        color: #374151 !important;
+        font-size: 14px;
+        min-width: 250px;
+    }
+
+    .p-input-icon-left > input:focus {
+        border-color: #3b82f6 !important;
+        box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1) !important;
+        outline: none !important;
+    }
+
+    .p-input-icon-left > input::placeholder {
+        color: #9ca3af !important;
+    }
+
+    .p-input-icon-left > i {
         position: absolute;
-        opacity: 0;
-        cursor: pointer;
-        height: 0;
-        width: 0;
-        
-        &:checked + .custom-checkbox-label:after {
-          opacity: 1;
-        }
-      }
-      
-      .custom-checkbox-label {
-        position: absolute;
+        left: 0.75rem;
+        color: #6b7280 !important;
+        z-index: 1;
+    }
+
+    /* Toolbar stilleri */
+    .p-toolbar {
+        background: #ffffff !important;
+        border: 1px solid #e5e7eb !important;
+        border-radius: 8px !important;
+        padding: 1rem !important;
+    }
+
+    .p-toolbar h5 {
+        color: #374151 !important;
+        font-weight: 600 !important;
+        margin: 0 !important;
+        visibility: visible !important;
+        opacity: 1 !important;
+        display: block !important;
+    }
+
+    /* Dialog/Modal stilleri - siyah arka plan problemini çözer */
+    .p-dialog {
+        background: #ffffff !important;
+        border: 1px solid #e5e7eb !important;
+        border-radius: 12px !important;
+        box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04) !important;
+    }
+
+    .p-dialog .p-dialog-header {
+        background: #ffffff !important;
+        color: #374151 !important;
+        border-bottom: 1px solid #e5e7eb !important;
+        padding: 1.5rem !important;
+        border-radius: 12px 12px 0 0 !important;
+    }
+
+    .p-dialog .p-dialog-title {
+        color: #374151 !important;
+        font-weight: 600 !important;
+        font-size: 1.25rem !important;
+    }
+
+    .p-dialog .p-dialog-content {
+        background: #ffffff !important;
+        color: #374151 !important;
+        padding: 1.5rem !important;
+    }
+
+    .p-dialog .p-dialog-footer {
+        background: #ffffff !important;
+        border-top: 1px solid #e5e7eb !important;
+        padding: 1.5rem !important;
+        border-radius: 0 0 12px 12px !important;
+    }
+
+    /* Dialog içerisindeki form elemanları */
+    .p-dialog .p-field label {
+        color: #374151 !important;
+        font-weight: 500 !important;
+        margin-bottom: 0.5rem !important;
+        display: block !important;
+    }
+
+    .p-dialog .p-inputtext,
+    .p-dialog .p-dropdown {
+        background: #ffffff !important;
+        border: 1px solid #d1d5db !important;
+        border-radius: 8px !important;
+        padding: 0.75rem !important;
+        color: #374151 !important;
+        width: 100% !important;
+    }
+
+    .p-dialog .p-inputtext:focus,
+    .p-dialog .p-dropdown:focus {
+        border-color: #3b82f6 !important;
+        box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1) !important;
+        outline: none !important;
+    }
+
+    .p-dialog .p-dropdown-panel {
+        background: #ffffff !important;
+        border: 1px solid #d1d5db !important;
+        border-radius: 8px !important;
+        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1) !important;
+    }
+
+    .p-dialog .p-dropdown-item {
+        color: #374151 !important;
+        padding: 0.75rem 1rem !important;
+    }
+
+    .p-dialog .p-dropdown-item:hover {
+        background: #f3f4f6 !important;
+        color: #374151 !important;
+    }
+
+    .p-dialog .p-dropdown-item.p-highlight {
+        background: #3b82f6 !important;
+        color: #ffffff !important;
+    }
+
+    /* Dialog buttons */
+    .p-dialog .p-button {
+        border-radius: 8px !important;
+        padding: 0.75rem 1.5rem !important;
+        font-weight: 500 !important;
+    }
+
+    .p-dialog .p-button.p-button-success {
+        background: #10b981 !important;
+        border-color: #10b981 !important;
+        color: #ffffff !important;
+    }
+
+    .p-dialog .p-button.p-button-success:hover {
+        background: #059669 !important;
+        border-color: #059669 !important;
+    }
+
+    .p-dialog .p-button.p-button-secondary {
+        background: #6b7280 !important;
+        border-color: #6b7280 !important;
+        color: #ffffff !important;
+    }
+
+    .p-dialog .p-button.p-button-secondary:hover {
+        background: #4b5563 !important;
+        border-color: #4b5563 !important;
+    }
+
+    /* Overlay - modal arka planı */
+    .p-component-overlay {
+        background: rgba(0, 0, 0, 0.4) !important;
+    }
+}
+
+/* Ana container stilleri */
+.card-container {
+    padding: 1.5rem;
+    background: #f8fafc;
+    min-height: 100vh;
+}
+
+.main-content {
+    margin-top: 2rem;
+}
+
+.main-content .card {
+    background: #ffffff;
+    border: 1px solid #e5e7eb;
+    border-radius: 12px;
+    padding: 0;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+}
+
+/* Widget card stilleri - yan yana düzen için optimize edildi */
+.widget-card {
+    border-radius: 16px !important;
+    border: none !important;
+    transition: all 0.3s ease;
+    margin-bottom: 0 !important;
+    min-height: 140px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    height: 100%; /* Tüm kartların aynı yükseklikte olması için */
+}
+
+.widget-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04) !important;
+}
+
+/* İstatistik kartları için özel stillemeler */
+.widget-card {
+    border-radius: 16px;
+    padding: 2rem;
+    position: relative;
+    overflow: hidden;
+    color: #ffffff;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+
+    &:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+    }
+
+    &.bg-green-500 { 
+        background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    }
+    &.bg-blue-500 { 
+        background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+    }
+    &.bg-yellow-500 { 
+        background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+    }
+    &.bg-red-500 { 
+        background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+    }
+}
+
+/* Sayfanın ana içeriği için stil düzenlemeleri */
+:host {
+    display: block;
+    padding: 1.5rem;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    min-height: 100vh;
+    
+    &::before {
+        content: '';
+        position: fixed;
         top: 0;
         left: 0;
-        height: 20px;
-        width: 20px;
-        background-color: #fff;
-        border: 2px solid #cbd5e1;
-        border-radius: 4px;
-        cursor: pointer;
-        transition: all 0.2s;
-        
-        &:hover {
-          border-color: #93c5fd;
-        }
-        
-        &:after {
-          content: "";
-          position: absolute;
-          left: 6px;
-          top: 2px;
-          width: 5px;
-          height: 10px;
-          border: solid #3b82f6;
-          border-width: 0 2px 2px 0;
-          transform: rotate(45deg);
-          opacity: 0;
-          transition: opacity 0.2s;
-        }
-      }
+        right: 0;
+        bottom: 0;
+        background: linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%);
+        z-index: -1;
     }
-  }
+
+    .grid {
+        margin: 0;
+    }
+    
+    /* Kartlar için container */
+    .card-container {
+        background: rgba(255, 255, 255, 0.95);
+        border-radius: 20px;
+        padding: 2.5rem;
+        box-shadow: 0 25px 50px rgba(0, 0, 0, 0.15);
+        backdrop-filter: blur(20px);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+    
+    /* Ana içerik alanı */
+    .main-content {
+        background: rgba(255, 255, 255, 0.98);
+        border-radius: 20px;
+        padding: 2.5rem;
+        margin-top: 2rem;
+        box-shadow: 0 25px 50px rgba(0, 0, 0, 0.1);
+        border: 1px solid rgba(255, 255, 255, 0.3);
+    }
+
+    /* Card stilleri */
+    .card {
+        background: #ffffff;
+        border-radius: 16px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        border: 1px solid #e2e8f0;
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+    }
+}
+
+/* Ana flex container için stiller */
+.flex {
+    display: flex !important;
+}
+
+.gap-4 {
+    gap: 1rem !important;
+}
+
+/* Flex öğeleri için stiller */
+.flex-1 {
+    flex: 1 !important;
+    min-width: 0 !important;
+}
+
+/* Kartların eşit yükseklikte olması için */
+.align-items-stretch {
+    align-items: stretch !important;
+}
+
+/* Responsive düzen - çok küçük ekranlarda bile yan yana kalsın */
+@media (max-width: 576px) {
+    .flex-1 {
+        flex: 1 1 auto !important;
+        min-width: 150px !important; /* Minimum genişlik daha küçük */
+    }
+    
+    .widget-card {
+        min-height: 120px !important; /* Küçük ekranlarda daha compact */
+    }
 }

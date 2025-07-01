@@ -1,6 +1,6 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterModule, Router } from '@angular/router';
+import { RouterModule, Router, NavigationEnd } from '@angular/router';
 import { MenuModule } from 'primeng/menu';
 import { SidebarModule } from 'primeng/sidebar';
 import { ButtonModule } from 'primeng/button';
@@ -8,6 +8,7 @@ import { ToolbarModule } from 'primeng/toolbar';
 import { AuthService } from '../../core/authentication/auth.service';
 import { LoadingIndicatorComponent } from '../../shared/components/loading-indicator/loading-indicator.component';
 import { ToastModule } from 'primeng/toast';
+import { filter } from 'rxjs/operators';
 
 @Component({
     selector: 'app-layout',
@@ -26,8 +27,8 @@ import { ToastModule } from 'primeng/toast';
     <app-loading-indicator></app-loading-indicator>
     <p-toast></p-toast>
     <div class="layout-container">
-      <!-- Sol Menü -->
-      <div class="layout-menu" [class.layout-menu-active]="sidebarVisible">
+      <!-- Sol Menü - Sadece bilgi işlem sayfalarında göster -->
+      <div class="layout-menu" [class.layout-menu-active]="sidebarVisible" *ngIf="showSidebar">
         <div class="menu-header">
           <h2>Bilgi İşlem</h2>
         </div>
@@ -36,46 +37,47 @@ import { ToastModule } from 'primeng/toast';
           <div class="menu-section">
             <h3>ENVANTER</h3>
             <ul>
-              <li><a routerLink="/it/inventory/computers" routerLinkActive="active">Bilgisayarlar</a></li>
-              <li><a routerLink="/it/inventory/printers" routerLinkActive="active">Yazıcılar</a></li>
-              <li><a routerLink="/it/inventory/network" routerLinkActive="active">Ağ Cihazları</a></li>
+              <li><a routerLink="/bilgi-islem/inventory/computers" routerLinkActive="active">Bilgisayarlar</a></li>
+              <li><a routerLink="/bilgi-islem/inventory/printers" routerLinkActive="active">Yazıcılar</a></li>
+              <li><a routerLink="/bilgi-islem/inventory/network" routerLinkActive="active">Ağ Cihazları</a></li>
             </ul>
           </div>
 
           <div class="menu-section">
             <h3>STOK</h3>
             <ul>
-              <li><a routerLink="/it/stock/consumables" routerLinkActive="active">Sarf Malzemeler</a></li>
-              <li><a routerLink="/it/stock/spare-parts" routerLinkActive="active">Yedek Parçalar</a></li>
+              <li><a routerLink="/bilgi-islem/stock/consumables" routerLinkActive="active">Sarf Malzemeler</a></li>
+              <li><a routerLink="/bilgi-islem/stock/spare-parts" routerLinkActive="active">Yedek Parçalar</a></li>
             </ul>
           </div>
 
           <div class="menu-section">
             <h3>İŞLER</h3>
             <ul>
-              <li><a routerLink="/it/tasks/active" routerLinkActive="active">Aktif İşler</a></li>
-              <li><a routerLink="/it/tasks/completed" routerLinkActive="active">Tamamlanan İşler</a></li>
+              <li><a routerLink="/bilgi-islem/tasks/active" routerLinkActive="active">Aktif İşler</a></li>
+              <li><a routerLink="/bilgi-islem/tasks/completed" routerLinkActive="active">Tamamlanan İşler</a></li>
             </ul>
           </div>
 
           <div class="menu-section">
             <h3>AYARLAR</h3>
             <ul>
-              <li><a routerLink="/it/settings/general" routerLinkActive="active">Genel Ayarlar</a></li>
-              <li><a routerLink="/it/settings/categories" routerLinkActive="active">Kategoriler</a></li>
+              <li><a routerLink="/bilgi-islem/settings/general" routerLinkActive="active">Genel Ayarlar</a></li>
+              <li><a routerLink="/bilgi-islem/settings/categories" routerLinkActive="active">Kategoriler</a></li>
             </ul>
           </div>
         </div>
       </div>
 
       <!-- Ana İçerik -->
-      <div class="layout-main">
+      <div class="layout-main" [class.no-sidebar]="!showSidebar">
         <!-- Üst Toolbar -->
         <div class="layout-topbar">
           <div class="topbar-left">
             <button pButton pRipple icon="pi pi-bars" 
                     class="p-button-text menu-button"
-                    (click)="sidebarVisible = !sidebarVisible">
+                    (click)="sidebarVisible = !sidebarVisible"
+                    *ngIf="showSidebar">
             </button>
             <h2 class="topbar-title">{{ pageTitle }}</h2>
           </div>
@@ -192,6 +194,10 @@ import { ToastModule } from 'primeng/toast';
       flex-direction: column;
     }
 
+    .layout-main.no-sidebar {
+      margin-left: 0;
+    }
+
     @media screen and (max-width: 768px) {
       .layout-main {
         margin-left: 0;
@@ -253,17 +259,53 @@ import { ToastModule } from 'primeng/toast';
     }
   `]
 })
-export class LayoutComponent {
+export class LayoutComponent implements OnInit {
   sidebarVisible = true;
-  pageTitle = 'Bilgi İşlem Yönetimi';
+  pageTitle = 'Dashboard';
+  showSidebar = false;
 
   constructor(
     private router: Router,
     private authService: AuthService
   ) {}
 
+  ngOnInit(): void {
+    // Router event'lerini dinleyerek sayfa başlığını ve sidebar durumunu ayarla
+    this.router.events
+      .pipe(filter(event => event instanceof NavigationEnd))
+      .subscribe(() => {
+        this.updatePageState();
+      });
+    
+    // İlk yükleme için state'i ayarla
+    this.updatePageState();
+  }
+
+  private updatePageState(): void {
+    const currentUrl = this.router.url;
+    
+    if (currentUrl.includes('/bilgi-islem')) {
+      this.showSidebar = true;
+      this.pageTitle = 'Bilgi İşlem Yönetimi';
+    } else if (currentUrl.includes('/dashboard')) {
+      this.showSidebar = false;
+      this.pageTitle = 'Dashboard';
+    } else if (currentUrl.includes('/user-management')) {
+      this.showSidebar = false;
+      this.pageTitle = 'Kullanıcı Yönetimi';
+    } else if (currentUrl.includes('/role-management')) {
+      this.showSidebar = false;
+      this.pageTitle = 'Rol Yönetimi';
+    } else {
+      this.showSidebar = false;
+      this.pageTitle = 'Sistem Yönetimi';
+    }
+  }
+
   navigateToHome(): void {
-    this.router.navigate(['/dashboard']);
+    const user = this.authService.getCurrentUser();
+    const targetRoute = user?.isAdmin ? '/app/dashboard/admin-dashboard' : '/app/dashboard/user-dashboard';
+    this.router.navigate([targetRoute]);
   }
 
   logout(): void {

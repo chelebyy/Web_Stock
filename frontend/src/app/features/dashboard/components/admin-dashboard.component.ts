@@ -155,42 +155,40 @@ export class AdminDashboardComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    // Profil resmi URL'sini ayarla
-    this.loadProfileImage();
+    this.checkPermissions();
     
+    // Kullanıcı bilgilerini al
     const user = this.authService.getCurrentUser();
     if (user) {
-      // Kullanıcı adını oluştur - öncelikle adi ve soyadi kullan, yoksa alternatif alanlar kullan
+      // Kullanıcı adını oluştur - öncelikle adi ve soyadi kullan
       if (user.adi && user.soyadi) {
         this.username = `${user.adi} ${user.soyadi}`;
       } else if (user.username) {
         this.username = user.username;
       } else {
-        this.username = `Kullanıcı #${user.id}`;
+        this.username = 'Kullanıcı';
       }
     }
     
-    // İzinleri kontrol et
-    this.checkPermissions();
-    
-    // Sistem verilerini yükle
     this.loadSystemData();
-    
-    // Grafik seçeneklerini ayarla (eski)
     // this.setupChartOptions();
     
-    // Bekleyen logları senkronize et
-    this.logService.syncPendingLogs();
+    // Log service çağrılarını geçici olarak kapatıyoruz
+    // this.logService.syncPendingLogs();
+    // this.loadUserActivityLogs();
     
-    // Kullanıcı aktivite loglarını yükle
-    this.loadUserActivityLogs();
+    // Örnek log verilerini yükle
+    this.userActivityLogs = this.generateSampleLogs();
+    this.totalRecords = this.userActivityLogs.length;
+    this.applyFilters();
+    this.loading = false;
     
-    // Giriş aktivitesini otomatik olarak logla
-    this.logService.logUserActivity({
-      activityType: 'dashboard_access',
-      description: 'Yönetim paneline erişim sağlandı',
-      status: 'info'
-    }).subscribe();
+    // Giriş aktivitesini loglamaya çalışma (401 hatası veriyor)
+    // this.logService.logUserActivity({
+    //   activityType: 'dashboard_access',
+    //   description: 'Yönetim paneline erişim sağlandı',
+    //   status: 'info'
+    // }).subscribe();
   }
 
   // İzinleri kontrol et
@@ -427,35 +425,35 @@ export class AdminDashboardComponent implements OnInit {
   }
 
   navigateToUserManagement(): void {
-    this.router.navigate(['/user-management/user-management']);
+    this.router.navigate(['/admin/users']);
   }
 
   navigateToRoleManagement(): void {
-    this.router.navigate(['/role-management']);
+    this.router.navigate(['/admin/roles']);
   }
   
   navigateToSystemSettings(): void {
-    this.router.navigate(['/admin/settings']);
+    this.router.navigate(['/app/admin/settings']);
   }
 
   navigateToReports(): void {
-    this.router.navigate(['/admin/reports']);
+    this.router.navigate(['/app/admin/reports']);
   }
 
   navigateToLogs(): void {
-    this.router.navigate(['/admin/logs']);
+    this.router.navigate(['/app/admin/logs']);
   }
 
   navigateToBackup(): void {
-    this.router.navigate(['/admin/backup']);
+    this.router.navigate(['/app/admin/backup']);
   }
 
   navigateToHelp(): void {
-    this.router.navigate(['/admin/help']);
+    this.router.navigate(['/app/admin/help']);
   }
 
   navigateToDashboardManagement(): void {
-    this.router.navigate(['/dashboard-management']);
+    this.router.navigate(['/app/dashboard-management']);
     
     // Kullanıcılara bir bilgi mesajı göster
     this.messageService.add({
@@ -466,7 +464,7 @@ export class AdminDashboardComponent implements OnInit {
   }
 
   navigateToPageManagement(): void {
-    this.router.navigate(['/admin/page-management']);
+    this.router.navigate(['/app/admin/page-management']);
   }
 
   togglePasswordChange(): void {

@@ -12,11 +12,6 @@ export const USER_MANAGEMENT_ROUTES: Routes = [
     }
   },
   {
-    path: 'user-management',
-    redirectTo: '',
-    pathMatch: 'full'
-  },
-  {
     path: 'users/:userId/permissions',
     loadComponent: () => import('./components/permission-management.component').then(m => m.PermissionManagementComponent),
     canActivate: [authGuard, permissionGuard],

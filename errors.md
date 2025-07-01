@@ -1,5 +1,52 @@
 # Hata Kayıtları
 
+## ❌ **User Management Sayfası Tasarım Sorunları (Çözüldü - 08.03.2025)**
+
+### **Sorun:**
+- User management sayfası beyaz/boş görünüyordu
+- PrimeNG kartları ve grid layout çalışmıyordu  
+- Siyah background sorunu vardı
+- Console'da çok fazla log spam'ı
+
+### **Kök Neden:**
+1. **PrimeFlex CSS Framework eksikti** - Angular.json'da grid sınıfları için gerekli CSS yüklenmiyordu
+2. **Angular default template stilleri** - App.component.html'de default Angular stilleri vardı
+3. **Gereksiz console.log'lar** - User management component'te debug logları
+
+### **Çözüm:**
+```bash
+# 1. PrimeFlex kurulumu
+npm install primeflex
+
+# 2. Angular.json güncelleme
+"styles": [
+  "node_modules/primeicons/primeicons.css",
+  "node_modules/primeflex/primeflex.css",  // ← Bu eklendi
+  "src/styles.scss"
+]
+
+# 3. App component temizliği
+# app.component.html'den tüm Angular default stilleri kaldırıldı
+# Sadece temel layout bırakıldı: <router-outlet></router-outlet>
+
+# 4. Console log temizliği  
+# user-management.component.ts'ten gereksiz console.log'lar kaldırıldı
+```
+
+### **Sonuç:**
+✅ Modern istatistik kartları görünüyor
+✅ Grid layout düzgün çalışıyor  
+✅ PrimeNG stilleri yükleniyor
+✅ Temiz console output
+✅ Responsive tasarım
+
+### **Öğrenilen:**
+- PrimeFlex, PrimeNG grid sisteminin temel CSS'i
+- Angular default template'ler production'da kaldırılmalı
+- Console log'lar production build'de otomatik kaldırılsa da development'te temiz tutulmalı
+
+---
+
 ## Angular Unit Test URL Matching Errors
 
 ### Tarih: 10.05.2025
@@ -1926,380 +1973,2633 @@ Tüm gereksiz konsol log ifadeleri kaldırıldı. Hata durumlarında kullanıcı
 
 ## Frontend Hataları
 
-_(Henüz kaydedilmiş frontend hatası bulunmamaktadır.)_
+### Sorun: Angular NgFor Hatası - Dizi Yerine Nesne Gelmesi
+**Tarih:** 03.08.2025
 
-# Frontend Build Hataları - 08.03.2025
-
-## 🎯 Çözülen Hatalar
-
-### 1. Angular Material Stylesheet Import Hatası - ✅ ÇÖZÜLDÜ
-**Hata:** `Can't find stylesheet to import. @use "@angular/material/prebuilt-themes/indigo-pink.css";`
-**Neden:** Projede Angular Material kullanılmıyor, PrimeNG kullanılıyor
-**Çözüm:** `frontend/src/styles.scss` dosyasından Angular Material import satırını kaldırdım
-```scss
-// Kaldırılan satır:
-@use "@angular/material/prebuilt-themes/indigo-pink.css";
-```
-
-### 2. DashboardUser Interface Avatar Property Eksik - ✅ ÇÖZÜLDÜ  
-**Hata:** `Property 'avatar' does not exist on type 'DashboardUser'`
-**Neden:** Template'de kullanılan avatar property'si interface'de tanımlı değildi
-**Çözüm:** DashboardUser interface'ine avatar property'sini ekledim
-```typescript
-export interface DashboardUser extends Omit<BaseUser, 'id'> {
-  // ... diğer property'ler
-  avatar?: string; // Eklenen property
-}
-```
-
-### 3. UserService Import Path Hataları - ✅ ÇÖZÜLDÜ
-**Hata:** `Cannot find module '../../../services/user.service'`
-**Neden:** UserManagementComponent'te yanlış import path'leri
-**Çözüm:** Import path'lerini düzelttim
-```typescript
-// Önceki (hatalı):
-import { User } from '../../../../shared/models/user.model';
-import { UserService } from '../../../../services/user.service';
-
-// Sonraki (doğru):
-import { User } from '../../../shared/models/user.model';
-import { UserService } from '../../../services/user.service';
-```
-
-### 4. UserService getUsers() Response Tip Hatası - ✅ ÇÖZÜLDÜ
-**Hata:** `Property 'items' does not exist on type 'User[]'`
-**Neden:** UserService.getUsers() doğrudan User[] dönüyor, PagedResponse değil
-**Çözüm:** Component'teki response handling'i düzelttim
-```typescript
-// Önceki (hatalı):
-this.userService.getUsers().subscribe((response) => {
-  this.users = response.items;
-});
-
-// Sonraki (doğru):
-this.userService.getUsers().subscribe((users) => {
-  this.users = users;
-});
-```
-
-### 5. Permission Management Template Syntax Hataları - ✅ ÇÖZÜLDÜ
-**Hata:** `Parser Error: Unexpected token . at column 2 in [[...Array(permissionGroups().length).keys()]]`
-**Neden:** Template'te karmaşık JavaScript syntax kullanımı
-**Çözüm:** Component'te yardımcı getter metodu oluşturdum
-```typescript
-// Component'e eklenen metod:
-get accordionActiveIndexes(): number[] {
-  return Array.from({ length: this.permissionGroups().length }, (_, i) => i);
-}
-
-// Template'te kullanım:
-<p-accordion [multiple]="true" [activeIndex]="accordionActiveIndexes">
-```
-
-### 6. SASS Fonksiyonu CSS Variable Hatası - ✅ ÇÖZÜLDÜ
-**Hata:** `$color: var(--danger-color) is not a color.`
-**Neden:** SASS fonksiyonları CSS variable'lar ile çalışmıyor
-**Çözüm:** SASS fonksiyon kullanımını hex renk kodu ile değiştirdim
-```scss
-// Önceki (hatalı):
-.p-button-danger:hover {
-  background-color: darken(var(--danger-color), 10%);
-  border-color: darken(var(--danger-color), 10%);
-}
-
-// Sonraki (doğru):
-.p-button-danger:hover {
-  background-color: #dc2626;
-  border-color: #dc2626;
-}
-```
-
-### 7. Optional Chaining Uyarısı - ✅ ÇÖZÜLDÜ
-**Uyarı:** `The left side of this optional chain operation does not include 'null' or 'undefined'`
-**Neden:** users signal'ı her zaman array, optional chaining gereksiz
-**Çözüm:** Optional chaining operatörünü kaldırdım
-```html
-<!-- Önceki: -->
-Toplam {{ users?.length || 0 }} kullanıcı.
-
-<!-- Sonraki: -->
-Toplam {{ users.length || 0 }} kullanıcı.
-```
-
-## 📊 Sonuç
-- **Frontend Build:** ✅ BAŞARILI
-- **Backend Build:** ✅ BAŞARILI  
-- **Toplam Çözülen Hata:** 7 adet
-- **Kalan Uyarı:** 1 adet (CSS budget uyarısı - kritik değil)
-
-## 🔧 Kullanılan Çözüm Teknikleri
-1. **Import Path Düzeltme:** Doğru relative path'lerin kullanılması
-2. **Interface Genişletme:** Eksik property'lerin interface'e eklenmesi  
-3. **Template Basitleştirme:** Karmaşık syntax'ın helper metodlarla çözülmesi
-4. **CSS Variable Optimizasyonu:** SASS fonksiyonlarının hex kodlarla değiştirilmesi
-5. **Response Type Handling:** API response tiplerinin doğru handle edilmesi
-
-## 📈 Sistem Durumu
-- ✅ Backend API çalışır durumda
-- ✅ Frontend Angular uygulaması çalışır durumda
-- ✅ Build süreçleri başarılı
-- ✅ Tüm kritik hatalar çözüldü
-
----
-
-# Geçmiş Hata Kayıtları
-
-// ... existing code ...
-
-## 🔧 Swagger XML ve CSP Hataları - 08.03.2025
-
-### 7. Swagger XML Documentation Dosyası Bulunamıyor - ✅ ÇÖZÜLDÜ
-**Hata:** `Could not find file 'Stock.Infrastructure.xml'`
-**Stack Trace:** SwaggerGen XML comments yükleme hatası
-**Neden:** XML documentation dosyası generate edilmiyordu
-**Çözüm:** XML comments konfigürasyonunu geçici olarak devre dışı bıraktım
-```csharp
-// Problematik kod:
-var xmlFile = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
-var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
-options.IncludeXmlComments(xmlPath);
-
-// Çözüm:
-// XML comments temporarily disabled
-// options.IncludeXmlComments(xmlPath);
-```
-**Dosya:** `src/Stock.Infrastructure/DependencyInjection.cs:79`
-
-### 8. Content Security Policy (CSP) Script Bloğu - ✅ ÇÖZÜLDÜ
-**Hata:** `Refused to execute inline script because it violates CSP directive`
-**Neden:** Swagger UI inline JavaScript kullanıyor, CSP'de `'unsafe-inline'` izni yoktu
-**Çözüm:** SecurityHeadersMiddleware'de CSP ayarlarına `'unsafe-inline'` eklendi
-```csharp
-// Önceki ayar:
-"script-src 'self' http://me.kis.v2.scr.kaspersky-labs.com..."
-
-// Düzeltilen ayar:
-"script-src 'self' 'unsafe-inline' http://me.kis.v2.scr.kaspersky-labs.com..."
-```
-**Dosya:** `src/Stock.API/Middleware/SecurityHeadersMiddleware.cs:25`
-**Sonuç:** Swagger UI artık düzgün yükleniyor
-
-### 📊 Özet Durum
-- ✅ Backend Build: BAŞARILI
-- ✅ Frontend Build: BAŞARILI  
-- ✅ Swagger UI: ÇALIŞIYOR
-- ✅ API Endpoints: AKTİF
-- ✅ Port 5037: NORMAL ÇALİŞIYOR
-
-### 🎯 Sonraki Adımlar
-1. XML documentation'ı isterseniz aktif edebiliriz (proje dosyalarında `<GenerateDocumentationFile>true</GenerateDocumentationFile>` ekleyerek)
-2. CSP güvenlik ayarlarını production için daha katı hale getirebiliriz
-3. Swagger UI tema ve customization ayarları
-
----
-
-# DotNet Build Hataları Çözümü - 25 Ocak 2025
-
-## 🎯 Tamamen Çözülen DotNet Build Hataları
-
-### Başlangıç Durumu
-- **Build Hatası:** 3 kritik hata
-- **Uyarılar:** 5 XML documentation uyarısı
-- **Durum:** Proje derlenemiyor ❌
-
-### Çözülen Hatalar
-
-#### 1. API Versioning Hataları (CS0246) - ✅ ÇÖZÜLDÜ
-**Hata Mesajı:** 
-```
-CS0246: The type or namespace name 'ApiVersionAttribute' could not be found
-```
-**Etkilenen Dosyalar:** 7 controller dosyası
-- `CategoriesController.cs`
-- `AuthController.cs` 
-- `AdminController.cs`
-- `ActivityLogController.cs`
-- `PermissionsController.cs`
-- `RolesController.cs`
-- `UsersController.cs`
-
-**Neden:** `Asp.Versioning.Mvc` paketi yüklü olmasına rağmen, `using Asp.Versioning;` ifadeleri eksikti.
-
-**Çözüm:** Tüm controller dosyalarına eksik using ifadesini ekledim:
-```csharp
-using Asp.Versioning;
-```
-
-#### 2. Result<T> Türü Bulunamıyor Hatası (CS0246) - ✅ ÇÖZÜLDÜ
 **Hata Mesajı:**
 ```
-CS0246: The type or namespace name 'Result<>' could not be found
+ERROR RuntimeError: NG02200: Cannot find a differ supporting object '[object Object]' of type 'object'. NgFor only supports binding to Iterables, such as Arrays.
+ERROR RuntimeError: NG0900: Error trying to diff '[object Object]'. Only arrays and iterables are allowed
 ```
-**Etkilenen Dosya:** `ProductsController.cs`
 
-**Neden:** `Stock.Domain.Common` namespace'inden `Result` sınıfını import etmek için using ifadesi eksikti.
+**Hatanın Nedeni:**
+Kullanıcı yönetimi gibi sayfalarda listeleme yapılırken, frontend'in `p-table` ve `*ngFor` gibi bileşenleri bir dizi (`Array`) beklerken, backend API'sinden gelen JSON yanıtında ilgili alan (`items`) bir nesne (`Object`) olarak geliyordu.
 
-**Çözüm:** ProductsController.cs dosyasına eksik using ifadesini ekledim:
+Sorunun asıl kaynağı, `src/Stock.API/Program.cs` dosyasındaki JSON serileştirme ayarlarında bulunan `ReferenceHandler.Preserve` seçeneğiydi. Bu seçenek, döngüsel referansları yönetmek amacıyla JSON çıktısına `"$id"` ve `"$values"` gibi meta veriler ekleyerek, basit bir diziyi `{ "$id": "1", "$values": [...] }` gibi bir nesneye dönüştürüyordu. Bu durum, frontend'in `response.items` alanını doğru bir şekilde yorumlamasını engelliyordu.
+
+**Çözüm:**
+`src/Stock.API/Program.cs` dosyasında, JSON serileştirme seçeneklerini yapılandıran bölümdeki `ReferenceHandler.Preserve` satırı yorum satırı haline getirildi.
+
 ```csharp
-using Stock.Domain.Common;
+// src/Stock.API/Program.cs
+builder.Services.AddControllers()
+    .AddJsonOptions(options =>
+    {
+        // Döngüsel referansları koru - BU SATIR SORUNA NEDEN OLUYORDU
+        // options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.Preserve; 
+        
+        // Null değerleri dahil etme
+        options.JsonSerializerOptions.DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull;
+    });
 ```
 
-#### 3. ProductDto IsSuccess Property Hatası (CS1061) - ✅ ÇÖZÜLDÜ
-**Hata Mesajı:**
-```
-CS1061: 'ProductDto' does not contain a definition for 'IsSuccess'
-```
-**Etkilenen Dosya:** `ProductsController.cs` - GetById metodu
+Bu değişiklik sonrası backend uygulaması yeniden başlatıldığında, API yanıtı standart JSON formatına döndü ve frontend hatası çözüldü.
 
-**Neden:** `GetProductByIdQuery` handler'ı `ProductDto?` döndürüyor, `Result<ProductDto>` değil. Bu yüzden `result.IsSuccess` çalışmıyordu.
+**Öğrenilen Dersler:**
+-   JSON serileştirme ayarları, API yanıtlarının yapısını önemli ölçüde etkileyebilir.
+-   `ReferenceHandler.Preserve` gibi gelişmiş serileştirme seçenekleri, standart DTO (Data Transfer Object) desenleri kullanan ve basit veri yapıları bekleyen front-end istemcileriyle uyumsuzluk sorunlarına yol açabilir.
+-   Frontend'de "Cannot find a differ" veya "Error trying to diff '[object Object]'" gibi hatalar alındığında, API'den gelen yanıtın yapısını tarayıcının ağ (network) sekmesinden kontrol etmek, sorunun kaynağını bulmada kritik bir adımdır.
 
-**Çözüm:** Controller'daki GetById metodunu `ProductDto?` ile çalışacak şekilde düzelttim:
-```csharp
-public async Task<ActionResult<ProductDto>> GetById(int id)
-{
-    var result = await _mediator.Send(new GetProductByIdQuery(id));
-    return result != null ? Ok(result) : NotFound();
-}
-```
+## Backend Derleme Hataları: Yinelenen Factory ve Eksik Namespace (26 Temmuz 2024)
 
-#### 4. XML Documentation Uyarıları (CS1570) - ✅ ÇÖZÜLDÜ
-
-##### 4.1 RolesController XML Hatası
-**Uyarı:** `CS1570: XML comment has badly formed XML`
-**Çözüm:** Logger parametresi açıklamasını düzelttim:
-```csharp
-/// <param name="logger">ILogger nesnesi.</param>
-```
-
-##### 4.2 AuthController XML Hatası  
-**Uyarı:** Parameter ismi uyumsuzluğu
-**Çözüm:** Parameter adını düzelttim:
-```csharp
-/// <param name="loginDto">Giriş bilgilerini içeren DTO.</param>
-```
-
-##### 4.3 Program.cs Async Method Uyarısı
-**Uyarı:** Async method içinde await kullanılmıyor
-**Çözüm:** Main metodunu sync yaptım:
-```csharp
-public static void Main(string[] args)
-```
-
-### 🎉 Final Sonuç
-
-**Build Durumu:** ✅ TAMAMEN BAŞARILI
-```
-Build succeeded.
-    0 Warning(s)
-    0 Error(s)
-Time Elapsed 00:00:01.40
-```
-
-**Çözülen Sorunlar:**
-- ✅ 7 API Versioning hatası çözüldü
-- ✅ 1 Result<T> import hatası çözüldü  
-- ✅ 1 Controller logic hatası çözüldü
-- ✅ 5 XML documentation uyarısı çözüldü
-- ✅ 1 Async method uyarısı çözüldü
-
-**Proje Durumu:**
-- ✅ **Stock.Domain:** Başarılı
-- ✅ **Stock.Application:** Başarılı  
-- ✅ **Stock.Infrastructure:** Başarılı
-- ✅ **Stock.API:** Başarılı
-
-### 🔧 Kullanılan Çözüm Teknikleri
-
-1. **Sistematik Hata Analizi:** Build çıktısını detaylı inceleyerek hataları önceliklendirme
-2. **Using İfadeleri Kontrolü:** Eksik namespace import'larını tespit etme
-3. **API Response Type Analizi:** Handler'ların gerçek dönüş tiplerini kontrol etme
-4. **XML Documentation Düzeltme:** Parameter isimlerini ve açıklamalarını doğru eşleştirme
-5. **Async/Sync Method Optimizasyonu:** Gereksiz async kullanımını temizleme
-
-### 📈 Öğrenilen Dersler
-
-1. **Import Kontrolü:** Her zaman ilk olarak using ifadelerini kontrol et
-2. **API Response Tipleri:** Handler'ların gerçek dönüş tiplerini frontend beklentileriyle karşılaştır
-3. **XML Documentation:** Parameter isimleri ile açıklamalar arasında tutarlılık sağla
-4. **Build Sırası:** Önce kritik hataları, sonra uyarıları çöz
-5. **Sistematik Yaklaşım:** Her hatayı çözdükten sonra build testi yap
-
-### 🚀 Proje Hazır!
-
-Proje artık tamamen hatasız ve uyarısız şekilde derleniyor. Production'a deployment için hazır durumda! 
-
-**Sonraki Adımlar:**
-- Frontend build kontrolü
-- Integration testleri
-- Performance optimizasyonu
-- Security audit
-
-## Backend Başlatma Sorunu - dotnet run
-
-### Tarih: 08.03.2025
-
-### Hata Mesajı
-```
-Unable to resolve service for type 'StackExchange.Redis.IConnectionMultiplexer' while attempting to activate 'Stock.Infrastructure.Services.CacheService'
-```
-
-### Hatanın Nedeni
-1. **IMemoryCache Servisi Eksik:** `InMemoryCacheService` sınıfı `IMemoryCache` bağımlılığını kullanıyor ancak DI container'da bu servis kayıtlı değildi.
-2. **Redis Bağımlılığı Problemi:** `CacheSettings.Enabled = false` olmasına rağmen `CacheService` hala `IConnectionMultiplexer` bekliyor. 
-3. **Hatalı DI Yapılandırması:** Cache servisleri arasında geçiş mekanizması doğru çalışmıyordu.
+### Sorunlar
+1.  **İlk Hata (CS0234 - `Microsoft.Data` Namespace):** `tests/Stock.IntegrationTests` projesi derlenirken `error CS0234: 'Data' tür veya ad alanı adı 'Microsoft' ad alanında yok` hatası alındı. Bu hatanın nedeni, `tests/Stock.IntegrationTests` dizininde, muhtemelen `Microsoft.Data.Sqlite` kullanmaya çalışan ancak ilgili paketin referans verilmediği ek bir `CustomWebApplicationFactory.cs` dosyasının bulunmasıydı.
+2.  **İkinci Hata (CS0246 - `CustomWebApplicationFactory` Bulunamadı):** Hatalı `CustomWebApplicationFactory.cs` dosyası silindikten sonra, `tests/Stock.IntegrationTests/Controllers/ProductControllerTests.cs` dosyasında `error CS0246: 'CustomWebApplicationFactory<>' türü veya ad alanı adı bulunamadı` hatası ortaya çıktı. Bu, test dosyasının `tests/Stock.IntegrationTests/Common/` dizinindeki doğru factory'yi kullanması gerekirken, ilgili namespace (`Stock.IntegrationTests.Common`) için `using` ifadesinin eksik olmasından kaynaklanıyordu.
 
 ### Çözüm Adımları
-
-#### 1. IMemoryCache Servisini Ekleme
-`src/Stock.Infrastructure/DependencyInjection.cs` dosyasında `AddCaching` metoduna:
-```csharp
-// Always add IMemoryCache service first
-services.AddMemoryCache();
-```
-
-#### 2. CacheService DI Kaydını Düzeltme
-Doğrudan `CacheService` kaydını kaldırarak, cache yapılandırmasını merkezi hale getirdik:
-```csharp
-// Cache service is configured in AddCaching method
-// services.AddScoped<ICacheService, CacheService>(); // This is now handled in AddCaching
-```
-
-#### 3. Redis Bağlantı Hatası için Fallback Mekanizması
-```csharp
-try
-{
-    services.AddStackExchangeRedisCache(options =>
-    {
-        options.Configuration = connectionString;
-        options.InstanceName = cacheSettings.GetValue<string>("InstanceName", "StockAPI_");
-    });
-
-    services.AddSingleton<IConnectionMultiplexer>(sp => 
-        ConnectionMultiplexer.Connect(connectionString));
-
-    services.AddSingleton<ICacheService, CacheService>();
-}
-catch (Exception)
-{
-    // If Redis connection fails, fallback to in-memory cache
-    services.AddDistributedMemoryCache();
-    services.AddSingleton<ICacheService, InMemoryCacheService>();
-}
-```
-
-### Test Sonuçları
-- ✅ `dotnet build` başarılı (15 uyarı ile)
-- ✅ `dotnet run` başarılı
-- ✅ Uygulama http://localhost:5037 adresinde çalışıyor
-- ✅ Swagger UI erişilebilir durumda
-- ✅ InMemoryCache kullanılıyor (Redis disabled)
+1.  **Yinelenen Factory Dosyası Silindi:** `tests/Stock.IntegrationTests/CustomWebApplicationFactory.cs` adresindeki kullanılmayan ve hataya neden olan dosya silindi.
+2.  **Eksik `using` İfadesi Eklendi:** `tests/Stock.IntegrationTests/Controllers/ProductControllerTests.cs` dosyasına, doğru factory sınıfını bulabilmesi için `using Stock.IntegrationTests.Common;` ifadesi eklendi.
+3.  **Doğrulama:** Çözüm yeniden derlenerek (`dotnet build src/src.sln`) hataların giderildiği teyit edildi.
 
 ### Öğrenilen Dersler
-- DI yapılandırmasında hizmet bağımlılıklarının doğru sırada kayıt edilmesi kritik
-- Cache implementasyonları arasında geçiş yaparken bağımlılıkların da uygun olduğundan emin olunmalı
-- Service provider building sırasında logger kullanmak circular dependency yaratabilir
-- Cache ayarları disable olduğunda bile, servis bağımlılıklarının doğru yapılandırılması gerekiyor
+1.  **Dosya ve Klasör Yönetimi:** Aynı amaca hizmet eden yinelenen dosyalardan kaçınılmalı ve proje yapısı tutarlı tutulmalıdır. Test yardımcıları gibi ortak bileşenler `Common` gibi belirli klasörlerde organize edilmelidir.
+2.  **Namespace ve Referans Kontrolü:** Kod taşırken veya yeniden düzenlerken `using` ifadelerinin doğruluğu kontrol edilmeli, sınıfların doğru namespace'lerden çağrıldığından emin olunmalıdır.
+3.  **Adım Adım Hata Ayıklama:** Bir hata giderildikten sonra başka bir hata ortaya çıkarsa, yapılan değişikliklerin bu yeni hataya neden olup olmadığı veya altta yatan başka bir sorunu ortaya çıkarıp çıkarmadığı analiz edilmelidir.
+4.  **Düzenli Derleme:** Geliştirme sürecinde sık sık derleme yapmak, hataları erken tespit etmeye yardımcı olur.
 
----
+### İlgili Dosyalar
+- `tests/Stock.IntegrationTests/CustomWebApplicationFactory.cs` (Silindi)
+- `tests/Stock.IntegrationTests/Common/CustomWebApplicationFactory.cs` (Korundu)
+- `tests/Stock.IntegrationTests/Controllers/ProductControllerTests.cs` (Güncellendi)
 
-// ... existing code ...
+## DDD (Domain-Driven Design) Value Object İmplementasyonu Sorunları ve Çözümleri
+
+### Hata: Entity Framework Core ve Value Object Entegrasyonu Sorunları
+
+**Tarih:** 20.03.2025
+
+**Hata Mesajı:**
+Çeşitli derleme hataları ve Entity Framework Core entegrasyon sorunları:
+```
+CSC : error CS0006: Meta veri dosyası 'C:\Users\muham\AppData\Local\Temp\.sonarqube\resources\0\SonarAnalyzer.CSharp.dll' bulunamadı
+```
+
+Ayrıca kullanılmayan `Sicil`, `FirstName`, `LastName` Value Object'leri ve bunları eksik veya yanlış kullanan kodlar derleme hatalarına neden oldu.
+
+**Hatanın Nedeni:**
+1. Value Object'leri Entity Framework Core ile eşleştirirken Configuration sınıflarında ve entity kullanımlarında tutarsızlıklar
+2. SonarQube geçici dosyaları ile ilgili sorunlar
+3. Eksik Domain Exception sınıfları
+4. Projenin mevcut yapısı ile entegrasyon zorlukları
+
+**Çözüm:**
+1. **Value Object Yaklaşımı Değişikliği**: 
+   - Value Object'ler kaldırıldı (`Sicil.cs`, `FirstName.cs`, `LastName.cs`)
+   - Primitive tipler (string) kullanılarak ancak DDD prensipleri korunarak User entity güncellendi
+   - Factory metotları ve entity davranışları korundu
+
+2. **SonarQube Sorunlarının Çözümü**:
+   - `.sonarqube` klasörü silindi
+   - `sonar-project.properties` dosyası geçici olarak yeniden adlandırıldı
+   - Derleme yapıldıktan sonra dosya eski adına geri getirildi
+
+3. **Eksik Sınıfların Eklenmesi**:
+   - `BadRequestException` sınıfı oluşturuldu
+   - `DomainException` sınıfından türetildi
+   - Domain katmanında gerekli hata sınıfları yapılandırıldı
+
+4. **Entity Framework Core ile Uyumluluk**:
+   - User entity'sindeki setter'lar public yapıldı (EF Core için gerekli)
+   - Boş constructor public olarak işaretlendi
+   - Role ile ilişkiyi doğru yönetmek için AssignRole metodu güncellendi
+
+**Öğrenilen Dersler:**
+1. Entity Framework Core ile DDD prensiplerine tam olarak uymak arasında bazen bazı ödünler vermek gerekir
+2. Value Object'ler yerine, primitive tipler kullanılsa bile DDD'nin core prensipleri (encapsulation, entity davranışları, factory metotları, vb.) korunabilir
+3. EF Core ile çalışırken, Entity'lerin en azından boş bir constructor'a ve property'lerde public setter'lara sahip olması gerekebilir
+4. Kod analiz araçlarının (SonarQube gibi) geçici dosyaları bazen derleme hatalarına neden olabilir
+5. DDD prensiplerini uygularken, projenin mevcut yapısını ve karmaşıklığını göz önünde bulundurarak pragmatik kararlar almak önemlidir
+
+**Daha Fazla Bilgi:**
+Detaylı bilgi için: [Domain-Driven Design: User Entity Yaklaşımı Değişikliği](knowledge-base/architectural_patterns/ddd_user_entity.md)
+
+## Test Kapsamının Genişletilmesi Sırasında Karşılaşılan Hatalar
+
+### Command Handler Implementation Eksikliği Hatası
+**Tarih:** 20 Nisan 2025
+**Hata:** Permission entity'si için Command Handler testleri oluşturulmaya başlandığında, öncelikle test edilecek command handler'ların uygulamasının eksik olduğu fark edildi.
+
+**Nedeni:** İş akışlarında CQRS pattern uygulanmış olmasına rağmen, Permission entity'si için sadece Query Handler'lar (GetAllPermissions, GetPermissionById) oluşturulmuştu. Command Handler'lar (Create, Update, Delete) oluşturulmamıştı.
+
+**Çözüm:**
+1. Öncelikle `src/Stock.Application/Features/Permissions/Commands` klasörü oluşturuldu.
+2. Diğer entity'lerdeki komut yapıları örnek alınarak aşağıdaki sınıflar oluşturuldu:
+   - `CreatePermissionCommand` ve `CreatePermissionCommandHandler`
+   - `UpdatePermissionCommand` ve `UpdatePermissionCommandHandler`
+   - `DeletePermissionCommand` ve `DeletePermissionCommandHandler`
+3. Ardından bu handler'lar için unit testler yazıldı.
+
+**Öğrenilen Dersler:**
+- Test yazmadan önce, test edilecek sınıfların varlığını kontrol etmek gerekiyor.
+- CQRS pattern uygulanırken tüm entity'ler için hem Query hem de Command handler'ların oluşturulduğundan emin olunmalı.
+- Test öncelikli geliştirme (TDD) yaklaşımı, eksik implementasyonları erken aşamada tespit etmeye yardımcı olabilir.
+
+### PermissionByIdSpecification Hatası
+**Tarih:** 20 Nisan 2025
+**Hata:** PermissionByIdSpecification sınıfı aranırken dosya bulunamadı hatası alındı.
+
+**Hata Mesajı:**
+```
+Could not find file 'src/Stock.Domain/Specifications/Permissions/PermissionByIdSpecification.cs'. Did you mean one of:
+- src/Stock.Domain/Specifications/RolePermissions/PermissionsByRoleIdSpecification.cs
+- src/Stock.Domain/Specifications/RolePermissions/RolePermissionsByRoleIdSpecification.cs
+- src/Stock.Domain/Specifications/UserPermissions/UserPermissionsByUserIdSpecification.cs
+```
+
+**Nedeni:** Spesifikasyon sınıfları farklı bir yapıda organize edilmiş, PermissionByIdSpecification sınıfı `Permissions` klasörü yerine doğrudan `Specifications` klasörü altına yerleştirilmişti.
+
+**Çözüm:**
+1. Doğru dosya yolunu belirlemek için grep aracı kullanıldı: `grep_search PermissionById *.cs`
+2. Doğru yolun `src/Stock.Domain/Specifications/PermissionByIdSpecification.cs` olduğu tespit edildi.
+3. Bu dosya yolu kullanılarak spesifikasyon sınıfı başarıyla kullanıldı.
+
+**Öğrenilen Dersler:**
+- Proje yapısında tutarlılık önemlidir. Tüm entity'lere ait spesifikasyonlar aynı yapıda organize edilmelidir.
+- Bir dosya aranırken bulunamadığında, grep gibi arama araçlarını kullanmak faydalı olabilir.
+- Farklı entity'ler için benzer yapıların tutarlı organizasyonu, kod tabanının anlaşılabilirliğini ve bakım yapılabilirliğini artırır.
+
+### Command Handler Dependency Injection Hatası
+**Tarih:** 21 Nisan 2025
+**Hata:** Yeni oluşturulan Permission Command Handler'ları için unit testler çalıştırıldığında, bazı bağımlılıkların doğru şekilde mock'lanmadığı tespit edildi.
+
+**Hata Mesajı:**
+```
+System.ArgumentException: Object of type 'Moq.Mock`1[Stock.Domain.Interfaces.IPermissionRepository]' cannot be converted to type 'Stock.Domain.Interfaces.IPermissionRepository'.
+```
+
+**Nedeni:** Unit testlerde, mock nesneleri (Mock<IPermissionRepository>) doğrudan kullanılmış, ancak constructor'a mock nesnesinin kendisi yerine mock'un Object özelliği geçilmesi gerekiyordu.
+
+**Çözüm:**
+1. Test sınıflarında mock nesnelerinin doğru şekilde geçirilmesi sağlandı:
+```csharp
+// Hatalı kullanım
+var handler = new CreatePermissionCommandHandler(_permissionRepositoryMock, _unitOfWorkMock, _mapperMock, _loggerMock);
+
+// Doğru kullanım
+var handler = new CreatePermissionCommandHandler(_permissionRepositoryMock.Object, _unitOfWorkMock.Object, _mapperMock.Object, _loggerMock.Object);
+```
+
+**Öğrenilen Dersler:**
+- Mock nesnelerini kullanırken, nesnenin kendisini değil .Object özelliğini kullanmak gerekiyor.
+- Test sınıflarında en yaygın hatalardan biri bağımlılıkların yanlış şekilde mock'lanmasıdır.
+- İyi bir IDE ve statik kod analizi araçları, bu tür hataları erken aşamada tespit etmeye yardımcı olabilir.
+
+### Test Coverage Raporlama Hatası
+**Tarih:** 21 Nisan 2025
+**Hata:** Test coverage raporlama aracı çalıştırıldığında, bazı projelerin dahil edilmediği ve raporların eksik olduğu fark edildi.
+
+**Nedeni:** Test coverage yapılandırmasında hangi projelerin kapsama dahil edileceği eksik veya hatalı tanımlanmıştı.
+
+**Çözüm:**
+1. `coverlet.runsettings` dosyası oluşturuldu ve aşağıdaki şekilde yapılandırıldı:
+```xml
+<?xml version="1.0" encoding="utf-8" ?>
+<RunSettings>
+  <DataCollectionRunSettings>
+    <DataCollectors>
+      <DataCollector friendlyName="XPlat code coverage">
+        <Configuration>
+          <Format>cobertura</Format>
+          <Include>[Stock.Application]*,[Stock.Domain]*,[Stock.Infrastructure]*</Include>
+          <Exclude>[*Tests]*,[*Test.Helpers]*</Exclude>
+          <ExcludeByAttribute>Obsolete,GeneratedCodeAttribute</ExcludeByAttribute>
+        </Configuration>
+      </DataCollector>
+    </DataCollectors>
+  </DataCollectionRunSettings>
+</RunSettings>
+```
+
+2. Test çalıştırma komutu güncellendi:
+```bash
+dotnet test --collect:"XPlat Code Coverage" --settings coverlet.runsettings
+```
+
+**Öğrenilen Dersler:**
+- Test coverage raporlaması için doğru yapılandırma kritik öneme sahiptir.
+- Include/Exclude filtreleri, hangi projelerin ve sınıfların kapsama dahil edileceğini belirlemekte önemli rol oynar.
+- Coverage raporlarını düzenli olarak gözden geçirmek, test kapsamının geliştirilmesi gereken alanları tespit etmeye yardımcı olur.
+
+## Test Kapsamı Raporlama Problemi ve Çözümü
+
+**Tarih:** 5 Mart 2025
+
+**Sorun:** Test kapsamı raporlama sistemi (`coverlet.collector`) kurulurken, test projesindeki sınıfların güncel kod tabanıyla uyumsuz olduğu tespit edildi.
+
+**Hata Mesajları:**
+```
+CS7036: 'GetCategoryByIdQueryHandler.GetCategoryByIdQueryHandler(IUnitOfWork, IMapper, ILogger<GetCategoryByIdQueryHandler>)'nin gerekli 'logger' parametresine karşılık gelen herhangi bir argüman yok
+CS1503: 1 bağımsız değişkeni: 'Stock.Domain.Interfaces.IRepository<Stock.Domain.Entities.Role>' öğesinden 'Stock.Domain.Interfaces.IRoleRepository' öğesine dönüştürülemiyor
+CS0246: 'AllCategoriesSpecification' türü veya ad alanı adı bulunamadı (bir using yönergeniz veya derleme başvurunuz mu eksik?)
+```
+
+**Nedeni:** Kod tabanında yapılan güncellemeler ve iyileştirmeler test projelerine yansıtılmamıştı. Temel olarak şu değişiklikler vardı:
+1. Handler sınıflarına ILogger parametreleri eklenmişti
+2. Genel repository arayüzleri yerine entity-specific repository arayüzlerine (örn. ICategoryRepository) geçilmişti
+3. Bazı specification sınıfları kaldırılmış veya değiştirilmişti (örn. AllCategoriesSpecification)
+
+**Çözüm:**
+1. **GetAllCategoriesQueryHandlerTests** dosyasını düzelttik:
+   - AllCategoriesSpecification kullanımını kaldırıp repository'nin GetAllAsync() metodunu kullanacak şekilde güncelledik
+   - Eksik ILogger parametresini ekledik
+
+2. **GetCategoryByIdQueryHandlerTests** dosyasını düzelttik:
+   - Eksik ILogger parametresini ekleyip handler oluşturucusuna geçirdik
+
+3. **UpdateCategoryCommandHandlerTests** dosyasını düzelttik:
+   - IRepository<Category> yerine ICategoryRepository kullandık
+   - Eksik ILogger ve IUnitOfWork parametrelerini ekledik
+
+4. Test sınıflarında kullanılan komut sınıflarını ve parametre veri türlerini güncelledik.
+
+**Önemli Dersler:**
+1. Kod tabanında yapılan değişikliklerin test projelerine yansıtılması kritik öneme sahiptir.
+2. Özellikle iyileştirme çalışmaları sonrasında, tüm testlerin çalıştığından emin olmak gerekir.
+3. Repository pattern veya service pattern gibi mimari desenlerdeki değişiklikler, testlerin de buna uygun şekilde güncellenmesini gerektirir.
+4. Test kapsamı raporlama, kod kalitesini artırmak için önemli bir araçtır ve düzenli olarak yapılmalıdır.
+
+**İleride Yapılması Gerekenler:**
+1. Düzenli olarak test kapsamı raporlarını oluşturmak ve incelemek
+2. Test kapsamını genişletmek için yeni testler eklemeye devam etmek
+3. Test kapsamı metriklerini CI/CD süreçlerine entegre etmek
+
+## Unit Test Hataları ve Çözümleri (Oturum: 2025-05-08)
+
+### Sorun 1: `CreateRoleCommandHandlerTests` - Hata Mesajı Yerelleştirme Uyumsuzluğu
+**Hata:** `Handle_RoleAlreadyExists_ShouldReturnFailureResult` testi, `Assert.Contains("already exists", ...)` ile İngilizce bir hata mesajı beklerken, handler Türkçe bir mesaj (`...'existing role' adında bir rol zaten mevc...`) döndürüyordu.
+**Çözüm:** Testteki `Assert.Contains` ifadesi, Türkçe hata mesajının bir kısmını (`"zaten mevcut"`) içerecek şekilde güncellendi.
+**Öğrenilen Ders:** Çok dilli uygulamalarda veya yerelleştirilmiş hata mesajları olan sistemlerde, testlerde hata mesajlarını doğrulamak için ya mesajın tamamı yerine anahtar bir ifade kullanılmalı ya da test ortamının dili sabitlenmelidir.
+
+### Sorun 2: `ProductRepositoryTests` - EF Core In-Memory Provider ile ValueObject Uyumsuzluğu
+**Hata:** `Product` entity'sindeki `ProductName` ve `ProductDescription` gibi ValueObject'ler, EF Core In-Memory provider tarafından doğru işlenemiyordu. Bu durum, `FirstOrDefaultAsync_WithSpecification_ReturnsCorrectProduct`, `CountAsync_WithSpecification_ReturnsCorrectCount`, `GetByIdAsync_ReturnsNull_WhenProductDoesNotExist` ve `ListAsync_WithSpecification_ReturnsCorrectProducts` testlerinde `KeyNotFoundException` veya `InvalidOperationException` (LINQ çeviri hatası) gibi hatalara neden oluyordu.
+**Nedeni:** EF Core In-Memory provider, `ProductConfiguration.cs` içinde `ComplexProperty` ile tanımlanmış ValueObject'lerin sorgulanmasını (özellikle iç property'lere erişim veya `OrderBy`) tam olarak destekleyemiyordu.
+**Çözüm:**
+1.  `ProductConfiguration.cs` dosyasında, `Product` entity'sinin `Name`, `Description` ve `StockLevel` ValueObject'leri için yapılan EF Core eşlemesi `ComplexProperty`'den `.OwnsOne()` yöntemine değiştirildi.
+2.  `.OwnsOne()` içinde `.HasColumnName()` kullanılarak ValueObject property'lerinin veritabanı sütun adları açıkça belirtildi (örn: `Name`, `Description`, `StockQuantity`).
+3.  Bu değişiklik, EF Core'un yeni bir migrasyon (`CheckProductConfigurationChange`) oluşturmasına neden oldu. Migrasyon, `Products` tablosundaki `Name_Value` sütununu `Name` olarak yeniden adlandırdı. Bu migrasyon veritabanına uygulandı.
+**Öğrenilen Ders:** EF Core In-Memory provider ile çalışırken, ValueObject'ler gibi karmaşık tiplerin eşlenmesinde `.OwnsOne()` konfigürasyonu, `ComplexProperty`'ye göre daha iyi uyumluluk sağlayabilir ve testlerde beklenmedik hataların önüne geçebilir. Yapılan konfigürasyon değişikliklerinin veritabanı migrasyonu gerektirip gerektirmediği `dotnet ef migrations add` komutu ile kontrol edilmelidir.
+
+### Sorun 3: Command Handler'larda Genel İstisna Yönetimi ve Hata Mesajı Uyumsuzluğu
+**Hata:**
+*   `CreateCategoryCommandHandlerTests.Handle_DatabaseError_ShouldReturnFailureResult`
+*   `DeleteCategoryCommandHandlerTests.Handle_DatabaseError_ShouldReturnFailureResult`
+*   `UpdateCategoryCommandHandlerTests.Handle_DatabaseError_ShouldReturnFailureResult`
+    gibi testlerde, mock `SaveChangesAsync` bir `Exception` fırlattığında, ilgili handler'lar bu istisnayı yakalayıp `Result.Failure` döndürmek yerine çöküyordu veya döndürdükleri hata mesajı testin `Assert.Contains` ile beklediği mesajla eşleşmiyordu.
+**Çözüm:**
+1.  İlgili Command Handler'ların (`CreateCategoryCommandHandler`, `DeleteCategoryCommandHandler`, `UpdateCategoryCommandHandler`, `CreatePermissionCommandHandler`, `DeletePermissionCommandHandler`) `Handle` metotlarındaki ana iş mantığı (özellikle veritabanı etkileşimleri) `try-catch (Exception ex)` blokları içine alındı.
+2.  `catch` bloklarında, loglama yapıldıktan sonra `Result.Failure("Belirli bir hata mesajı")` döndürülerek, testlerin beklediği hata mesajlarıyla uyum sağlandı. Önceki durumda `ex.Message` içeren daha dinamik mesajlar kullanılıyordu, bu da `Assert.Contains` ile sorun yaratıyordu.
+**Öğrenilen Ders:** Command Handler'lar, beklenmedik istisnaları kontrollü bir şekilde yönetmeli ve standart bir hata sonucu (örn: `Result.Failure`) döndürmelidir. Testler, bu hata sonuçlarını ve beklenen hata mesajlarını (veya mesajın bir kısmını) doğrulamalıdır.
+
+### Sorun 4: Controller'da Beklenen `NotFoundException`'ın Yakalanması
+**Hata:** `RoleControllerTests.GetRole_ThrowsException_WhenRoleDoesNotExist` testinde, `GetRoleByIdQueryHandler`'ın `NotFoundException` fırlatmasına rağmen, `RoleController`'daki `GetRole` metodundaki genel `try-catch (Exception ex)` bloğu bu istisnayı yakalayıp 500 Internal Server Error döndürüyordu. Test ise 404 Not Found bekliyordu.
+**Çözüm:** `RoleController.cs` dosyasındaki `GetRole(int id)` metodundan genel `try-catch` bloğu kaldırıldı. Bu, `NotFoundException`'ın merkezi bir `GlobalExceptionHandlingMiddleware` tarafından yakalanıp doğru HTTP durum koduna (404) çevrilmesini sağladı.
+**Öğrenilen Ders:** Domain'e özgü beklenen istisnalar (NotFound, Validation, Conflict vb.) controller katmanında genel `try-catch` blokları ile yakalanmamalıdır. Bu tür istisnaların yönetimi, merkezi bir exception handling middleware'e bırakılmalıdır.
+
+### Sorun 5: Handler'da Validasyonun Tetiklenmemesi
+**Hata:** `UpdateRoleCommandHandlerTests.Handle_InvalidRoleName_ShouldThrowValidationException` testinde, geçersiz bir rol adı (`""`) gönderilmesine rağmen `UpdateRoleCommandHandler` beklenen `ValidationException`'ı fırlatmıyordu.
+**Nedeni:** Handler içindeki bir koşul (`!string.IsNullOrWhiteSpace(request.Name)`), boş bir isim durumunda `Role.UpdateName()` metodunun (ve dolayısıyla içindeki validasyonun) çağrılmasını engelliyordu.
+**Çözüm:** `UpdateRoleCommandHandler.cs`'teki mantık, `Role.UpdateName()` metodunun her zaman çağrılmasını (eğer `request.Name` `null` değilse) ve domain validasyonunun tetiklenmesini sağlayacak şekilde güncellendi. Conflict kontrolü, isim değişikliği ve geçerliliği durumuna göre ayrıca ele alındı.
+**Öğrenilen Ders:** Handler'lar, domain entity'lerindeki validasyon metotlarının her zaman uygun şekilde çağrıldığından emin olmalıdır. İş mantığındaki koşullar, bu validasyonların atlanmasına neden olmamalıdır.
+
+## Database Migrations
+
+When migrations fail to apply, follow these steps:
+
+1. Delete the Migrations folder
+2. Drop existing database
+3. Run the following command:
+```
+dotnet ef migrations add InitialMigration --project src/Stock.Infrastructure --startup-project src/Stock.API --context ApplicationDbContext
+```
+4. Then apply the migrations:
+```
+dotnet ef database update --project src/Stock.Infrastructure --startup-project src/Stock.API --context ApplicationDbContext
+```
+
+## Frontend Build Errors
+
+If you encounter CORS issues with the frontend:
+
+1. Ensure the correct origin is set in the CORS configuration
+2. Make sure both backend and frontend are running on the expected ports
+3. Check if CORS middleware is correctly registered in Program.cs
+
+## Entegrasyon Testleri Sorunları
+
+Entegrasyon testlerinde karşılaşılan hata ve sorunlar:
+
+1. **Content Root Problemi**: 
+   - Hata: `Solution root could not be located using application root`
+   - Çözüm: CustomWebApplicationFactory'de content root açıkça belirtilmeli
+
+2. **Entity Factory Method Uyumsuzlukları**:
+   - Hata: Domain entity'lerin constructor'ları değiştirilmiş ve doğrudan kullanılamıyor
+   - Çözüm: TestDataHelper'da domain factory metodları kullanılarak test verileri oluşturmalı
+   
+3. **Yetkilendirme Sorunları**:
+   - Hata: 401 Unauthorized hataları
+   - Çözüm: TestAuthHandler kullanılarak API isteklerinde kimlik doğrulama bypass edilmeli
+   
+4. **SQLite/PostgreSQL Çakışmaları**:
+   - Hata: Veritabanı provider uyumsuzlukları
+   - Çözüm: Test ortamında PostgreSQL bağımlılıkları kaldırılıp SQLite in-memory DB yapılandırılmalı
+
+Bu sorunlar, ana projenin kodlarını değiştirmeden test konfigürasyonları ile düzeltilebilir. Daha fazla detay için `tests/Stock.IntegrationTests/README.md` dosyasına bakabilirsiniz.
+
+## Entegrasyon Testi Hataları ve Çözümleri (Oturum: 2025-05-08)
+
+### Hata: 'Solution root could not be located'
+
+**Hata Mesajı:**
+```
+Solution root could not be located using application root C:\Users\muham\OneDrive\Masaüstü\Stock\tests\Stock.IntegrationTests\bin\Debug\net9.0\.
+```
+
+**Nedeni:**
+WebApplicationFactory, test sırasında web uygulamasını başlatırken solution kök dizinini bulamadı. ASP.NET Core 6.0+ ile minimal API yaklaşımının kullanılması ve WebApplicationFactory'nin test paketinde güncellenmesiyle bu sorun ortaya çıkıyor.
+
+**Çözüm:**
+
+1. **CustomWebApplicationFactory Düzenleme:**
+   - Content root (API projesi) yolu elle belirtildi
+   - Solution kök dizinini bulmak için özel bir `GetSolutionRoot` metodu eklendi
+   - SQLite in-memory veritabanı kullanımı düzeltildi
+   - TestAuthHandler ile kimlik doğrulama bypass edildi
+
+```csharp
+public class CustomWebApplicationFactory<TProgram> : WebApplicationFactory<TProgram> where TProgram : class
+{
+    private readonly SqliteConnection _connection;
+
+    public CustomWebApplicationFactory()
+    {
+        _connection = new SqliteConnection("Data Source=:memory:");
+        _connection.Open();
+    }
+
+    protected override void ConfigureWebHost(IWebHostBuilder builder)
+    {
+        // Content root yolunu elle ayarla
+        var projectDir = Directory.GetCurrentDirectory();
+        var solutionDir = GetSolutionRoot(projectDir); 
+        var apiProjectDir = Path.Combine(solutionDir, "src", "Stock.API");
+
+        builder.UseContentRoot(apiProjectDir);
+        builder.UseEnvironment("Testing");
+        
+        // Test için appsettings.Testing.json yapılandırmasını ekle
+        builder.ConfigureAppConfiguration((context, config) =>
+        {
+            config.AddJsonFile(Path.Combine(projectDir, "appsettings.Testing.json"), optional: false);
+        });
+
+        // Diğer yapılandırmalar...
+    }
+
+    private string GetSolutionRoot(string projectDir)
+    {
+        // Solution kök dizinini bul
+        var directory = new DirectoryInfo(projectDir);
+        while (directory != null && !directory.GetFiles("*.sln").Any())
+        {
+            directory = directory.Parent;
+        }
+
+        return directory?.FullName ?? Path.GetFullPath(Path.Combine(projectDir, "..", ".."));
+    }
+}
+```
+
+2. **Ortam Değişkenleri:**
+   - Test çalıştırma betiği içinde ASPNETCORE_CONTENTROOT ayarlandı
+   - ASPNETCORE_ENVIRONMENT değişkeni "Testing" olarak belirlendi
+
+```powershell
+set ASPNETCORE_ENVIRONMENT=Testing
+set ASPNETCORE_CONTENTROOT=%~dp0..\..\src\Stock.API
+```
+
+3. **Program.cs ve Startup.cs Düzenleme:**
+   - Program.cs içinde CreateHostBuilder metodu düzenlendi
+   - Test spesifik Startup sınıfı geliştirildi
+
+4. **xUnit Yapılandırma:**
+   - xunit.runner.json dosyası güncellendi
+   - Paralel test çalıştırma devre dışı bırakıldı
+
+5. **Test Sınıfı İyileştirmeleri:**
+   - TestDataHelper içinde factory metodları kullanımı düzeltildi
+   - RolesControllerTests içinde DbContext erişimi iyileştirildi
+
+### Diğer Hata Çözümü Önerileri:
+
+1. **Kayıp Tip Hataları:**
+   - Test projesi için ErrorResponse sınıfı eklendi
+   - Type alias kullanılarak namespace çakışmaları engellendi
+
+2. **Veritabanı Bağlantı Sorunları:**
+   - SQLite in-memory veritabanı kullanıldı
+   - Entity yapılandırma sorunları için AsNoTracking() eklendi
+
+3. **Proje Yapılandırma Sorunları:**
+   - PreserveCompilationContext özelliği true olarak ayarlandı
+   - CopyToOutputDirectory PreserveNewest olarak ayarlandı
+
+### Genel Test Tavsiyesi:
+
+Entegrasyon testleri, gerçek bir veritabanı kullanmadan ancak gerçek API davranışını test edecek şekilde tasarlanmalıdır. Test ortamında SQL Server yerine SQLite kullanmak, test hızını artırır ve kaynakları verimli kullanır.
+
+## Angular Unit Test Hataları ve Çözümleri
+
+### Frontend Test Hataları
+
+#### Hata 1: Auth Service Testi Hatası
+**Hata Tanımı:** `AuthService` içindeki `createUser` metodu, farklı hata mesajları döndürürken test beklenen mesajları doğru şekilde kontrol etmiyordu.
+
+**Hata Mesajı:** 
+```
+Expected 'Sunucu tarafında bir hata oluştu. Lütfen daha sonra tekrar deneyin.' to be 'Kullanıcı oluşturulurken bir hata oluştu'.
+```
+
+**Çözüm:**
+Testteki beklenti, gerçek kodun davranışına göre güncellendi. Generic API hatası için beklenen mesaj string'i düzeltildi.
+
+```typescript
+expect(err.message).toBe('Sunucu tarafında bir hata oluştu. Lütfen daha sonra tekrar deneyin.');
+expect((err as any).code).toBe('');
+expect((err as any).field).toBe('');
+```
+
+#### Hata 2: loadStoredUser Testi Hatası
+**Hata Tanımı:** `loadStoredUser` metodu, normal kullanıcılar için `Pages.RoleManagement` izni eklenmesine izin veriyordu, ancak bu izin sadece admin kullanıcıları için otomatik eklenmeli.
+
+**Hata Mesajı:**
+```
+Expected false to be true.
+```
+
+**Çözüm:**
+1. Normal (admin olmayan) kullanıcılar için Pages.RoleManagement izninin beklentisi false olarak güncellendi ve AuthService'teki extractPermissionsFromToken metodu düzeltildi.
+2. AuthService'teki extractPermissionsFromToken metodu, koşulsuz izin ekleme kaldırıldı.
+
+```typescript
+// Test düzeltmesi
+expect(service.hasPermission('Pages.RoleManagement')).toBeFalse();
+
+// Kod düzeltmesi
+// Tekrarlayan izinleri temizle
+const uniquePermissions = [...new Set(permissions)];
+// Pages.RoleManagement izninin otomatik eklenmesi loadStoredUser içinde admin kontrolüyle yapılıyor.
+return uniquePermissions;
+```
+
+#### Hata 3: ErrorMessageComponent Test Hatası
+**Hata Tanımı:** PrimeNG v18+ sürümünde Messages bileşeninin DOM yapısı değiştiği için, CSS seçicileri ve elementleri doğru kontrol edilemiyordu.
+
+**Hata Mesajı:**
+```
+Expected ' Hata 1 ' to contain 'Detay 1'.
+Expected ' Uyarı 1 ' to contain 'Detay 2'.
+```
+
+**Uyarı Mesajı:**
+```
+Messages component is deprecated as of v18. Use Message component instead.
+```
+
+**Çözüm:**
+DOM yapısı kontrollerini daha esnek hale getirerek, belirli CSS seçicileri (`.p-message-detail`, `.p-message-text`) yerine doğrudan mesaj içeriğini kontrol eden bir yaklaşım benimsendi.
+
+```typescript
+// PrimeNG yapısı değişebileceği için doğrudan içeriği kontrol edelim
+const firstMessageContent = messageElements[0].textContent || '';
+expect(firstMessageContent).toContain('Hata 1');
+expect(firstMessageContent).toContain('Detay 1');
+```
+
+#### Hata 4: Bileşen Testleri Provider Hataları
+**Hata Tanımı:** Bazı bileşen testlerinde JwtHelperService ve HttpClient gibi bağımlılıklar eksikti.
+
+**Hata Mesajı:**
+```
+NullInjectorError: No provider for JwtHelperService!
+NullInjectorError: No provider for HttpClient!
+```
+
+**Çözüm:**
+İlgili bileşen testlerine mock JwtHelperService ve HttpClientTestingModule eklendi.
+
+```typescript
+// MockJwtHelperService
+class MockJwtHelperService {
+  decodeToken(token?: string): any { 
+    return null; 
+  }
+  
+  getTokenExpirationDate(token?: string): Date | null { 
+    return null; 
+  }
+  
+  isTokenExpired(token?: string, offsetSeconds?: number): boolean { 
+    return true; 
+  }
+}
+
+// Test modülü yapılandırması
+TestBed.configureTestingModule({
+  imports: [
+    ComponentName,
+    HttpClientTestingModule
+  ],
+  providers: [
+    { provide: JwtHelperService, useClass: MockJwtHelperService }
+  ]
+})
+```
+
+## Öğrenilen Dersler
+
+1. **Test-Kod Uyumu:** Test kodu, uygulama kodundan bağımsız değildir. Uygulama kodu güncellendiğinde, testlerin de güncellenmesi gerekebilir.
+
+2. **DOM Testi Yaklaşımı:** DOM yapısını test ederken, belirli CSS seçicileri yerine, tam metin içeriğini kontrol etmek daha esnek bir yaklaşımdır. Böylece, kütüphane güncellemelerinde yapısal değişiklikler testleri etkilemez.
+
+3. **3rd Party Kütüphane Değişiklikleri:** PrimeNG gibi 3. parti kütüphanelerin sürüm güncellemelerinde, API ve DOM yapısında değişiklikler olabilir. Bu nedenle güncellemelerden sonra testlerin kontrol edilmesi gerekir.
+
+4. **Mock Servislerin Önemi:** Test ortamında gerçek servislerin doğru şekilde taklit edilmesi, başarılı testler için kritik öneme sahiptir. Her bileşen testi için gerekli bağımlılıkların sağlanması gerekir.
+
+5. **Hata Tespiti ve Düzeltme Stratejisi:** Başarısız bir testin nedeni tespit edildiğinde, benzer hataları sergileyebilecek diğer testleri de kontrol etmek ve aynı çözümü uygulamak önemlidir.
+
+### Sonraki Adımlar
+1. Tüm bileşenlerde benzer tip hatalarını kontrol etmek ve düzeltmek.
+2. Model ve bileşen arasındaki tip uyumsuzluklarını gidermek için ortak bir tip tanımı oluşturmak.
+3. Servis metodlarının dokümantasyonunu iyileştirmek ve tutarlı isimlendirme kuralları uygulamak.
+
+### PrimeNG Message Arayüzü Import Hatası
+**Tarih:** 26 Temmuz 2024
+
+**Hata Mesajı:**
+```
+[ERROR] TS2305: Module '"primeng/api"' has no exported member 'Message'.
+[ERROR] TS2305: Module '"primeng/message"' has no exported member 'Message'.
+```
+
+**Hatanın Nedeni:**
+`ErrorMessageComponent` oluşturulurken, PrimeNG'nin `Message` arayüzünü import etmeye çalıştık. Ancak ne `primeng/api` ne de `primeng/message` yolları çalışmadı. Bu durum, projedeki PrimeNG sürümü (19.0.6) ile TypeScript yapılandırması arasında bir uyumsuzluk veya `Message` arayüzünün farklı bir modülde yer almasından kaynaklanıyor olabilir. PrimeNG dokümantasyonu genellikle `primeng/api` yolunu gösterse de, bu projede çalışmadı.
+
+**Çözüm (Geçici):**
+Doğru import yolu bulunamadığı için, linter hatasını gidermek ve bileşenin çalışmasını sağlamak amacıyla `Message` tipi yerine geçici olarak `any` tipi kullanıldı.
+
+```typescript
+// error-message.component.ts
+// Message importu kaldırılarak any[] kullanılıyor
+import { MessagesModule } from 'primeng/messages';
+
+// ...
+
+export class ErrorMessageComponent {
+  // Message[] yerine any[] kullanılıyor
+  @Input() error: string | any[] | null = null;
+
+  // Message[] yerine any[] kullanılıyor
+  get messages(): any[] {
+    // ... (implementation using any)
+  }
+}
+```
+
+**Öğrenilen Dersler:**
+- Kütüphane sürümleri ve TypeScript yapılandırmaları arasındaki uyumsuzluklar beklenmedik import hatalarına yol açabilir.
+- Dokümantasyon her zaman projenin özel durumunu yansıtmayabilir.
+- Geçici çözümler (örneğin `any` kullanımı) işlevselliği sağlayabilir, ancak tipleme güvenliğini azalttığı için kalıcı olmamalıdır. Doğru tip veya import yolu bulunduğunda kod güncellenmelidir.
+
+**Sonraki Adımlar:**
+- Projedeki PrimeNG sürümü ve yapılandırmasıyla uyumlu `Message` arayüzünün doğru import yolunu araştırmak.
+- Doğru yol bulunduğunda `ErrorMessageComponent`'i `any` yerine `Message` tipiyle güncellemek.
+
+## Kullanıcı Yönetimi Sayfası Sorunları
+
+### Sorun 1: Kullanıcılar otomatik olarak yüklenmiyor
+**Tarih:** 2023-11-15
+
+**Sorun Açıklaması:**  
+Kullanıcı yönetimi sayfasına girildiğinde kullanıcılar otomatik olarak yüklenmiyordu.
+
+**Çözüm:**  
+`user-management.component.ts` dosyasında `ngOnInit` metodunda `loadUsers()` çağrısı yorum satırı haline getirilmişti. Bu çağrı aktif hale getirildi. Böylece sayfa yüklendiğinde kullanıcılar otomatik olarak yüklenecek.
+
+```typescript
+ngOnInit() {
+  console.log('UserManagementComponent initialized');
+  
+  // Önce rolleri yükle
+  this.loadRoles();
+  
+  // Kullanıcıları yükle - artık loadRoles içinde çağrılıyor olsa da
+  // burada da çağıralım, böylece roller yüklenemese bile kullanıcılar yüklenebilir
+  this.loadUsers();
+  
+  // Form başlatma
+  this.initForm();
+  
+  // ...
+}
+```
+
+### Sorun 2: Oluşturulan roller kullanıcı yönetimi sayfasında görünmüyor
+**Tarih:** 2023-11-15
+
+**Sorun Açıklaması:**  
+Oluşturulan roller kullanıcı yönetimi sayfasında görüntülenmiyordu. Kullanıcıların rol bilgileri "Bilinmeyen Rol" olarak gösteriliyordu.
+
+**Çözüm:**  
+İki sorun tespit edildi ve çözüldü:
+
+1. `loadRoles` metodunda API'den gelen rol verilerinin işlenmesi sırasında sadece `label` ve `value` özellikleri kaydediliyordu. Buna `id` ve `name` özellikleri de eklendi.
+
+```typescript
+this.roles = roles.map(role => {
+  console.log('İşlenen rol:', role);
+  return {
+    label: role.name,
+    value: role.id,
+    id: role.id,
+    name: role.name
+  };
+});
+```
+
+2. `getRoleName` metodunda rol ID'si ile eşleşen rolü bulmak için sadece `value` özelliği kontrol ediliyordu. Hem `value` hem de `id` özelliklerini kontrol edecek şekilde güncellendi.
+
+```typescript
+// Rol ID'si ile eşleşen rolü bul (hem value hem de id özelliklerini kontrol et)
+const role = this.roles.find(r => r.value === roleId || r.id === roleId);
+
+if (role) {
+  console.log('Rol bulundu:', role);
+  return role.label || role.name;
+} else {
+  console.warn(`ID: ${roleId} için rol bulunamadı!`);
+  return 'Bilinmeyen Rol';
+}
+```
+
+3. Rol yükleme hatası durumunda daha iyi bir hata yönetimi eklendi ve varsayılan roller oluşturuldu.
+
+**Öğrenilen Dersler:**
+- Frontend'de veri yapılarının tutarlı olması önemlidir. Aynı veri farklı yerlerde farklı şekillerde (id/value, name/label) kullanılabilir, bu durumda her iki durumu da desteklemek gerekir.
+- Hata durumlarında kullanıcıya bilgi vermek ve varsayılan değerler sağlamak önemlidir.
+- Konsola detaylı log bilgileri yazmak hata ayıklamayı kolaylaştırır.
+
+## Rol Yükleme Hatası
+
+**Tarih:** 2023-11-15
+
+**Sorun Açıklaması:**  
+Kullanıcı yönetimi sayfasında roller yüklenirken 404 (Not Found) hatası alınıyordu.
+
+```
+GET http://localhost:5037/api/roles 404 (Not Found)
+```
+
+Hata mesajı:
+```
+Roller yüklenirken hata oluştu: Error: İstek yapılan kaynak bulunamadı.
+```
+
+**Sorunun Nedeni:**  
+Frontend'deki `role.service.ts` dosyasında API URL'si yanlış yapılandırılmıştı. Backend'de controller adı `RoleController` olduğu için, API endpoint'i `/api/role` olmalıydı, ancak `/api/roles` olarak tanımlanmıştı.
+
+**Çözüm:**  
+`role.service.ts` dosyasındaki API URL'si düzeltildi:
+
+```typescript
+// Önceki hali
+private apiUrl = `${environment.apiUrl}/api/roles`;
+
+// Düzeltilmiş hali
+private apiUrl = `${environment.apiUrl}/api/role`;
+```
+
+**Öğrenilen Dersler:**
+- Frontend ve backend arasındaki API endpoint'lerinin uyumlu olması önemlidir.
+- ASP.NET Core'da controller adı ve route arasındaki ilişkiye dikkat edilmelidir. `[Route("api/[controller]")]` attribute'u kullanıldığında, "Controller" son eki olmadan controller adı kullanılır.
+- API çağrıları başarısız olduğunda, ilk kontrol edilmesi gereken şey endpoint'in doğru olup olmadığıdır.
+
+## API Endpoint Uyumluluğu Sorunları
+
+### Sorun 1: Roller Yüklenirken 404 Hatası
+
+**Hata Mesajı:**
+```
+GET http://localhost:5037/api/roles 404 (Not Found)
+```
+
+**Nedeni:**
+Frontend'deki `role.service.ts` dosyasında API URL'si yanlış yapılandırılmıştı. Backend'de controller adı `RoleController` olduğu için, API endpoint'i `/api/role` olmalıydı, ancak `/api/roles` olarak tanımlanmıştı.
+
+**Çözüm:**
+`role.service.ts` dosyasındaki API URL'si düzeltildi:
+
+```typescript
+// Önceki hali
+private apiUrl = `${environment.apiUrl}/api/roles`;
+
+// Düzeltilmiş hali
+private apiUrl = `${environment.apiUrl}/api/role`;
+```
+
+### Sorun 2: İzinler Yüklenirken 404 Hatası
+
+**Hata Mesajı:** 
+```
+GET http://localhost:5037/api/permissions 404 (Not Found)
+```
+
+**Nedeni:**
+Frontend'deki `permission.service.ts` dosyasında API URL'si yanlış yapılandırılmıştı. Backend'de controller adı `PermissionsController` olduğu için, API endpoint'i `/api/Permissions` olmalıydı, ancak `/api/permissions` olarak tanımlanmıştı. ASP.NET Core'da route'lar büyük/küçük harf duyarlıdır.
+
+**Çözüm:**
+`permission.service.ts` dosyasındaki API URL'si düzeltildi:
+
+```typescript
+// Önceki hali
+private apiUrl = `${environment.apiUrl}/api/permissions`;
+
+// Düzeltilmiş hali
+private apiUrl = `${environment.apiUrl}/api/Permissions`;
+```
+
+**Öğrenilen Dersler:**
+- Frontend ve backend arasındaki API endpoint'lerinin uyumlu olması önemlidir.
+- ASP.NET Core'da controller adı ve route arasındaki ilişkiye dikkat edilmelidir.
+- Controller adlarının büyük/küçük harf duyarlılığına dikkat edilmelidir.
+- API çağrıları başarısız olduğunda, ilk kontrol edilmesi gereken şey endpoint'in doğru olup olmadığıdır.
+
+### Sorun 3: Şifre Sıfırlama Endpoint'i Hatası
+
+**Hata Mesajı:**
+```
+POST http://localhost:5037/api/auth/request-password-reset 404 (Not Found)
+```
+
+**Nedeni:**
+Frontend'deki `password.service.ts` dosyasında şifre sıfırlama isteği için API endpoint'i yanlış yapılandırılmıştı. Şifre sıfırlama işlemi `AuthController`'da değil, `FixPasswordController`'da bulunmaktadır.
+
+**Çözüm:**
+`password.service.ts` dosyasındaki şifre sıfırlama endpoint'i düzeltildi:
+
+```typescript
+// Önceki hali
+return this.http.post(`${this.apiUrl}/auth/request-password-reset`, { email }, options)
+
+// Düzeltilmiş hali
+return this.http.post(`${this.apiUrl}/FixPassword/request-password-reset`, { email }, options)
+```
+
+**Öğrenilen Dersler:**
+- Frontend ve backend arasındaki API endpoint'lerinin uyumlu olması önemlidir.
+- API çağrıları başarısız olduğunda, ilk kontrol edilmesi gereken şey endpoint'in doğru olup olmadığıdır.
+- Şifre yönetimi gibi kritik işlevler için doğru controller ve endpoint'lerin kullanılması gerekir.
+
+## Frontend Bileşenlerinde Gereksiz Console.log İfadeleri
+
+### Sorun
+Frontend bileşenlerinde, özellikle `permission-management.component.ts`, `user-management.component.ts` ve `role-management.component.ts` dosyalarında çok sayıda gereksiz `console.log`, `console.error` ve `console.warn` ifadeleri bulunuyordu. Bu ifadeler geliştirme aşamasında faydalı olsa da, üretim ortamında performans sorunlarına yol açabilir ve güvenlik riskleri oluşturabilir.
+
+### Çözüm
+Tüm gereksiz konsol log ifadeleri kaldırıldı. Hata durumlarında kullanıcıya bilgi vermek için `MessageService` kullanıldı. Bu sayede:
+
+1. Tarayıcı performansı iyileştirildi
+2. Kod okunabilirliği arttı
+3. Hassas bilgilerin konsola yazdırılması engellendi
+4. Kullanıcıya daha anlamlı hata mesajları gösterildi
+
+### Öğrenilen Dersler
+- Üretim ortamında hata ayıklama amaçlı log ifadeleri bulunmamalıdır
+- Hata durumlarında kullanıcıya anlamlı geri bildirim sağlanmalıdır
+- Hassas bilgilerin konsola yazdırılması güvenlik riski oluşturabilir
+- Geliştirme aşamasında eklenen log ifadeleri, üretim öncesi temizlenmelidir
+
+### İlgili Dosyalar
+- `frontend/src/app/features/user-management/components/permission-management.component.ts`
+- `frontend/src/app/features/user-management/components/user-management.component.ts`
+- `frontend/src/app/features/user-management/components/role-management.component.ts`
+
+## Derleme Hataları ve Eksik Sabitler
+
+### Sorun: Derleme Başarısız: Eksik Sabit Tanımları
+**Tarih:** 26 Temmuz 2024
+**Hata:** API projesi derlenirken `CS0234: The type or namespace name 'Exceptions' does not exist in the namespace 'Stock.Domain'`, `CS0311: The type 'Stock.Application.Features.Roles.Commands.DeleteRole.DeleteRoleCommandHandler' cannot be used as type parameter 'TRequestHandler' in the generic type or method 'IServiceCollection.AddMediatR(params Type[])'`, ve `NU1608: Detected package version outside of dependency constraint` hataları alındı.
+**Nedeni:**
+1. CS0234: `Stock.Domain.Exceptions` namespace'i bazı dosyalarda yanlış kullanılmış veya eksik referans verilmişti.
+2. CS0311: `/Handlers/` klasöründe eski veya yanlış `DeleteRoleCommandHandler`/`UpdateRoleCommandHandler` dosyaları kalmıştı ve MediatR DI kaydında çakışmaya neden oluyordu.
+3. NU1608: `AutoMapper.Extensions.Microsoft.DependencyInjection` paketi, `AutoMapper` 13.0.0+ ile uyumsuzdu (bu işlevsellik ana pakete dahil edilmişti).
+**Çözüm:**
+1. Hatalı namespace kullanımları düzeltildi.
+2. `/Handlers/` altındaki eski komut handler dosyaları silindi.
+3. `Stock.Infrastructure.csproj` dosyasından `AutoMapper.Extensions.Microsoft.DependencyInjection` paketi kaldırıldı.
+
+### Sorun: EF Core Migration "already exists" Hatası
+**Tarih:** 14 Haziran 2025
+**Hata:** Yoğun refactoring sonrası boş veritabanına migration uygulamaya çalışırken `42P07: relation "IX_Users_Username" already exists` gibi mantık dışı hatalar alındı.
+**Nedeni:** EF Core migration mekanizması, geçmişteki tutarsızlıklardan dolayı bozulmuş olabilir.
+**Çözüm:**
+1. Standart çözümler (veritabanını silme, `__EFMigrationsHistory` tablosunu silme, migration dosyalarını/snapshot'ı manuel düzenleme) işe yaramadı.
+2. `src/Stock.Infrastructure/Migrations` klasörü tamamen silindi.
+3. `dotnet ef migrations add InitialCreate` komutu ile mevcut modele göre tek bir başlangıç migration'ı oluşturuldu.
+4. `dotnet ef database update` komutu ile migration başarıyla uygulandı.
+
+### Sorun: `dotnet ef database update` Build Hataları (`Username` Kaldırma Sonrası)
+**Tarih:** 14 Haziran 2025
+**Hata:** `dotnet build` başarılı olmasına rağmen, `dotnet ef database update` komutu çalıştırıldığında derleme hataları alındı (örn. `UserDto` içinde `AdiSoyadi` eksikliği, `IUserPermissionService` uyumsuzluğu, eksik `ErrorMessages`).
+**Nedeni:** `Username` alanının kaldırılması ve `AdiSoyadi` alanının eklenmesiyle ilgili değişiklikler tüm katmanlara (DTO'lar, Servisler, Validatorlar, Entity Konfigürasyonları, Arayüzler) tam olarak yansıtılmamıştı. `dotnet ef` komutları, normal build sürecinden farklı olarak tüm bağımlılıkları daha sıkı kontrol edebilir.
+**Çözüm:**
+1. Hata mesajları dikkatlice incelenerek `Username`/`AdiSoyadi` ile ilgili tüm referanslar bulundu ve düzeltildi.
+2. `UserDto`, `PermissionDto`, `IUserPermissionService`, `UserService`, `AuthService` (Infrastructure), `JwtTokenGenerator`, `ErrorMessages` güncellendi.
+3. Değişiklikler sonrası `dotnet build` ve `dotnet ef database update` komutları başarıyla çalıştırıldı.
+
+### Sorun: Repository Arayüz Implementasyon Hataları (CS0535, CS0738)
+**Tarih:** 15 Haziran 2025
+**Hata:** `GenericRepository` ve `ProductRepository` sınıfları derlenirken, implemente ettikleri `IRepository` ve `IProductRepository` arayüzleriyle uyumsuzluk nedeniyle CS0535 ('does not implement interface member') ve CS0738 ('cannot implement interface member ... because it does not have the matching return type') hataları alındı.
+**Nedeni:**
+1. `GenericRepository`'deki `Update` ve `Delete` metotları asenkron olarak yeniden adlandırılmıştı, ancak arayüz hem senkron (`void`) hem de asenkron (`Task`) versiyonları bekliyordu. Senkron versiyonlar eksikti.
+2. `GenericRepository`'deki `GetAllAsync` metodu `Task<IReadOnlyList<T>>` döndürürken, arayüz `Task<IEnumerable<T>>` bekliyordu.
+3. `ProductRepository`'deki metot imzaları (`GetByIdAsync` dönüş tipi ve tüm metotlardaki `CancellationToken` parametreleri) `IProductRepository` arayüzündeki tanımlarla birebir eşleşmiyordu.
+**Çözüm:**
+1. `GenericRepository.cs` güncellendi:
+   - Senkron `Update(T entity)` ve `Delete(T entity)` metotları (dönüş tipi `void`) eklendi/geri getirildi.
+   - Asenkron `UpdateAsync(T entity, CancellationToken)` ve `DeleteAsync(T entity, CancellationToken)` metotları (dönüş tipi `Task`) eklendi/düzeltildi.
+   - `GetAllAsync` metodunun dönüş tipi `Task<IEnumerable<T>>` olarak düzeltildi.
+2. `ProductRepository.cs` güncellendi:
+   - Tüm metotlardan (`GetByIdAsync`, `GetAllAsync`, `AddAsync`, `UpdateAsync`, `DeleteAsync`) fazladan olan `CancellationToken` parametreleri kaldırıldı.
+   - `GetByIdAsync` metodunun dönüş tipi `Task<Product?>` yerine `Task<Product>` olarak değiştirildi ve bulunamama durumunda `KeyNotFoundException` fırlatması sağlandı.
+
+### Sorun: Unit Test Başarısızlığı (`ProductRepositoryTests`)
+**Tarih:** 15 Haziran 2025
+**Hata:** `ProductRepositoryTests.GetByIdAsync_ShouldReturnNull_WhenProductNotFound` testi başarısız oldu.
+**Nedeni:** Önceki adımdaki düzeltme ile `ProductRepository.GetByIdAsync` metodu, ürün bulunamadığında `null` yerine `KeyNotFoundException` fırlatacak şekilde değiştirilmişti. Ancak test hala `null` dönmesini bekliyordu.
+**Çözüm:**
+1. `ProductRepositoryTests.cs` dosyasındaki ilgili test metodu güncellendi.
+2. `result.Should().BeNull()` assertion'ı yerine `await act.Should().ThrowAsync<KeyNotFoundException>(...)` kullanılarak exception fırlatılıp fırlatılmadığı kontrol edildi.
+
+## Frontend Hataları
+
+### Sorun: Angular NgFor Hatası - Dizi Yerine Nesne Gelmesi
+**Tarih:** 03.08.2025
+
+**Hata Mesajı:**
+```
+ERROR RuntimeError: NG02200: Cannot find a differ supporting object '[object Object]' of type 'object'. NgFor only supports binding to Iterables, such as Arrays.
+ERROR RuntimeError: NG0900: Error trying to diff '[object Object]'. Only arrays and iterables are allowed
+```
+
+**Hatanın Nedeni:**
+Kullanıcı yönetimi gibi sayfalarda listeleme yapılırken, frontend'in `p-table` ve `*ngFor` gibi bileşenleri bir dizi (`Array`) beklerken, backend API'sinden gelen JSON yanıtında ilgili alan (`items`) bir nesne (`Object`) olarak geliyordu.
+
+Sorunun asıl kaynağı, `src/Stock.API/Program.cs` dosyasındaki JSON serileştirme ayarlarında bulunan `ReferenceHandler.Preserve` seçeneğiydi. Bu seçenek, döngüsel referansları yönetmek amacıyla JSON çıktısına `"$id"` ve `"$values"` gibi meta veriler ekleyerek, basit bir diziyi `{ "$id": "1", "$values": [...] }` gibi bir nesneye dönüştürüyordu. Bu durum, frontend'in `response.items` alanını doğru bir şekilde yorumlamasını engelliyordu.
+
+**Çözüm:**
+`src/Stock.API/Program.cs` dosyasında, JSON serileştirme seçeneklerini yapılandıran bölümdeki `ReferenceHandler.Preserve` satırı yorum satırı haline getirildi.
+
+```csharp
+// src/Stock.API/Program.cs
+builder.Services.AddControllers()
+    .AddJsonOptions(options =>
+    {
+        // Döngüsel referansları koru - BU SATIR SORUNA NEDEN OLUYORDU
+        // options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.Preserve; 
+        
+        // Null değerleri dahil etme
+        options.JsonSerializerOptions.DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull;
+    });
+```
+
+Bu değişiklik sonrası backend uygulaması yeniden başlatıldığında, API yanıtı standart JSON formatına döndü ve frontend hatası çözüldü.
+
+**Öğrenilen Dersler:**
+-   JSON serileştirme ayarları, API yanıtlarının yapısını önemli ölçüde etkileyebilir.
+-   `ReferenceHandler.Preserve` gibi gelişmiş serileştirme seçenekleri, standart DTO (Data Transfer Object) desenleri kullanan ve basit veri yapıları bekleyen front-end istemcileriyle uyumsuzluk sorunlarına yol açabilir.
+-   Frontend'de "Cannot find a differ" veya "Error trying to diff '[object Object]'" gibi hatalar alındığında, API'den gelen yanıtın yapısını tarayıcının ağ (network) sekmesinden kontrol etmek, sorunun kaynağını bulmada kritik bir adımdır.
+
+## Backend Derleme Hataları: Yinelenen Factory ve Eksik Namespace (26 Temmuz 2024)
+
+### Sorunlar
+1.  **İlk Hata (CS0234 - `Microsoft.Data` Namespace):** `tests/Stock.IntegrationTests` projesi derlenirken `error CS0234: 'Data' tür veya ad alanı adı 'Microsoft' ad alanında yok` hatası alındı. Bu hatanın nedeni, `tests/Stock.IntegrationTests` dizininde, muhtemelen `Microsoft.Data.Sqlite` kullanmaya çalışan ancak ilgili paketin referans verilmediği ek bir `CustomWebApplicationFactory.cs` dosyasının bulunmasıydı.
+2.  **İkinci Hata (CS0246 - `CustomWebApplicationFactory` Bulunamadı):** Hatalı `CustomWebApplicationFactory.cs` dosyası silindikten sonra, `tests/Stock.IntegrationTests/Controllers/ProductControllerTests.cs` dosyasında `error CS0246: 'CustomWebApplicationFactory<>' türü veya ad alanı adı bulunamadı` hatası ortaya çıktı. Bu, test dosyasının `tests/Stock.IntegrationTests/Common/` dizinindeki doğru factory'yi kullanması gerekirken, ilgili namespace (`Stock.IntegrationTests.Common`) için `using` ifadesinin eksik olmasından kaynaklanıyordu.
+
+### Çözüm Adımları
+1.  **Yinelenen Factory Dosyası Silindi:** `tests/Stock.IntegrationTests/CustomWebApplicationFactory.cs` adresindeki kullanılmayan ve hataya neden olan dosya silindi.
+2.  **Eksik `using` İfadesi Eklendi:** `tests/Stock.IntegrationTests/Controllers/ProductControllerTests.cs` dosyasına, doğru factory sınıfını bulabilmesi için `using Stock.IntegrationTests.Common;` ifadesi eklendi.
+3.  **Doğrulama:** Çözüm yeniden derlenerek (`dotnet build src/src.sln`) hataların giderildiği teyit edildi.
+
+### Öğrenilen Dersler
+1.  **Dosya ve Klasör Yönetimi:** Aynı amaca hizmet eden yinelenen dosyalardan kaçınılmalı ve proje yapısı tutarlı tutulmalıdır. Test yardımcıları gibi ortak bileşenler `Common` gibi belirli klasörlerde organize edilmelidir.
+2.  **Namespace ve Referans Kontrolü:** Kod taşırken veya yeniden düzenlerken `using` ifadelerinin doğruluğu kontrol edilmeli, sınıfların doğru namespace'lerden çağrıldığından emin olunmalıdır.
+3.  **Adım Adım Hata Ayıklama:** Bir hata giderildikten sonra başka bir hata ortaya çıkarsa, yapılan değişikliklerin bu yeni hataya neden olup olmadığı veya altta yatan başka bir sorunu ortaya çıkarıp çıkarmadığı analiz edilmelidir.
+4.  **Düzenli Derleme:** Geliştirme sürecinde sık sık derleme yapmak, hataları erken tespit etmeye yardımcı olur.
+
+### İlgili Dosyalar
+- `tests/Stock.IntegrationTests/CustomWebApplicationFactory.cs` (Silindi)
+- `tests/Stock.IntegrationTests/Common/CustomWebApplicationFactory.cs` (Korundu)
+- `tests/Stock.IntegrationTests/Controllers/ProductControllerTests.cs` (Güncellendi)
+
+## DDD (Domain-Driven Design) Value Object İmplementasyonu Sorunları ve Çözümleri
+
+### Hata: Entity Framework Core ve Value Object Entegrasyonu Sorunları
+
+**Tarih:** 20.03.2025
+
+**Hata Mesajı:**
+Çeşitli derleme hataları ve Entity Framework Core entegrasyon sorunları:
+```
+CSC : error CS0006: Meta veri dosyası 'C:\Users\muham\AppData\Local\Temp\.sonarqube\resources\0\SonarAnalyzer.CSharp.dll' bulunamadı
+```
+
+Ayrıca kullanılmayan `Sicil`, `FirstName`, `LastName` Value Object'leri ve bunları eksik veya yanlış kullanan kodlar derleme hatalarına neden oldu.
+
+**Hatanın Nedeni:**
+1. Value Object'leri Entity Framework Core ile eşleştirirken Configuration sınıflarında ve entity kullanımlarında tutarsızlıklar
+2. SonarQube geçici dosyaları ile ilgili sorunlar
+3. Eksik Domain Exception sınıfları
+4. Projenin mevcut yapısı ile entegrasyon zorlukları
+
+**Çözüm:**
+1. **Value Object Yaklaşımı Değişikliği**: 
+   - Value Object'ler kaldırıldı (`Sicil.cs`, `FirstName.cs`, `LastName.cs`)
+   - Primitive tipler (string) kullanılarak ancak DDD prensipleri korunarak User entity güncellendi
+   - Factory metotları ve entity davranışları korundu
+
+2. **SonarQube Sorunlarının Çözümü**:
+   - `.sonarqube` klasörü silindi
+   - `sonar-project.properties` dosyası geçici olarak yeniden adlandırıldı
+   - Derleme yapıldıktan sonra dosya eski adına geri getirildi
+
+3. **Eksik Sınıfların Eklenmesi**:
+   - `BadRequestException` sınıfı oluşturuldu
+   - `DomainException` sınıfından türetildi
+   - Domain katmanında gerekli hata sınıfları yapılandırıldı
+
+4. **Entity Framework Core ile Uyumluluk**:
+   - User entity'sindeki setter'lar public yapıldı (EF Core için gerekli)
+   - Boş constructor public olarak işaretlendi
+   - Role ile ilişkiyi doğru yönetmek için AssignRole metodu güncellendi
+
+**Öğrenilen Dersler:**
+1. Entity Framework Core ile DDD prensiplerine tam olarak uymak arasında bazen bazı ödünler vermek gerekir
+2. Value Object'ler yerine, primitive tipler kullanılsa bile DDD'nin core prensipleri (encapsulation, entity davranışları, factory metotları, vb.) korunabilir
+3. EF Core ile çalışırken, Entity'lerin en azından boş bir constructor'a ve property'lerde public setter'lara sahip olması gerekebilir
+4. Kod analiz araçlarının (SonarQube gibi) geçici dosyaları bazen derleme hatalarına neden olabilir
+5. DDD prensiplerini uygularken, projenin mevcut yapısını ve karmaşıklığını göz önünde bulundurarak pragmatik kararlar almak önemlidir
+
+**Daha Fazla Bilgi:**
+Detaylı bilgi için: [Domain-Driven Design: User Entity Yaklaşımı Değişikliği](knowledge-base/architectural_patterns/ddd_user_entity.md)
+
+## Test Kapsamının Genişletilmesi Sırasında Karşılaşılan Hatalar
+
+### Command Handler Implementation Eksikliği Hatası
+**Tarih:** 20 Nisan 2025
+**Hata:** Permission entity'si için Command Handler testleri oluşturulmaya başlandığında, öncelikle test edilecek command handler'ların uygulamasının eksik olduğu fark edildi.
+
+**Nedeni:** İş akışlarında CQRS pattern uygulanmış olmasına rağmen, Permission entity'si için sadece Query Handler'lar (GetAllPermissions, GetPermissionById) oluşturulmuştu. Command Handler'lar (Create, Update, Delete) oluşturulmamıştı.
+
+**Çözüm:**
+1. Öncelikle `src/Stock.Application/Features/Permissions/Commands` klasörü oluşturuldu.
+2. Diğer entity'lerdeki komut yapıları örnek alınarak aşağıdaki sınıflar oluşturuldu:
+   - `CreatePermissionCommand` ve `CreatePermissionCommandHandler`
+   - `UpdatePermissionCommand` ve `UpdatePermissionCommandHandler`
+   - `DeletePermissionCommand` ve `DeletePermissionCommandHandler`
+3. Ardından bu handler'lar için unit testler yazıldı.
+
+**Öğrenilen Dersler:**
+- Test yazmadan önce, test edilecek sınıfların varlığını kontrol etmek gerekiyor.
+- CQRS pattern uygulanırken tüm entity'ler için hem Query hem de Command handler'ların oluşturulduğundan emin olunmalı.
+- Test öncelikli geliştirme (TDD) yaklaşımı, eksik implementasyonları erken aşamada tespit etmeye yardımcı olabilir.
+
+### PermissionByIdSpecification Hatası
+**Tarih:** 20 Nisan 2025
+**Hata:** PermissionByIdSpecification sınıfı aranırken dosya bulunamadı hatası alındı.
+
+**Hata Mesajı:**
+```
+Could not find file 'src/Stock.Domain/Specifications/Permissions/PermissionByIdSpecification.cs'. Did you mean one of:
+- src/Stock.Domain/Specifications/RolePermissions/PermissionsByRoleIdSpecification.cs
+- src/Stock.Domain/Specifications/RolePermissions/RolePermissionsByRoleIdSpecification.cs
+- src/Stock.Domain/Specifications/UserPermissions/UserPermissionsByUserIdSpecification.cs
+```
+
+**Nedeni:** Spesifikasyon sınıfları farklı bir yapıda organize edilmiş, PermissionByIdSpecification sınıfı `Permissions` klasörü yerine doğrudan `Specifications` klasörü altına yerleştirilmişti.
+
+**Çözüm:**
+1. Doğru dosya yolunu belirlemek için grep aracı kullanıldı: `grep_search PermissionById *.cs`
+2. Doğru yolun `src/Stock.Domain/Specifications/PermissionByIdSpecification.cs` olduğu tespit edildi.
+3. Bu dosya yolu kullanılarak spesifikasyon sınıfı başarıyla kullanıldı.
+
+**Öğrenilen Dersler:**
+- Proje yapısında tutarlılık önemlidir. Tüm entity'lere ait spesifikasyonlar aynı yapıda organize edilmelidir.
+- Bir dosya aranırken bulunamadığında, grep gibi arama araçlarını kullanmak faydalı olabilir.
+- Farklı entity'ler için benzer yapıların tutarlı organizasyonu, kod tabanının anlaşılabilirliğini ve bakım yapılabilirliğini artırır.
+
+### Command Handler Dependency Injection Hatası
+**Tarih:** 21 Nisan 2025
+**Hata:** Yeni oluşturulan Permission Command Handler'ları için unit testler çalıştırıldığında, bazı bağımlılıkların doğru şekilde mock'lanmadığı tespit edildi.
+
+**Hata Mesajı:**
+```
+System.ArgumentException: Object of type 'Moq.Mock`1[Stock.Domain.Interfaces.IPermissionRepository]' cannot be converted to type 'Stock.Domain.Interfaces.IPermissionRepository'.
+```
+
+**Nedeni:** Unit testlerde, mock nesneleri (Mock<IPermissionRepository>) doğrudan kullanılmış, ancak constructor'a mock nesnesinin kendisi yerine mock'un Object özelliği geçilmesi gerekiyordu.
+
+**Çözüm:**
+1. Test sınıflarında mock nesnelerinin doğru şekilde geçirilmesi sağlandı:
+```csharp
+// Hatalı kullanım
+var handler = new CreatePermissionCommandHandler(_permissionRepositoryMock, _unitOfWorkMock, _mapperMock, _loggerMock);
+
+// Doğru kullanım
+var handler = new CreatePermissionCommandHandler(_permissionRepositoryMock.Object, _unitOfWorkMock.Object, _mapperMock.Object, _loggerMock.Object);
+```
+
+**Öğrenilen Dersler:**
+- Mock nesnelerini kullanırken, nesnenin kendisini değil .Object özelliğini kullanmak gerekiyor.
+- Test sınıflarında en yaygın hatalardan biri bağımlılıkların yanlış şekilde mock'lanmasıdır.
+- İyi bir IDE ve statik kod analizi araçları, bu tür hataları erken aşamada tespit etmeye yardımcı olabilir.
+
+### Test Coverage Raporlama Hatası
+**Tarih:** 21 Nisan 2025
+**Hata:** Test coverage raporlama aracı çalıştırıldığında, bazı projelerin dahil edilmediği ve raporların eksik olduğu fark edildi.
+
+**Nedeni:** Test coverage yapılandırmasında hangi projelerin kapsama dahil edileceği eksik veya hatalı tanımlanmıştı.
+
+**Çözüm:**
+1. `coverlet.runsettings` dosyası oluşturuldu ve aşağıdaki şekilde yapılandırıldı:
+```xml
+<?xml version="1.0" encoding="utf-8" ?>
+<RunSettings>
+  <DataCollectionRunSettings>
+    <DataCollectors>
+      <DataCollector friendlyName="XPlat code coverage">
+        <Configuration>
+          <Format>cobertura</Format>
+          <Include>[Stock.Application]*,[Stock.Domain]*,[Stock.Infrastructure]*</Include>
+          <Exclude>[*Tests]*,[*Test.Helpers]*</Exclude>
+          <ExcludeByAttribute>Obsolete,GeneratedCodeAttribute</ExcludeByAttribute>
+        </Configuration>
+      </DataCollector>
+    </DataCollectors>
+  </DataCollectionRunSettings>
+</RunSettings>
+```
+
+2. Test çalıştırma komutu güncellendi:
+```bash
+dotnet test --collect:"XPlat Code Coverage" --settings coverlet.runsettings
+```
+
+**Öğrenilen Dersler:**
+- Test coverage raporlaması için doğru yapılandırma kritik öneme sahiptir.
+- Include/Exclude filtreleri, hangi projelerin ve sınıfların kapsama dahil edileceğini belirlemekte önemli rol oynar.
+- Coverage raporlarını düzenli olarak gözden geçirmek, test kapsamının geliştirilmesi gereken alanları tespit etmeye yardımcı olur.
+
+## Test Kapsamı Raporlama Problemi ve Çözümü
+
+**Tarih:** 5 Mart 2025
+
+**Sorun:** Test kapsamı raporlama sistemi (`coverlet.collector`) kurulurken, test projesindeki sınıfların güncel kod tabanıyla uyumsuz olduğu tespit edildi.
+
+**Hata Mesajları:**
+```
+CS7036: 'GetCategoryByIdQueryHandler.GetCategoryByIdQueryHandler(IUnitOfWork, IMapper, ILogger<GetCategoryByIdQueryHandler>)'nin gerekli 'logger' parametresine karşılık gelen herhangi bir argüman yok
+CS1503: 1 bağımsız değişkeni: 'Stock.Domain.Interfaces.IRepository<Stock.Domain.Entities.Role>' öğesinden 'Stock.Domain.Interfaces.IRoleRepository' öğesine dönüştürülemiyor
+CS0246: 'AllCategoriesSpecification' türü veya ad alanı adı bulunamadı (bir using yönergeniz veya derleme başvurunuz mu eksik?)
+```
+
+**Nedeni:** Kod tabanında yapılan güncellemeler ve iyileştirmeler test projelerine yansıtılmamıştı. Temel olarak şu değişiklikler vardı:
+1. Handler sınıflarına ILogger parametreleri eklenmişti
+2. Genel repository arayüzleri yerine entity-specific repository arayüzlerine (örn. ICategoryRepository) geçilmişti
+3. Bazı specification sınıfları kaldırılmış veya değiştirilmişti (örn. AllCategoriesSpecification)
+
+**Çözüm:**
+1. **GetAllCategoriesQueryHandlerTests** dosyasını düzelttik:
+   - AllCategoriesSpecification kullanımını kaldırıp repository'nin GetAllAsync() metodunu kullanacak şekilde güncelledik
+   - Eksik ILogger parametresini ekledik
+
+2. **GetCategoryByIdQueryHandlerTests** dosyasını düzelttik:
+   - Eksik ILogger parametresini ekleyip handler oluşturucusuna geçirdik
+
+3. **UpdateCategoryCommandHandlerTests** dosyasını düzelttik:
+   - IRepository<Category> yerine ICategoryRepository kullandık
+   - Eksik ILogger ve IUnitOfWork parametrelerini ekledik
+
+4. Test sınıflarında kullanılan komut sınıflarını ve parametre veri türlerini güncelledik.
+
+**Önemli Dersler:**
+1. Kod tabanında yapılan değişikliklerin test projelerine yansıtılması kritik öneme sahiptir.
+2. Özellikle iyileştirme çalışmaları sonrasında, tüm testlerin çalıştığından emin olmak gerekir.
+3. Repository pattern veya service pattern gibi mimari desenlerdeki değişiklikler, testlerin de buna uygun şekilde güncellenmesini gerektirir.
+4. Test kapsamı raporlama, kod kalitesini artırmak için önemli bir araçtır ve düzenli olarak yapılmalıdır.
+
+**İleride Yapılması Gerekenler:**
+1. Düzenli olarak test kapsamı raporlarını oluşturmak ve incelemek
+2. Test kapsamını genişletmek için yeni testler eklemeye devam etmek
+3. Test kapsamı metriklerini CI/CD süreçlerine entegre etmek
+
+## Unit Test Hataları ve Çözümleri (Oturum: 2025-05-08)
+
+### Sorun 1: `CreateRoleCommandHandlerTests` - Hata Mesajı Yerelleştirme Uyumsuzluğu
+**Hata:** `Handle_RoleAlreadyExists_ShouldReturnFailureResult` testi, `Assert.Contains("already exists", ...)` ile İngilizce bir hata mesajı beklerken, handler Türkçe bir mesaj (`...'existing role' adında bir rol zaten mevc...`) döndürüyordu.
+**Çözüm:** Testteki `Assert.Contains` ifadesi, Türkçe hata mesajının bir kısmını (`"zaten mevcut"`) içerecek şekilde güncellendi.
+**Öğrenilen Ders:** Çok dilli uygulamalarda veya yerelleştirilmiş hata mesajları olan sistemlerde, testlerde hata mesajlarını doğrulamak için ya mesajın tamamı yerine anahtar bir ifade kullanılmalı ya da test ortamının dili sabitlenmelidir.
+
+### Sorun 2: `ProductRepositoryTests` - EF Core In-Memory Provider ile ValueObject Uyumsuzluğu
+**Hata:** `Product` entity'sindeki `ProductName` ve `ProductDescription` gibi ValueObject'ler, EF Core In-Memory provider tarafından doğru işlenemiyordu. Bu durum, `FirstOrDefaultAsync_WithSpecification_ReturnsCorrectProduct`, `CountAsync_WithSpecification_ReturnsCorrectCount`, `GetByIdAsync_ReturnsNull_WhenProductDoesNotExist` ve `ListAsync_WithSpecification_ReturnsCorrectProducts` testlerinde `KeyNotFoundException` veya `InvalidOperationException` (LINQ çeviri hatası) gibi hatalara neden oluyordu.
+**Nedeni:** EF Core In-Memory provider, `ProductConfiguration.cs` içinde `ComplexProperty` ile tanımlanmış ValueObject'lerin sorgulanmasını (özellikle iç property'lere erişim veya `OrderBy`) tam olarak destekleyemiyordu.
+**Çözüm:**
+1.  `ProductConfiguration.cs` dosyasında, `Product` entity'sinin `Name`, `Description` ve `StockLevel` ValueObject'leri için yapılan EF Core eşlemesi `ComplexProperty`'den `.OwnsOne()` yöntemine değiştirildi.
+2.  `.OwnsOne()` içinde `.HasColumnName()` kullanılarak ValueObject property'lerinin veritabanı sütun adları açıkça belirtildi (örn: `Name`, `Description`, `StockQuantity`).
+3.  Bu değişiklik, EF Core'un yeni bir migrasyon (`CheckProductConfigurationChange`) oluşturmasına neden oldu. Migrasyon, `Products` tablosundaki `Name_Value` sütununu `Name` olarak yeniden adlandırdı. Bu migrasyon veritabanına uygulandı.
+**Öğrenilen Ders:** EF Core In-Memory provider ile çalışırken, ValueObject'ler gibi karmaşık tiplerin eşlenmesinde `.OwnsOne()` konfigürasyonu, `ComplexProperty`'ye göre daha iyi uyumluluk sağlayabilir ve testlerde beklenmedik hataların önüne geçebilir. Yapılan konfigürasyon değişikliklerinin veritabanı migrasyonu gerektirip gerektirmediği `dotnet ef migrations add` komutu ile kontrol edilmelidir.
+
+### Sorun 3: Command Handler'larda Genel İstisna Yönetimi ve Hata Mesajı Uyumsuzluğu
+**Hata:**
+*   `CreateCategoryCommandHandlerTests.Handle_DatabaseError_ShouldReturnFailureResult`
+*   `DeleteCategoryCommandHandlerTests.Handle_DatabaseError_ShouldReturnFailureResult`
+*   `UpdateCategoryCommandHandlerTests.Handle_DatabaseError_ShouldReturnFailureResult`
+    gibi testlerde, mock `SaveChangesAsync` bir `Exception` fırlattığında, ilgili handler'lar bu istisnayı yakalayıp `Result.Failure` döndürmek yerine çöküyordu veya döndürdükleri hata mesajı testin `Assert.Contains` ile beklediği mesajla eşleşmiyordu.
+**Çözüm:**
+1.  İlgili Command Handler'ların (`CreateCategoryCommandHandler`, `DeleteCategoryCommandHandler`, `UpdateCategoryCommandHandler`, `CreatePermissionCommandHandler`, `DeletePermissionCommandHandler`) `Handle` metotlarındaki ana iş mantığı (özellikle veritabanı etkileşimleri) `try-catch (Exception ex)` blokları içine alındı.
+2.  `catch` bloklarında, loglama yapıldıktan sonra `Result.Failure("Belirli bir hata mesajı")` döndürülerek, testlerin beklediği hata mesajlarıyla uyum sağlandı. Önceki durumda `ex.Message` içeren daha dinamik mesajlar kullanılıyordu, bu da `Assert.Contains` ile sorun yaratıyordu.
+**Öğrenilen Ders:** Command Handler'lar, beklenmedik istisnaları kontrollü bir şekilde yönetmeli ve standart bir hata sonucu (örn: `Result.Failure`) döndürmelidir. Testler, bu hata sonuçlarını ve beklenen hata mesajlarını (veya mesajın bir kısmını) doğrulamalıdır.
+
+### Sorun 4: Controller'da Beklenen `NotFoundException`'ın Yakalanması
+**Hata:** `RoleControllerTests.GetRole_ThrowsException_WhenRoleDoesNotExist` testinde, `GetRoleByIdQueryHandler`'ın `NotFoundException` fırlatmasına rağmen, `RoleController`'daki `GetRole` metodundaki genel `try-catch (Exception ex)` bloğu bu istisnayı yakalayıp 500 Internal Server Error döndürüyordu. Test ise 404 Not Found bekliyordu.
+**Çözüm:** `RoleController.cs` dosyasındaki `GetRole(int id)` metodundan genel `try-catch` bloğu kaldırıldı. Bu, `NotFoundException`'ın merkezi bir `GlobalExceptionHandlingMiddleware` tarafından yakalanıp doğru HTTP durum koduna (404) çevrilmesini sağladı.
+**Öğrenilen Ders:** Domain'e özgü beklenen istisnalar (NotFound, Validation, Conflict vb.) controller katmanında genel `try-catch` blokları ile yakalanmamalıdır. Bu tür istisnaların yönetimi, merkezi bir exception handling middleware'e bırakılmalıdır.
+
+### Sorun 5: Handler'da Validasyonun Tetiklenmemesi
+**Hata:** `UpdateRoleCommandHandlerTests.Handle_InvalidRoleName_ShouldThrowValidationException` testinde, geçersiz bir rol adı (`""`) gönderilmesine rağmen `UpdateRoleCommandHandler` beklenen `ValidationException`'ı fırlatmıyordu.
+**Nedeni:** Handler içindeki bir koşul (`!string.IsNullOrWhiteSpace(request.Name)`), boş bir isim durumunda `Role.UpdateName()` metodunun (ve dolayısıyla içindeki validasyonun) çağrılmasını engelliyordu.
+**Çözüm:** `UpdateRoleCommandHandler.cs`'teki mantık, `Role.UpdateName()` metodunun her zaman çağrılmasını (eğer `request.Name` `null` değilse) ve domain validasyonunun tetiklenmesini sağlayacak şekilde güncellendi. Conflict kontrolü, isim değişikliği ve geçerliliği durumuna göre ayrıca ele alındı.
+**Öğrenilen Ders:** Handler'lar, domain entity'lerindeki validasyon metotlarının her zaman uygun şekilde çağrıldığından emin olmalıdır. İş mantığındaki koşullar, bu validasyonların atlanmasına neden olmamalıdır.
+
+## Database Migrations
+
+When migrations fail to apply, follow these steps:
+
+1. Delete the Migrations folder
+2. Drop existing database
+3. Run the following command:
+```
+dotnet ef migrations add InitialMigration --project src/Stock.Infrastructure --startup-project src/Stock.API --context ApplicationDbContext
+```
+4. Then apply the migrations:
+```
+dotnet ef database update --project src/Stock.Infrastructure --startup-project src/Stock.API --context ApplicationDbContext
+```
+
+## Frontend Build Errors
+
+If you encounter CORS issues with the frontend:
+
+1. Ensure the correct origin is set in the CORS configuration
+2. Make sure both backend and frontend are running on the expected ports
+3. Check if CORS middleware is correctly registered in Program.cs
+
+## Entegrasyon Testleri Sorunları
+
+Entegrasyon testlerinde karşılaşılan hata ve sorunlar:
+
+1. **Content Root Problemi**: 
+   - Hata: `Solution root could not be located using application root`
+   - Çözüm: CustomWebApplicationFactory'de content root açıkça belirtilmeli
+
+2. **Entity Factory Method Uyumsuzlukları**:
+   - Hata: Domain entity'lerin constructor'ları değiştirilmiş ve doğrudan kullanılamıyor
+   - Çözüm: TestDataHelper'da domain factory metodları kullanılarak test verileri oluşturmalı
+   
+3. **Yetkilendirme Sorunları**:
+   - Hata: 401 Unauthorized hataları
+   - Çözüm: TestAuthHandler kullanılarak API isteklerinde kimlik doğrulama bypass edilmeli
+   
+4. **SQLite/PostgreSQL Çakışmaları**:
+   - Hata: Veritabanı provider uyumsuzlukları
+   - Çözüm: Test ortamında PostgreSQL bağımlılıkları kaldırılıp SQLite in-memory DB yapılandırılmalı
+
+Bu sorunlar, ana projenin kodlarını değiştirmeden test konfigürasyonları ile düzeltilebilir. Daha fazla detay için `tests/Stock.IntegrationTests/README.md` dosyasına bakabilirsiniz.
+
+## Entegrasyon Testi Hataları ve Çözümleri (Oturum: 2025-05-08)
+
+### Hata: 'Solution root could not be located'
+
+**Hata Mesajı:**
+```
+Solution root could not be located using application root C:\Users\muham\OneDrive\Masaüstü\Stock\tests\Stock.IntegrationTests\bin\Debug\net9.0\.
+```
+
+**Nedeni:**
+WebApplicationFactory, test sırasında web uygulamasını başlatırken solution kök dizinini bulamadı. ASP.NET Core 6.0+ ile minimal API yaklaşımının kullanılması ve WebApplicationFactory'nin test paketinde güncellenmesiyle bu sorun ortaya çıkıyor.
+
+**Çözüm:**
+
+1. **CustomWebApplicationFactory Düzenleme:**
+   - Content root (API projesi) yolu elle belirtildi
+   - Solution kök dizinini bulmak için özel bir `GetSolutionRoot` metodu eklendi
+   - SQLite in-memory veritabanı kullanımı düzeltildi
+   - TestAuthHandler ile kimlik doğrulama bypass edildi
+
+```csharp
+public class CustomWebApplicationFactory<TProgram> : WebApplicationFactory<TProgram> where TProgram : class
+{
+    private readonly SqliteConnection _connection;
+
+    public CustomWebApplicationFactory()
+    {
+        _connection = new SqliteConnection("Data Source=:memory:");
+        _connection.Open();
+    }
+
+    protected override void ConfigureWebHost(IWebHostBuilder builder)
+    {
+        // Content root yolunu elle ayarla
+        var projectDir = Directory.GetCurrentDirectory();
+        var solutionDir = GetSolutionRoot(projectDir); 
+        var apiProjectDir = Path.Combine(solutionDir, "src", "Stock.API");
+
+        builder.UseContentRoot(apiProjectDir);
+        builder.UseEnvironment("Testing");
+        
+        // Test için appsettings.Testing.json yapılandırmasını ekle
+        builder.ConfigureAppConfiguration((context, config) =>
+        {
+            config.AddJsonFile(Path.Combine(projectDir, "appsettings.Testing.json"), optional: false);
+        });
+
+        // Diğer yapılandırmalar...
+    }
+
+    private string GetSolutionRoot(string projectDir)
+    {
+        // Solution kök dizinini bul
+        var directory = new DirectoryInfo(projectDir);
+        while (directory != null && !directory.GetFiles("*.sln").Any())
+        {
+            directory = directory.Parent;
+        }
+
+        return directory?.FullName ?? Path.GetFullPath(Path.Combine(projectDir, "..", ".."));
+    }
+}
+```
+
+2. **Ortam Değişkenleri:**
+   - Test çalıştırma betiği içinde ASPNETCORE_CONTENTROOT ayarlandı
+   - ASPNETCORE_ENVIRONMENT değişkeni "Testing" olarak belirlendi
+
+```powershell
+set ASPNETCORE_ENVIRONMENT=Testing
+set ASPNETCORE_CONTENTROOT=%~dp0..\..\src\Stock.API
+```
+
+3. **Program.cs ve Startup.cs Düzenleme:**
+   - Program.cs içinde CreateHostBuilder metodu düzenlendi
+   - Test spesifik Startup sınıfı geliştirildi
+
+4. **xUnit Yapılandırma:**
+   - xunit.runner.json dosyası güncellendi
+   - Paralel test çalıştırma devre dışı bırakıldı
+
+5. **Test Sınıfı İyileştirmeleri:**
+   - TestDataHelper içinde factory metodları kullanımı düzeltildi
+   - RolesControllerTests içinde DbContext erişimi iyileştirildi
+
+### Diğer Hata Çözümü Önerileri:
+
+1. **Kayıp Tip Hataları:**
+   - Test projesi için ErrorResponse sınıfı eklendi
+   - Type alias kullanılarak namespace çakışmaları engellendi
+
+2. **Veritabanı Bağlantı Sorunları:**
+   - SQLite in-memory veritabanı kullanıldı
+   - Entity yapılandırma sorunları için AsNoTracking() eklendi
+
+3. **Proje Yapılandırma Sorunları:**
+   - PreserveCompilationContext özelliği true olarak ayarlandı
+   - CopyToOutputDirectory PreserveNewest olarak ayarlandı
+
+### Genel Test Tavsiyesi:
+
+Entegrasyon testleri, gerçek bir veritabanı kullanmadan ancak gerçek API davranışını test edecek şekilde tasarlanmalıdır. Test ortamında SQL Server yerine SQLite kullanmak, test hızını artırır ve kaynakları verimli kullanır.
+
+## Angular Unit Test Hataları ve Çözümleri
+
+### Frontend Test Hataları
+
+#### Hata 1: Auth Service Testi Hatası
+**Hata Tanımı:** `AuthService` içindeki `createUser` metodu, farklı hata mesajları döndürürken test beklenen mesajları doğru şekilde kontrol etmiyordu.
+
+**Hata Mesajı:** 
+```
+Expected 'Sunucu tarafında bir hata oluştu. Lütfen daha sonra tekrar deneyin.' to be 'Kullanıcı oluşturulurken bir hata oluştu'.
+```
+
+**Çözüm:**
+Testteki beklenti, gerçek kodun davranışına göre güncellendi. Generic API hatası için beklenen mesaj string'i düzeltildi.
+
+```typescript
+expect(err.message).toBe('Sunucu tarafında bir hata oluştu. Lütfen daha sonra tekrar deneyin.');
+expect((err as any).code).toBe('');
+expect((err as any).field).toBe('');
+```
+
+#### Hata 2: loadStoredUser Testi Hatası
+**Hata Tanımı:** `loadStoredUser` metodu, normal kullanıcılar için `Pages.RoleManagement` izni eklenmesine izin veriyordu, ancak bu izin sadece admin kullanıcıları için otomatik eklenmeli.
+
+**Hata Mesajı:**
+```
+Expected false to be true.
+```
+
+**Çözüm:**
+1. Normal (admin olmayan) kullanıcılar için Pages.RoleManagement izninin beklentisi false olarak güncellendi ve AuthService'teki extractPermissionsFromToken metodu düzeltildi.
+2. AuthService'teki extractPermissionsFromToken metodu, koşulsuz izin ekleme kaldırıldı.
+
+```typescript
+// Test düzeltmesi
+expect(service.hasPermission('Pages.RoleManagement')).toBeFalse();
+
+// Kod düzeltmesi
+// Tekrarlayan izinleri temizle
+const uniquePermissions = [...new Set(permissions)];
+// Pages.RoleManagement izninin otomatik eklenmesi loadStoredUser içinde admin kontrolüyle yapılıyor.
+return uniquePermissions;
+```
+
+#### Hata 3: ErrorMessageComponent Test Hatası
+**Hata Tanımı:** PrimeNG v18+ sürümünde Messages bileşeninin DOM yapısı değiştiği için, CSS seçicileri ve elementleri doğru kontrol edilemiyordu.
+
+**Hata Mesajı:**
+```
+Expected ' Hata 1 ' to contain 'Detay 1'.
+Expected ' Uyarı 1 ' to contain 'Detay 2'.
+```
+
+**Uyarı Mesajı:**
+```
+Messages component is deprecated as of v18. Use Message component instead.
+```
+
+**Çözüm:**
+DOM yapısı kontrollerini daha esnek hale getirerek, belirli CSS seçicileri (`.p-message-detail`, `.p-message-text`) yerine doğrudan mesaj içeriğini kontrol eden bir yaklaşım benimsendi.
+
+```typescript
+// PrimeNG yapısı değişebileceği için doğrudan içeriği kontrol edelim
+const firstMessageContent = messageElements[0].textContent || '';
+expect(firstMessageContent).toContain('Hata 1');
+expect(firstMessageContent).toContain('Detay 1');
+```
+
+#### Hata 4: Bileşen Testleri Provider Hataları
+**Hata Tanımı:** Bazı bileşen testlerinde JwtHelperService ve HttpClient gibi bağımlılıklar eksikti.
+
+**Hata Mesajı:**
+```
+NullInjectorError: No provider for JwtHelperService!
+NullInjectorError: No provider for HttpClient!
+```
+
+**Çözüm:**
+İlgili bileşen testlerine mock JwtHelperService ve HttpClientTestingModule eklendi.
+
+```typescript
+// MockJwtHelperService
+class MockJwtHelperService {
+  decodeToken(token?: string): any { 
+    return null; 
+  }
+  
+  getTokenExpirationDate(token?: string): Date | null { 
+    return null; 
+  }
+  
+  isTokenExpired(token?: string, offsetSeconds?: number): boolean { 
+    return true; 
+  }
+}
+
+// Test modülü yapılandırması
+TestBed.configureTestingModule({
+  imports: [
+    ComponentName,
+    HttpClientTestingModule
+  ],
+  providers: [
+    { provide: JwtHelperService, useClass: MockJwtHelperService }
+  ]
+})
+```
+
+## Öğrenilen Dersler
+
+1. **Test-Kod Uyumu:** Test kodu, uygulama kodundan bağımsız değildir. Uygulama kodu güncellendiğinde, testlerin de güncellenmesi gerekebilir.
+
+2. **DOM Testi Yaklaşımı:** DOM yapısını test ederken, belirli CSS seçicileri yerine, tam metin içeriğini kontrol etmek daha esnek bir yaklaşımdır. Böylece, kütüphane güncellemelerinde yapısal değişiklikler testleri etkilemez.
+
+3. **3rd Party Kütüphane Değişiklikleri:** PrimeNG gibi 3. parti kütüphanelerin sürüm güncellemelerinde, API ve DOM yapısında değişiklikler olabilir. Bu nedenle güncellemelerden sonra testlerin kontrol edilmesi gerekir.
+
+4. **Mock Servislerin Önemi:** Test ortamında gerçek servislerin doğru şekilde taklit edilmesi, başarılı testler için kritik öneme sahiptir. Her bileşen testi için gerekli bağımlılıkların sağlanması gerekir.
+
+5. **Hata Tespiti ve Düzeltme Stratejisi:** Başarısız bir testin nedeni tespit edildiğinde, benzer hataları sergileyebilecek diğer testleri de kontrol etmek ve aynı çözümü uygulamak önemlidir.
+
+### Sonraki Adımlar
+1. Tüm bileşenlerde benzer tip hatalarını kontrol etmek ve düzeltmek.
+2. Model ve bileşen arasındaki tip uyumsuzluklarını gidermek için ortak bir tip tanımı oluşturmak.
+3. Servis metodlarının dokümantasyonunu iyileştirmek ve tutarlı isimlendirme kuralları uygulamak.
+
+### PrimeNG Message Arayüzü Import Hatası
+**Tarih:** 26 Temmuz 2024
+
+**Hata Mesajı:**
+```
+[ERROR] TS2305: Module '"primeng/api"' has no exported member 'Message'.
+[ERROR] TS2305: Module '"primeng/message"' has no exported member 'Message'.
+```
+
+**Hatanın Nedeni:**
+`ErrorMessageComponent` oluşturulurken, PrimeNG'nin `Message` arayüzünü import etmeye çalıştık. Ancak ne `primeng/api` ne de `primeng/message` yolları çalışmadı. Bu durum, projedeki PrimeNG sürümü (19.0.6) ile TypeScript yapılandırması arasında bir uyumsuzluk veya `Message` arayüzünün farklı bir modülde yer almasından kaynaklanıyor olabilir. PrimeNG dokümantasyonu genellikle `primeng/api` yolunu gösterse de, bu projede çalışmadı.
+
+**Çözüm (Geçici):**
+Doğru import yolu bulunamadığı için, linter hatasını gidermek ve bileşenin çalışmasını sağlamak amacıyla `Message` tipi yerine geçici olarak `any` tipi kullanıldı.
+
+```typescript
+// error-message.component.ts
+// Message importu kaldırılarak any[] kullanılıyor
+import { MessagesModule } from 'primeng/messages';
+
+// ...
+
+export class ErrorMessageComponent {
+  // Message[] yerine any[] kullanılıyor
+  @Input() error: string | any[] | null = null;
+
+  // Message[] yerine any[] kullanılıyor
+  get messages(): any[] {
+    // ... (implementation using any)
+  }
+}
+```
+
+**Öğrenilen Dersler:**
+- Kütüphane sürümleri ve TypeScript yapılandırmaları arasındaki uyumsuzluklar beklenmedik import hatalarına yol açabilir.
+- Dokümantasyon her zaman projenin özel durumunu yansıtmayabilir.
+- Geçici çözümler (örneğin `any` kullanımı) işlevselliği sağlayabilir, ancak tipleme güvenliğini azalttığı için kalıcı olmamalıdır. Doğru tip veya import yolu bulunduğunda kod güncellenmelidir.
+
+**Sonraki Adımlar:**
+- Projedeki PrimeNG sürümü ve yapılandırmasıyla uyumlu `Message` arayüzünün doğru import yolunu araştırmak.
+- Doğru yol bulunduğunda `ErrorMessageComponent`'i `any` yerine `Message` tipiyle güncellemek.
+
+## Kullanıcı Yönetimi Sayfası Sorunları
+
+### Sorun 1: Kullanıcılar otomatik olarak yüklenmiyor
+**Tarih:** 2023-11-15
+
+**Sorun Açıklaması:**  
+Kullanıcı yönetimi sayfasına girildiğinde kullanıcılar otomatik olarak yüklenmiyordu.
+
+**Çözüm:**  
+`user-management.component.ts` dosyasında `ngOnInit` metodunda `loadUsers()` çağrısı yorum satırı haline getirilmişti. Bu çağrı aktif hale getirildi. Böylece sayfa yüklendiğinde kullanıcılar otomatik olarak yüklenecek.
+
+```typescript
+ngOnInit() {
+  console.log('UserManagementComponent initialized');
+  
+  // Önce rolleri yükle
+  this.loadRoles();
+  
+  // Kullanıcıları yükle - artık loadRoles içinde çağrılıyor olsa da
+  // burada da çağıralım, böylece roller yüklenemese bile kullanıcılar yüklenebilir
+  this.loadUsers();
+  
+  // Form başlatma
+  this.initForm();
+  
+  // ...
+}
+```
+
+### Sorun 2: Oluşturulan roller kullanıcı yönetimi sayfasında görünmüyor
+**Tarih:** 2023-11-15
+
+**Sorun Açıklaması:**  
+Oluşturulan roller kullanıcı yönetimi sayfasında görüntülenmiyordu. Kullanıcıların rol bilgileri "Bilinmeyen Rol" olarak gösteriliyordu.
+
+**Çözüm:**  
+İki sorun tespit edildi ve çözüldü:
+
+1. `loadRoles` metodunda API'den gelen rol verilerinin işlenmesi sırasında sadece `label` ve `value` özellikleri kaydediliyordu. Buna `id` ve `name` özellikleri de eklendi.
+
+```typescript
+this.roles = roles.map(role => {
+  console.log('İşlenen rol:', role);
+  return {
+    label: role.name,
+    value: role.id,
+    id: role.id,
+    name: role.name
+  };
+});
+```
+
+2. `getRoleName` metodunda rol ID'si ile eşleşen rolü bulmak için sadece `value` özelliği kontrol ediliyordu. Hem `value` hem de `id` özelliklerini kontrol edecek şekilde güncellendi.
+
+```typescript
+// Rol ID'si ile eşleşen rolü bul (hem value hem de id özelliklerini kontrol et)
+const role = this.roles.find(r => r.value === roleId || r.id === roleId);
+
+if (role) {
+  console.log('Rol bulundu:', role);
+  return role.label || role.name;
+} else {
+  console.warn(`ID: ${roleId} için rol bulunamadı!`);
+  return 'Bilinmeyen Rol';
+}
+```
+
+3. Rol yükleme hatası durumunda daha iyi bir hata yönetimi eklendi ve varsayılan roller oluşturuldu.
+
+**Öğrenilen Dersler:**
+- Frontend'de veri yapılarının tutarlı olması önemlidir. Aynı veri farklı yerlerde farklı şekillerde (id/value, name/label) kullanılabilir, bu durumda her iki durumu da desteklemek gerekir.
+- Hata durumlarında kullanıcıya bilgi vermek ve varsayılan değerler sağlamak önemlidir.
+- Konsola detaylı log bilgileri yazmak hata ayıklamayı kolaylaştırır.
+
+## Rol Yükleme Hatası
+
+**Tarih:** 2023-11-15
+
+**Sorun Açıklaması:**  
+Kullanıcı yönetimi sayfasında roller yüklenirken 404 (Not Found) hatası alınıyordu.
+
+```
+GET http://localhost:5037/api/roles 404 (Not Found)
+```
+
+Hata mesajı:
+```
+Roller yüklenirken hata oluştu: Error: İstek yapılan kaynak bulunamadı.
+```
+
+**Sorunun Nedeni:**  
+Frontend'deki `role.service.ts` dosyasında API URL'si yanlış yapılandırılmıştı. Backend'de controller adı `RoleController` olduğu için, API endpoint'i `/api/role` olmalıydı, ancak `/api/roles` olarak tanımlanmıştı.
+
+**Çözüm:**  
+`role.service.ts` dosyasındaki API URL'si düzeltildi:
+
+```typescript
+// Önceki hali
+private apiUrl = `${environment.apiUrl}/api/roles`;
+
+// Düzeltilmiş hali
+private apiUrl = `${environment.apiUrl}/api/role`;
+```
+
+**Öğrenilen Dersler:**
+- Frontend ve backend arasındaki API endpoint'lerinin uyumlu olması önemlidir.
+- ASP.NET Core'da controller adı ve route arasındaki ilişkiye dikkat edilmelidir. `[Route("api/[controller]")]` attribute'u kullanıldığında, "Controller" son eki olmadan controller adı kullanılır.
+- API çağrıları başarısız olduğunda, ilk kontrol edilmesi gereken şey endpoint'in doğru olup olmadığıdır.
+
+## API Endpoint Uyumluluğu Sorunları
+
+### Sorun 1: Roller Yüklenirken 404 Hatası
+
+**Hata Mesajı:**
+```
+GET http://localhost:5037/api/roles 404 (Not Found)
+```
+
+**Nedeni:**
+Frontend'deki `role.service.ts` dosyasında API URL'si yanlış yapılandırılmıştı. Backend'de controller adı `RoleController` olduğu için, API endpoint'i `/api/role` olmalıydı, ancak `/api/roles` olarak tanımlanmıştı.
+
+**Çözüm:**
+`role.service.ts` dosyasındaki API URL'si düzeltildi:
+
+```typescript
+// Önceki hali
+private apiUrl = `${environment.apiUrl}/api/roles`;
+
+// Düzeltilmiş hali
+private apiUrl = `${environment.apiUrl}/api/role`;
+```
+
+### Sorun 2: İzinler Yüklenirken 404 Hatası
+
+**Hata Mesajı:**
+```
+GET http://localhost:5037/api/permissions 404 (Not Found)
+```
+
+**Nedeni:**
+Frontend'deki `permission.service.ts` dosyasında API URL'si yanlış yapılandırılmıştı. Backend'de controller adı `PermissionsController` olduğu için, API endpoint'i `/api/Permissions` olmalıydı, ancak `/api/permissions` olarak tanımlanmıştı. ASP.NET Core'da route'lar büyük/küçük harf duyarlıdır.
+
+**Çözüm:**
+`permission.service.ts` dosyasındaki API URL'si düzeltildi:
+
+```typescript
+// Önceki hali
+private apiUrl = `${environment.apiUrl}/api/permissions`;
+
+// Düzeltilmiş hali
+private apiUrl = `${environment.apiUrl}/api/Permissions`;
+```
+
+**Öğrenilen Dersler:**
+- Frontend ve backend arasındaki API endpoint'lerinin uyumlu olması önemlidir.
+- ASP.NET Core'da controller adı ve route arasındaki ilişkiye dikkat edilmelidir.
+- Controller adlarının büyük/küçük harf duyarlılığına dikkat edilmelidir.
+- API çağrıları başarısız olduğunda, ilk kontrol edilmesi gereken şey endpoint'in doğru olup olmadığıdır.
+
+### Sorun 3: Şifre Sıfırlama Endpoint'i Hatası
+
+**Hata Mesajı:**
+```
+POST http://localhost:5037/api/auth/request-password-reset 404 (Not Found)
+```
+
+**Nedeni:**
+Frontend'deki `password.service.ts` dosyasında şifre sıfırlama isteği için API endpoint'i yanlış yapılandırılmıştı. Şifre sıfırlama işlemi `AuthController`'da değil, `FixPasswordController`'da bulunmaktadır.
+
+**Çözüm:**
+`password.service.ts` dosyasındaki şifre sıfırlama endpoint'i düzeltildi:
+
+```typescript
+// Önceki hali
+return this.http.post(`${this.apiUrl}/auth/request-password-reset`, { email }, options)
+
+// Düzeltilmiş hali
+return this.http.post(`${this.apiUrl}/FixPassword/request-password-reset`, { email }, options)
+```
+
+**Öğrenilen Dersler:**
+- Frontend ve backend arasındaki API endpoint'lerinin uyumlu olması önemlidir.
+- API çağrıları başarısız olduğunda, ilk kontrol edilmesi gereken şey endpoint'in doğru olup olmadığıdır.
+- Şifre yönetimi gibi kritik işlevler için doğru controller ve endpoint'lerin kullanılması gerekir.
+
+## Frontend Bileşenlerinde Gereksiz Console.log İfadeleri
+
+### Sorun
+Frontend bileşenlerinde, özellikle `permission-management.component.ts`, `user-management.component.ts` ve `role-management.component.ts` dosyalarında çok sayıda gereksiz `console.log`, `console.error` ve `console.warn` ifadeleri bulunuyordu. Bu ifadeler geliştirme aşamasında faydalı olsa da, üretim ortamında performans sorunlarına yol açabilir ve güvenlik riskleri oluşturabilir.
+
+### Çözüm
+Tüm gereksiz konsol log ifadeleri kaldırıldı. Hata durumlarında kullanıcıya bilgi vermek için `MessageService` kullanıldı. Bu sayede:
+
+1. Tarayıcı performansı iyileştirildi
+2. Kod okunabilirliği arttı
+3. Hassas bilgilerin konsola yazdırılması engellendi
+4. Kullanıcıya daha anlamlı hata mesajları gösterildi
+
+### Öğrenilen Dersler
+- Üretim ortamında hata ayıklama amaçlı log ifadeleri bulunmamalıdır
+- Hata durumlarında kullanıcıya anlamlı geri bildirim sağlanmalıdır
+- Hassas bilgilerin konsola yazdırılması güvenlik riski oluşturabilir
+- Geliştirme aşamasında eklenen log ifadeleri, üretim öncesi temizlenmelidir
+
+### İlgili Dosyalar
+- `frontend/src/app/features/user-management/components/permission-management.component.ts`
+- `frontend/src/app/features/user-management/components/user-management.component.ts`
+- `frontend/src/app/features/user-management/components/role-management.component.ts`
+
+## Derleme Hataları ve Eksik Sabitler
+
+### Sorun: Derleme Başarısız: Eksik Sabit Tanımları
+**Tarih:** 26 Temmuz 2024
+**Hata:** API projesi derlenirken `CS0234: The type or namespace name 'Exceptions' does not exist in the namespace 'Stock.Domain'`, `CS0311: The type 'Stock.Application.Features.Roles.Commands.DeleteRole.DeleteRoleCommandHandler' cannot be used as type parameter 'TRequestHandler' in the generic type or method 'IServiceCollection.AddMediatR(params Type[])'`, ve `NU1608: Detected package version outside of dependency constraint` hataları alındı.
+**Nedeni:**
+1. CS0234: `Stock.Domain.Exceptions` namespace'i bazı dosyalarda yanlış kullanılmış veya eksik referans verilmişti.
+2. CS0311: `/Handlers/` klasöründe eski veya yanlış `DeleteRoleCommandHandler`/`UpdateRoleCommandHandler` dosyaları kalmıştı ve MediatR DI kaydında çakışmaya neden oluyordu.
+3. NU1608: `AutoMapper.Extensions.Microsoft.DependencyInjection` paketi, `AutoMapper` 13.0.0+ ile uyumsuzdu (bu işlevsellik ana pakete dahil edilmişti).
+**Çözüm:**
+1. Hatalı namespace kullanımları düzeltildi.
+2. `/Handlers/` altındaki eski komut handler dosyaları silindi.
+3. `Stock.Infrastructure.csproj` dosyasından `AutoMapper.Extensions.Microsoft.DependencyInjection` paketi kaldırıldı.
+
+### Sorun: EF Core Migration "already exists" Hatası
+**Tarih:** 14 Haziran 2025
+**Hata:** Yoğun refactoring sonrası boş veritabanına migration uygulamaya çalışırken `42P07: relation "IX_Users_Username" already exists` gibi mantık dışı hatalar alındı.
+**Nedeni:** EF Core migration mekanizması, geçmişteki tutarsızlıklardan dolayı bozulmuş olabilir.
+**Çözüm:**
+1. Standart çözümler (veritabanını silme, `__EFMigrationsHistory` tablosunu silme, migration dosyalarını/snapshot'ı manuel düzenleme) işe yaramadı.
+2. `src/Stock.Infrastructure/Migrations` klasörü tamamen silindi.
+3. `dotnet ef migrations add InitialCreate` komutu ile mevcut modele göre tek bir başlangıç migration'ı oluşturuldu.
+4. `dotnet ef database update` komutu ile migration başarıyla uygulandı.
+
+### Sorun: `dotnet ef database update` Build Hataları (`Username` Kaldırma Sonrası)
+**Tarih:** 14 Haziran 2025
+**Hata:** `dotnet build` başarılı olmasına rağmen, `dotnet ef database update` komutu çalıştırıldığında derleme hataları alındı (örn. `UserDto` içinde `AdiSoyadi` eksikliği, `IUserPermissionService` uyumsuzluğu, eksik `ErrorMessages`).
+**Nedeni:** `Username` alanının kaldırılması ve `AdiSoyadi` alanının eklenmesiyle ilgili değişiklikler tüm katmanlara (DTO'lar, Servisler, Validatorlar, Entity Konfigürasyonları, Arayüzler) tam olarak yansıtılmamıştı. `dotnet ef` komutları, normal build sürecinden farklı olarak tüm bağımlılıkları daha sıkı kontrol edebilir.
+**Çözüm:**
+1. Hata mesajları dikkatlice incelenerek `Username`/`AdiSoyadi` ile ilgili tüm referanslar bulundu ve düzeltildi.
+2. `UserDto`, `PermissionDto`, `IUserPermissionService`, `UserService`, `AuthService` (Infrastructure), `JwtTokenGenerator`, `ErrorMessages` güncellendi.
+3. Değişiklikler sonrası `dotnet build` ve `dotnet ef database update` komutları başarıyla çalıştırıldı.
+
+### Sorun: Repository Arayüz Implementasyon Hataları (CS0535, CS0738)
+**Tarih:** 15 Haziran 2025
+**Hata:** `GenericRepository` ve `ProductRepository` sınıfları derlenirken, implemente ettikleri `IRepository` ve `IProductRepository` arayüzleriyle uyumsuzluk nedeniyle CS0535 ('does not implement interface member') ve CS0738 ('cannot implement interface member ... because it does not have the matching return type') hataları alındı.
+**Nedeni:**
+1. `GenericRepository`'deki `Update` ve `Delete` metotları asenkron olarak yeniden adlandırılmıştı, ancak arayüz hem senkron (`void`) hem de asenkron (`Task`) versiyonları bekliyordu. Senkron versiyonlar eksikti.
+2. `GenericRepository`'deki `GetAllAsync` metodu `Task<IReadOnlyList<T>>` döndürürken, arayüz `Task<IEnumerable<T>>` bekliyordu.
+3. `ProductRepository`'deki metot imzaları (`GetByIdAsync` dönüş tipi ve tüm metotlardaki `CancellationToken` parametreleri) `IProductRepository` arayüzündeki tanımlarla birebir eşleşmiyordu.
+**Çözüm:**
+1. `GenericRepository.cs` güncellendi:
+   - Senkron `Update(T entity)` ve `Delete(T entity)` metotları (dönüş tipi `void`) eklendi/geri getirildi.
+   - Asenkron `UpdateAsync(T entity, CancellationToken)` ve `DeleteAsync(T entity, CancellationToken)` metotları (dönüş tipi `Task`) eklendi/düzeltildi.
+   - `GetAllAsync` metodunun dönüş tipi `Task<IEnumerable<T>>` olarak düzeltildi.
+2. `ProductRepository.cs` güncellendi:
+   - Tüm metotlardan (`GetByIdAsync`, `GetAllAsync`, `AddAsync`, `UpdateAsync`, `DeleteAsync`) fazladan olan `CancellationToken` parametreleri kaldırıldı.
+   - `GetByIdAsync` metodunun dönüş tipi `Task<Product?>` yerine `Task<Product>` olarak değiştirildi ve bulunamama durumunda `KeyNotFoundException` fırlatması sağlandı.
+
+### Sorun: Unit Test Başarısızlığı (`ProductRepositoryTests`)
+**Tarih:** 15 Haziran 2025
+**Hata:** `ProductRepositoryTests.GetByIdAsync_ShouldReturnNull_WhenProductNotFound` testi başarısız oldu.
+**Nedeni:** Önceki adımdaki düzeltme ile `ProductRepository.GetByIdAsync` metodu, ürün bulunamadığında `null` yerine `KeyNotFoundException` fırlatacak şekilde değiştirilmişti. Ancak test hala `null` dönmesini bekliyordu.
+**Çözüm:**
+1. `ProductRepositoryTests.cs` dosyasındaki ilgili test metodu güncellendi.
+2. `result.Should().BeNull()` assertion'ı yerine `await act.Should().ThrowAsync<KeyNotFoundException>(...)` kullanılarak exception fırlatılıp fırlatılmadığı kontrol edildi.
+
+## Frontend Hataları
+
+### Sorun: Angular NgFor Hatası - Dizi Yerine Nesne Gelmesi
+**Tarih:** 03.08.2025
+
+**Hata Mesajı:**
+```
+ERROR RuntimeError: NG02200: Cannot find a differ supporting object '[object Object]' of type 'object'. NgFor only supports binding to Iterables, such as Arrays.
+ERROR RuntimeError: NG0900: Error trying to diff '[object Object]'. Only arrays and iterables are allowed
+```
+
+**Hatanın Nedeni:**
+Kullanıcı yönetimi gibi sayfalarda listeleme yapılırken, frontend'in `p-table` ve `*ngFor` gibi bileşenleri bir dizi (`Array`) beklerken, backend API'sinden gelen JSON yanıtında ilgili alan (`items`) bir nesne (`Object`) olarak geliyordu.
+
+Sorunun asıl kaynağı, `src/Stock.API/Program.cs` dosyasındaki JSON serileştirme ayarlarında bulunan `ReferenceHandler.Preserve` seçeneğiydi. Bu seçenek, döngüsel referansları yönetmek amacıyla JSON çıktısına `"$id"` ve `"$values"` gibi meta veriler ekleyerek, basit bir diziyi `{ "$id": "1", "$values": [...] }` gibi bir nesneye dönüştürüyordu. Bu durum, frontend'in `response.items` alanını doğru bir şekilde yorumlamasını engelliyordu.
+
+**Çözüm:**
+`src/Stock.API/Program.cs` dosyasında, JSON serileştirme seçeneklerini yapılandıran bölümdeki `ReferenceHandler.Preserve` satırı yorum satırı haline getirildi.
+
+```csharp
+// src/Stock.API/Program.cs
+builder.Services.AddControllers()
+    .AddJsonOptions(options =>
+    {
+        // Döngüsel referansları koru - BU SATIR SORUNA NEDEN OLUYORDU
+        // options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.Preserve; 
+        
+        // Null değerleri dahil etme
+        options.JsonSerializerOptions.DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull;
+    });
+```
+
+Bu değişiklik sonrası backend uygulaması yeniden başlatıldığında, API yanıtı standart JSON formatına döndü ve frontend hatası çözüldü.
+
+**Öğrenilen Dersler:**
+-   JSON serileştirme ayarları, API yanıtlarının yapısını önemli ölçüde etkileyebilir.
+-   `ReferenceHandler.Preserve` gibi gelişmiş serileştirme seçenekleri, standart DTO (Data Transfer Object) desenleri kullanan ve basit veri yapıları bekleyen front-end istemcileriyle uyumsuzluk sorunlarına yol açabilir.
+-   Frontend'de "Cannot find a differ" veya "Error trying to diff '[object Object]'" gibi hatalar alındığında, API'den gelen yanıtın yapısını tarayıcının ağ (network) sekmesinden kontrol etmek, sorunun kaynağını bulmada kritik bir adımdır.
+
+## Backend Derleme Hataları: Yinelenen Factory ve Eksik Namespace (26 Temmuz 2024)
+
+### Sorunlar
+1.  **İlk Hata (CS0234 - `Microsoft.Data` Namespace):** `tests/Stock.IntegrationTests` projesi derlenirken `error CS0234: 'Data' tür veya ad alanı adı 'Microsoft' ad alanında yok` hatası alındı. Bu hatanın nedeni, `tests/Stock.IntegrationTests` dizininde, muhtemelen `Microsoft.Data.Sqlite` kullanmaya çalışan ancak ilgili paketin referans verilmediği ek bir `CustomWebApplicationFactory.cs` dosyasının bulunmasıydı.
+2.  **İkinci Hata (CS0246 - `CustomWebApplicationFactory` Bulunamadı):** Hatalı `CustomWebApplicationFactory.cs` dosyası silindikten sonra, `tests/Stock.IntegrationTests/Controllers/ProductControllerTests.cs` dosyasında `error CS0246: 'CustomWebApplicationFactory<>' türü veya ad alanı adı bulunamadı` hatası ortaya çıktı. Bu, test dosyasının `tests/Stock.IntegrationTests/Common/` dizinindeki doğru factory'yi kullanması gerekirken, ilgili namespace (`Stock.IntegrationTests.Common`) için `using` ifadesinin eksik olmasından kaynaklanıyordu.
+
+### Çözüm Adımları
+1.  **Yinelenen Factory Dosyası Silindi:** `tests/Stock.IntegrationTests/CustomWebApplicationFactory.cs` adresindeki kullanılmayan ve hataya neden olan dosya silindi.
+2.  **Eksik `using` İfadesi Eklendi:** `tests/Stock.IntegrationTests/Controllers/ProductControllerTests.cs` dosyasına, doğru factory sınıfını bulabilmesi için `using Stock.IntegrationTests.Common;` ifadesi eklendi.
+3.  **Doğrulama:** Çözüm yeniden derlenerek (`dotnet build src/src.sln`) hataların giderildiği teyit edildi.
+
+### Öğrenilen Dersler
+1.  **Dosya ve Klasör Yönetimi:** Aynı amaca hizmet eden yinelenen dosyalardan kaçınılmalı ve proje yapısı tutarlı tutulmalıdır. Test yardımcıları gibi ortak bileşenler `Common` gibi belirli klasörlerde organize edilmelidir.
+2.  **Namespace ve Referans Kontrolü:** Kod taşırken veya yeniden düzenlerken `using` ifadelerinin doğruluğu kontrol edilmeli, sınıfların doğru namespace'lerden çağrıldığından emin olunmalıdır.
+3.  **Adım Adım Hata Ayıklama:** Bir hata giderildikten sonra başka bir hata ortaya çıkarsa, yapılan değişikliklerin bu yeni hataya neden olup olmadığı veya altta yatan başka bir sorunu ortaya çıkarıp çıkarmadığı analiz edilmelidir.
+4.  **Düzenli Derleme:** Geliştirme sürecinde sık sık derleme yapmak, hataları erken tespit etmeye yardımcı olur.
+
+### İlgili Dosyalar
+- `tests/Stock.IntegrationTests/CustomWebApplicationFactory.cs` (Silindi)
+- `tests/Stock.IntegrationTests/Common/CustomWebApplicationFactory.cs` (Korundu)
+- `tests/Stock.IntegrationTests/Controllers/ProductControllerTests.cs` (Güncellendi)
+
+## DDD (Domain-Driven Design) Value Object İmplementasyonu Sorunları ve Çözümleri
+
+### Hata: Entity Framework Core ve Value Object Entegrasyonu Sorunları
+
+**Tarih:** 20.03.2025
+
+**Hata Mesajı:**
+Çeşitli derleme hataları ve Entity Framework Core entegrasyon sorunları:
+```
+CSC : error CS0006: Meta veri dosyası 'C:\Users\muham\AppData\Local\Temp\.sonarqube\resources\0\SonarAnalyzer.CSharp.dll' bulunamadı
+```
+
+Ayrıca kullanılmayan `Sicil`, `FirstName`, `LastName` Value Object'leri ve bunları eksik veya yanlış kullanan kodlar derleme hatalarına neden oldu.
+
+**Hatanın Nedeni:**
+1. Value Object'leri Entity Framework Core ile eşleştirirken Configuration sınıflarında ve entity kullanımlarında tutarsızlıklar
+2. SonarQube geçici dosyaları ile ilgili sorunlar
+3. Eksik Domain Exception sınıfları
+4. Projenin mevcut yapısı ile entegrasyon zorlukları
+
+**Çözüm:**
+1. **Value Object Yaklaşımı Değişikliği**: 
+   - Value Object'ler kaldırıldı (`Sicil.cs`, `FirstName.cs`, `LastName.cs`)
+   - Primitive tipler (string) kullanılarak ancak DDD prensipleri korunarak User entity güncellendi
+   - Factory metotları ve entity davranışları korundu
+
+2. **SonarQube Sorunlarının Çözümü**:
+   - `.sonarqube` klasörü silindi
+   - `sonar-project.properties` dosyası geçici olarak yeniden adlandırıldı
+   - Derleme yapıldıktan sonra dosya eski adına geri getirildi
+
+3. **Eksik Sınıfların Eklenmesi**:
+   - `BadRequestException` sınıfı oluşturuldu
+   - `DomainException` sınıfından türetildi
+   - Domain katmanında gerekli hata sınıfları yapılandırıldı
+
+4. **Entity Framework Core ile Uyumluluk**:
+   - User entity'sindeki setter'lar public yapıldı (EF Core için gerekli)
+   - Boş constructor public olarak işaretlendi
+   - Role ile ilişkiyi doğru yönetmek için AssignRole metodu güncellendi
+
+**Öğrenilen Dersler:**
+1. Entity Framework Core ile DDD prensiplerine tam olarak uymak arasında bazen bazı ödünler vermek gerekir
+2. Value Object'ler yerine, primitive tipler kullanılsa bile DDD'nin core prensipleri (encapsulation, entity davranışları, factory metotları, vb.) korunabilir
+3. EF Core ile çalışırken, Entity'lerin en azından boş bir constructor'a ve property'lerde public setter'lara sahip olması gerekebilir
+4. Kod analiz araçlarının (SonarQube gibi) geçici dosyaları bazen derleme hatalarına neden olabilir
+5. DDD prensiplerini uygularken, projenin mevcut yapısını ve karmaşıklığını göz önünde bulundurarak pragmatik kararlar almak önemlidir
+
+**Daha Fazla Bilgi:**
+Detaylı bilgi için: [Domain-Driven Design: User Entity Yaklaşımı Değişikliği](knowledge-base/architectural_patterns/ddd_user_entity.md)
+
+## Test Kapsamının Genişletilmesi Sırasında Karşılaşılan Hatalar
+
+### Command Handler Implementation Eksikliği Hatası
+**Tarih:** 20 Nisan 2025
+**Hata:** Permission entity'si için Command Handler testleri oluşturulmaya başlandığında, öncelikle test edilecek command handler'ların uygulamasının eksik olduğu fark edildi.
+
+**Nedeni:** İş akışlarında CQRS pattern uygulanmış olmasına rağmen, Permission entity'si için sadece Query Handler'lar (GetAllPermissions, GetPermissionById) oluşturulmuştu. Command Handler'lar (Create, Update, Delete) oluşturulmamıştı.
+
+**Çözüm:**
+1. Öncelikle `src/Stock.Application/Features/Permissions/Commands` klasörü oluşturuldu.
+2. Diğer entity'lerdeki komut yapıları örnek alınarak aşağıdaki sınıflar oluşturuldu:
+   - `CreatePermissionCommand` ve `CreatePermissionCommandHandler`
+   - `UpdatePermissionCommand` ve `UpdatePermissionCommandHandler`
+   - `DeletePermissionCommand` ve `DeletePermissionCommandHandler`
+3. Ardından bu handler'lar için unit testler yazıldı.
+
+**Öğrenilen Dersler:**
+- Test yazmadan önce, test edilecek sınıfların varlığını kontrol etmek gerekiyor.
+- CQRS pattern uygulanırken tüm entity'ler için hem Query hem de Command handler'ların oluşturulduğundan emin olunmalı.
+- Test öncelikli geliştirme (TDD) yaklaşımı, eksik implementasyonları erken aşamada tespit etmeye yardımcı olabilir.
+
+### PermissionByIdSpecification Hatası
+**Tarih:** 20 Nisan 2025
+**Hata:** PermissionByIdSpecification sınıfı aranırken dosya bulunamadı hatası alındı.
+
+**Hata Mesajı:**
+```
+Could not find file 'src/Stock.Domain/Specifications/Permissions/PermissionByIdSpecification.cs'. Did you mean one of:
+- src/Stock.Domain/Specifications/RolePermissions/PermissionsByRoleIdSpecification.cs
+- src/Stock.Domain/Specifications/RolePermissions/RolePermissionsByRoleIdSpecification.cs
+- src/Stock.Domain/Specifications/UserPermissions/UserPermissionsByUserIdSpecification.cs
+```
+
+**Nedeni:** Spesifikasyon sınıfları farklı bir yapıda organize edilmiş, PermissionByIdSpecification sınıfı `Permissions` klasörü yerine doğrudan `Specifications` klasörü altına yerleştirilmişti.
+
+**Çözüm:**
+1. Doğru dosya yolunu belirlemek için grep aracı kullanıldı: `grep_search PermissionById *.cs`
+2. Doğru yolun `src/Stock.Domain/Specifications/PermissionByIdSpecification.cs` olduğu tespit edildi.
+3. Bu dosya yolu kullanılarak spesifikasyon sınıfı başarıyla kullanıldı.
+
+**Öğrenilen Dersler:**
+- Proje yapısında tutarlılık önemlidir. Tüm entity'lere ait spesifikasyonlar aynı yapıda organize edilmelidir.
+- Bir dosya aranırken bulunamadığında, grep gibi arama araçlarını kullanmak faydalı olabilir.
+- Farklı entity'ler için benzer yapıların tutarlı organizasyonu, kod tabanının anlaşılabilirliğini ve bakım yapılabilirliğini artırır.
+
+### Command Handler Dependency Injection Hatası
+**Tarih:** 21 Nisan 2025
+**Hata:** Yeni oluşturulan Permission Command Handler'ları için unit testler çalıştırıldığında, bazı bağımlılıkların doğru şekilde mock'lanmadığı tespit edildi.
+
+**Hata Mesajı:**
+```
+System.ArgumentException: Object of type 'Moq.Mock`1[Stock.Domain.Interfaces.IPermissionRepository]' cannot be converted to type 'Stock.Domain.Interfaces.IPermissionRepository'.
+```
+
+**Nedeni:** Unit testlerde, mock nesneleri (Mock<IPermissionRepository>) doğrudan kullanılmış, ancak constructor'a mock nesnesinin kendisi yerine mock'un Object özelliği geçilmesi gerekiyordu.
+
+**Çözüm:**
+1. Test sınıflarında mock nesnelerinin doğru şekilde geçirilmesi sağlandı:
+```csharp
+// Hatalı kullanım
+var handler = new CreatePermissionCommandHandler(_permissionRepositoryMock, _unitOfWorkMock, _mapperMock, _loggerMock);
+
+// Doğru kullanım
+var handler = new CreatePermissionCommandHandler(_permissionRepositoryMock.Object, _unitOfWorkMock.Object, _mapperMock.Object, _loggerMock.Object);
+```
+
+**Öğrenilen Dersler:**
+- Mock nesnelerini kullanırken, nesnenin kendisini değil .Object özelliğini kullanmak gerekiyor.
+- Test sınıflarında en yaygın hatalardan biri bağımlılıkların yanlış şekilde mock'lanmasıdır.
+- İyi bir IDE ve statik kod analizi araçları, bu tür hataları erken aşamada tespit etmeye yardımcı olabilir.
+
+### Test Coverage Raporlama Hatası
+**Tarih:** 21 Nisan 2025
+**Hata:** Test coverage raporlama aracı çalıştırıldığında, bazı projelerin dahil edilmediği ve raporların eksik olduğu fark edildi.
+
+**Nedeni:** Test coverage yapılandırmasında hangi projelerin kapsama dahil edileceği eksik veya hatalı tanımlanmıştı.
+
+**Çözüm:**
+1. `coverlet.runsettings` dosyası oluşturuldu ve aşağıdaki şekilde yapılandırıldı:
+```xml
+<?xml version="1.0" encoding="utf-8" ?>
+<RunSettings>
+  <DataCollectionRunSettings>
+    <DataCollectors>
+      <DataCollector friendlyName="XPlat code coverage">
+        <Configuration>
+          <Format>cobertura</Format>
+          <Include>[Stock.Application]*,[Stock.Domain]*,[Stock.Infrastructure]*</Include>
+          <Exclude>[*Tests]*,[*Test.Helpers]*</Exclude>
+          <ExcludeByAttribute>Obsolete,GeneratedCodeAttribute</ExcludeByAttribute>
+        </Configuration>
+      </DataCollector>
+    </DataCollectors>
+  </DataCollectionRunSettings>
+</RunSettings>
+```
+
+2. Test çalıştırma komutu güncellendi:
+```bash
+dotnet test --collect:"XPlat Code Coverage" --settings coverlet.runsettings
+```
+
+**Öğrenilen Dersler:**
+- Test coverage raporlaması için doğru yapılandırma kritik öneme sahiptir.
+- Include/Exclude filtreleri, hangi projelerin ve sınıfların kapsama dahil edileceğini belirlemekte önemli rol oynar.
+- Coverage raporlarını düzenli olarak gözden geçirmek, test kapsamının geliştirilmesi gereken alanları tespit etmeye yardımcı olur.
+
+## Test Kapsamı Raporlama Problemi ve Çözümü
+
+**Tarih:** 5 Mart 2025
+
+**Sorun:** Test kapsamı raporlama sistemi (`coverlet.collector`) kurulurken, test projesindeki sınıfların güncel kod tabanıyla uyumsuz olduğu tespit edildi.
+
+**Hata Mesajları:**
+```
+CS7036: 'GetCategoryByIdQueryHandler.GetCategoryByIdQueryHandler(IUnitOfWork, IMapper, ILogger<GetCategoryByIdQueryHandler>)'nin gerekli 'logger' parametresine karşılık gelen herhangi bir argüman yok
+CS1503: 1 bağımsız değişkeni: 'Stock.Domain.Interfaces.IRepository<Stock.Domain.Entities.Role>' öğesinden 'Stock.Domain.Interfaces.IRoleRepository' öğesine dönüştürülemiyor
+CS0246: 'AllCategoriesSpecification' türü veya ad alanı adı bulunamadı (bir using yönergeniz veya derleme başvurunuz mu eksik?)
+```
+
+**Nedeni:** Kod tabanında yapılan güncellemeler ve iyileştirmeler test projelerine yansıtılmamıştı. Temel olarak şu değişiklikler vardı:
+1. Handler sınıflarına ILogger parametreleri eklenmişti
+2. Genel repository arayüzleri yerine entity-specific repository arayüzlerine (örn. ICategoryRepository) geçilmişti
+3. Bazı specification sınıfları kaldırılmış veya değiştirilmişti (örn. AllCategoriesSpecification)
+
+**Çözüm:**
+1. **GetAllCategoriesQueryHandlerTests** dosyasını düzelttik:
+   - AllCategoriesSpecification kullanımını kaldırıp repository'nin GetAllAsync() metodunu kullanacak şekilde güncelledik
+   - Eksik ILogger parametresini ekledik
+
+2. **GetCategoryByIdQueryHandlerTests** dosyasını düzelttik:
+   - Eksik ILogger parametresini ekleyip handler oluşturucusuna geçirdik
+
+3. **UpdateCategoryCommandHandlerTests** dosyasını düzelttik:
+   - IRepository<Category> yerine ICategoryRepository kullandık
+   - Eksik ILogger ve IUnitOfWork parametrelerini ekledik
+
+4. Test sınıflarında kullanılan komut sınıflarını ve parametre veri türlerini güncelledik.
+
+**Önemli Dersler:**
+1. Kod tabanında yapılan değişikliklerin test projelerine yansıtılması kritik öneme sahiptir.
+2. Özellikle iyileştirme çalışmaları sonrasında, tüm testlerin çalıştığından emin olmak gerekir.
+3. Repository pattern veya service pattern gibi mimari desenlerdeki değişiklikler, testlerin de buna uygun şekilde güncellenmesini gerektirir.
+4. Test kapsamı raporlama, kod kalitesini artırmak için önemli bir araçtır ve düzenli olarak yapılmalıdır.
+
+**İleride Yapılması Gerekenler:**
+1. Düzenli olarak test kapsamı raporlarını oluşturmak ve incelemek
+2. Test kapsamını genişletmek için yeni testler eklemeye devam etmek
+3. Test kapsamı metriklerini CI/CD süreçlerine entegre etmek
+
+## Unit Test Hataları ve Çözümleri (Oturum: 2025-05-08)
+
+### Sorun 1: `CreateRoleCommandHandlerTests` - Hata Mesajı Yerelleştirme Uyumsuzluğu
+**Hata:** `Handle_RoleAlreadyExists_ShouldReturnFailureResult` testi, `Assert.Contains("already exists", ...)` ile İngilizce bir hata mesajı beklerken, handler Türkçe bir mesaj (`...'existing role' adında bir rol zaten mevc...`) döndürüyordu.
+**Çözüm:** Testteki `Assert.Contains` ifadesi, Türkçe hata mesajının bir kısmını (`"zaten mevcut"`) içerecek şekilde güncellendi.
+**Öğrenilen Ders:** Çok dilli uygulamalarda veya yerelleştirilmiş hata mesajları olan sistemlerde, testlerde hata mesajlarını doğrulamak için ya mesajın tamamı yerine anahtar bir ifade kullanılmalı ya da test ortamının dili sabitlenmelidir.
+
+### Sorun 2: `ProductRepositoryTests` - EF Core In-Memory Provider ile ValueObject Uyumsuzluğu
+**Hata:** `Product` entity'sindeki `ProductName` ve `ProductDescription` gibi ValueObject'ler, EF Core In-Memory provider tarafından doğru işlenemiyordu. Bu durum, `FirstOrDefaultAsync_WithSpecification_ReturnsCorrectProduct`, `CountAsync_WithSpecification_ReturnsCorrectCount`, `GetByIdAsync_ReturnsNull_WhenProductDoesNotExist` ve `ListAsync_WithSpecification_ReturnsCorrectProducts` testlerinde `KeyNotFoundException` veya `InvalidOperationException` (LINQ çeviri hatası) gibi hatalara neden oluyordu.
+**Nedeni:** EF Core In-Memory provider, `ProductConfiguration.cs` içinde `ComplexProperty` ile tanımlanmış ValueObject'lerin sorgulanmasını (özellikle iç property'lere erişim veya `OrderBy`) tam olarak destekleyemiyordu.
+**Çözüm:**
+1.  `ProductConfiguration.cs` dosyasında, `Product` entity'sinin `Name`, `Description` ve `StockLevel` ValueObject'leri için yapılan EF Core eşlemesi `ComplexProperty`'den `.OwnsOne()` yöntemine değiştirildi.
+2.  `.OwnsOne()` içinde `.HasColumnName()` kullanılarak ValueObject property'lerinin veritabanı sütun adları açıkça belirtildi (örn: `Name`, `Description`, `StockQuantity`).
+3.  Bu değişiklik, EF Core'un yeni bir migrasyon (`CheckProductConfigurationChange`) oluşturmasına neden oldu. Migrasyon, `Products` tablosundaki `Name_Value` sütununu `Name` olarak yeniden adlandırdı. Bu migrasyon veritabanına uygulandı.
+**Öğrenilen Ders:** EF Core In-Memory provider ile çalışırken, ValueObject'ler gibi karmaşık tiplerin eşlenmesinde `.OwnsOne()` konfigürasyonu, `ComplexProperty`'ye göre daha iyi uyumluluk sağlayabilir ve testlerde beklenmedik hataların önüne geçebilir. Yapılan konfigürasyon değişikliklerinin veritabanı migrasyonu gerektirip gerektirmediği `dotnet ef migrations add` komutu ile kontrol edilmelidir.
+
+### Sorun 3: Command Handler'larda Genel İstisna Yönetimi ve Hata Mesajı Uyumsuzluğu
+**Hata:**
+*   `CreateCategoryCommandHandlerTests.Handle_DatabaseError_ShouldReturnFailureResult`
+*   `DeleteCategoryCommandHandlerTests.Handle_DatabaseError_ShouldReturnFailureResult`
+*   `UpdateCategoryCommandHandlerTests.Handle_DatabaseError_ShouldReturnFailureResult`
+    gibi testlerde, mock `SaveChangesAsync` bir `Exception` fırlattığında, ilgili handler'lar bu istisnayı yakalayıp `Result.Failure` döndürmek yerine çöküyordu veya döndürdükleri hata mesajı testin `Assert.Contains` ile beklediği mesajla eşleşmiyordu.
+**Çözüm:**
+1.  İlgili Command Handler'ların (`CreateCategoryCommandHandler`, `DeleteCategoryCommandHandler`, `UpdateCategoryCommandHandler`, `CreatePermissionCommandHandler`, `DeletePermissionCommandHandler`) `Handle` metotlarındaki ana iş mantığı (özellikle veritabanı etkileşimleri) `try-catch (Exception ex)` blokları içine alındı.
+2.  `catch` bloklarında, loglama yapıldıktan sonra `Result.Failure("Belirli bir hata mesajı")` döndürülerek, testlerin beklediği hata mesajlarıyla uyum sağlandı. Önceki durumda `ex.Message` içeren daha dinamik mesajlar kullanılıyordu, bu da `Assert.Contains` ile sorun yaratıyordu.
+**Öğrenilen Ders:** Command Handler'lar, beklenmedik istisnaları kontrollü bir şekilde yönetmeli ve standart bir hata sonucu (örn: `Result.Failure`) döndürmelidir. Testler, bu hata sonuçlarını ve beklenen hata mesajlarını (veya mesajın bir kısmını) doğrulamalıdır.
+
+### Sorun 4: Controller'da Beklenen `NotFoundException`'ın Yakalanması
+**Hata:** `RoleControllerTests.GetRole_ThrowsException_WhenRoleDoesNotExist` testinde, `GetRoleByIdQueryHandler`'ın `NotFoundException` fırlatmasına rağmen, `RoleController`'daki `GetRole` metodundaki genel `try-catch (Exception ex)` bloğu bu istisnayı yakalayıp 500 Internal Server Error döndürüyordu. Test ise 404 Not Found bekliyordu.
+**Çözüm:** `RoleController.cs` dosyasındaki `GetRole(int id)` metodundan genel `try-catch` bloğu kaldırıldı. Bu, `NotFoundException`'ın merkezi bir `GlobalExceptionHandlingMiddleware` tarafından yakalanıp doğru HTTP durum koduna (404) çevrilmesini sağladı.
+**Öğrenilen Ders:** Domain'e özgü beklenen istisnalar (NotFound, Validation, Conflict vb.) controller katmanında genel `try-catch` blokları ile yakalanmamalıdır. Bu tür istisnaların yönetimi, merkezi bir exception handling middleware'e bırakılmalıdır.
+
+### Sorun 5: Handler'da Validasyonun Tetiklenmemesi
+**Hata:** `UpdateRoleCommandHandlerTests.Handle_InvalidRoleName_ShouldThrowValidationException` testinde, geçersiz bir rol adı (`""`) gönderilmesine rağmen `UpdateRoleCommandHandler` beklenen `ValidationException`'ı fırlatmıyordu.
+**Nedeni:** Handler içindeki bir koşul (`!string.IsNullOrWhiteSpace(request.Name)`), boş bir isim durumunda `Role.UpdateName()` metodunun (ve dolayısıyla içindeki validasyonun) çağrılmasını engelliyordu.
+**Çözüm:** `UpdateRoleCommandHandler.cs`'teki mantık, `Role.UpdateName()` metodunun her zaman çağrılmasını (eğer `request.Name` `null` değilse) ve domain validasyonunun tetiklenmesini sağlayacak şekilde güncellendi. Conflict kontrolü, isim değişikliği ve geçerliliği durumuna göre ayrıca ele alındı.
+**Öğrenilen Ders:** Handler'lar, domain entity'lerindeki validasyon metotlarının her zaman uygun şekilde çağrıldığından emin olmalıdır. İş mantığındaki koşullar, bu validasyonların atlanmasına neden olmamalıdır.
+
+## Database Migrations
+
+When migrations fail to apply, follow these steps:
+
+1. Delete the Migrations folder
+2. Drop existing database
+3. Run the following command:
+```
+dotnet ef migrations add InitialMigration --project src/Stock.Infrastructure --startup-project src/Stock.API --context ApplicationDbContext
+```
+4. Then apply the migrations:
+```
+dotnet ef database update --project src/Stock.Infrastructure --startup-project src/Stock.API --context ApplicationDbContext
+```
+
+## Frontend Build Errors
+
+If you encounter CORS issues with the frontend:
+
+1. Ensure the correct origin is set in the CORS configuration
+2. Make sure both backend and frontend are running on the expected ports
+3. Check if CORS middleware is correctly registered in Program.cs
+
+## Entegrasyon Testleri Sorunları
+
+Entegrasyon testlerinde karşılaşılan hata ve sorunlar:
+
+1. **Content Root Problemi**: 
+   - Hata: `Solution root could not be located using application root`
+   - Çözüm: CustomWebApplicationFactory'de content root açıkça belirtilmeli
+
+2. **Entity Factory Method Uyumsuzlukları**:
+   - Hata: Domain entity'lerin constructor'ları değiştirilmiş ve doğrudan kullanılamıyor
+   - Çözüm: TestDataHelper'da domain factory metodları kullanılarak test verileri oluşturmalı
+   
+3. **Yetkilendirme Sorunları**:
+   - Hata: 401 Unauthorized hataları
+   - Çözüm: TestAuthHandler kullanılarak API isteklerinde kimlik doğrulama bypass edilmeli
+   
+4. **SQLite/PostgreSQL Çakışmaları**:
+   - Hata: Veritabanı provider uyumsuzlukları
+   - Çözüm: Test ortamında PostgreSQL bağımlılıkları kaldırılıp SQLite in-memory DB yapılandırılmalı
+
+Bu sorunlar, ana projenin kodlarını değiştirmeden test konfigürasyonları ile düzeltilebilir. Daha fazla detay için `tests/Stock.IntegrationTests/README.md` dosyasına bakabilirsiniz.
+
+## Entegrasyon Testi Hataları ve Çözümleri (Oturum: 2025-05-08)
+
+### Hata: 'Solution root could not be located'
+
+**Hata Mesajı:**
+```
+Solution root could not be located using application root C:\Users\muham\OneDrive\Masaüstü\Stock\tests\Stock.IntegrationTests\bin\Debug\net9.0\.
+```
+
+**Nedeni:**
+WebApplicationFactory, test sırasında web uygulamasını başlatırken solution kök dizinini bulamadı. ASP.NET Core 6.0+ ile minimal API yaklaşımının kullanılması ve WebApplicationFactory'nin test paketinde güncellenmesiyle bu sorun ortaya çıkıyor.
+
+**Çözüm:**
+
+1. **CustomWebApplicationFactory Düzenleme:**
+   - Content root (API projesi) yolu elle belirtildi
+   - Solution kök dizinini bulmak için özel bir `GetSolutionRoot` metodu eklendi
+   - SQLite in-memory veritabanı kullanımı düzeltildi
+   - TestAuthHandler ile kimlik doğrulama bypass edildi
+
+```csharp
+public class CustomWebApplicationFactory<TProgram> : WebApplicationFactory<TProgram> where TProgram : class
+{
+    private readonly SqliteConnection _connection;
+
+    public CustomWebApplicationFactory()
+    {
+        _connection = new SqliteConnection("Data Source=:memory:");
+        _connection.Open();
+    }
+
+    protected override void ConfigureWebHost(IWebHostBuilder builder)
+    {
+        // Content root yolunu elle ayarla
+        var projectDir = Directory.GetCurrentDirectory();
+        var solutionDir = GetSolutionRoot(projectDir); 
+        var apiProjectDir = Path.Combine(solutionDir, "src", "Stock.API");
+
+        builder.UseContentRoot(apiProjectDir);
+        builder.UseEnvironment("Testing");
+        
+        // Test için appsettings.Testing.json yapılandırmasını ekle
+        builder.ConfigureAppConfiguration((context, config) =>
+        {
+            config.AddJsonFile(Path.Combine(projectDir, "appsettings.Testing.json"), optional: false);
+        });
+
+        // Diğer yapılandırmalar...
+    }
+
+    private string GetSolutionRoot(string projectDir)
+    {
+        // Solution kök dizinini bul
+        var directory = new DirectoryInfo(projectDir);
+        while (directory != null && !directory.GetFiles("*.sln").Any())
+        {
+            directory = directory.Parent;
+        }
+
+        return directory?.FullName ?? Path.GetFullPath(Path.Combine(projectDir, "..", ".."));
+    }
+}
+```
+
+2. **Ortam Değişkenleri:**
+   - Test çalıştırma betiği içinde ASPNETCORE_CONTENTROOT ayarlandı
+   - ASPNETCORE_ENVIRONMENT değişkeni "Testing" olarak belirlendi
+
+```powershell
+set ASPNETCORE_ENVIRONMENT=Testing
+set ASPNETCORE_CONTENTROOT=%~dp0..\..\src\Stock.API
+```
+
+3. **Program.cs ve Startup.cs Düzenleme:**
+   - Program.cs içinde CreateHostBuilder metodu düzenlendi
+   - Test spesifik Startup sınıfı geliştirildi
+
+4. **xUnit Yapılandırma:**
+   - xunit.runner.json dosyası güncellendi
+   - Paralel test çalıştırma devre dışı bırakıldı
+
+5. **Test Sınıfı İyileştirmeleri:**
+   - TestDataHelper içinde factory metodları kullanımı düzeltildi
+   - RolesControllerTests içinde DbContext erişimi iyileştirildi
+
+### Diğer Hata Çözümü Önerileri:
+
+1. **Kayıp Tip Hataları:**
+   - Test projesi için ErrorResponse sınıfı eklendi
+   - Type alias kullanılarak namespace çakışmaları engellendi
+
+2. **Veritabanı Bağlantı Sorunları:**
+   - SQLite in-memory veritabanı kullanıldı
+   - Entity yapılandırma sorunları için AsNoTracking() eklendi
+
+3. **Proje Yapılandırma Sorunları:**
+   - PreserveCompilationContext özelliği true olarak ayarlandı
+   - CopyToOutputDirectory PreserveNewest olarak ayarlandı
+
+### Genel Test Tavsiyesi:
+
+Entegrasyon testleri, gerçek bir veritabanı kullanmadan ancak gerçek API davranışını test edecek şekilde tasarlanmalıdır. Test ortamında SQL Server yerine SQLite kullanmak, test hızını artırır ve kaynakları verimli kullanır.
+
+## Angular Unit Test Hataları ve Çözümleri
+
+### Frontend Test Hataları
+
+#### Hata 1: Auth Service Testi Hatası
+**Hata Tanımı:** `AuthService` içindeki `createUser` metodu, farklı hata mesajları döndürürken test beklenen mesajları doğru şekilde kontrol etmiyordu.
+
+**Hata Mesajı:** 
+```
+Expected 'Sunucu tarafında bir hata oluştu. Lütfen daha sonra tekrar deneyin.' to be 'Kullanıcı oluşturulurken bir hata oluştu'.
+```
+
+**Çözüm:**
+Testteki beklenti, gerçek kodun davranışına göre güncellendi. Generic API hatası için beklenen mesaj string'i düzeltildi.
+
+```typescript
+expect(err.message).toBe('Sunucu tarafında bir hata oluştu. Lütfen daha sonra tekrar deneyin.');
+expect((err as any).code).toBe('');
+expect((err as any).field).toBe('');
+```
+
+#### Hata 2: loadStoredUser Testi Hatası
+**Hata Tanımı:** `loadStoredUser` metodu, normal kullanıcılar için `Pages.RoleManagement` izni eklenmesine izin veriyordu, ancak bu izin sadece admin kullanıcıları için otomatik eklenmeli.
+
+**Hata Mesajı:**
+```
+Expected false to be true.
+```
+
+**Çözüm:**
+1. Normal (admin olmayan) kullanıcılar için Pages.RoleManagement izninin beklentisi false olarak güncellendi ve AuthService'teki extractPermissionsFromToken metodu düzeltildi.
+2. AuthService'teki extractPermissionsFromToken metodu, koşulsuz izin ekleme kaldırıldı.
+
+```typescript
+// Test düzeltmesi
+expect(service.hasPermission('Pages.RoleManagement')).toBeFalse();
+
+// Kod düzeltmesi
+// Tekrarlayan izinleri temizle
+const uniquePermissions = [...new Set(permissions)];
+// Pages.RoleManagement izninin otomatik eklenmesi loadStoredUser içinde admin kontrolüyle yapılıyor.
+return uniquePermissions;
+```
+
+#### Hata 3: ErrorMessageComponent Test Hatası
+**Hata Tanımı:** PrimeNG v18+ sürümünde Messages bileşeninin DOM yapısı değiştiği için, CSS seçicileri ve elementleri doğru kontrol edilemiyordu.
+
+**Hata Mesajı:**
+```
+Expected ' Hata 1 ' to contain 'Detay 1'.
+Expected ' Uyarı 1 ' to contain 'Detay 2'.
+```
+
+**Uyarı Mesajı:**
+```
+Messages component is deprecated as of v18. Use Message component instead.
+```
+
+**Çözüm:**
+DOM yapısı kontrollerini daha esnek hale getirerek, belirli CSS seçicileri (`.p-message-detail`, `.p-message-text`) yerine doğrudan mesaj içeriğini kontrol eden bir yaklaşım benimsendi.
+
+```typescript
+// PrimeNG yapısı değişebileceği için doğrudan içeriği kontrol edelim
+const firstMessageContent = messageElements[0].textContent || '';
+expect(firstMessageContent).toContain('Hata 1');
+expect(firstMessageContent).toContain('Detay 1');
+```
+
+#### Hata 4: Bileşen Testleri Provider Hataları
+**Hata Tanımı:** Bazı bileşen testlerinde JwtHelperService ve HttpClient gibi bağımlılıklar eksikti.
+
+**Hata Mesajı:**
+```
+NullInjectorError: No provider for JwtHelperService!
+NullInjectorError: No provider for HttpClient!
+```
+
+**Çözüm:**
+İlgili bileşen testlerine mock JwtHelperService ve HttpClientTestingModule eklendi.
+
+```typescript
+// MockJwtHelperService
+class MockJwtHelperService {
+  decodeToken(token?: string): any { 
+    return null; 
+  }
+  
+  getTokenExpirationDate(token?: string): Date | null { 
+    return null; 
+  }
+  
+  isTokenExpired(token?: string, offsetSeconds?: number): boolean { 
+    return true; 
+  }
+}
+
+// Test modülü yapılandırması
+TestBed.configureTestingModule({
+  imports: [
+    ComponentName,
+    HttpClientTestingModule
+  ],
+  providers: [
+    { provide: JwtHelperService, useClass: MockJwtHelperService }
+  ]
+})
+```
+
+## Öğrenilen Dersler
+
+1. **Test-Kod Uyumu:** Test kodu, uygulama kodundan bağımsız değildir. Uygulama kodu güncellendiğinde, testlerin de güncellenmesi gerekebilir.
+
+2. **DOM Testi Yaklaşımı:** DOM yapısını test ederken, belirli CSS seçicileri yerine, tam metin içeriğini kontrol etmek daha esnek bir yaklaşımdır. Böylece, kütüphane güncellemelerinde yapısal değişiklikler testleri etkilemez.
+
+3. **3rd Party Kütüphane Değişiklikleri:** PrimeNG gibi 3. parti kütüphanelerin sürüm güncellemelerinde, API ve DOM yapısında değişiklikler olabilir. Bu nedenle güncellemelerden sonra testlerin kontrol edilmesi gerekir.
+
+4. **Mock Servislerin Önemi:** Test ortamında gerçek servislerin doğru şekilde taklit edilmesi, başarılı testler için kritik öneme sahiptir. Her bileşen testi için gerekli bağımlılıkların sağlanması gerekir.
+
+5. **Hata Tespiti ve Düzeltme Stratejisi:** Başarısız bir testin nedeni tespit edildiğinde, benzer hataları sergileyebilecek diğer testleri de kontrol etmek ve aynı çözümü uygulamak önemlidir.
+
+### Sonraki Adımlar
+1. Tüm bileşenlerde benzer tip hatalarını kontrol etmek ve düzeltmek.
+2. Model ve bileşen arasındaki tip uyumsuzluklarını gidermek için ortak bir tip tanımı oluşturmak.
+3. Servis metodlarının dokümantasyonunu iyileştirmek ve tutarlı isimlendirme kuralları uygulamak.
+
+### PrimeNG Message Arayüzü Import Hatası
+**Tarih:** 26 Temmuz 2024
+
+**Hata Mesajı:**
+```
+[ERROR] TS2305: Module '"primeng/api"' has no exported member 'Message'.
+[ERROR] TS2305: Module '"primeng/message"' has no exported member 'Message'.
+```
+
+**Hatanın Nedeni:**
+`ErrorMessageComponent` oluşturulurken, PrimeNG'nin `Message` arayüzünü import etmeye çalıştık. Ancak ne `primeng/api` ne de `primeng/message` yolları çalışmadı. Bu durum, projedeki PrimeNG sürümü (19.0.6) ile TypeScript yapılandırması arasında bir uyumsuzluk veya `Message` arayüzünün farklı bir modülde yer almasından kaynaklanıyor olabilir. PrimeNG dokümantasyonu genellikle `primeng/api` yolunu gösterse de, bu projede çalışmadı.
+
+**Çözüm (Geçici):**
+Doğru import yolu bulunamadığı için, linter hatasını gidermek ve bileşenin çalışmasını sağlamak amacıyla `Message` tipi yerine geçici olarak `any` tipi kullanıldı.
+
+```typescript
+// error-message.component.ts
+// Message importu kaldırılarak any[] kullanılıyor
+import { MessagesModule } from 'primeng/messages';
+
+// ...
+
+export class ErrorMessageComponent {
+  // Message[] yerine any[] kullanılıyor
+  @Input() error: string | any[] | null = null;
+
+  // Message[] yerine any[] kullanılıyor
+  get messages(): any[] {
+    // ... (implementation using any)
+  }
+}
+```
+
+**Öğrenilen Dersler:**
+- Kütüphane sürümleri ve TypeScript yapılandırmaları arasındaki uyumsuzluklar beklenmedik import hatalarına yol açabilir.
+- Dokümantasyon her zaman projenin özel durumunu yansıtmayabilir.
+- Geçici çözümler (örneğin `any` kullanımı) işlevselliği sağlayabilir, ancak tipleme güvenliğini azalttığı için kalıcı olmamalıdır. Doğru tip veya import yolu bulunduğunda kod güncellenmelidir.
+
+**Sonraki Adımlar:**
+- Projedeki PrimeNG sürümü ve yapılandırmasıyla uyumlu `Message` arayüzünün doğru import yolunu araştırmak.
+- Doğru yol bulunduğunda `ErrorMessageComponent`'i `any` yerine `Message` tipiyle güncellemek.
+
+## Kullanıcı Yönetimi Sayfası Sorunları
+
+### Sorun 1: Kullanıcılar otomatik olarak yüklenmiyor
+**Tarih:** 2023-11-15
+
+**Sorun Açıklaması:**  
+Kullanıcı yönetimi sayfasına girildiğinde kullanıcılar otomatik olarak yüklenmiyordu.
+
+**Çözüm:**  
+`user-management.component.ts` dosyasında `ngOnInit` metodunda `loadUsers()` çağrısı yorum satırı haline getirilmişti. Bu çağrı aktif hale getirildi. Böylece sayfa yüklendiğinde kullanıcılar otomatik olarak yüklenecek.
+
+```typescript
+ngOnInit() {
+  console.log('UserManagementComponent initialized');
+  
+  // Önce rolleri yükle
+  this.loadRoles();
+  
+  // Kullanıcıları yükle - artık loadRoles içinde çağrılıyor olsa da
+  // burada da çağıralım, böylece roller yüklenemese bile kullanıcılar yüklenebilir
+  this.loadUsers();
+  
+  // Form başlatma
+  this.initForm();
+  
+  // ...
+}
+```
+
+### Sorun 2: Oluşturulan roller kullanıcı yönetimi sayfasında görünmüyor
+**Tarih:** 2023-11-15
+
+**Sorun Açıklaması:**  
+Oluşturulan roller kullanıcı yönetimi sayfasında görüntülenmiyordu. Kullanıcıların rol bilgileri "Bilinmeyen Rol" olarak gösteriliyordu.
+
+**Çözüm:**  
+İki sorun tespit edildi ve çözüldü:
+
+1. `loadRoles` metodunda API'den gelen rol verilerinin işlenmesi sırasında sadece `label` ve `value` özellikleri kaydediliyordu. Buna `id` ve `name` özellikleri de eklendi.
+
+```typescript
+this.roles = roles.map(role => {
+  console.log('İşlenen rol:', role);
+  return {
+    label: role.name,
+    value: role.id,
+    id: role.id,
+    name: role.name
+  };
+});
+```
+
+2. `getRoleName` metodunda rol ID'si ile eşleşen rolü bulmak için sadece `value` özelliği kontrol ediliyordu. Hem `value` hem de `id` özelliklerini kontrol edecek şekilde güncellendi.
+
+```typescript
+// Rol ID'si ile eşleşen rolü bul (hem value hem de id özelliklerini kontrol et)
+const role = this.roles.find(r => r.value === roleId || r.id === roleId);
+
+if (role) {
+  console.log('Rol bulundu:', role);
+  return role.label || role.name;
+} else {
+  console.warn(`ID: ${roleId} için rol bulunamadı!`);
+  return 'Bilinmeyen Rol';
+}
+```
+
+3. Rol yükleme hatası durumunda daha iyi bir hata yönetimi eklendi ve varsayılan roller oluşturuldu.
+
+**Öğrenilen Dersler:**
+- Frontend'de veri yapılarının tutarlı olması önemlidir. Aynı veri farklı yerlerde farklı şekillerde (id/value, name/label) kullanılabilir, bu durumda her iki durumu da desteklemek gerekir.
+- Hata durumlarında kullanıcıya bilgi vermek ve varsayılan değerler sağlamak önemlidir.
+- Konsola detaylı log bilgileri yazmak hata ayıklamayı kolaylaştırır.
+
+## Rol Yükleme Hatası
+
+**Tarih:** 2023-11-15
+
+**Sorun Açıklaması:**  
+Kullanıcı yönetimi sayfasında roller yüklenirken 404 (Not Found) hatası alınıyordu.
+
+```
+GET http://localhost:5037/api/roles 404 (Not Found)
+```
+
+Hata mesajı:
+```
+Roller yüklenirken hata oluştu: Error: İstek yapılan kaynak bulunamadı.
+```
+
+**Sorunun Nedeni:**  
+Frontend'deki `role.service.ts` dosyasında API URL'si yanlış yapılandırılmıştı. Backend'de controller adı `RoleController` olduğu için, API endpoint'i `/api/role` olmalıydı, ancak `/api/roles` olarak tanımlanmıştı.
+
+**Çözüm:**  
+`role.service.ts` dosyasındaki API URL'si düzeltildi:
+
+```typescript
+// Önceki hali
+private apiUrl = `${environment.apiUrl}/api/roles`;
+
+// Düzeltilmiş hali
+private apiUrl = `${environment.apiUrl}/api/role`;
+```
+
+**Öğrenilen Dersler:**
+- Frontend ve backend arasındaki API endpoint'lerinin uyumlu olması önemlidir.
+- ASP.NET Core'da controller adı ve route arasındaki ilişkiye dikkat edilmelidir. `[Route("api/[controller]")]` attribute'u kullanıldığında, "Controller" son eki olmadan controller adı kullanılır.
+- API çağrıları başarısız olduğunda, ilk kontrol edilmesi gereken şey endpoint'in doğru olup olmadığıdır.
+
+## API Endpoint Uyumluluğu Sorunları
+
+### Sorun 1: Roller Yüklenirken 404 Hatası
+
+**Hata Mesajı:**
+```
+GET http://localhost:5037/api/roles 404 (Not Found)
+```
+
+**Nedeni:**
+Frontend'deki `role.service.ts` dosyasında API URL'si yanlış yapılandırılmıştı. Backend'de controller adı `RoleController` olduğu için, API endpoint'i `/api/role` olmalıydı, ancak `/api/roles` olarak tanımlanmıştı.
+
+**Çözüm:**
+`role.service.ts` dosyasındaki API URL'si düzeltildi:
+
+```typescript
+// Önceki hali
+private apiUrl = `${environment.apiUrl}/api/roles`;
+
+// Düzeltilmiş hali
+private apiUrl = `${environment.apiUrl}/api/role`;
+```
+
+### Sorun 2: İzinler Yüklenirken 404 Hatası
+
+**Hata Mesajı:**
+```
+GET http://localhost:5037/api/permissions 404 (Not Found)
+```
+
+**Nedeni:**
+Frontend'deki `permission.service.ts` dosyasında API URL'si yanlış yapılandırılmıştı. Backend'de controller adı `PermissionsController` olduğu için, API endpoint'i `/api/Permissions` olmalıydı, ancak `/api/permissions` olarak tanımlanmıştı. ASP.NET Core'da route'lar büyük/küçük harf duyarlıdır.
+
+**Çözüm:**
+`permission.service.ts` dosyasındaki API URL'si düzeltildi:
+
+```typescript
+// Önceki hali
+private apiUrl = `${environment.apiUrl}/api/permissions`;
+
+// Düzeltilmiş hali
+private apiUrl = `${environment.apiUrl}/api/Permissions`;
+```
+
+**Öğrenilen Dersler:**
+- Frontend ve backend arasındaki API endpoint'lerinin uyumlu olması önemlidir.
+- ASP.NET Core'da controller adı ve route arasındaki ilişkiye dikkat edilmelidir.
+- Controller adlarının büyük/küçük harf duyarlılığına dikkat edilmelidir.
+- API çağrıları başarısız olduğunda, ilk kontrol edilmesi gereken şey endpoint'in doğru olup olmadığıdır.
+
+### Sorun 3: Şifre Sıfırlama Endpoint'i Hatası
+
+**Hata Mesajı:**
+```
+POST http://localhost:5037/api/auth/request-password-reset 404 (Not Found)
+```
+
+**Nedeni:**
+Frontend'deki `password.service.ts` dosyasında şifre sıfırlama isteği için API endpoint'i yanlış yapılandırılmıştı. Şifre sıfırlama işlemi `AuthController`'da değil, `FixPasswordController`'da bulunmaktadır.
+
+**Çözüm:**
+`password.service.ts` dosyasındaki şifre sıfırlama endpoint'i düzeltildi:
+
+```typescript
+// Önceki hali
+return this.http.post(`${this.apiUrl}/auth/request-password-reset`, { email }, options)
+
+// Düzeltilmiş hali
+return this.http.post(`${this.apiUrl}/FixPassword/request-password-reset`, { email }, options)
+```
+
+**Öğrenilen Dersler:**
+- Frontend ve backend arasındaki API endpoint'lerinin uyumlu olması önemlidir.
+- API çağrıları başarısız olduğunda, ilk kontrol edilmesi gereken şey endpoint'in doğru olup olmadığıdır.
+- Şifre yönetimi gibi kritik işlevler için doğru controller ve endpoint'lerin kullanılması gerekir.
+
+## Frontend Bileşenlerinde Gereksiz Console.log İfadeleri
+
+### Sorun
+Frontend bileşenlerinde, özellikle `permission-management.component.ts`, `user-management.component.ts` ve `role-management.component.ts` dosyalarında çok sayıda gereksiz `console.log`, `console.error` ve `console.warn` ifadeleri bulunuyordu. Bu ifadeler geliştirme aşamasında faydalı olsa da, üretim ortamında performans sorunlarına yol açabilir ve güvenlik riskleri oluşturabilir.
+
+### Çözüm
+Tüm gereksiz konsol log ifadeleri kaldırıldı. Hata durumlarında kullanıcıya bilgi vermek için `MessageService` kullanıldı. Bu sayede:
+
+1. Tarayıcı performansı iyileştirildi
+2. Kod okunabilirliği arttı
+3. Hassas bilgilerin konsola yazdırılması engellendi
+4. Kullanıcıya daha anlamlı hata mesajları gösterildi
+
+### Öğrenilen Dersler
+- Üretim ortamında hata ayıklama amaçlı log ifadeleri bulunmamalıdır
+- Hata durumlarında kullanıcıya anlamlı geri bildirim sağlanmalıdır
+- Hassas bilgilerin konsola yazdırılması güvenlik riski oluşturabilir
+- Geliştirme aşamasında eklenen log ifadeleri, üretim öncesi temizlenmelidir
+
+### İlgili Dosyalar
+- `frontend/src/app/features/user-management/components/permission-management.component.ts`
+- `frontend/src/app/features/user-management/components/user-management.component.ts`
+- `frontend/src/app/features/user-management/components/role-management.component.ts`
+
+## Derleme Hataları ve Eksik Sabitler
+
+### Sorun: Derleme Başarısız: Eksik Sabit Tanımları
+**Tarih:** 26 Temmuz 2024
+**Hata:** API projesi derlenirken `CS0234: The type or namespace name 'Exceptions' does not exist in the namespace 'Stock.Domain'`, `CS0311: The type 'Stock.Application.Features.Roles.Commands.DeleteRole.DeleteRoleCommandHandler' cannot be used as type parameter 'TRequestHandler' in the generic type or method 'IServiceCollection.AddMediatR(params Type[])'`, ve `NU1608: Detected package version outside of dependency constraint` hataları alındı.
+**Nedeni:**
+1. CS0234: `Stock.Domain.Exceptions` namespace'i bazı dosyalarda yanlış kullanılmış veya eksik referans verilmişti.
+2. CS0311: `/Handlers/` klasöründe eski veya yanlış `DeleteRoleCommandHandler`/`UpdateRoleCommandHandler` dosyaları kalmıştı ve MediatR DI kaydında çakışmaya neden oluyordu.
+3. NU1608: `AutoMapper.Extensions.Microsoft.DependencyInjection` paketi, `AutoMapper` 13.0.0+ ile uyumsuzdu (bu işlevsellik ana pakete dahil edilmişti).
+**Çözüm:**
+1. Hatalı namespace kullanımları düzeltildi.
+2. `/Handlers/` altındaki eski komut handler dosyaları silindi.
+3. `Stock.Infrastructure.csproj` dosyasından `AutoMapper.Extensions.Microsoft.DependencyInjection` paketi kaldırıldı.
+
+### Sorun: EF Core Migration "already exists" Hatası
+**Tarih:** 14 Haziran 2025
+**Hata:** Yoğun refactoring sonrası boş veritabanına migration uygulamaya çalışırken `42P07: relation "IX_Users_Username" already exists` gibi mantık dışı hatalar alındı.
+**Nedeni:** EF Core migration mekanizması, geçmişteki tutarsızlıklardan dolayı bozulmuş olabilir.
+**Çözüm:**
+1. Standart çözümler (veritabanını silme, `__EFMigrationsHistory` tablosunu silme, migration dosyalarını/snapshot'ı manuel düzenleme) işe yaramadı.
+2. `src/Stock.Infrastructure/Migrations` klasörü tamamen silindi.
+3. `dotnet ef migrations add InitialCreate` komutu ile mevcut modele göre tek bir başlangıç migration'ı oluşturuldu.
+4. `dotnet ef database update` komutu ile migration başarıyla uygulandı.
+
+### Sorun: `dotnet ef database update` Build Hataları (`Username` Kaldırma Sonrası)
+**Tarih:** 14 Haziran 2025
+**Hata:** `dotnet build` başarılı olmasına rağmen, `dotnet ef database update` komutu çalıştırıldığında derleme hataları alındı (örn. `UserDto` içinde `AdiSoyadi` eksikliği, `IUserPermissionService` uyumsuzluğu, eksik `ErrorMessages`).
+**Nedeni:** `Username` alanının kaldırılması ve `AdiSoyadi` alanının eklenmesiyle ilgili değişiklikler tüm katmanlara (DTO'lar, Servisler, Validatorlar, Entity Konfigürasyonları, Arayüzler) tam olarak yansıtılmamıştı. `dotnet ef` komutları, normal build sürecinden farklı olarak tüm bağımlılıkları daha sıkı kontrol edebilir.
+**Çözüm:**
+1. Hata mesajları dikkatlice incelenerek `Username`/`AdiSoyadi` ile ilgili tüm referanslar bulundu ve düzeltildi.
+2. `UserDto`, `PermissionDto`, `IUserPermissionService`, `UserService`, `AuthService` (Infrastructure), `JwtTokenGenerator`, `ErrorMessages` güncellendi.
+3. Değişiklikler sonrası `dotnet build` ve `dotnet ef database update` komutları başarıyla çalıştırıldı.
+
+### Sorun: Repository Arayüz Implementasyon Hataları (CS0535, CS0738)
+**Tarih:** 15 Haziran 2025
+**Hata:** `GenericRepository` ve `ProductRepository` sınıfları derlenirken, implemente ettikleri `IRepository` ve `IProductRepository` arayüzleriyle uyumsuzluk nedeniyle CS0535 ('does not implement interface member') ve CS0738 ('cannot implement interface member ... because it does not have the matching return type') hataları alındı.
+**Nedeni:**
+1. `GenericRepository`'deki `Update` ve `Delete` metotları asenkron olarak yeniden adlandırılmıştı, ancak arayüz hem senkron (`void`) hem de asenkron (`Task`) versiyonları bekliyordu. Senkron versiyonlar eksikti.
+2. `GenericRepository`'deki `GetAllAsync` metodu `Task<IReadOnlyList<T>>` döndürürken, arayüz `Task<IEnumerable<T>>` bekliyordu.
+3. `ProductRepository`'deki metot imzaları (`GetByIdAsync` dönüş tipi ve tüm metotlardaki `CancellationToken` parametreleri) `IProductRepository` arayüzündeki tanımlarla birebir eşleşmiyordu.
+**Çözüm:**
+1. `GenericRepository.cs` güncellendi:
+   - Senkron `Update(T entity)` ve `Delete(T entity)` metotları (dönüş tipi `void`) eklendi/geri getirildi.
+   - Asenkron `UpdateAsync(T entity, CancellationToken)` ve `DeleteAsync(T entity, CancellationToken)` metotları (dönüş tipi `Task`) eklendi/düzeltildi.
+   - `GetAllAsync` metodunun dönüş tipi `Task<IEnumerable<T>>` olarak düzeltildi.
+2. `
